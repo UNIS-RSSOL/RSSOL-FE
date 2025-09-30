@@ -5,12 +5,12 @@ import "./App.css";
 
 function App() {
   return (
-    <div className="max-w-[393px] mx-auto bg-white min-h-screen shadow-md">
+    <div className="w-full min-[393px]:w-[393px] mx-auto bg-white h-screen flex flex-col">
       <header className="p-4 bg-blue-500 text-white text-center font-bold">
         모바일 고정 사이트
       </header>
 
-      <main className="p-4">
+      <main className="flex-1 overflow-y-auto">
         <p className="text-gray-700">
           이 사이트는 항상 393px 폭으로만 보입니다.
         </p>
