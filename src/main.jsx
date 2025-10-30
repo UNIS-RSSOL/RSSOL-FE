@@ -1,11 +1,25 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import React, { useEffect, useState } from "react";
+import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
 import Splash from "./pages/common/Splash.jsx";
+import { BrowserRouter as Router } from "react-router-dom";
 
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
+const Root = () => {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSplash(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return showSplash ? (
     <Splash />
-  </StrictMode>,
-);
+  ) : (
+    <Router>
+      <App />
+    </Router>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Root />);
