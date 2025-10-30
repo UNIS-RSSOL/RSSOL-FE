@@ -1,14 +1,20 @@
 import { Routes, Route } from "react-router-dom";
 import "./App.css";
+import "./index.css";
+import Header from "./components/layout/header/Header.jsx";
+import Footer from "./components/layout/footer/Footer.jsx";
+import OwnerPage from "./pages/owner/mypage/OwnerPage.jsx";
 
 function App() {
   return (
-    <div className="w-full min-[393px]:w-[393px] mx-auto bg-white h-screen flex flex-col">
-      <header className="p-4 bg-blue-500 text-white text-center font-bold">
-        Header
-      </header>
-
-      <Routes className="flex-1 overflow-y-auto"></Routes>
+    <div className="w-full min-[393px]:w-[393px] mx-auto h-screen flex flex-col font-sans">
+      <Header />
+      <main className="flex-1 overflow-y-auto">
+        <Routes>
+          <Route path="/ownerpage" element={<OwnerPage />} />
+        </Routes>
+      </main>
+      <Footer />
     </div>
   );
 }
