@@ -1,11 +1,25 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
+import Splash from "./pages/common/Splash.jsx";
 import { BrowserRouter as Router } from "react-router-dom";
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <Router>
-    <App />
-  </Router>,
-);
+const Root = () => {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSplash(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return showSplash ? (
+    <Splash />
+  ) : (
+    <Router>
+      <App />
+    </Router>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Root />);
