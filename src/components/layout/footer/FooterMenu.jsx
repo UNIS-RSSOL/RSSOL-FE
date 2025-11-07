@@ -1,8 +1,11 @@
-function FooterMenu({ MenuIcon, title }) {
+function FooterMenu({ MenuIcon, title, onClick }) {
   return (
-    <div className="flex-col justify-items-center items-center w-[60px]">
+    <div
+      className="flex-col justify-items-center items-center w-[60px] cursor-pointer"
+      onClick={onClick}
+    >
       {MenuIcon}
-      <p className="font-medium text-[10px] mt-[3px]">{title}</p>
+      <p className="font-medium text-[11px] mt-[3px]">{title}</p>
     </div>
   );
 }

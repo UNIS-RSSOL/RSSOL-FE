@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["AppleNeo", ...defaultTheme.fontFamily.sans],
+        Pretendard: ["Pretendard", ...defaultTheme.fontFamily.sans],
       },
     },
   },
