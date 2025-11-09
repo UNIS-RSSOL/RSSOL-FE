@@ -18,7 +18,11 @@ function Footer() {
 
   useEffect(() => {
     const path = location.pathname;
-    if (path === "/ownerpage" || path === "/ownerpage/managestore") {
+    if (
+      path === "/ownerpage" ||
+      path === "/ownerpage/managestore" ||
+      path === "/employeepage"
+    ) {
       setSelectedMenu("마이페이지");
     } else if (path.includes("/ownercalendar")) {
       setSelectedMenu("캘린더");

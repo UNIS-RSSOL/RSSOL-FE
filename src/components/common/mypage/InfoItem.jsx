@@ -3,7 +3,16 @@ import CopyIcon from "../../../assets/icons/CopyIcon";
 import ArrowIcon from "../../../assets/icons/ArrowIcon";
 import { useNavigate } from "react-router-dom";
 
-function InfoItem({ icon, title, content, isEdit, hasCopy, hasArrow, msg }) {
+function InfoItem({
+  icon,
+  title,
+  content,
+  isEdit,
+  hasCopy,
+  hasArrow,
+  msg,
+  nav,
+}) {
   const [value, setValue] = useState(content);
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
@@ -27,7 +36,7 @@ function InfoItem({ icon, title, content, isEdit, hasCopy, hasArrow, msg }) {
     <div className="flex flex-row items-center justify-between w-full mt-2">
       <div className="flex flex-row items-center">
         {icon}
-        <div className="flex flex-col ml-2 mt-2">
+        <div className="flex flex-col ml-3 mt-2">
           <p className="text-[14px] text-left font-[600] text-gray-400 mb-2">
             {title}
           </p>
@@ -43,22 +52,23 @@ function InfoItem({ icon, title, content, isEdit, hasCopy, hasArrow, msg }) {
             ) : (
               <div className="flex flex-row items-center">
                 <input
-                  className="text-[18px] text-left font-[600]"
+                  className="w-min text-[18px] text-left font-[600] focus:outline-none"
                   type="text"
                   value={value}
+                  size={value ? value.length : 1}
                   disabled={true}
                 />
                 {hasCopy && <CopyIcon onClick={handleCopy} />}
-                {copied && (
-                  <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-green-400 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300">
-                    복사 완료
-                  </div>
-                )}
+              </div>
+            )}
+            {copied && (
+              <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-green-400 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300">
+                복사 완료
               </div>
             )}
           </div>
           {isEdit ? (
-            <div className="w-full h-[12px] border-b border-gray-400 text-[10px] text-[#f74a4a] text-left">
+            <div className="w-[290px] h-[12px] border-b border-gray-400 text-[10px] text-[#f74a4a] text-left">
               {msg}
             </div>
           ) : (
@@ -69,7 +79,7 @@ function InfoItem({ icon, title, content, isEdit, hasCopy, hasArrow, msg }) {
       {hasArrow && (
         <ArrowIcon
           onClick={() => {
-            navigate("/ownerpage/managestore");
+            navigate(nav);
           }}
         />
       )}

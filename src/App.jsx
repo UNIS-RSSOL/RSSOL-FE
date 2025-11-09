@@ -6,6 +6,7 @@ import Footer from "./components/layout/footer/Footer.jsx";
 import OwnerPage from "./pages/owner/mypage/OwnerPage.jsx";
 import ManageStore from "./pages/owner/mypage/ManageStore.jsx";
 import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
+import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 
 function App() {
   return (
@@ -15,6 +16,9 @@ function App() {
         <Routes>
           <Route path="/ownerpage" element={<OwnerPage />} />
           <Route path="/ownerpage/managestore" element={<ManageStore />} />
+          <Route path="/employeepage" element={<EmployeePage />} />
+          <Route path="/employeepage/managestore" element={<ManageStore />} />
+
           <Route path="/ownercalendar" element={<OwnerCalendar />} />
         </Routes>
       </main>
