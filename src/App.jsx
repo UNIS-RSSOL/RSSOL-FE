@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import "./App.css";
 import "./index.css";
 import Header from "./components/layout/header/Header.jsx";
@@ -14,24 +14,33 @@ import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 
 function App() {
   const location = useLocation();
-  const hideLayout = hideLayoutPaths.includes(location.pathname);
+
+  // 헤더·푸터 제외할 페이지
   const hideLayoutPaths = ["/login", "/onboarding"];
+  const hideLayout = hideLayoutPaths.includes(location.pathname);
 
   return (
     <div className="w-full bg-[#F8FBFE] min-[393px]:w-[393px] mx-auto h-screen flex flex-col font-Pretendard">
       {!hideLayout && <Header />}
+
       <main className="flex-1 overflow-y-auto">
         <Routes>
-          <Route pat="/login" element={<Login />} />
-          <Route pat="/onboarding" element={<Onboarding />} />
+          {/* 개발용 기본 진입 → OwnerPage */}
+          <Route path="/" element={<OwnerPage />} />
 
+          {/* 로그인/온보딩 */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+
+          {/* 사장님/직원 페이지 */}
           <Route path="/ownerpage" element={<OwnerPage />} />
           <Route path="/ownerpage/managestore" element={<ManageStore />} />
+          <Route path="/ownercalendar" element={<OwnerCalendar />} />
           <Route path="/employeepage" element={<EmployeePage />} />
           <Route path="/employeepage/managestore" element={<ManageStore />} />
-          <Route path="/ownercalendar" element={<OwnerCalendar />} />
         </Routes>
       </main>
+
       {!hideLayout && <Footer />}
     </div>
   );

@@ -1,11 +1,13 @@
+import { useState } from "react";
 import React from "react";
+import HeaderImage from "../../assets/Header.svg";
 
 function Header() {
   return (
-    <div className="w-full h-[42px] bg-red-500 flex items-center">
-      <p className="text-white font-bold">알쏠</p>
+    <div className="bg-gray-100 min-h-screen">
+      <img src={HeaderImage} alt="Header" />
     </div>
   );
 }
 
-export default Header;
+export default Header;  
