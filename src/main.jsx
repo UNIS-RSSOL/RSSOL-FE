@@ -7,9 +7,9 @@ import { BrowserRouter as Router } from "react-router-dom";
 
 const Root = () => {
   const [showSplash, setShowSplash] = useState(true);
-
+  
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 2000);
+    const timer = setTimeout(() => setShowSplash(false), 3000);
     return () => clearTimeout(timer);
   }, []);
 
