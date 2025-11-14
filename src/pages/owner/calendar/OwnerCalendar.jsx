@@ -3,7 +3,7 @@ import WeekCalendar from "../../../components/common/calendar/WeekCalendar.jsx";
 
 function OwnerCalendar() {
   return (
-    <div className="flex justify-center mt-5">
+    <div className="flex flex-col items-center mt-5">
       <DayCalendar />
     </div>
   );

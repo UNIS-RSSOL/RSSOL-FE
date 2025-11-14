@@ -1,11 +1,5 @@
-import FullCalendar from "@fullcalendar/react";
-
 function WeekCalendar() {
-  return (
-    <div>
-      <FullCalendar />
-    </div>
-  );
+  return <div className="w-[330px]"></div>;
 }
 
 export default WeekCalendar;
