@@ -84,7 +84,7 @@ export default function Onboarding() {
 
           {step === 2 && role === "owner" && (
             <>
-              <h1 className="text-2xl font-bold mb-6">🏪 매장 정보 입력</h1>
+              <h1 className="text-2xl font-bold mb-6">매장 정보 입력</h1>
               <div className="flex flex-col gap-3 w-72">
                 <input
                   name="storeName"

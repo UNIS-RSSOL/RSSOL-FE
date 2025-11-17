@@ -16,9 +16,11 @@ function App() {
   const location = useLocation();
 
   // 헤더·푸터 제외할 페이지
-  const hideLayoutPaths = ["/login", "/onboarding"];
-  const hideLayout = hideLayoutPaths.includes(location.pathname);
-
+    const hideLayoutPaths = ["/login", "/onboarding", "/"];
+    const hideLayout = hideLayoutPaths.some(path =>
+      location.pathname.startsWith(path)
+    );
+  
   return (
     <div className="w-full bg-[#F8FBFE] min-[393px]:w-[393px] mx-auto h-screen flex flex-col font-Pretendard">
       {!hideLayout && <Header />}
@@ -26,7 +28,7 @@ function App() {
       <main className="flex-1 overflow-y-auto">
         <Routes>
           {/* 개발용 기본 진입 → OwnerPage */}
-          <Route path="/" element={<OwnerPage />} />
+          <Route path="/" element={<Login />} />
 
           {/* 로그인/온보딩 */}
           <Route path="/login" element={<Login />} />
