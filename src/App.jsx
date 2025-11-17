@@ -16,7 +16,7 @@ function App() {
   const location = useLocation();
 
   // 헤더·푸터 제외할 페이지
-    const hideLayoutPaths = ["/login", "/onboarding", "/"];
+    const hideLayoutPaths = ["/login", "/onboarding"];
     const hideLayout = hideLayoutPaths.some(path =>
       location.pathname.startsWith(path)
     );

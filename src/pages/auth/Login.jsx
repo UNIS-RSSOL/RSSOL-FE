@@ -18,7 +18,7 @@ function Login() {
       {/* 로고 */}
       <div className="mb-10 flex flex-col items-center text-center">
         <LogoImage className="w-[180px] h-auto mb-3" />
-        <p className="text-[15px] font-medium text-[#555]">번거로운 알바 스케줄링, 원터치로 끝!</p>
+        <p className="text-[15px] font-medium text-[#000]">번거로운 알바 스케줄링, 원터치로 끝!</p>
       </div>
 
       {/* 로그인 버튼들 */}
