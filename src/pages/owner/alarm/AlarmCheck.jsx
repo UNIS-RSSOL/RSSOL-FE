@@ -1,8 +1,8 @@
 import React from "react";
-import TopBar from "./TopBar";
-import NavBar from "./NavBar";
-import AlarmItem from "../alarm/AlarmItem";
-import ActionButtons from "../alarm/ActionButtons";
+import TopBar from "../../../components/layout/alarm/TopBar";
+import NavBar from "../../../components/layout/alarm/NavBar";
+import AlarmItem from "../../../components/layout/alarm/AlarmItem";
+import ActionButtons from "../../../components/layout/alarm/ActionButtons";
 
 
 function AlarmCheck({ handleBack }) {

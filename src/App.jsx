@@ -12,6 +12,7 @@ import ManageStore from "./pages/owner/mypage/ManageStore.jsx";
 import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
 import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
+import CalAdd from "./pages/owner/calendarAdd/calAdd.jsx"
 
 function App() {
   const location = useLocation();
@@ -29,7 +30,7 @@ function App() {
       <main className="flex-1 overflow-y-auto">
         <Routes>
           {/* 개발용 기본 진입 → OwnerPage */}
-          <Route path="/" element={<AlarmHome />} />
+          <Route path="/" element={<CalAdd />} />
 
           {/* 로그인/온보딩 */}
           <Route path="/login" element={<Login />} />
