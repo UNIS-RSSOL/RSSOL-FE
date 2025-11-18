@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";   // ★ 추가
+import { useNavigate } from "react-router-dom";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -8,7 +8,7 @@ import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import "./CalAdd.css";
 
 export default function CalAdd() {
-  const navigate = useNavigate(); // ★ 뒤로가기용 훅
+  const navigate = useNavigate();
 
   const [selectedDates, setSelectedDates] = useState([]);
 
@@ -59,11 +59,10 @@ export default function CalAdd() {
   return (
     <div className="flex flex-col h-screen">
 
-      {/* ★ shadow-sm 추가해서 이 페이지만 적용됨 */}
       <div className="shadow-sm">
         <TopBar 
           title="근무표 생성" 
-          onBack={() => navigate(-1)}   // ★ 뒤로가기 기능
+          onBack={() => navigate(-1)}  
         />
       </div>
 
