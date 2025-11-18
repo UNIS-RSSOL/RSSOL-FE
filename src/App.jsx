@@ -13,16 +13,19 @@ import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
 import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import CalAdd from "./pages/owner/calendarAdd/calAdd.jsx"
+import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
+import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
+import OwnerHome from "./pages/owner/OwnerHome.jsx";
 
 function App() {
   const location = useLocation();
 
   // 헤더·푸터 제외할 페이지
-    const hideLayoutPaths = ["/login", "/onboarding"];
-    const hideLayout = hideLayoutPaths.some(path =>
-      location.pathname.startsWith(path)
-    );
-  
+  const hideLayoutPaths = ["/login", "/onboarding"];
+  const hideLayout = hideLayoutPaths.some((path) =>
+    location.pathname.startsWith(path),
+  );
+
   return (
     <div className="w-full bg-[#F8FBFE] min-[393px]:w-[393px] mx-auto h-screen flex flex-col font-Pretendard">
       {!hideLayout && <Header />}
@@ -36,12 +39,20 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
 
-          {/* 사장님/직원 페이지 */}
-          <Route path="/ownerpage" element={<OwnerPage />} />
-          <Route path="/ownerpage/managestore" element={<ManageStore />} />
-          <Route path="/ownercalendar" element={<OwnerCalendar />} />
-          <Route path="/employeepage" element={<EmployeePage />} />
-          <Route path="/employeepage/managestore" element={<ManageStore />} />
+          <Route path="/owner" element={<OwnerHome />} />
+
+          <Route path="/owner/mypage" element={<OwnerPage />} />
+          <Route path="/owner/mypage/managestore" element={<ManageStore />} />
+          <Route path="/employee/mypage" element={<EmployeePage />} />
+          <Route
+            path="/employee/mypage/managestore"
+            element={<ManageStore />}
+          />
+
+          <Route path="/owner/manageemp" element={<ManageEmpPage />} />
+          <Route path="/employee/managesalary" element={<ManageSalary />} />
+
+          <Route path="/owner/calendar" element={<OwnerCalendar />} />
         </Routes>
       </main>
 
