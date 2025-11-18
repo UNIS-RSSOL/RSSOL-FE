@@ -1,5 +1,5 @@
-// CalAdd.jsx
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";   // ★ 추가
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -7,44 +7,41 @@ import TopBar from "../../../components/layout/alarm/TopBar";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import "./CalAdd.css";
 
-
 export default function CalAdd() {
+  const navigate = useNavigate(); // ★ 뒤로가기용 훅
+
   const [selectedDates, setSelectedDates] = useState([]);
 
-    const handleDateClick = (info) => {
-      const clicked = info.dateStr;
+  const handleDateClick = (info) => {
+    const clicked = info.dateStr;
 
-      if (selectedDates.length === 0) {
-        setSelectedDates([clicked]);
-      } else if (selectedDates.length === 1) {
-        const first = selectedDates[0];
+    if (selectedDates.length === 0) {
+      setSelectedDates([clicked]);
+    } else if (selectedDates.length === 1) {
+      const first = selectedDates[0];
+      const range = [first, clicked].sort();
+      setSelectedDates(range);
+    } else {
+      setSelectedDates([clicked]);
+    }
+  };
 
-        // 두 날짜 정렬
-        const range = [first, clicked].sort();
-        setSelectedDates(range);
-      } else {
-        // 다시 처음부터 선택
-        setSelectedDates([clicked]);
-      }
-    };
+  const dayCellClassNames = (arg) => {
+    const dateStr = arg.dateStr;
 
-    const dayCellClassNames = (arg) => {
-      const dateStr = arg.dateStr;
+    if (selectedDates.length === 1 && selectedDates[0] === dateStr) {
+      return "fc-selected-start";
+    }
 
-      if (selectedDates.length === 1 && selectedDates[0] === dateStr) {
-        return "fc-selected-start"; // 하나만 선택된 상태
-      }
+    if (selectedDates.length === 2) {
+      const [start, end] = selectedDates;
 
-      if (selectedDates.length === 2) {
-        const [start, end] = selectedDates;
-
-        if (dateStr === start) return "fc-selected-start";
-        if (dateStr === end) return "fc-selected-end";
-
-        if (dateStr > start && dateStr < end) return "fc-selected-between";
-      }
-      return "";
-    };
+      if (dateStr === start) return "fc-selected-start";
+      if (dateStr === end) return "fc-selected-end";
+      if (dateStr > start && dateStr < end) return "fc-selected-between";
+    }
+    return "";
+  };
 
   const [unitSpecified, setUnitSpecified] = useState(true);
   const [timeSlots, setTimeSlots] = useState([{ start: "09:00", end: "13:00", count: 0 }]);
@@ -61,17 +58,22 @@ export default function CalAdd() {
 
   return (
     <div className="flex flex-col h-screen">
-      <TopBar title="근무표 생성" />
+
+      {/* ★ shadow-sm 추가해서 이 페이지만 적용됨 */}
+      <div className="shadow-sm">
+        <TopBar 
+          title="근무표 생성" 
+          onBack={() => navigate(-1)}   // ★ 뒤로가기 기능
+        />
+      </div>
 
       <div className="flex-1 overflow-auto p-4 space-y-4">
-        {/* FullCalendar */}
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           dateClick={handleDateClick}
           dayCellClassNames={dayCellClassNames}
         />
-
 
         {/* 근무표 생성 단위 */}
         <div className="space-y-2">
@@ -84,7 +86,7 @@ export default function CalAdd() {
             />
             <span>지정함</span>
           </label>
-          {/* 시간 입력 UI */}
+
           {unitSpecified && (
             <div className="space-y-2">
               {timeSlots.map((slot, idx) => (
@@ -92,14 +94,18 @@ export default function CalAdd() {
                   <input
                     type="time"
                     value={slot.start}
-                    onChange={(e) => handleTimeChange(idx, "start", e.target.value)}
+                    onChange={(e) =>
+                      handleTimeChange(idx, "start", e.target.value)
+                    }
                     className="border p-1 rounded w-24"
                   />
                   <span>-</span>
                   <input
                     type="time"
                     value={slot.end}
-                    onChange={(e) => handleTimeChange(idx, "end", e.target.value)}
+                    onChange={(e) =>
+                      handleTimeChange(idx, "end", e.target.value)
+                    }
                     className="border p-1 rounded w-24"
                   />
                   <div className="flex items-center space-x-1">
@@ -113,7 +119,9 @@ export default function CalAdd() {
                     </button>
                     <span>{slot.count}</span>
                     <button
-                      onClick={() => handleTimeChange(idx, "count", slot.count + 1)}
+                      onClick={() =>
+                        handleTimeChange(idx, "count", slot.count + 1)
+                      }
                       className="border rounded px-2"
                     >
                       +
@@ -129,6 +137,7 @@ export default function CalAdd() {
               </button>
             </div>
           )}
+
           <label className="flex items-center space-x-2">
             <input
               type="radio"
@@ -140,7 +149,10 @@ export default function CalAdd() {
         </div>
       </div>
 
-      <BottomBar leftText="내 스케줄 추가하기" rightText="근무표 생성하기" />
+      <BottomBar
+        leftText="내 스케줄 추가하기"
+        rightText="근무표 생성하기"
+      />
     </div>
   );
 }

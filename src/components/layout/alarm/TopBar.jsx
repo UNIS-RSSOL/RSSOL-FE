@@ -7,6 +7,12 @@ function TopBar({ title, onBack }) {
       <button
         onClick={onBack}
         className="z-10 p-0 w-fit h-fit bg-transparent flex items-center justify-center"
+        style={{
+          WebkitAppearance: "none", 
+          backgroundColor: "transparent", 
+          border: "none",
+          outline: "none",
+        }}
       >
         <ChevronLeft size={24} />
       </button>
