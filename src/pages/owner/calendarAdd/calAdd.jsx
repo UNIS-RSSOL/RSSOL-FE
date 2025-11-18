@@ -107,7 +107,11 @@ export default function CalAdd() {
                   <div className="flex items-center space-x-1">
                     <button
                       onClick={() =>
-                        handleTimeChange(idx, "count", Math.max(slot.count - 1, 0))
+                        handleTimeChange(
+                          idx,
+                          "count",
+                          Math.max(slot.count - 1, 0),
+                        )
                       }
                       className="border rounded px-2"
                     >
@@ -145,11 +149,7 @@ export default function CalAdd() {
         </div>
       </div>
 
-      <BottomBar
-        leftText="내 스케줄 추가하기"
-        rightText="근무표 생성하기"
-      />
+      <BottomBar leftText="내 스케줄 추가하기" rightText="근무표 생성하기" />
     </div>
   );
 }
-
