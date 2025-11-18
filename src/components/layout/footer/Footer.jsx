@@ -31,7 +31,7 @@ function Footer() {
       path.includes("/employee/managesalary")
     ) {
       setSelectedMenu("직원관리");
-    } else {
+    } else if (path.includes("/owner")) {
       setSelectedMenu("홈");
     }
   }, [location.pathname]);
@@ -46,13 +46,19 @@ function Footer() {
         <FooterMenu
           MenuIcon={<SelectedHomeIcon />}
           title="홈"
-          onClick={() => handleMenuClick("홈")}
+          onClick={() => {
+            handleMenuClick("홈");
+            navigate("/owner");
+          }}
         />
       ) : (
         <FooterMenu
           MenuIcon={<HomeIcon />}
           title="홈"
-          onClick={() => handleMenuClick("홈")}
+          onClick={() => {
+            handleMenuClick("홈");
+            navigate("/owner");
+          }}
         />
       )}
       {selectedMenu === "캘린더" ? (

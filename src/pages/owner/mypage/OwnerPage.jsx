@@ -8,12 +8,13 @@ import SaveIcon from "../../../assets/icons/SaveIcon.jsx";
 import TypeIcon from "../../../assets/icons/TypeIcon.jsx";
 import MapIcon from "../../../assets/icons/MapIcon.jsx";
 import NoteIcon from "../../../assets/icons/NoteIcon.jsx";
+import character from "../../../assets/images/character1.png";
 
 function OwnerPage() {
   return (
     <div className=" flex flex-col divide-y-8 divide-[#E7EAF3]">
       <div className="flex flex-col items-center">
-        <div className="w-[130px] h-[130px] bg-[#68E194] rounded-full border-[3px] border-white mt-7 mb-3 shadow-[0_4px_8px_0_rgba(0,0,0,0.2)]"></div>
+        <div className="flex w-[130px] h-[130px] bg-[#68E194] rounded-full border-[3px] border-white mt-7 mb-3 shadow-[0_4px_8px_0_rgba(0,0,0,0.2)] items-center justify-center"></div>
         <p className="text-[20px] font-semibold mb-4">홍길동</p>
       </div>
       <InfoBox title="내 정보">
