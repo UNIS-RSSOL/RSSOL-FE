@@ -1,7 +1,7 @@
 function FooterMenu({ MenuIcon, title, onClick }) {
   return (
     <div
-      className="flex-col justify-items-center items-center w-[90px] cursor-pointer"
+      className="flex flex-col justify-items-center items-center w-[90px] cursor-pointer"
       onClick={onClick}
     >
       {MenuIcon}
