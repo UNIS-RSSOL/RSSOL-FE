@@ -20,11 +20,11 @@ function App() {
   const location = useLocation();
 
   // 헤더·푸터 제외할 페이지
-    const hideLayoutPaths = ["/login", "/onboarding"];
-    const hideLayout = hideLayoutPaths.some(path =>
-      location.pathname.startsWith(path)
-    );
-  
+  const hideLayoutPaths = ["/login", "/onboarding"];
+  const hideLayout = hideLayoutPaths.some((path) =>
+    location.pathname.startsWith(path),
+  );
+
   return (
     <div className="w-full bg-[#F8FBFE] min-[393px]:w-[393px] mx-auto h-screen flex flex-col font-Pretendard">
       {!hideLayout && <Header />}
