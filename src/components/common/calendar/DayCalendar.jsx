@@ -1,9 +1,9 @@
 import { Table } from "antd";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-function DayCalendar() {
-  const [currentDate, setCurrentDate] = useState(dayjs());
+function DayCalendar({ date }) {
+  const [currentDate, setCurrentDate] = useState(date);
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
   const workers = ["시현", "민솔", "서진", "지유", "시은", "혜민", "채은"];
   const events = [
@@ -14,12 +14,21 @@ function DayCalendar() {
     { worker: "시은", start: "2025-11-18 18:00", end: "2025-11-18 23:00" },
     { worker: "혜민", start: "2025-11-18 18:00", end: "2025-11-18 24:00" },
     { worker: "채은", start: "2025-11-18 18:00", end: "2025-11-18 24:00" },
+    { worker: "시현", start: "2025-11-19 8:00", end: "2025-11-19 13:00" },
+    { worker: "민솔", start: "2025-11-19 8:00", end: "2025-11-19 13:00" },
+    { worker: "서진", start: "2025-11-19 13:00", end: "2025-11-19 18:00" },
+    { worker: "지유", start: "2025-11-19 13:00", end: "2025-11-19 18:00" },
   ];
   const colors = ["#68e194", "#32d1aa", "#00c1bd"];
 
   const getEventForCell = (worker, hour) => {
     return events.find((event) => {
-      if (event.worker !== worker) return false;
+      if (
+        event.worker !== worker ||
+        currentDate.format("YYYY-MM-DD") !==
+          dayjs(event.start).format("YYYY-MM-DD")
+      )
+        return false;
       const startHour = dayjs(event.start).hour();
       let endHour = dayjs(event.end).hour();
       if (endHour === 0) endHour = 24;
@@ -41,6 +50,10 @@ function DayCalendar() {
     acc[`${event.worker}-${event.start}-${event.end}`] = colors[colorIndex];
     return acc;
   }, {});
+
+  useEffect(() => {
+    setCurrentDate(date);
+  }, [date]);
 
   return (
     <div className="flex flex-col w-full max-w-[360px] border-[0.5px] border-black rounded-[20px] bg-white items-center justify-center overflow-x-auto overflow-y-auto">

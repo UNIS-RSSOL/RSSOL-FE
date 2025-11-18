@@ -41,7 +41,7 @@ function Footer() {
   };
 
   return (
-    <div className="w-full h-[60px] flex flex-row justify-between items-center p-5 shadow-[0_-2px_7px_0_rgba(0,0,0,0.1)]">
+    <div className="w-full h-[60px] flex flex-row justify-between items-center px-2 shadow-[0_-2px_7px_0_rgba(0,0,0,0.1)]">
       {selectedMenu === "홈" ? (
         <FooterMenu
           MenuIcon={<SelectedHomeIcon />}
