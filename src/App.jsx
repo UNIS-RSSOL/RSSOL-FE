@@ -12,6 +12,7 @@ import ManageStore from "./pages/owner/mypage/ManageStore.jsx";
 import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
 import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
+import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
 import CalAdd from "./pages/owner/calendarAdd/calAdd.jsx"
 import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
@@ -33,7 +34,7 @@ function App() {
       <main className="flex-1 overflow-y-auto">
         <Routes>
           {/* 개발용 기본 진입 → OwnerPage */}
-          <Route path="/" element={<CalAdd />} />
+          <Route path="/" element={<AlarmHome />} />
 
           {/* 로그인/온보딩 */}
           <Route path="/login" element={<Login />} />
@@ -48,6 +49,11 @@ function App() {
             path="/employee/mypage/managestore"
             element={<ManageStore />}
           />
+
+          <Route path="/calAdd" element={<CalAdd />} />
+
+          <Route path="/alarmhome" element={<AlarmHome />} />
+          <Route path="/alarmcheck" element={<AlarmCheck />} />
 
           <Route path="/owner/manageemp" element={<ManageEmpPage />} />
           <Route path="/employee/managesalary" element={<ManageSalary />} />

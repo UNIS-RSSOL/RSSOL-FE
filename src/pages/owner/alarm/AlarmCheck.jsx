@@ -17,7 +17,7 @@ function AlarmCheck({ handleBack }) {
 
             <AlarmItem
             icon={<div className="w-full h-full bg-gray-200 rounded-full"></div>}
-            title="맥도날드 신청중"
+            title="맥도날드 신촌점"
             time="4분 전"
             >
             ‘김혜민’님이 신청한 대타를 ‘오시현’님이 수락했어요. 이 변경을 최종 승인하시겠어요?

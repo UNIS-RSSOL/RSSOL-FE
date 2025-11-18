@@ -17,7 +17,7 @@ function AlarmHome({ handleBack }) {
             <div className="mt-2">
             <AlarmItem
             icon={<div className="w-full h-full bg-gray-200 rounded-full"></div>}
-            title="맥도날드 신청중"
+            title="맥도날드 신촌점"
             time="10분 전"
             >
             ‘김혜민’님이 15(월) 13:00~16:00 근무를 부탁했어요!

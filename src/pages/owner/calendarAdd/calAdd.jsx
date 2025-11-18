@@ -1,9 +1,5 @@
 // CalAdd.jsx
 import React, { useState } from "react";
-import { Calendar } from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import timeGridPlugin from "@fullcalendar/timegrid";
 import TopBar from "../../../components/layout/alarm/TopBar";
 
 export default function CalAdd() {

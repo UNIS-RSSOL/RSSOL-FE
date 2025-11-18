@@ -1,6 +1,4 @@
-import React from "react";
-import { useState } from "react";
-import { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import HeaderMenu from "./HeaderMenu.jsx";
 import CalAddIcon from "../../../assets/icons/CalAddIcon.jsx";
@@ -14,10 +12,10 @@ function Header() {
 
   useEffect(() => {
     const path = location.pathname;
-    if (path === "/") {
+    if (path === "/" || path.includes("/calendar") || path.includes("/cal")) {
       setSelectedMenu("캘린더생성");
-    } else if (path.includes("/calendar") || path.includes("/cal")) {
-      setSelectedMenu("캘린더생성");
+    } else if (path.includes("/alarm-home")) {
+      setSelectedMenu("알림");
     } else {
       setSelectedMenu("");
     }
@@ -25,6 +23,10 @@ function Header() {
 
   const handleMenuClick = (menu) => {
     setSelectedMenu(menu);
+
+    // 메뉴별 페이지 이동
+    if (menu === "캘린더생성") navigate("/calAdd"); // CalAdd.jsx
+    if (menu === "알림") navigate("/alarmhome");  // AlarmHome.jsx
   };
 
   return (
