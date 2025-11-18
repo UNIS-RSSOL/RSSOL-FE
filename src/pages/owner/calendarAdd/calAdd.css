@@ -4,7 +4,6 @@
   background: white;
 }
 
-/* 날짜 숫자 중앙 정렬 */
 .fc-daygrid-day-number {
   display: flex !important;
   justify-content: center !important;
@@ -45,4 +44,3 @@
   font-weight: 500;
   padding: 6px 0;
 }
-

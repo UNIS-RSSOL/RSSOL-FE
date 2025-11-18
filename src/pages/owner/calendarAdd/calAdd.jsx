@@ -9,7 +9,6 @@ import "./CalAdd.css";
 
 export default function CalAdd() {
   const navigate = useNavigate();
-
   const [selectedDates, setSelectedDates] = useState([]);
 
   const handleDateClick = (info) => {
