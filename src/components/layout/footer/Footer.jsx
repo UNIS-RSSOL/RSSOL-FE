@@ -19,14 +19,17 @@ function Footer() {
   useEffect(() => {
     const path = location.pathname;
     if (
-      path === "/ownerpage" ||
-      path === "/ownerpage/managestore" ||
-      path === "/employeepage"
+      path === "/owner/mypage" ||
+      path === "/owner/mypage/managestore" ||
+      path === "/employee/mypage"
     ) {
       setSelectedMenu("마이페이지");
-    } else if (path.includes("/ownercalendar")) {
+    } else if (path.includes("/owner/calendar")) {
       setSelectedMenu("캘린더");
-    } else if (path.includes("/employee")) {
+    } else if (
+      path.includes("/owner/manageemp") ||
+      path.includes("/employee/managesalary")
+    ) {
       setSelectedMenu("직원관리");
     } else {
       setSelectedMenu("홈");
@@ -58,7 +61,7 @@ function Footer() {
           title="캘린더"
           onClick={() => {
             handleMenuClick("캘린더");
-            navigate("/ownercalendar");
+            navigate("/owner/calendar");
           }}
         />
       ) : (
@@ -67,7 +70,7 @@ function Footer() {
           title="캘린더"
           onClick={() => {
             handleMenuClick("캘린더");
-            navigate("/ownercalendar");
+            navigate("/owner/calendar");
           }}
         />
       )}
@@ -75,13 +78,19 @@ function Footer() {
         <FooterMenu
           MenuIcon={<SelectedEditIcon />}
           title="직원관리"
-          onClick={() => handleMenuClick("직원관리")}
+          onClick={() => {
+            handleMenuClick("직원관리");
+            navigate("/owner/manageemp");
+          }}
         />
       ) : (
         <FooterMenu
           MenuIcon={<EditIcon />}
           title="직원관리"
-          onClick={() => handleMenuClick("직원관리")}
+          onClick={() => {
+            handleMenuClick("직원관리");
+            navigate("/owner/manageemp");
+          }}
         />
       )}
       {selectedMenu === "마이페이지" ? (
@@ -90,7 +99,7 @@ function Footer() {
           title="마이페이지"
           onClick={() => {
             handleMenuClick("마이페이지");
-            navigate("/ownerpage");
+            navigate("/owner/mypage");
           }}
         />
       ) : (
@@ -99,7 +108,7 @@ function Footer() {
           title="마이페이지"
           onClick={() => {
             handleMenuClick("마이페이지");
-            navigate("/ownerpage");
+            navigate("/owner/mypage");
           }}
         />
       )}

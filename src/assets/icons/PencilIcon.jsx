@@ -1,4 +1,4 @@
-function PencilIcon({ onClick, isFilled }) {
+function PencilIcon({ className, onClick, isFilled }) {
   return (
     <svg
       width="25"
@@ -6,7 +6,7 @@ function PencilIcon({ onClick, isFilled }) {
       viewBox="0 0 25 25"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="cursor-pointer"
+      className={`cursor-pointer ${className}`}
       onClick={onClick}
     >
       <rect width="25" height="25" />
