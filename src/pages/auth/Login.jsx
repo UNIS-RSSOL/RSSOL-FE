@@ -14,7 +14,7 @@ function Login() {
   }
 
   return (
-    <div className="w-full h-screen bg-[#F8FBFE] flex flex-col justify-center items-center">
+    <div className="w-full h-screen bg-white flex flex-col justify-center items-center">
       {/* 로고 */}
       <div className="mb-10 flex flex-col items-center text-center">
         <LogoImage className="w-[180px] h-auto mb-3" />
