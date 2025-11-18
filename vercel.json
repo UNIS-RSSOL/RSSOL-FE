@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "백엔드경로/api/$1"
+    }
+  ]
+}
