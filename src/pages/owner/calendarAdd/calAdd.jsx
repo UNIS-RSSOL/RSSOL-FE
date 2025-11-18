@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";   // ★ 추가
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import TopBar from "../../../components/layout/alarm/TopBar";
+import TopBar from "../../../components/layout/alarm/TopBar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import "./CalAdd.css";
 
