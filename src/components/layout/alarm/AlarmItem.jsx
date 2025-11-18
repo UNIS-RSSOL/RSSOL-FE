@@ -16,10 +16,8 @@ function AlarmItem({ icon, title, time, children }) {
                 {/* 내용 */}
                 <div className="text-left font-medium text-[14px] leading-[20px] text-black">
                     {children}
+                    <p className="text-[12px] text-gray-400 mt-1">{time}</p>
                 </div>
-
-                {/* 시간 */}
-                <p className="text-[12px] text-gray-400 mt-1">{time}</p>
             </div>
         </div>
     );

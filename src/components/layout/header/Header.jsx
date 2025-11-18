@@ -30,7 +30,7 @@ function Header() {
   };
 
   return (
-    <div className="w-full h-[60px] flex flex-row justify-between items-center p-5 shadow-[0_2px_7px_0_rgba(0,0,0,0.1)]">
+    <div className="w-full h-[60px] bg-white flex flex-row justify-between items-center p-5 shadow-[0_2px_7px_0_rgba(0,0,0,0.1)]">
       <div className="flex items-center">
         <LogoImage />
       </div>

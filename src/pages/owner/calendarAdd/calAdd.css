@@ -1,0 +1,48 @@
+/* 날짜 칸 전체 기본 스타일 */
+.fc-daygrid-day {
+    border: none !important;         /* 구분선 제거 */
+    background: white;
+  }
+  
+  /* 날짜 숫자 중앙 정렬 */
+  .fc-daygrid-day-number {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100%;
+    height: 38px;
+    margin: 4px auto;
+    font-size: 15px;
+    color: #2d2d2d;
+  }
+  
+  /* 선택된 날짜 공통 */
+  .fc-selected-start .fc-daygrid-day-number,
+  .fc-selected-end .fc-daygrid-day-number {
+    background-color: #68E194 !important;
+    color: white !important;
+    border-radius: 50%;
+    width: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    font-weight: bold;
+  }
+  
+  /* 시작과 끝 사이 날짜 영역 (연한 초록색) */
+  .fc-selected-between {
+    background-color: rgba(104, 225, 148, 0.3) !important;
+    border-radius: 0 !important;
+  }
+  
+  /* 선택된 날짜 셀의 hover 느낌 제거 */
+  .fc-daygrid-day:hover {
+    background: none !important;
+  }
+  
+  /* 요일(header) 스타일 연하게 */
+  .fc-col-header-cell-cushion {
+    color: #9aa0a6;
+    font-weight: 500;
+    padding: 6px 0;
+  }
+  

@@ -22,12 +22,13 @@ function Login() {
       </div>
 
       {/* 로그인 버튼들 */}
-      <div className="flex flex-col gap-4 w-[80%] max-w-[300px]">
+      <div className="flex flex-col gap-4 w-[80%] max-w-[300px] mb-[20px]">
         <LoginKakao onClick={handleLogin} />
         <LoginNaver onClick={handleLogin} />
         <LoginGoogle onClick={handleLogin} />
       </div>
 
+      
       <button
         onClick={handleLogin}
         className="px-4 py-2 bg-blue-500 text-black rounded-lg"

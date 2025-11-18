@@ -1,18 +1,53 @@
 // CalAdd.jsx
 import React, { useState } from "react";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
 import TopBar from "../../../components/layout/alarm/TopBar";
+import BottomBar from "../../../components/layout/common/BottomBar.jsx";
+import "./CalAdd.css";
+
 
 export default function CalAdd() {
   const [selectedDates, setSelectedDates] = useState([]);
+
+    const handleDateClick = (info) => {
+      const clicked = info.dateStr;
+
+      if (selectedDates.length === 0) {
+        setSelectedDates([clicked]);
+      } else if (selectedDates.length === 1) {
+        const first = selectedDates[0];
+
+        // 두 날짜 정렬
+        const range = [first, clicked].sort();
+        setSelectedDates(range);
+      } else {
+        // 다시 처음부터 선택
+        setSelectedDates([clicked]);
+      }
+    };
+
+    const dayCellClassNames = (arg) => {
+      const dateStr = arg.dateStr;
+
+      if (selectedDates.length === 1 && selectedDates[0] === dateStr) {
+        return "fc-selected-start"; // 하나만 선택된 상태
+      }
+
+      if (selectedDates.length === 2) {
+        const [start, end] = selectedDates;
+
+        if (dateStr === start) return "fc-selected-start";
+        if (dateStr === end) return "fc-selected-end";
+
+        if (dateStr > start && dateStr < end) return "fc-selected-between";
+      }
+      return "";
+    };
+
   const [unitSpecified, setUnitSpecified] = useState(true);
   const [timeSlots, setTimeSlots] = useState([{ start: "09:00", end: "13:00", count: 0 }]);
-
-  const handleDateClick = (info) => {
-    const dateStr = info.dateStr;
-    setSelectedDates((prev) =>
-      prev.includes(dateStr) ? prev.filter((d) => d !== dateStr) : [...prev, dateStr]
-    );
-  };
 
   const handleAddTime = () => {
     setTimeSlots([...timeSlots, { start: "00:00", end: "00:00", count: 0 }]);
@@ -30,14 +65,13 @@ export default function CalAdd() {
 
       <div className="flex-1 overflow-auto p-4 space-y-4">
         {/* FullCalendar */}
-        <Calendar
-          plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
+        <FullCalendar
+          plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           dateClick={handleDateClick}
-          dayCellClassNames={(arg) =>
-            selectedDates.includes(arg.dateStr) ? "bg-green-200 rounded" : ""
-          }
+          dayCellClassNames={dayCellClassNames}
         />
+
 
         {/* 근무표 생성 단위 */}
         <div className="space-y-2">
@@ -50,15 +84,6 @@ export default function CalAdd() {
             />
             <span>지정함</span>
           </label>
-          <label className="flex items-center space-x-2">
-            <input
-              type="radio"
-              checked={!unitSpecified}
-              onChange={() => setUnitSpecified(false)}
-            />
-            <span>지정하지 않음</span>
-          </label>
-
           {/* 시간 입력 UI */}
           {unitSpecified && (
             <div className="space-y-2">
@@ -104,6 +129,14 @@ export default function CalAdd() {
               </button>
             </div>
           )}
+          <label className="flex items-center space-x-2">
+            <input
+              type="radio"
+              checked={!unitSpecified}
+              onChange={() => setUnitSpecified(false)}
+            />
+            <span>지정하지 않음</span>
+          </label>
         </div>
       </div>
 
