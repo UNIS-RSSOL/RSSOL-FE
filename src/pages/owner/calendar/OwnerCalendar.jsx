@@ -15,8 +15,9 @@ function OwnerCalendar() {
   const today = dayjs();
   const [currentDate, setCurrentDate] = useState(today);
   const [currentWeek, setCurrentWeek] = useState(
-    `${today.format("YYYY.MM")} ${today.week() - dayjs(today).startOf("month").week() + 1}주차`,
+    `${currentDate.format("YYYY.MM")} ${currentDate.week() - dayjs(currentDate).startOf("month").week() + 1}주차`,
   );
+
   const [formattedCurrentDate, setFormattedCurrentDate] = useState(
     currentDate.year() +
       "." +
@@ -42,10 +43,6 @@ function OwnerCalendar() {
   ];
 
   useEffect(() => {
-    const weekNum =
-      currentDate.week() - dayjs(currentDate).startOf("month").week() + 1;
-    setCurrentWeek(`${currentDate.format("YYYY.MM")} ${weekNum}주차`);
-
     setFormattedCurrentDate(
       currentDate.year() +
         "." +
@@ -53,29 +50,42 @@ function OwnerCalendar() {
         " " +
         currentDate.date(),
     );
+    setCurrentWeek(
+      `${currentDate.format("YYYY.MM")} ${currentDate.week() - dayjs(currentDate).startOf("month").week() + 1}주차`,
+    );
   }, [currentDate]);
 
   return (
     <div className="flex flex-col items-center py-5">
       <div className="flex flex-row w-full justify-between items-center px-4 mb-2">
         <PencilIcon className="size-[20px] mr-[36px]" />
-        <div className="flex flex-row items-center justify-center">
-          <LeftOutlined
-            onClick={() => setCurrentDate(currentDate.subtract(1, "day"))}
-          />
-          {selectedKey === "1" ? (
+
+        {selectedKey === "1" ? (
+          <div className="flex flex-row items-center justify-center">
+            <LeftOutlined
+              onClick={() => setCurrentDate(currentDate.subtract(1, "day"))}
+            />
             <p className="h-[20px] text-[20px]/[20px] font-[600] mx-5 ">
               {formattedCurrentDate}
             </p>
-          ) : (
+            <RightOutlined
+              onClick={() => setCurrentDate(currentDate.add(1, "day"))}
+            />{" "}
+          </div>
+        ) : (
+          <div className="flex flex-row items-center justify-center">
+            <LeftOutlined
+              onClick={() => setCurrentDate(currentDate.subtract(7, "day"))}
+            />
             <p className="h-[20px] text-[20px]/[20px] font-[600] mx-5 ">
               {currentWeek}
             </p>
-          )}
-          <RightOutlined
-            onClick={() => setCurrentDate(currentDate.add(1, "day"))}
-          />
-        </div>
+            <RightOutlined
+              onClick={() => setCurrentDate(currentDate.add(7, "day"))}
+            />{" "}
+          </div>
+        )}
+
         <div className="relative">
           <div
             className={`flex w-[60px] items-center justify-center py-[2px] bg-white gap-1 cursor-pointer ${dropdownOpen ? "border border-b-[#87888c] rounded-t-[12px]" : "border rounded-full"}`}
