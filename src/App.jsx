@@ -13,7 +13,7 @@ import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
 import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
-import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx"
+import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
 import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
@@ -29,7 +29,6 @@ function App() {
     "/calAdd",
     "/alarmhome",
     "/alarmcheck",
-    "/"
   ];
   const hideLayout = hideLayoutPaths.some((path) =>
     location.pathname.startsWith(path),
