@@ -17,6 +17,7 @@ import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx"
 import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
+import EmpHome from "./pages/employee/EmpHome.jsx";
 
 function App() {
   const location = useLocation();
@@ -47,13 +48,17 @@ function App() {
           <Route path="/onboarding" element={<Onboarding />} />
 
           <Route path="/owner" element={<OwnerHome />} />
+          <Route path="/employee" element={<EmpHome />} />
 
           <Route path="/owner/mypage" element={<OwnerPage />} />
-          <Route path="/owner/mypage/managestore" element={<ManageStore />} />
+          <Route
+            path="/owner/mypage/managestore"
+            element={<ManageStore isOwner={true} />}
+          />
           <Route path="/employee/mypage" element={<EmployeePage />} />
           <Route
             path="/employee/mypage/managestore"
-            element={<ManageStore />}
+            element={<ManageStore isOwner={false} />}
           />
 
           <Route path="/calAdd" element={<CalAdd />} />

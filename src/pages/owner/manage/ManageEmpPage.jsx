@@ -180,7 +180,7 @@ const ManageEmpPage = () => {
 
   return (
     <div className="w-full">
-      <div className="flex w-full bg-[#FDFFFE] pt-5">
+      <div className="flex w-full bg-[#FDFFFE]">
         <div className="w-1/2 relative" onClick={() => setTab(0)}>
           <div
             className={`text-[18px] font-[500] cursor-pointer ${tab === 0 ? "text-black" : "text-[#87888C]"}`}

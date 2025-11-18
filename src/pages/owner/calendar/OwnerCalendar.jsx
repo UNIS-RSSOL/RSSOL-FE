@@ -1,9 +1,114 @@
 import DayCalendar from "../../../components/common/calendar/DayCalendar.jsx";
+import WeekCalendar from "../../../components/common/calendar/WeekCalendar.jsx";
+import PencilIcon from "../../../assets/icons/PencilIcon.jsx";
+import { useState, useEffect } from "react";
+import dayjs from "dayjs";
+import {
+  LeftOutlined,
+  RightOutlined,
+  CaretDownFilled,
+} from "@ant-design/icons";
 
 function OwnerCalendar() {
+  const [selectedKey, setSelectedKey] = useState("1");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const today = dayjs();
+  const [currentDate, setCurrentDate] = useState(today);
+  const [currentWeek, setCurrentWeek] = useState(
+    `${today.format("YYYY.MM")} ${today.week() - dayjs(today).startOf("month").week() + 1}주차`,
+  );
+  const [formattedCurrentDate, setFormattedCurrentDate] = useState(
+    currentDate.year() +
+      "." +
+      (currentDate.month() + 1) +
+      " " +
+      currentDate.date(),
+  );
+  const items = [
+    {
+      label: "일간",
+      key: "1",
+      onClick: () => {
+        setSelectedKey("1");
+      },
+    },
+    {
+      label: "주간",
+      key: "2",
+      onClick: () => {
+        setSelectedKey("2");
+      },
+    },
+  ];
+
+  useEffect(() => {
+    const weekNum =
+      currentDate.week() - dayjs(currentDate).startOf("month").week() + 1;
+    setCurrentWeek(`${currentDate.format("YYYY.MM")} ${weekNum}주차`);
+
+    setFormattedCurrentDate(
+      currentDate.year() +
+        "." +
+        (currentDate.month() + 1) +
+        " " +
+        currentDate.date(),
+    );
+  }, [currentDate]);
+
   return (
-    <div className="flex flex-col items-center mt-5">
-      <DayCalendar />
+    <div className="flex flex-col items-center py-5">
+      <div className="flex flex-row w-full justify-between items-center px-4 mb-2">
+        <PencilIcon className="size-[20px] mr-[36px]" />
+        <div className="flex flex-row items-center justify-center">
+          <LeftOutlined
+            onClick={() => setCurrentDate(currentDate.subtract(1, "day"))}
+          />
+          {selectedKey === "1" ? (
+            <p className="h-[20px] text-[20px]/[20px] font-[600] mx-5 ">
+              {formattedCurrentDate}
+            </p>
+          ) : (
+            <p className="h-[20px] text-[20px]/[20px] font-[600] mx-5 ">
+              {currentWeek}
+            </p>
+          )}
+          <RightOutlined
+            onClick={() => setCurrentDate(currentDate.add(1, "day"))}
+          />
+        </div>
+        <div className="relative">
+          <div
+            className={`flex w-[60px] items-center justify-center py-[2px] bg-white gap-1 cursor-pointer ${dropdownOpen ? "border border-b-[#87888c] rounded-t-[12px]" : "border rounded-full"}`}
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+          >
+            <span className="text-[12px] font-[400]">
+              {items.find((item) => item.key === selectedKey)?.label}
+            </span>
+            <CaretDownFilled />
+          </div>
+          {dropdownOpen && (
+            <div className="absolute left-0 mt-0 rounded-b-[12px] border-x-1 border-b-1 overflow-hidden">
+              {items.map((item) => (
+                <div
+                  key={item.key}
+                  className="flex items-center justify-center w-[60px] py-[2px] bg-white gap-1 cursor-pointer"
+                  onClick={() => {
+                    setSelectedKey(item.key);
+                    setDropdownOpen(false);
+                  }}
+                >
+                  <span className="text-[12px] font-[400]">{item.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      {selectedKey === "1" ? (
+        <DayCalendar date={currentDate} />
+      ) : (
+        <WeekCalendar date={currentDate} />
+      )}
     </div>
   );
 }
