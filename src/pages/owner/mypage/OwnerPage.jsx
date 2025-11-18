@@ -66,7 +66,7 @@ function OwnerPage() {
           title="내 매장 관리"
           content="알바 솔로몬 1호점"
           hasArrow={true}
-          nav="/ownerpage/managestore"
+          nav="/owner/mypage/managestore"
         />
       </InfoBox>
     </div>

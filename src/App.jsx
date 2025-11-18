@@ -12,6 +12,9 @@ import ManageStore from "./pages/owner/mypage/ManageStore.jsx";
 import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
 import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
+import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
+import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
+import OwnerHome from "./pages/owner/OwnerHome.jsx";
 
 function App() {
   const location = useLocation();
@@ -35,12 +38,20 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
 
-          {/* 사장님/직원 페이지 */}
-          <Route path="/ownerpage" element={<OwnerPage />} />
-          <Route path="/ownerpage/managestore" element={<ManageStore />} />
-          <Route path="/ownercalendar" element={<OwnerCalendar />} />
-          <Route path="/employeepage" element={<EmployeePage />} />
-          <Route path="/employeepage/managestore" element={<ManageStore />} />
+          <Route path="/owner" element={<OwnerHome />} />
+
+          <Route path="/owner/mypage" element={<OwnerPage />} />
+          <Route path="/owner/mypage/managestore" element={<ManageStore />} />
+          <Route path="/employee/mypage" element={<EmployeePage />} />
+          <Route
+            path="/employee/mypage/managestore"
+            element={<ManageStore />}
+          />
+
+          <Route path="/owner/manageemp" element={<ManageEmpPage />} />
+          <Route path="/employee/managesalary" element={<ManageSalary />} />
+
+          <Route path="/owner/calendar" element={<OwnerCalendar />} />
         </Routes>
       </main>
 
