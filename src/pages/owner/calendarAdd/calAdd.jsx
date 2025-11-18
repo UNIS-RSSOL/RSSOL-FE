@@ -44,7 +44,9 @@ export default function CalAdd() {
   };
 
   const [unitSpecified, setUnitSpecified] = useState(true);
-  const [timeSlots, setTimeSlots] = useState([{ start: "09:00", end: "13:00", count: 0 }]);
+  const [timeSlots, setTimeSlots] = useState([
+    { start: "09:00", end: "13:00", count: 0 },
+  ]);
 
   const handleAddTime = () => {
     setTimeSlots([...timeSlots, { start: "00:00", end: "00:00", count: 0 }]);
@@ -58,12 +60,8 @@ export default function CalAdd() {
 
   return (
     <div className="flex flex-col h-screen">
-
       <div className="shadow-sm">
-        <TopBar 
-          title="근무표 생성" 
-          onBack={() => navigate(-1)}  
-        />
+        <TopBar title="근무표 생성" onBack={() => navigate(-1)} />
       </div>
 
       <div className="flex-1 overflow-auto p-4 space-y-4">
@@ -74,7 +72,6 @@ export default function CalAdd() {
           dayCellClassNames={dayCellClassNames}
         />
 
-        {/* 근무표 생성 단위 */}
         <div className="space-y-2">
           <div className="font-semibold">근무표 생성 단위</div>
           <label className="flex items-center space-x-2">
@@ -155,3 +152,4 @@ export default function CalAdd() {
     </div>
   );
 }
+
