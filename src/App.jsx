@@ -9,6 +9,7 @@ import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
 import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
+import OwnerHome from "./pages/owner/OwnerHome.jsx";
 
 function App() {
   return (
@@ -16,6 +17,8 @@ function App() {
       <Header />
       <main className="flex-1 overflow-y-auto">
         <Routes>
+          <Route path="/owner" element={<OwnerHome />} />
+
           <Route path="/owner/mypage" element={<OwnerPage />} />
           <Route path="/owner/mypage/managestore" element={<ManageStore />} />
           <Route path="/employee/mypage" element={<EmployeePage />} />

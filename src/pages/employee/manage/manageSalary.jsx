@@ -5,6 +5,7 @@ import DollarIcon from "../../../assets/icons/DollarIcon.jsx";
 import CopyIcon from "../../../assets/icons/CopyIcon.jsx";
 import Toast from "../../../components/common/Toast.jsx";
 import GreenBtn from "../../../components/common/GreenBtn.jsx";
+import Box from "../../../components/common/Box.jsx";
 import LeftOutlined from "@ant-design/icons/es/icons/LeftOutlined";
 import RightOutlined from "@ant-design/icons/es/icons/RightOutlined";
 import { Divider } from "antd";
@@ -24,19 +25,6 @@ const ManageSalary = () => {
       .getDate()
       .toString()
       .padStart(2, "0");
-
-  const Box = ({ disabled, children }) => {
-    const [isSelected, setIsSelected] = useState(false);
-
-    return (
-      <div
-        className={`flex flex-col w-[360px] p-[18px] rounded-[20px] shadow-[0px_4px_8px_0px_rgba(0,0,0,0.20)] items-center ${isSelected ? "bg-[#68E194]/[0.2] border-[1px] border-[#68E194] cursor-pointer" : "bg-[#FDFFFE]"}`}
-        onClick={disabled ? () => {} : () => setIsSelected(!isSelected)}
-      >
-        {children}
-      </div>
-    );
-  };
 
   const SalaryInfo = ({ title, content }) => {
     return (

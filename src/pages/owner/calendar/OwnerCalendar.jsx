@@ -1,5 +1,4 @@
 import DayCalendar from "../../../components/common/calendar/DayCalendar.jsx";
-import WeekCalendar from "../../../components/common/calendar/WeekCalendar.jsx";
 
 function OwnerCalendar() {
   return (

@@ -1,0 +1,55 @@
+:root {
+  --fc-border-color: #e7eaf3;
+  --fc-page-bg-color: #fdfffe;
+}
+
+.fc {
+  background-color: var(--fc-page-bg-color) !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  border: 1px solid black !important;
+}
+
+.fc-col-header-cell,
+.fc-col-header-cell a,
+.fc-col-header-cell span {
+  color: #000 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  height: 30px !important;
+  line-height: 30px !important;
+}
+
+.fc-timegrid-event {
+  border: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+.fc-event-main {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  color: black !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.fc-timegrid-slot {
+  height: 35px !important;
+  border-bottom: 1px solid var(--fc-border-color) !important;
+}
+
+.fc-timegrid-col-events {
+  margin: 0 !important;
+}
+
+.fc .fc-timegrid-col.fc-day-today {
+  background-color: var(--fc-page-bg-color) !important;
+}

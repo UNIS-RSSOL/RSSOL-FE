@@ -3,6 +3,7 @@ import CoinIcon from "../../../assets/icons/CoinIcon.jsx";
 import PhoneIcon from "../../../assets/icons/PhoneIcon";
 import DollarIcon from "../../../assets/icons/DollarIcon.jsx";
 import CopyIcon from "../../../assets/icons/CopyIcon.jsx";
+import Box from "../../../components/common/Box.jsx";
 import Toast from "../../../components/common/Toast";
 import GreenBtn from "../../../components/common/GreenBtn.jsx";
 import LeftOutlined from "@ant-design/icons/es/icons/LeftOutlined";
@@ -72,19 +73,6 @@ const ManageEmpPage = () => {
             </div>
           </div>
         )}
-      </div>
-    );
-  };
-
-  const Box = ({ disabled, children }) => {
-    const [isSelected, setIsSelected] = useState(false);
-
-    return (
-      <div
-        className={`flex flex-col w-[360px] p-[18px] rounded-[20px] shadow-[0px_4px_8px_0px_rgba(0,0,0,0.20)] items-center ${isSelected ? "bg-[#68E194]/[0.2] border-[1px] border-[#68E194] cursor-pointer" : "bg-[#FDFFFE]"}`}
-        onClick={disabled ? () => {} : () => setIsSelected(!isSelected)}
-      >
-        {children}
       </div>
     );
   };
