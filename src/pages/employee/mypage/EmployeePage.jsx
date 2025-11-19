@@ -9,7 +9,7 @@ import StoreIcon from "../../../assets/icons/StoreIcon.jsx";
 
 function EmployeePage() {
   return (
-    <div className=" flex flex-col divide-y-8 divide-[#E7EAF3]">
+    <div className="w-full flex flex-col divide-y-8 divide-[#E7EAF3]">
       <div className="flex flex-col items-center">
         <div className="w-[130px] h-[130px] bg-[#68E194] rounded-full border-[3px] border-white mt-7 mb-3 shadow-[0_4px_8px_0_rgba(0,0,0,0.2)]"></div>
         <p className="text-[20px] font-semibold mb-4">홍길동</p>
