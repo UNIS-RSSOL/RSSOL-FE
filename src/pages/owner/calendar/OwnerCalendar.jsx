@@ -56,7 +56,7 @@ function OwnerCalendar() {
   }, [currentDate]);
 
   return (
-    <div className="flex flex-col items-center py-5">
+    <div className="w-full flex flex-col items-center py-5">
       <div className="flex flex-row w-full justify-between items-center px-4 mb-2">
         <PencilIcon className="size-[20px] mr-[36px]" />
 

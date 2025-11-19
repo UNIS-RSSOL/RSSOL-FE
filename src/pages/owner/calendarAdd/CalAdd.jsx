@@ -58,7 +58,7 @@ export default function CalAdd() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="w-full flex flex-col h-screen">
       <div className="shadow-sm">
         <TopBar title="근무표 생성" onBack={() => navigate(-1)} />
       </div>

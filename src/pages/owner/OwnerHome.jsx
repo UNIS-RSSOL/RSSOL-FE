@@ -53,7 +53,7 @@ function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col py-7 px-5">
+    <div className="w-full flex flex-col py-7 px-5">
       <div className="w-full flex flex-col items-start">
         <div className="rounded-[30px] border py-[4px] px-[20px] bg-white border-[#32d1aa] shadow-[0_2px_4px_0_rbga(0,0,0,0.15)] text-[16px] font-[600] inline-block">
           {formattedToday}
