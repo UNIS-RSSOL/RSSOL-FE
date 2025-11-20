@@ -14,17 +14,20 @@ function OwnerCalendar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const today = dayjs();
   const [currentDate, setCurrentDate] = useState(today);
-  const [currentWeek, setCurrentWeek] = useState(
-    `${currentDate.format("YYYY.MM")} ${currentDate.week() - dayjs(currentDate).startOf("month").week() + 1}주차`,
+  const [formattedCurrentDate, setFormattedCurrentDate] = useState(
+    today.year() + "." + (today.month() + 1) + " " + today.date(),
   );
 
-  const [formattedCurrentDate, setFormattedCurrentDate] = useState(
-    currentDate.year() +
-      "." +
-      (currentDate.month() + 1) +
-      " " +
-      currentDate.date(),
-  );
+  useEffect(() => {
+    setFormattedCurrentDate(
+      currentDate.year() +
+        "." +
+        (currentDate.month() + 1) +
+        " " +
+        currentDate.date(),
+    );
+  }, [currentDate]);
+
   const items = [
     {
       label: "일간",
@@ -42,83 +45,65 @@ function OwnerCalendar() {
     },
   ];
 
-  useEffect(() => {
-    setFormattedCurrentDate(
-      currentDate.year() +
-        "." +
-        (currentDate.month() + 1) +
-        " " +
-        currentDate.date(),
+  const DropDown = () => {
+    return (
+      <div className="relative">
+        <div
+          className={`flex w-[60px] items-center justify-center py-[2px] bg-white gap-1 cursor-pointer ${dropdownOpen ? "border border-b-[#87888c] rounded-t-[12px]" : "border rounded-full"}`}
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+        >
+          <span className="text-[12px] font-[400]">
+            {items.find((item) => item.key === selectedKey)?.label}
+          </span>
+          <CaretDownFilled />
+        </div>
+        {dropdownOpen && (
+          <div className="absolute left-0 mt-0 rounded-b-[12px] border-x-1 border-b-1 overflow-hidden">
+            {items.map((item) => (
+              <div
+                key={item.key}
+                className="flex items-center justify-center w-[60px] py-[2px] bg-white gap-1 cursor-pointer"
+                onClick={() => {
+                  setSelectedKey(item.key);
+                  setDropdownOpen(false);
+                }}
+              >
+                <span className="text-[12px] font-[400]">{item.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     );
-    setCurrentWeek(
-      `${currentDate.format("YYYY.MM")} ${currentDate.week() - dayjs(currentDate).startOf("month").week() + 1}주차`,
-    );
-  }, [currentDate]);
+  };
 
-  return (
-    <div className="w-full flex flex-col items-center py-5">
-      <div className="flex flex-row w-full justify-between items-center px-4 mb-2">
-        <PencilIcon className="size-[20px] mr-[36px]" />
+  const Day = () => {
+    return (
+      <div className="w-full flex flex-col items-center py-5">
+        <div className="flex flex-row w-full justify-between items-center px-4 mb-2">
+          <PencilIcon className="size-[20px] mr-[36px]" />
 
-        {selectedKey === "1" ? (
-          <div className="flex flex-row items-center justify-center">
+          <div className="flex flex-row items-center justify-between">
             <LeftOutlined
               onClick={() => setCurrentDate(currentDate.subtract(1, "day"))}
             />
-            <p className="h-[20px] text-[20px]/[20px] font-[600] mx-5 ">
+            <p className="h-[20px] w-[150px] text-[20px]/[20px] font-[600] ">
               {formattedCurrentDate}
             </p>
             <RightOutlined
               onClick={() => setCurrentDate(currentDate.add(1, "day"))}
-            />{" "}
-          </div>
-        ) : (
-          <div className="flex flex-row items-center justify-center">
-            <LeftOutlined
-              onClick={() => setCurrentDate(currentDate.subtract(7, "day"))}
             />
-            <p className="h-[20px] text-[20px]/[20px] font-[600] mx-5 ">
-              {currentWeek}
-            </p>
-            <RightOutlined
-              onClick={() => setCurrentDate(currentDate.add(7, "day"))}
-            />{" "}
           </div>
-        )}
-
-        <div className="relative">
-          <div
-            className={`flex w-[60px] items-center justify-center py-[2px] bg-white gap-1 cursor-pointer ${dropdownOpen ? "border border-b-[#87888c] rounded-t-[12px]" : "border rounded-full"}`}
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-          >
-            <span className="text-[12px] font-[400]">
-              {items.find((item) => item.key === selectedKey)?.label}
-            </span>
-            <CaretDownFilled />
-          </div>
-          {dropdownOpen && (
-            <div className="absolute left-0 mt-0 rounded-b-[12px] border-x-1 border-b-1 overflow-hidden">
-              {items.map((item) => (
-                <div
-                  key={item.key}
-                  className="flex items-center justify-center w-[60px] py-[2px] bg-white gap-1 cursor-pointer"
-                  onClick={() => {
-                    setSelectedKey(item.key);
-                    setDropdownOpen(false);
-                  }}
-                >
-                  <span className="text-[12px] font-[400]">{item.label}</span>
-                </div>
-              ))}
-            </div>
-          )}
+          <DropDown />
         </div>
-      </div>
-      {selectedKey === "1" ? (
         <DayCalendar date={currentDate} />
-      ) : (
-        <WeekCalendar date={currentDate} />
-      )}
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      <Day />
     </div>
   );
 }

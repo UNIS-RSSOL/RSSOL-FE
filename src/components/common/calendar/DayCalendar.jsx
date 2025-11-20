@@ -1,33 +1,49 @@
-import { Table } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
+import { fetchSchedules } from "../../../services/CalendarService.js";
 
 function DayCalendar({ date }) {
-  const [currentDate, setCurrentDate] = useState(date);
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
-  const workers = ["시현", "민솔", "서진", "지유", "시은", "혜민", "채은"];
-  const events = [
-    { worker: "시현", start: "2025-11-18 8:00", end: "2025-11-18 13:00" },
-    { worker: "민솔", start: "2025-11-18 8:00", end: "2025-11-18 13:00" },
-    { worker: "서진", start: "2025-11-18 13:00", end: "2025-11-18 18:00" },
-    { worker: "지유", start: "2025-11-18 13:00", end: "2025-11-18 18:00" },
-    { worker: "시은", start: "2025-11-18 18:00", end: "2025-11-18 23:00" },
-    { worker: "혜민", start: "2025-11-18 18:00", end: "2025-11-18 24:00" },
-    { worker: "시현", start: "2025-11-19 8:00", end: "2025-11-19 13:00" },
-    { worker: "민솔", start: "2025-11-19 8:00", end: "2025-11-19 13:00" },
-    { worker: "서진", start: "2025-11-19 13:00", end: "2025-11-19 18:00" },
-    { worker: "지유", start: "2025-11-19 13:00", end: "2025-11-19 18:00" },
-  ];
+  const [blank, setBlank] = useState(Array.from({ length: 7 }, () => "."));
+  const [workers, setWorkers] = useState([]);
+
+  const [events, setEvents] = useState([]);
   const colors = ["#68e194", "#32d1aa", "#00c1bd"];
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const schedules = await fetchSchedules(
+          date.format("YYYY-MM-DD"),
+          date.format("YYYY-MM-DD"),
+        );
+        const uniqueWorkers = [
+          ...new Set(schedules.map((shedule) => schedules.userStoreId)),
+        ];
+        const formattedEvents = schedules.map((schedule) => ({
+          worker: schedule.userStoreId,
+          start: schedule.startDatetime,
+          end: schedule.endDatetime,
+        }));
+
+        setWorkers(uniqueWorkers);
+        setEvents(formattedEvents);
+
+        const len = uniqueWorkers?.length || 0;
+        const newBlank = Array.from(
+          { length: Math.max(0, 7 - len) },
+          () => ".",
+        );
+        setBlank(newBlank);
+      } catch (error) {
+        console.error("Error fetching schedules:", error);
+      }
+    })();
+  }, [date]);
 
   const getEventForCell = (worker, hour) => {
     return events.find((event) => {
-      if (
-        event.worker !== worker ||
-        currentDate.format("YYYY-MM-DD") !==
-          dayjs(event.start).format("YYYY-MM-DD")
-      )
-        return false;
+      if (event.worker !== worker) return false;
       const startHour = dayjs(event.start).hour();
       let endHour = dayjs(event.end).hour();
       if (endHour === 0) endHour = 24;
@@ -36,94 +52,89 @@ function DayCalendar({ date }) {
   };
 
   const getColorIndex = (startHour) => {
-    const totalHours = 15;
-    const segmentSize = totalHours / 3;
-    const hourInDay = startHour < 8 ? startHour + 24 : startHour;
-    const normalizedHour = hourInDay - 8;
-    return Math.min(2, Math.floor(normalizedHour / segmentSize));
+    const totalHours = hours.length - 1;
+    const segmentSize = Math.trunc(totalHours / colors.length);
+    const normalizedHour = startHour - hours[0];
+    return Math.min(
+      colors.length - 1,
+      Math.floor(normalizedHour / segmentSize),
+    );
   };
 
-  const eventColors = events.reduce((acc, event) => {
+  const getEventColor = (event) => {
+    if (!event) return "white";
     const startHour = dayjs(event.start).hour();
     const colorIndex = getColorIndex(startHour);
-    acc[`${event.worker}-${event.start}-${event.end}`] = colors[colorIndex];
-    return acc;
-  }, {});
-
-  useEffect(() => {
-    setCurrentDate(date);
-  }, [date]);
+    return colors[colorIndex];
+  };
 
   return (
-    <div className="flex flex-col w-full max-w-[360px] border-[0.5px] border-black rounded-[20px] bg-white items-center overflow-x-auto">
-      <div className="w-full border-b border-[#e7eaf3]">
-        <div className="flex">
-          <div className="w-[66px] bg-white"></div>
-          <div className="flex-1 ">
-            <div
-              className="flex"
-              style={{ minWidth: `${workers.length * 42}px` }}
-            >
-              {workers.map((worker) => (
-                <div
-                  key={worker}
-                  className="flex-shrink-0 w-[42px] h-[30px] border-l border-[#e7eaf3] bg-white text-center flex items-center justify-center"
-                ></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="w-full ">
+    <div className="flex flex-row w-full max-w-[362px] border-[0.5px] border-black rounded-[20px] bg-white items-center overflow-x-auto">
+      <div className="flex-shrink-0 flex-col w-[66px]">
+        <div className="h-[35px] border-b border-[#e7eaf3]" />
         {hours.map((hour) => (
-          <div
-            key={hour}
-            className="flex h-[35px] border-b border-[#e7eaf3] last:border-b-0"
-          >
-            <div className="w-[66px] flex-shrink-0 text-[16px] font-[400] text-center border-r border-[#e7eaf3] flex items-center justify-center">
+          <div key={hour}>
+            <div className="flex h-[35px] items-center justify-center border-b border-[#e7eaf3]">
               {String(hour)}:00
-            </div>
-            <div
-              className="flex "
-              style={{ minWidth: `${workers.length * 42}px` }}
-            >
-              {workers.map((worker) => {
-                const event = getEventForCell(worker, hour);
-                const eventKey = event
-                  ? `${event.worker}-${event.start}-${event.end}`
-                  : null;
-                const isMiddleHour = (() => {
-                  if (!event) return false;
-                  const startHour = dayjs(event.start).hour();
-                  let endHour = dayjs(event.end).hour();
-                  if (endHour === 0) endHour = 24;
-                  const middleHour = Math.floor((startHour + endHour - 1) / 2);
-                  return hour === middleHour;
-                })();
-
-                return (
-                  <div
-                    key={`${worker}-${hour}`}
-                    className="flex-shrink-0 w-[42px] h-full border-r border-[#e7eaf3] last:border-r-0 relative"
-                    style={
-                      event ? { backgroundColor: eventColors[eventKey] } : {}
-                    }
-                  >
-                    {isMiddleHour && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-[12px] font-[400] text-black ">
-                          {worker}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
             </div>
           </div>
         ))}
       </div>
+      {workers.map((worker, index) => (
+        <div
+          key={worker}
+          className="flex-shrink-0 flex-col w-[42px] border-[#e7eaf3]"
+        >
+          <div className="h-[35px] border-b border-[#e7eaf3]" />
+
+          {hours.map((hour) => {
+            const event = getEventForCell(worker, hour);
+            const eventKey = event
+              ? `${event.worker}-${event.start}-${event.end}`
+              : null;
+            const isMiddleHour = (() => {
+              if (!event) return false;
+              const startHour = dayjs(event.start).hour();
+              let endHour = dayjs(event.end).hour();
+              if (endHour === 0) endHour = 24;
+              const middleHour = Math.floor((startHour + endHour - 1) / 2);
+              return hour === middleHour;
+            })();
+            return event ? (
+              <div
+                key={`${worker}-${hour}`}
+                className="flex h-[35px] items-center justify-center border-b border-[#e7eaf3]"
+                style={{ backgroundColor: getEventColor(event) }}
+              >
+                {isMiddleHour ? (
+                  <span className="text-black text-[12px] font-[400]">
+                    {worker}
+                  </span>
+                ) : null}
+              </div>
+            ) : (
+              <div
+                key={`${worker}-${hour}`}
+                className="flex h-[35px] border-b border-[#e7eaf3] bg-white"
+              />
+            );
+          })}
+        </div>
+      ))}
+      {blank &&
+        blank.map((blank, index) => (
+          <div
+            key={index}
+            className={`flex-shrink-0 flex-col w-[42px] border-r border-[#e7eaf3] last:border-r-0 ${index === 0 ? "border-l" : ""}`}
+          >
+            <div className="h-[35px] border-b border-[#e7eaf3]" />
+            {hours.map((hour) => (
+              <div key={hour}>
+                <div className="flex h-[35px] items-center justify-center border-b border-[#e7eaf3]" />
+              </div>
+            ))}
+          </div>
+        ))}
     </div>
   );
 }
