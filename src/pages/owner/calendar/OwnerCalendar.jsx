@@ -17,6 +17,9 @@ function OwnerCalendar() {
   const [formattedCurrentDate, setFormattedCurrentDate] = useState(
     today.year() + "." + (today.month() + 1) + " " + today.date(),
   );
+  const [formattedCurrentWeek, setFormattedCurrentWeek] = useState(
+    `${today.format("YY")}.${today.format("MM")} ${Math.ceil(today.date() / 7)}주차`,
+  );
 
   useEffect(() => {
     setFormattedCurrentDate(
@@ -26,6 +29,9 @@ function OwnerCalendar() {
         " " +
         currentDate.date(),
     );
+    setFormattedCurrentWeek(
+      `${currentDate.format("YY")}.${currentDate.format("MM")} ${Math.ceil(currentDate.date() / 7)}주차`,
+    );
   }, [currentDate]);
 
   const items = [
@@ -34,6 +40,8 @@ function OwnerCalendar() {
       key: "1",
       onClick: () => {
         setSelectedKey("1");
+        setCurrentDate(today);
+        setDropdownOpen(false);
       },
     },
     {
@@ -41,6 +49,8 @@ function OwnerCalendar() {
       key: "2",
       onClick: () => {
         setSelectedKey("2");
+        setCurrentDate(today);
+        setDropdownOpen(false);
       },
     },
   ];
@@ -63,10 +73,7 @@ function OwnerCalendar() {
               <div
                 key={item.key}
                 className="flex items-center justify-center w-[60px] py-[2px] bg-white gap-1 cursor-pointer"
-                onClick={() => {
-                  setSelectedKey(item.key);
-                  setDropdownOpen(false);
-                }}
+                onClick={item.onClick}
               >
                 <span className="text-[12px] font-[400]">{item.label}</span>
               </div>
@@ -101,11 +108,37 @@ function OwnerCalendar() {
     );
   };
 
-  return (
-    <div>
-      <Day />
-    </div>
-  );
+  const Week = () => {
+    return (
+      <div className="w-full flex flex-col items-center py-5">
+        <div className="flex flex-row w-full justify-between items-center px-4 mb-2">
+          <PencilIcon className="size-[20px] mr-[36px]" />
+
+          <div className="flex flex-row items-center justify-between">
+            <LeftOutlined
+              onClick={() => {
+                const newDate = dayjs(currentDate).subtract(1, "week");
+                setCurrentDate(newDate);
+              }}
+            />
+            <p className="h-[20px] w-[150px] text-[20px]/[20px] font-[600] text-center">
+              {formattedCurrentWeek}
+            </p>
+            <RightOutlined
+              onClick={() => {
+                const newDate = dayjs(currentDate).add(1, "week");
+                setCurrentDate(newDate);
+              }}
+            />
+          </div>
+          <DropDown />
+        </div>
+        <WeekCalendar date={currentDate} />
+      </div>
+    );
+  };
+
+  return <div>{selectedKey === "1" ? <Day /> : <Week />}</div>;
 }
 
 export default OwnerCalendar;

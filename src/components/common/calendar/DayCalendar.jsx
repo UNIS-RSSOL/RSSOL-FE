@@ -69,9 +69,9 @@ function DayCalendar({ date }) {
   };
 
   return (
-    <div className="flex flex-row w-full max-w-[362px] border-[0.5px] border-black rounded-[20px] bg-white items-center overflow-x-auto">
+    <div className="flex flex-row w-full h-[596px] max-w-[362px] border-[0.5px] border-black rounded-[20px] bg-white items-center overflow-x-auto overflow-y-hidden">
       <div className="flex-shrink-0 flex-col w-[66px]">
-        <div className="h-[35px] border-b border-[#e7eaf3]" />
+        <div className="h-[30px] border-b border-[#e7eaf3]" />
         {hours.map((hour) => (
           <div key={hour}>
             <div className="flex h-[35px] items-center justify-center border-b border-[#e7eaf3]">
@@ -83,9 +83,9 @@ function DayCalendar({ date }) {
       {workers.map((worker, index) => (
         <div
           key={worker}
-          className="flex-shrink-0 flex-col w-[42px] border-[#e7eaf3]"
+          className="flex flex-shrink-0 flex-col w-[42px] border-[#e7eaf3]"
         >
-          <div className="h-[35px] border-b border-[#e7eaf3]" />
+          <div className="flex h-[30px] border-b border-[#e7eaf3]" />
 
           {hours.map((hour) => {
             const event = getEventForCell(worker, hour);
@@ -127,7 +127,7 @@ function DayCalendar({ date }) {
             key={index}
             className={`flex-shrink-0 flex-col w-[42px] border-r border-[#e7eaf3] last:border-r-0 ${index === 0 ? "border-l" : ""}`}
           >
-            <div className="h-[35px] border-b border-[#e7eaf3]" />
+            <div className="h-[30px] border-b border-[#e7eaf3]" />
             {hours.map((hour) => (
               <div key={hour}>
                 <div className="flex h-[35px] items-center justify-center border-b border-[#e7eaf3]" />
