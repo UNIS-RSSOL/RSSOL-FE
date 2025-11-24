@@ -12,10 +12,21 @@ function InfoItem({
   hasArrow,
   msg,
   nav,
+  required,
+  onChange,
+  name,
 }) {
   const [value, setValue] = useState(content);
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const newValue = e.target.value;
+    setValue(newValue);
+    if (onChange && name) {
+      onChange(name, newValue);
+    }
+  };
 
   const handleCopy = async () => {
     if (!value) return;
@@ -37,16 +48,24 @@ function InfoItem({
       <div className="flex flex-row items-center">
         {icon}
         <div className="flex flex-col ml-3 mt-2">
-          <p className="text-[14px] text-left font-[600] text-gray-400 mb-2">
-            {title}
-          </p>
+          <div className="flex flex-row gap-1">
+            <p className="text-[14px] text-left font-[600] text-gray-400 mb-2">
+              {title}
+            </p>
+            {required && (
+              <span className="text-[16px] text-left font-[400] text-black">
+                *
+              </span>
+            )}
+          </div>
           <div className="flex items-center">
             {isEdit ? (
               <div>
                 <input
                   className="text-[18px] text-left font-[600]"
                   value={value}
-                  onChange={(e) => setValue(e.target.value)}
+                  onChange={handleChange}
+                  name={name}
                 />
               </div>
             ) : (

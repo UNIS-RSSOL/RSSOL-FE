@@ -8,7 +8,7 @@ import Login from "./pages/auth/Login.jsx";
 import Onboarding from "./pages/auth/Onboarding.jsx";
 
 import OwnerPage from "./pages/owner/mypage/OwnerPage.jsx";
-import ManageStore from "./pages/owner/mypage/ManageStore.jsx";
+import ManageStore from "./pages/common/mypage/ManageStore.jsx";
 import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
 import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";

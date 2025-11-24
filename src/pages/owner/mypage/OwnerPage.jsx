@@ -13,6 +13,8 @@ import character1 from "../../../assets/images/character1.png";
 import {
   fetchMydata,
   fetchStoredata,
+  updateMydata,
+  updateStoredate,
 } from "../../../services/owner/MyPageService";
 
 function OwnerPage() {
@@ -26,6 +28,31 @@ function OwnerPage() {
     setStoredata(storedata);
   }, []);
 
+  const handleUpdateMydata = async () => {
+    try {
+      await updateMydata(
+        mydata?.username,
+        mydata?.email,
+        mydata?.businessRegistrationNumber,
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleUpdateStoredata = async () => {
+    try {
+      await updateStoredate(
+        storedata?.name,
+        storedata?.address,
+        storedata?.phoneNumber,
+        storedata?.businessRegistrationNumber,
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="w-full flex flex-col divide-y-8 divide-[#E7EAF3]">
       <div className="flex flex-col items-center">
@@ -34,7 +61,7 @@ function OwnerPage() {
         </div>
         <p className="text-[20px] font-semibold mb-4">{mydata?.username}</p>
       </div>
-      <InfoBox title="내 정보">
+      <InfoBox title="내 정보" update={handleUpdateMydata}>
         <InfoItem
           icon={<MypageIcon className="size-6 m-2" />}
           title="내 이름"
@@ -55,7 +82,7 @@ function OwnerPage() {
           }}
         />
       </InfoBox>
-      <InfoBox title="가게 정보">
+      <InfoBox title="가게 정보" update={handleUpdateStoredata}>
         <InfoItem
           icon={<SaveIcon className="size-6 m-2" />}
           title="매장 등록 코드"
