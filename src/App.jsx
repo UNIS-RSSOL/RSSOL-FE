@@ -13,10 +13,11 @@ import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
 import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
-import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx"
+import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
 import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
+import EmpHome from "./pages/employee/EmpHome.jsx";
 
 function App() {
   const location = useLocation();
@@ -28,7 +29,6 @@ function App() {
     "/calAdd",
     "/alarmhome",
     "/alarmcheck",
-    "/"
   ];
   const hideLayout = hideLayoutPaths.some((path) =>
     location.pathname.startsWith(path),
@@ -40,20 +40,23 @@ function App() {
 
       <main className="flex-1 overflow-y-auto">
         <Routes>
-          <Route path="/" element={<Login />} />
-
+          <Route path="/" />
           {/* 로그인/온보딩 */}
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
 
           <Route path="/owner" element={<OwnerHome />} />
+          <Route path="/employee" element={<EmpHome />} />
 
           <Route path="/owner/mypage" element={<OwnerPage />} />
-          <Route path="/owner/mypage/managestore" element={<ManageStore />} />
+          <Route
+            path="/owner/mypage/managestore"
+            element={<ManageStore isOwner={true} />}
+          />
           <Route path="/employee/mypage" element={<EmployeePage />} />
           <Route
             path="/employee/mypage/managestore"
-            element={<ManageStore />}
+            element={<ManageStore isOwner={false} />}
           />
 
           <Route path="/calAdd" element={<CalAdd />} />
