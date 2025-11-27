@@ -20,7 +20,12 @@ export default defineConfig({
   },
   // 개발 서버 설정 (프로덕션에는 영향 없음)
   server: {
-    port: 5173,
-    strictPort: false,
+    host: true,
+    strictPort: true,
+    hmr: {
+      host: 'localhost',
+      protocol: 'ws',
+      port: 5173,
+    }
   },
 });

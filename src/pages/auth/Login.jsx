@@ -6,6 +6,7 @@ import LoginKakao from "../../assets/LoginKakao.jsx";
 import LoginNaver from "../../assets/LoginNaver.jsx";
 import { LogoImage } from "../../assets/icons/logo2.jsx";
 import { getDevToken } from "../../services/authService.js";
+import { goToKakaoLogin } from "../../services/kakaoLogin.js";
 
 function Login() {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ function Login() {
 
       {/* 로그인 버튼들 */}
       <div className="flex flex-col gap-4 w-[80%] max-w-[300px] mb-[20px]">
-        <LoginKakao onClick={handleLogin} />
+        <LoginKakao onClick={goToKakaoLogin} />
         <LoginNaver onClick={handleLogin} />
         <LoginGoogle onClick={handleLogin} />
       </div>

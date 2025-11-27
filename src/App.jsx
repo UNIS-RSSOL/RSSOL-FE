@@ -41,7 +41,7 @@ function App() {
 
       <main className="flex-1 overflow-y-auto">
         <Routes>
-          <Route path="/" />
+          <Route path="/" element={<Login />} />
           {/* 로그인/온보딩 */}
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
