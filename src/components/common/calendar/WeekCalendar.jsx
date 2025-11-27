@@ -7,10 +7,8 @@ function WeekCalendar({ date }) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
   const [week, setWeek] = useState([]);
   const days = ["일", "월", "화", "수", "목", "금", "토"];
-  const [workers, setWorkers] = useState(["시현", "민솔", "채은", "서진"]);
-  const [events, setEvents] = useState([
-    { worker: "시현", start: "2025-11-25 13:00", end: "2025-11-25 17:00" },
-  ]);
+  const [workers, setWorkers] = useState([]);
+  const [events, setEvents] = useState(null);
   const colors = ["#68e194", "#32d1aa", "#00c1bd"];
 
   useEffect(() => {

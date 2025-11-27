@@ -15,9 +15,11 @@ function InfoItem({
   required,
   onChange,
   name,
+  check,
 }) {
   const [value, setValue] = useState(content);
   const [copied, setCopied] = useState(false);
+  const [showMsg, setShowMsg] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -26,6 +28,7 @@ function InfoItem({
     if (onChange && name) {
       onChange(name, newValue);
     }
+    handleCheck(newValue);
   };
 
   const handleCopy = async () => {
@@ -41,6 +44,11 @@ function InfoItem({
     } catch (err) {
       console.error("Copy failed", err);
     }
+  };
+
+  const handleCheck = (value) => {
+    const c = check(value);
+    setShowMsg(!c);
   };
 
   return (
@@ -88,7 +96,7 @@ function InfoItem({
           </div>
           {isEdit ? (
             <div className="w-[290px] h-[12px] border-b border-gray-400 text-[10px] text-[#f74a4a] text-left">
-              {msg}
+              {showMsg ? msg : null}
             </div>
           ) : (
             <div className="w-full h-[12px] border-b border-[#f8fbfe] "></div>

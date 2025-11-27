@@ -97,3 +97,23 @@ export async function deleteStore(storeId) {
     console.error(error);
   }
 }
+
+//활성 매장 조회
+export async function fetchActiveStore() {
+  try {
+    const response = await api.get("/api/mypage/active-store");
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+//활성 매장 변경
+export async function changeActiveStore(storeId) {
+  try {
+    const response = await api.patch(`/api/mypage/active-store/${storeId}`);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
