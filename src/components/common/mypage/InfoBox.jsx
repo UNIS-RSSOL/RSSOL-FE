@@ -2,12 +2,10 @@ import React from "react";
 import { useState, useEffect, Children } from "react";
 import PencilIcon from "../../../assets/icons/PencilIcon";
 
-function InfoBox({ title, children }) {
+function InfoBox({ title, children, update }) {
   const [isEdit, setIsEdit] = useState(false);
 
-  useEffect(() => {
-    console.log(isEdit);
-  }, [isEdit]);
+  useEffect(() => {}, [isEdit]);
 
   const childrenWithIsEdit = Children.map(children, (child) => {
     if (React.isValidElement(child)) {
@@ -16,6 +14,11 @@ function InfoBox({ title, children }) {
     return child;
   });
 
+  const handleUpdate = () => {
+    update();
+    setIsEdit(false);
+  };
+
   return (
     <div className="w-full p-4">
       <div className="flex flex-row justify-between mb-4">
@@ -23,7 +26,7 @@ function InfoBox({ title, children }) {
         {isEdit ? (
           <div
             className="w-[68px] h-[25px] rounded-[20px] border-[1px] border-[#68E194] text-[14px]/6 font-[400] cursor-pointer"
-            onClick={() => setIsEdit(false)}
+            onClick={handleUpdate}
           >
             수정완료
           </div>
