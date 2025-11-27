@@ -11,7 +11,11 @@ export const getDevToken = async (email) => {
       email: email,
     });
 
-    return response.data;
+    return {
+      success: true,
+      data: response.data.data,
+      message: response.data.message,
+    };
   } catch (error) {
     console.error(
       "Dev token 요청 실패:",
