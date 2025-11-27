@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import TopBar from "../../../components/layout/alarm/TopBar";
 import NavBar from "../../../components/layout/alarm/NavBar";
@@ -5,12 +6,15 @@ import AlarmItem from "../../../components/layout/alarm/AlarmItem";
 import ActionButtons from "../../../components/layout/alarm/ActionButtons";
 
 
-function AlarmHome({ handleBack }) {
+function AlarmHome() {
+    const navigate = useNavigate();
     const [tab, setTab] = useState("all");
 
     return (
         <div className="w-full h-full bg-[#F8FBFE] overflow-y-auto">
-            <TopBar title="알림" onBack={handleBack} />
+            <TopBar
+                title="알림"
+                onBack={() => navigate(-1)} />
             <NavBar currentTab={tab} setCurrentTab={setTab} />
 
             <div className="px-4 mt-4 text-[15px] font-semibold">09.15(월)</div>
