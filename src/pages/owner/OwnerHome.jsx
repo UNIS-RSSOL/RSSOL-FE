@@ -6,7 +6,7 @@ import GreenBtn from "../../components/common/GreenBtn.jsx";
 import { useEffect, useState } from "react";
 import character1 from "../../assets/images/character1.png";
 import Note from "../../components/common/Note.jsx";
-import ResourceCalendar from "../../components/common/calendar/resourceCalendar.jsx";
+import ResourceCalendar from "../../components/common/calendar/ResourceCalendar.jsx";
 
 function Home() {
   const [currentTime, setCurrentTime] = useState("");
