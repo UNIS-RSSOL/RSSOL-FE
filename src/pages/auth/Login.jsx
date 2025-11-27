@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import LoginGoogle from "../../assets/LoginGoogle.jsx";
-import LoginKakao from "../../assets/LoginKakao.jsx";
-import LoginNaver from "../../assets/LoginNaver.jsx";
 import { LogoImage } from "../../assets/icons/logo2.jsx";
 import { getDevToken } from "../../services/authService.js";
 import { goToKakaoLogin } from "../../services/kakaoLogin.js";
+import GreenBtn from "../../components/common/GreenBtn.jsx";
 
 function Login() {
   const navigate = useNavigate();
@@ -69,9 +67,24 @@ function Login() {
 
       {/* 로그인 버튼들 */}
       <div className="flex flex-col gap-4 w-[80%] max-w-[300px] mb-[20px]">
-        <LoginKakao onClick={goToKakaoLogin} />
-        <LoginNaver onClick={handleLogin} />
-        <LoginGoogle onClick={handleLogin} />
+        <GreenBtn
+          className="h-[48px] text-[15px] font-semibold text-[#381e1f] bg-[#fee500] hover:bg-[#f9d900]"
+          onClick={goToKakaoLogin}
+        >
+          카카오 로그인
+        </GreenBtn>
+        <GreenBtn
+          className="h-[48px] text-[15px] font-semibold text-white bg-[#03c75a] hover:bg-[#02b052]"
+          onClick={handleLogin}
+        >
+          네이버 로그인
+        </GreenBtn>
+        <GreenBtn
+          className="h-[48px] text-[15px] font-semibold text-white bg-[#4285f4] hover:bg-[#3a76d8]"
+          onClick={handleLogin}
+        >
+          구글 로그인
+        </GreenBtn>
       </div>
 
       {/* 체크용 로그인 (개발용) */}
