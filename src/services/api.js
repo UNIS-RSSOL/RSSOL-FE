@@ -16,8 +16,6 @@ api.interceptors.request.use(
     const token = getAuthToken(); // 저장소에서 토큰을 가져옵니다.
 
     if (token) {
-      // 토큰이 존재하면 Authorization 헤더에 'Bearer <token>' 형식으로 추가
-      // 이는 JWT(JSON Web Token) 사용 시 표준 방식입니다.
       config.headers.Authorization = `Bearer ${token}`;
     }
 

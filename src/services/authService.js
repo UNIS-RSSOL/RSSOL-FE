@@ -13,6 +13,7 @@ export const getDevToken = async (email) => {
       {
         headers: {
           "Content-Type": "application/json",
+          Authorization: undefined,
         },
       },
     );
