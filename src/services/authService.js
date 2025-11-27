@@ -7,9 +7,17 @@ import api from "./api"; // 수정된 Axios 인스턴스 가져오기
  */
 export const getDevToken = async (email) => {
   try {
-    const response = await api.post("/auth/dev-token", {
-      email: email,
-    });
+    const response = await api.post(
+      "/auth/dev-token",
+      {
+        email: email,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
 
     return {
       success: true,
