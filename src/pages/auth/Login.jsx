@@ -68,19 +68,19 @@ function Login() {
       {/* 로그인 버튼들 */}
       <div className="flex flex-col gap-4 w-[80%] max-w-[300px] mb-[20px]">
         <GreenBtn
-          className="h-[48px] text-[15px] font-semibold text-[#381e1f] bg-[#fee500] hover:bg-[#f9d900]"
+          className="h-[48px] text-[15px] font-semibold text-[#381e1f] bg-[#FEE500] hover:bg-[#FEE500]"
           onClick={goToKakaoLogin}
         >
           카카오 로그인
         </GreenBtn>
         <GreenBtn
-          className="h-[48px] text-[15px] font-semibold text-white bg-[#03c75a] hover:bg-[#02b052]"
+          className="h-[48px] text-[15px] font-semibold text-white bg-[#03C75A] hover:bg-[#03C75A]"
           onClick={handleLogin}
         >
           네이버 로그인
         </GreenBtn>
         <GreenBtn
-          className="h-[48px] text-[15px] font-semibold text-white bg-[#4285f4] hover:bg-[#3a76d8]"
+          className="h-[48px] text-[15px] font-semibold text-black bg-[#ffffff] hover:bg-[#ffffff]"
           onClick={handleLogin}
         >
           구글 로그인

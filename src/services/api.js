@@ -16,7 +16,10 @@ api.interceptors.request.use(
     const token = getAuthToken(); // 저장소에서 토큰을 가져옵니다.
 
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers = config.headers ?? {};
+      if (!config.headers.Authorization) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
 
     return config;
