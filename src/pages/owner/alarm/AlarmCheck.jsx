@@ -7,7 +7,7 @@ import ActionButtons from "../../../components/layout/alarm/ActionButtons";
 
 function AlarmCheck({ handleBack }) {
     return (
-        <div className="w-full h-full bg-white overflow-y-auto">
+        <div className="w-full h-full bg-[#F8FBFE] overflow-y-auto">
             <TopBar title="알림" onBack={handleBack} />
             <NavBar currentTab="final" setCurrentTab={() => {}} />
 

@@ -12,7 +12,7 @@ function NavBar({ currentTab, setCurrentTab }) {
   };
 
   return (
-    <div className="flex w-full h-[44px] border-b border-gray-200 text-[15px] font-medium">
+    <div className="flex w-full h-[44px] bg-white border-b border-gray-200 text-[15px] font-medium">
       <div
         onClick={() => handleTabClick("all")}
         className={`flex-1 flex items-center justify-center cursor-pointer relative ${
