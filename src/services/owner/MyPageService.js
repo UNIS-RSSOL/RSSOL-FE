@@ -28,9 +28,9 @@ export async function updateMydata(
 ) {
   try {
     const response = await api.put("/api/mypage/owner/profile", {
-      username,
-      email,
-      businessRegistrationNumber,
+      username: username,
+      email: email,
+      businessRegistrationNumber: businessRegistrationNumber,
     });
     return response.data;
   } catch (error) {
@@ -47,10 +47,10 @@ export async function updateStoredate(
 ) {
   try {
     const response = await api.put("/api/mypage/owner/store", {
-      name,
-      address,
-      phoneNumber,
-      businessRegistrationNumber,
+      name: name,
+      address: address,
+      phoneNumber: phoneNumber,
+      businessRegistrationNumber: businessRegistrationNumber,
     });
     return response.data;
   } catch (error) {
@@ -77,10 +77,10 @@ export async function addStore(
 ) {
   try {
     const response = await api.post("/api/mypage/owner/stores", {
-      businessRegistrationNumber,
-      name,
-      address,
-      phoneNumber,
+      businessRegistrationNumber: businessRegistrationNumber,
+      name: name,
+      address: address,
+      phoneNumber: phoneNumber,
     });
     return response.data;
   } catch (error) {
