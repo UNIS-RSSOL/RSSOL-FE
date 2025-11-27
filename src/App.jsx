@@ -10,6 +10,7 @@ import Onboarding from "./pages/auth/Onboarding.jsx";
 import OwnerPage from "./pages/owner/mypage/OwnerPage.jsx";
 import ManageStore from "./pages/common/mypage/ManageStore.jsx";
 import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
+import EmpCalendar from "./pages/employee/calendar/EmpCalendar.jsx";
 import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
@@ -68,6 +69,7 @@ function App() {
           <Route path="/employee/managesalary" element={<ManageSalary />} />
 
           <Route path="/owner/calendar" element={<OwnerCalendar />} />
+          <Route path="/employee/calendar" element={<EmpCalendar />} />
         </Routes>
       </main>
 

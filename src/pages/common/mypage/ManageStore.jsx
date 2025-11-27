@@ -22,12 +22,7 @@ function ManageStore({ isOwner }) {
   const [isModalOpen2, setIsModalOpen2] = useState(false);
   const [isToastOpen, setIsToastOpen] = useState(false);
   const [deletedStore, setDeletedStore] = useState(null);
-  const [newStore, setNewStore] = useState({
-    name: "",
-    address: "",
-    phoneNumber: "",
-    businessRegistrationNumber: "",
-  });
+  const [newStore, setNewStore] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -101,7 +96,7 @@ function ManageStore({ isOwner }) {
         <p className="text-[16px] font-medium pl-5">매장 추가 등록</p>
       </div>
       {isModalOpen && (
-        <Modal>
+        <Modal onClose={() => setIsModalOpen(false)}>
           <div className="flex flex-col items-center justify-center h-full">
             <p className="w-3/4 text-center text-[14px]/[24px] font-medium">
               '{deletedStore.name}'을 내 매장에서 삭제할까요?

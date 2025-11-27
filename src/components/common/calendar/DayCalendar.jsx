@@ -18,7 +18,7 @@ function DayCalendar({ date }) {
           date.format("YYYY-MM-DD"),
         );
         const uniqueWorkers = [
-          ...new Set(schedules.map((shedule) => schedules.userStoreId)),
+          ...new Set(schedules.map((schedule) => schedule.userStoreId)),
         ];
         const formattedEvents = schedules.map((schedule) => ({
           worker: schedule.userStoreId,
