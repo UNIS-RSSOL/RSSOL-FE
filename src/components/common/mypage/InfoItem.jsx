@@ -12,10 +12,24 @@ function InfoItem({
   hasArrow,
   msg,
   nav,
+  required,
+  onChange,
+  name,
+  check,
 }) {
   const [value, setValue] = useState(content);
   const [copied, setCopied] = useState(false);
+  const [showMsg, setShowMsg] = useState(false);
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const newValue = e.target.value;
+    setValue(newValue);
+    if (onChange && name) {
+      onChange(name, newValue);
+    }
+    handleCheck(newValue);
+  };
 
   const handleCopy = async () => {
     if (!value) return;
@@ -32,21 +46,34 @@ function InfoItem({
     }
   };
 
+  const handleCheck = (value) => {
+    const c = check(value);
+    setShowMsg(!c);
+  };
+
   return (
     <div className="flex flex-row items-center justify-between w-full mt-2">
       <div className="flex flex-row items-center">
         {icon}
         <div className="flex flex-col ml-3 mt-2">
-          <p className="text-[14px] text-left font-[600] text-gray-400 mb-2">
-            {title}
-          </p>
+          <div className="flex flex-row gap-1">
+            <p className="text-[14px] text-left font-[600] text-gray-400 mb-2">
+              {title}
+            </p>
+            {required && (
+              <span className="text-[16px] text-left font-[400] text-black">
+                *
+              </span>
+            )}
+          </div>
           <div className="flex items-center">
             {isEdit ? (
               <div>
                 <input
                   className="text-[18px] text-left font-[600]"
                   value={value}
-                  onChange={(e) => setValue(e.target.value)}
+                  onChange={handleChange}
+                  name={name}
                 />
               </div>
             ) : (
@@ -69,7 +96,7 @@ function InfoItem({
           </div>
           {isEdit ? (
             <div className="w-[290px] h-[12px] border-b border-gray-400 text-[10px] text-[#f74a4a] text-left">
-              {msg}
+              {showMsg ? msg : null}
             </div>
           ) : (
             <div className="w-full h-[12px] border-b border-[#f8fbfe] "></div>

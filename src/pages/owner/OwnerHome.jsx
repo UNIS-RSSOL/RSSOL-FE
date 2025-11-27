@@ -5,6 +5,8 @@ import CheckIcon from "../../assets/icons/CheckIcon.jsx";
 import GreenBtn from "../../components/common/GreenBtn.jsx";
 import { useEffect, useState } from "react";
 import character1 from "../../assets/images/character1.png";
+import Note from "../../components/common/Note.jsx";
+import ResourceCalendar from "../../components/common/calendar/ResourceCalendar.jsx";
 
 function Home() {
   const [currentTime, setCurrentTime] = useState("");
@@ -66,7 +68,12 @@ function Home() {
         </div>
       </div>
       <div className="flex justify-center w-full">
-        <Box className="w-full my-5 max-w-[500px]" disabled={true}></Box>
+        <Note
+          className="w-full my-5 max-w-[500px] overflow-x-hidden"
+          disabled={true}
+        >
+          <ResourceCalendar />
+        </Note>
       </div>
       <div className="flex items-center">
         <CheckIcon />

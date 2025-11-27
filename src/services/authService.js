@@ -1,24 +1,4 @@
-import axios from "axios";
-
-// API base URL - 환경 변수로 관리
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-if (!API_BASE_URL) {
-  console.error(
-    "❌ VITE_API_BASE_URL 환경변수가 설정되지 않았습니다.\n" +
-      "프로젝트 루트에 .env.development 또는 .env.production 파일을 생성하고\n" +
-      "VITE_API_BASE_URL=your-api-url 형태로 설정하세요."
-  );
-}
-
-// 로그인 API용 axios 인스턴스 (인증 없이 사용)
-const authApi = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: false,
-});
+import api from "./api"; // 수정된 Axios 인스턴스 가져오기
 
 /**
  * 체크용 로그인 - 개발 토큰 발급
@@ -27,27 +7,22 @@ const authApi = axios.create({
  */
 export const getDevToken = async (email) => {
   try {
-    const response = await authApi.post("/auth/dev-token", {
+    // 1. api 인스턴스를 사용하여 POST 요청을 보냅니다.
+    // baseURL이 이미 api 인스턴스에 설정되어 있으므로 경로만 입력합니다.
+    // Axios는 두 번째 인수인 객체를 자동으로 JSON.stringify() 합니다.
+    const response = await api.post("/auth/dev-token", {
       email: email,
     });
 
+    // 2. Axios는 2xx 응답인 경우에만 성공으로 처리하며,
+    // response.data에 파싱된 JSON 객체가 바로 들어있습니다.
     return response.data;
   } catch (error) {
-    console.error("Dev token 요청 실패:", error);
-    
-    // axios 에러 처리
-    if (error.response) {
-      // 서버가 응답했지만 상태 코드가 에러 범위
-      const errorMessage = error.response.data?.message || 
-                          `HTTP error! status: ${error.response.status}`;
-      throw new Error(errorMessage);
-    } else if (error.request) {
-      // 요청은 보냈지만 응답을 받지 못함
-      throw new Error("서버에 연결할 수 없습니다. 네트워크를 확인해주세요.");
-    } else {
-      // 요청 설정 중 오류 발생
-      throw new Error(error.message || "로그인 요청 중 오류가 발생했습니다.");
-    }
+    // 3. Axios는 4xx/5xx 응답인 경우 자동으로 에러를 throw 합니다.
+    // error.response를 통해 서버가 보낸 상세 응답 내용을 확인할 수 있습니다.
+    console.error("Dev token 요청 실패:", error.response || error.message);
+    throw error;
   }
 };
 
+// 참고: API_BASE_URL 상수는 더 이상 이 함수에서 필요하지 않습니다.
