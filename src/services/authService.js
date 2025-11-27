@@ -9,7 +9,7 @@ export const getDevToken = async (email) => {
   try {
     const response = await api.post(
       "/auth/dev-token",
-      { email: email },
+      { email },
       {
         headers: {
           "Content-Type": "application/json",
