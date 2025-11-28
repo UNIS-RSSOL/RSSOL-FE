@@ -35,9 +35,9 @@ function App() {
     "/calAdd",
     "/calGen",
     "/calAddEmp",
-    "/alarmhome",
-    "/alarmcheck",
-    "/alarmhomeemp",
+    "/alarmHomeEmp",
+    "/alarmHome",
+    "/alarmCheck",
   ];
   const hideLayout = hideLayoutPaths.some((path) =>
     location.pathname.startsWith(path),
@@ -72,9 +72,9 @@ function App() {
           <Route path="/calAdd" element={<CalAdd />} />
           <Route path="/calGen" element={<CalGen />} />
 
-          <Route path="/alarmhomeemp" element={<AlarmHomeEmp />} />
-          <Route path="/alarmhome" element={<AlarmHome />} />
-          <Route path="/alarmcheck" element={<AlarmCheck />} />
+          <Route path="/alarmHomeEmp" element={<AlarmHomeEmp />} />
+          <Route path="/alarmHome" element={<AlarmHome />} />
+          <Route path="/alarmCheck" element={<AlarmCheck />} />
 
           <Route path="/owner/manageemp" element={<ManageEmpPage />} />
           <Route path="/employee/managesalary" element={<ManageSalary />} />

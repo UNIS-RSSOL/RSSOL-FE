@@ -24,9 +24,14 @@ function Header() {
   const handleMenuClick = (menu) => {
     setSelectedMenu(menu);
 
-    // 메뉴별 페이지 이동
-    if (menu === "캘린더생성") navigate("/calAdd"); // CalAdd.jsx
-    if (menu === "알림") navigate("/alarmhome");  // AlarmHome.jsx
+    if (menu === "캘린더생성") {
+      const fromEmployeeSection = location.pathname.startsWith("/employee");
+      navigate(fromEmployeeSection ? "/calAddEmp" : "/calAdd");
+    }
+    if (menu === "알림") {
+      const fromEmployeeSection = location.pathname.startsWith("/employee");
+      navigate(fromEmployeeSection ? "/alarmHomeEmp" : "/alarmHome");
+    }
   };
 
   return (
