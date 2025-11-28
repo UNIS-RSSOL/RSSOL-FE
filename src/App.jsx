@@ -36,7 +36,7 @@ function App() {
   );
 
   return (
-    <div className="w-full bg-[#F8FBFE] min-[393px]:w-[393px] mx-auto h-screen flex flex-col font-Pretendard">
+    <div className="w-[393px] bg-[#F8FBFE] min-[393px]:w-[393px] mx-auto h-screen flex flex-col font-Pretendard">
       {!hideLayout && <Header />}
 
       <main className="flex-1 overflow-y-auto">
