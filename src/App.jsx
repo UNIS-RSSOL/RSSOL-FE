@@ -18,6 +18,8 @@ import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
 
 import CalAddEmp from "./pages/employee/calendarAdd/CalAddEmp.jsx"
 import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
+import CalGen from "./pages/owner/calendarAdd/CalGen.jsx";
+
 import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
@@ -31,6 +33,7 @@ function App() {
     "/login",
     "/onboarding",
     "/calAdd",
+    "/calGen",
     "/calAddEmp",
     "/alarmhome",
     "/alarmcheck",
@@ -67,6 +70,7 @@ function App() {
 
           <Route path="/calAddEmp" element={<CalAddEmp />} />
           <Route path="/calAdd" element={<CalAdd />} />
+          <Route path="/calGen" element={<CalGen />} />
 
           <Route path="/alarmhomeemp" element={<AlarmHomeEmp />} />
           <Route path="/alarmhome" element={<AlarmHome />} />
