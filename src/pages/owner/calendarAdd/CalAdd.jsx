@@ -67,9 +67,18 @@ export default function CalAdd() {
         <FullCalendar
           plugins={[dayGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
+          headerToolbar={{
+            left: "prev",
+            center: "title",
+            right: "next",
+          }}
+          buttonText={{
+            today: "오늘",
+          }}
           dateClick={handleDateClick}
           dayCellClassNames={dayCellClassNames}
         />
+
 
         <div className="space-y-2">
           <div className="font-semibold">근무표 생성 단위</div>
