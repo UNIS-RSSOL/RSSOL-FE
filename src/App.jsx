@@ -12,6 +12,7 @@ import ManageStore from "./pages/common/mypage/ManageStore.jsx";
 import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
 import EmpCalendar from "./pages/employee/calendar/EmpCalendar.jsx";
 import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
+import AlarmHomeEmp from "./pages/employee/alarm/AlarmHomeEmp.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
 import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
@@ -30,6 +31,7 @@ function App() {
     "/calAdd",
     "/alarmhome",
     "/alarmcheck",
+    "/alarmhomeemp",
   ];
   const hideLayout = hideLayoutPaths.some((path) =>
     location.pathname.startsWith(path),
@@ -62,6 +64,7 @@ function App() {
 
           <Route path="/calAdd" element={<CalAdd />} />
 
+          <Route path="/alarmhomeemp" element={<AlarmHomeEmp />} />
           <Route path="/alarmhome" element={<AlarmHome />} />
           <Route path="/alarmcheck" element={<AlarmCheck />} />
 

@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
+import koLocale from "@fullcalendar/core/locales/ko";
 import interactionPlugin from "@fullcalendar/interaction";
 import TopBar from "../../../components/layout/alarm/TopBar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
@@ -9,11 +10,15 @@ import "./CalAdd.css";
 
 export default function CalAdd() {
   const navigate = useNavigate();
+  const calendarRef = useRef(null);
   const [selectedDates, setSelectedDates] = useState([]);
+  const [visibleMonth, setVisibleMonth] = useState(() => {
+    const d = new Date();
+    return { year: d.getFullYear(), month: d.getMonth() + 1 };
+  });
 
   const handleDateClick = (info) => {
     const clicked = info.dateStr;
-
     if (selectedDates.length === 0) {
       setSelectedDates([clicked]);
     } else if (selectedDates.length === 1) {
@@ -27,14 +32,11 @@ export default function CalAdd() {
 
   const dayCellClassNames = (arg) => {
     const dateStr = arg.dateStr;
-
     if (selectedDates.length === 1 && selectedDates[0] === dateStr) {
       return "fc-selected-start";
     }
-
     if (selectedDates.length === 2) {
       const [start, end] = selectedDates;
-
       if (dateStr === start) return "fc-selected-start";
       if (dateStr === end) return "fc-selected-end";
       if (dateStr > start && dateStr < end) return "fc-selected-between";
@@ -42,20 +44,48 @@ export default function CalAdd() {
     return "";
   };
 
+  // --- 시간 슬롯 로직 (원래 코드 유지) ---
   const [unitSpecified, setUnitSpecified] = useState(true);
   const [timeSlots, setTimeSlots] = useState([
     { start: "09:00", end: "13:00", count: 0 },
   ]);
-
   const handleAddTime = () => {
     setTimeSlots([...timeSlots, { start: "00:00", end: "00:00", count: 0 }]);
   };
-
   const handleTimeChange = (index, field, value) => {
     const newSlots = [...timeSlots];
     newSlots[index][field] = value;
     setTimeSlots(newSlots);
   };
+
+  // datesSet 콜백: 뷰가 바뀔 때(월 이동 등) 호출됨
+  const handleDatesSet = (arg) => {
+    const start = arg.start;
+    const end = arg.end;
+  
+    // start ~ end 중간 날짜 구하기
+    const midTime = (start.getTime() + end.getTime()) / 2;
+    const midDate = new Date(midTime);
+  
+    setVisibleMonth({
+      year: midDate.getFullYear(),
+      month: midDate.getMonth() + 1,
+    });
+  };
+  
+
+  // 커스텀 prev / next
+  const goPrev = () => {
+    const api = calendarRef.current?.getApi();
+    api?.prev();
+  };
+  const goNext = () => {
+    const api = calendarRef.current?.getApi();
+    api?.next();
+  };
+
+  // visibleMonth를 "YYYY.MM" 형식으로 렌더
+  const formattedTitle = `${visibleMonth.year}.${String(visibleMonth.month).padStart(2, "0")}`;
 
   return (
     <div className="w-full flex flex-col h-screen">
@@ -64,22 +94,67 @@ export default function CalAdd() {
       </div>
 
       <div className="flex-1 overflow-auto p-4 space-y-4">
-        <FullCalendar
-          plugins={[dayGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          headerToolbar={{
-            left: "prev",
-            center: "title",
-            right: "next",
-          }}
-          buttonText={{
-            today: "오늘",
-          }}
-          dateClick={handleDateClick}
-          dayCellClassNames={dayCellClassNames}
-        />
+        {/* 커스텀 헤더 */}
+        <div className="fc-custom-header flex items-center justify-between mb-2">
+          <button className="fc-nav-btn" onClick={goPrev} aria-label="이전달">
+            {/* 간단한 SVG 화살표 (검은색) */}
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M15 18L9 12L15 6"
+                stroke="#000"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
 
+          <div className="fc-custom-title font-semibold text-lg">
+            {formattedTitle}
+          </div>
 
+          <button className="fc-nav-btn" onClick={goNext} aria-label="다음달">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M9 6L15 12L9 18"
+                stroke="#000"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <div className="calendar-wrapper">
+          <FullCalendar
+            ref={calendarRef}
+            plugins={[dayGridPlugin]}
+            initialView="dayGridMonth"
+            locale={koLocale}
+            headerToolbar={false}
+            fixedWeekCount={false}
+            height="auto"
+            dayCellContent={(arg) => {
+              return { html: `<div class='date-num'>${arg.date.getDate()}</div>` };
+            }}
+            datesSet={handleDatesSet}   // 필수
+          />
+        </div>
+
+        {/* --- 나머지 UI (시간 슬롯 등) --- */}
         <div className="space-y-2">
           <div className="font-semibold">근무표 생성 단위</div>
           <label className="flex items-center space-x-2">

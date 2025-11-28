@@ -1,0 +1,29 @@
+import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import TopBar from "../../../components/layout/alarm/TopBar";
+import AlarmItem from "../../../components/layout/alarm/AlarmItem";
+import ActionButtons from "../../../components/layout/alarm/ActionButtons";
+
+function AlarmHomeEmp() {
+  const navigate = useNavigate();
+  const [tab, setTab] = useState("all");
+
+  return (
+    <div className="w-full h-full bg-[#F8FBFE] overflow-y-auto">
+      <TopBar title="알림" onBack={() => navigate(-1)} />
+
+      <div className="px-4 mt-4 text-[15px] font-semibold">09.15(월)</div>
+      <div className="mt-2">
+        <AlarmItem
+          icon={<div className="w-full h-full bg-gray-200 rounded-full"></div>}
+          title="맥도날드 신촌점"
+          time="10분 전"
+        >
+          ‘김혜민’님이 15(월) 13:00~16:00 근무를 부탁했어요!
+          <ActionButtons leftLabel="거절" rightLabel="수락" />
+        </AlarmItem>
+      </div>
+    </div>
+  );
+}
+export default AlarmHomeEmp;
