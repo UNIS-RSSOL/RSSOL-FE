@@ -15,6 +15,8 @@ import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 import AlarmHomeEmp from "./pages/employee/alarm/AlarmHomeEmp.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
+
+import CalAddEmp from "./pages/employee/calendarAdd/CalAddEmp.jsx"
 import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
 import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
@@ -29,6 +31,7 @@ function App() {
     "/login",
     "/onboarding",
     "/calAdd",
+    "/calAddEmp",
     "/alarmhome",
     "/alarmcheck",
     "/alarmhomeemp",
@@ -62,6 +65,7 @@ function App() {
             element={<ManageStore isOwner={false} />}
           />
 
+          <Route path="/calAddEmp" element={<CalAddEmp />} />
           <Route path="/calAdd" element={<CalAdd />} />
 
           <Route path="/alarmhomeemp" element={<AlarmHomeEmp />} />

@@ -7,9 +7,31 @@ function BottomBar({
   onRightClick,
   disabledLeft = false,
   disabledRight = false,
+  singleButton = false,
+  singleButtonText,
+  onSingleClick,
+  disabledSingle = false,
 }) {
   const base =
     "w-full h-12 rounded-xl text-black font-semibold text-sm appearance-none outline-none border-none shadow-none";
+
+  if (singleButton) {
+    return (
+      <div className="sticky bottom-0 w-full px-4 py-3 bg-white border-t border-[#e7eaf3] flex flex-col gap-3">
+        <button
+          onClick={onSingleClick}
+          disabled={disabledSingle}
+          className={`${base} ${disabledSingle ? "opacity-60 cursor-not-allowed" : "opacity-100"}`}
+          style={{
+            WebkitAppearance: "none",
+            backgroundColor: "#68E194",
+          }}
+        >
+          {singleButtonText || rightText || leftText}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="sticky bottom-0 w-full px-4 py-3 bg-white border-t border-[#e7eaf3] flex flex-col gap-3">
