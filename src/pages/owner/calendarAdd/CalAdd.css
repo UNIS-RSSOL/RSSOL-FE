@@ -89,8 +89,8 @@
   .range-end .fc-daygrid-day-frame::before {
     content: "";
     position: absolute;
-    width: 32px;
-    height: 32px;
+    width: 45px;
+    height:45px;
     background: #68E194;
     border-radius: 50%;
     top: 50%;
@@ -98,17 +98,42 @@
     transform: translate(-50%, -50%);
     z-index: 1;
   }
+    
+  .range-start .fc-daygrid-day-frame::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    width: 50%;
+    height: 45px;
+    background: rgba(104, 225, 148, 0.4);
+    z-index: 0;
+  }
+
+  .range-end .fc-daygrid-day-frame::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    right: 50%;
+    width: 50%;
+    height: 45px;
+    background: rgba(104, 225, 148, 0.4);
+    z-index: 0;
+  }
+
   
   /* 사이 날짜: 전체 셀 배경 */
   .range-between .fc-daygrid-day-frame::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 2px;
+    left: 0%;
+    width: 100%;
+    height: 45px;
     bottom: 0;
     background: rgba(104, 225, 148, 0.4);
-    border-radius: 0; /* 좌우 연결 느낌 유지 */
+    border-radius: 0 !important; /* 좌우 경계 완전 제거 */
+    z-index: 0 !important;       /* 원(시작/종료) 아래로 보내기 */
     z-index: 1;
   }
   
@@ -154,4 +179,3 @@
     outline: 2px solid rgba(0, 0, 0, 0.12);
     outline-offset: 2px;
   }
-  

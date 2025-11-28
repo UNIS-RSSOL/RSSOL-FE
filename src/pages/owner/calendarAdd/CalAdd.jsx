@@ -72,29 +72,31 @@ export default function CalAdd() {
   useEffect(() => {
     const api = calendarRef.current?.getApi();
     if (!api) return;
-
+  
     api.render();
-
+  
     const dayCells = document.querySelectorAll(".fc-daygrid-day");
     dayCells.forEach((cell) => {
       const dateStr = cell.getAttribute("data-date");
       if (!dateStr) return;
-
+  
+      // 기존 클래스 제거
       cell.classList.remove("range-start", "range-end", "range-between");
-
+  
       if (selectedDates.length === 1) {
+        // 시작 날짜만 선택된 경우
         if (selectedDates[0] === dateStr) cell.classList.add("range-start");
-      }
-
-      if (selectedDates.length === 2) {
+        // 사이 날짜는 적용하지 않음
+      } else if (selectedDates.length === 2) {
+        // 시작/끝 날짜와 사이 날짜 처리
         const [start, end] = selectedDates;
         if (dateStr === start) cell.classList.add("range-start");
         else if (dateStr === end) cell.classList.add("range-end");
-        else if (dateStr > start && dateStr < end)
-          cell.classList.add("range-between");
+        else if (dateStr > start && dateStr < end) cell.classList.add("range-between");
       }
     });
   }, [selectedDates]);
+  
 
   // -------------------------
   // 시간 슬롯 (원본 유지)
