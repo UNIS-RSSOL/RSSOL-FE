@@ -171,14 +171,15 @@ function ManageStore({ isOwner }) {
         )}
         <GreenBtn
           className="h-[50px] text-[16px] font-semibold mt-5"
-          onClick={() =>
+          onClick={() => {
             handleAddStore(
               newStore.businessRegistrationNumber,
               newStore.name,
               newStore.address,
               newStore.phoneNumber,
-            )
-          }
+            );
+            setIsToastOpen(false);
+          }}
         >
           추가하기
         </GreenBtn>

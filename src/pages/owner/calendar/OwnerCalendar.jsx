@@ -30,7 +30,7 @@ function OwnerCalendar() {
   const [formattedCurrentWeek, setFormattedCurrentWeek] = useState(
     `${today.format("YY")}.${today.format("MM")} ${Math.ceil(today.date() / 7)}주차`,
   );
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTime, setNewTime] = useState({ day: "", start: "", end: "" });
   const week = ["월", "화", "수", "목", "금", "토", "일"];
   const [weekDropOpen, setWeekDropOpen] = useState(false);
@@ -251,7 +251,10 @@ function OwnerCalendar() {
                   <p className="w-[40px] flex-shrink-0 text-[14px] font-[500] text-right gap-1">
                     근무자
                   </p>
-                  <Input className="rounded-[10px] border-[#87888c]" />
+                  <Input
+                    className="rounded-[10px] border-[#87888c]"
+                    style={{ width: "235px" }}
+                  />
                 </div>
               </div>
               <GreenBtn className="w-full h-[35px] text-[14px] font-[500]">

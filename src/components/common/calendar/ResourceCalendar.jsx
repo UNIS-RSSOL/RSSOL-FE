@@ -1,17 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 
-function ResourceCalendar() {
+function ResourceCalendar({ e, w }) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
   const [workers, setWorkers] = useState(["지민", "수진", "채은"]);
-  const [events, setEvents] = useState([
-    {
-      worker: "지민",
-      start: "2025-11-25T08:00:00",
-      end: "2025-11-25T12:00:00",
-    },
-  ]);
+  const [events, setEvents] = useState([]);
   const colors = ["#68e194", "#32d1aa", "#00c1bd"];
+
+  useEffect(() => {
+    setEvents(e);
+    setWorkers(w);
+  }, []);
 
   const getEventForCell = (worker, hour) => {
     return events.find((event) => {
