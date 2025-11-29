@@ -12,6 +12,8 @@ export default function CalAdd() {
   const navigate = useNavigate();
   const calendarRef = useRef(null);
 
+  const [minWorkTime, setMinWorkTime] = useState(1); // 최소 근무시간 (시간 단위)
+
   const [selectedDates, setSelectedDates] = useState([]);
 
   // -------------------------
@@ -134,7 +136,7 @@ export default function CalAdd() {
     <div className="w-full flex flex-col h-screen">
       <TopBar title="근무표 생성" onBack={() => navigate(-1)} />
 
-      <div className="flex-1 overflow-auto p-4 space-y-4">
+      <div className="flex-1 p-4 space-y-4 h-flex">
         {/* ---------- 커스텀 헤더 ---------- */}
         <div className="fc-custom-header flex items-center justify-between mb-2">
           <button className="fc-nav-btn" onClick={goPrev}>
@@ -165,7 +167,7 @@ export default function CalAdd() {
             </svg>
           </button>
         </div>
-
+      
         {/* ---------- 달력 ---------- */}
         <div className="calendar-wrapper">
           <FullCalendar
@@ -183,8 +185,8 @@ export default function CalAdd() {
             })}
           />
         </div>
-        
-        
+      </div>
+      <div className="flex-1 overflow-auto p-4 space-y-4">
         {/* ---------- 시간 슬롯 ---------- */}
         <div className="space-y-2">
           <div className="font-semibold">근무표 생성 단위</div>
@@ -263,6 +265,22 @@ export default function CalAdd() {
             />
             <span>지정하지 않음</span>
           </label>
+          {!unitSpecified && (
+            <div className="mt-2 space-y-1">
+              <div className="font-medium">
+                최소 근무시간
+                <input
+                  type="number"
+                  min="1"
+                  value={minWorkTime}
+                  className="border p-1 rounded w-12"
+                  onChange={(e) => setMinWorkTime(e.target.value)}
+                />
+                <span>시간</span>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
 

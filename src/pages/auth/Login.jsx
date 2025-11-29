@@ -1,65 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { LogoImage } from "../../assets/icons/logo2.jsx";
 import { getDevToken } from "../../services/authService.js";
-import { goToKakaoLogin, completeKakaoLogin } from "../../services/kakaoLogin.js";
+import { goToKakaoLogin } from "../../services/kakaoLogin.js";
 import GreenBtn from "../../components/common/GreenBtn.jsx";
 
 function Login() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleLogin = () => {
     navigate("/onboarding");
-  };
-
-  // 카카오 로그인 콜백 처리
-  useEffect(() => {
-    const code = searchParams.get("code");
-    
-    if (code) {
-      handleKakaoCallback(code);
-    }
-  }, [searchParams]);
-
-  const handleKakaoCallback = async (code) => {
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const session = await completeKakaoLogin(code);
-      
-      // 응답에서 isNewUser 확인
-      if (session.isNewUser) {
-        // 신규 유저는 온보딩 페이지로 이동
-        navigate("/onboarding");
-      } else {
-        // 기존 유저는 역할에 따라 적절한 페이지로 이동
-        // activeStoreId가 있으면 해당 역할의 홈으로 이동
-        if (session.activeStoreId) {
-          // 역할에 따라 owner 또는 employee 홈으로 이동
-          // 백엔드 응답에 role 정보가 있다면 그것을 사용, 없으면 activeStoreId로 판단
-          navigate(session.role === "employee" ? "/employee" : "/owner");
-        } else {
-          // activeStoreId가 없으면 온보딩으로 이동 (역할 설정 필요)
-          navigate("/onboarding");
-        }
-      }
-
-      // URL에서 code 파라미터 제거
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } catch (err) {
-      setError(err.message || "카카오 로그인 중 오류가 발생했습니다.");
-      console.error("Kakao login error:", err);
-      // URL에서 code 파라미터 제거
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleDevLogin = async (e) => {

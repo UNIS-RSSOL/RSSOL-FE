@@ -1,4 +1,4 @@
-import api from "./api"; // 수정된 Axios 인스턴스 가져오기
+import api from "./api";
 
 /**
  * 체크용 로그인 - 개발 토큰 발급
