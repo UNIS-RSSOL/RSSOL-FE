@@ -25,15 +25,27 @@ function App() {
 
   // 헤더·푸터 제외할 페이지
   const hideLayoutPaths = [
+    "/",
     "/login",
     "/onboarding",
     "/calAdd",
     "/alarmhome",
     "/alarmcheck",
   ];
-  const hideLayout = hideLayoutPaths.some((path) =>
-    location.pathname.startsWith(path),
-  );
+  const hideLayout = hideLayoutPaths.some((path) => {
+    // 루트 경로 (정확히 "/"만 일치)
+    if (path === "/" && location.pathname === "/") {
+      return true;
+    }
+    // 나머지 경로 (정확히 일치하거나, 해당 경로로 시작하는 하위 경로)
+    if (
+      path !== "/" &&
+      (location.pathname === path || location.pathname.startsWith(path + "/"))
+    ) {
+      return true;
+    }
+    return false;
+  });
 
   return (
     <div className="w-[393px] bg-[#F8FBFE] min-[393px]:w-[393px] mx-auto h-screen flex flex-col font-Pretendard">
