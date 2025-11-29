@@ -43,11 +43,11 @@ function OwnerHome() {
           today.format("YYYY-MM-DD"),
         );
         const formattedEvents = schedules.map((schedule) => ({
-          worker: schedule.userStoreId,
+          worker: schedule.userName,
           start: schedule.startDatetime,
           end: schedule.endDatetime,
         }));
-        const worker = schedules.map((s) => s.userStoreId);
+        const worker = schedules.map((s) => s.userName);
 
         const activeStore = await fetchActiveStore();
         const fetchedWage = await fetchWage(
@@ -70,7 +70,6 @@ function OwnerHome() {
       const now = new Date();
       const hours = now.getHours().toString().padStart(2, "0");
       const minutes = now.getMinutes().toString().padStart(2, "0");
-      const seconds = now.getSeconds().toString().padStart(2, "0");
       setCurrentTime(`${hours}:${minutes}`);
     };
 
@@ -104,7 +103,7 @@ function OwnerHome() {
 
     const changeActive = async (storeId) => {
       try {
-        const response = changeActive(storeId);
+        const response = changeActiveStore(storeId);
         setActiveStore(response.storeId);
       } catch (error) {
         console.error(error);

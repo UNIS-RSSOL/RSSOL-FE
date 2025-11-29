@@ -24,7 +24,10 @@ function Footer() {
       path === "/employee/mypage"
     ) {
       setSelectedMenu("마이페이지");
-    } else if (path.includes("/owner/calendar")) {
+    } else if (
+      path.includes("/owner/calendar") ||
+      path.includes("/employee/calendar")
+    ) {
       setSelectedMenu("캘린더");
     } else if (
       path.includes("/owner/manageemp") ||
