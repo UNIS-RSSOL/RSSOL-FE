@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
+import { fetchSchedules } from "../../../services/common/ScheduleService";
 
 function ResourceCalendar({ e, w }) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
-  const [workers, setWorkers] = useState(["지민", "수진", "채은"]);
+  const [workers, setWorkers] = useState([]);
   const [events, setEvents] = useState([]);
   const colors = ["#68e194", "#32d1aa", "#00c1bd"];
 
   useEffect(() => {
-    setEvents(e);
     setWorkers(w);
+    setEvents(e);
   }, []);
 
   const getEventForCell = (worker, hour) => {

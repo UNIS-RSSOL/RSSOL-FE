@@ -1,4 +1,4 @@
-function AddIcon() {
+function AddIcon({ onClick, className }) {
   return (
     <svg
       width="32"
@@ -6,6 +6,8 @@ function AddIcon() {
       viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
+      className={className}
     >
       <rect
         x="1"

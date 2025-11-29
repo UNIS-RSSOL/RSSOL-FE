@@ -7,15 +7,21 @@ import { useEffect, useState } from "react";
 import character1 from "../../assets/images/character1.png";
 import Note from "../../components/common/Note.jsx";
 import ResourceCalendar from "../../components/common/calendar/ResourceCalendar.jsx";
-import { fetchSchedules } from "../../services/CalendarService.js";
+import { fetchSchedules } from "../../services/common/ScheduleService.js";
 import { fetchWage } from "../../services/owner/WageService.js";
-import { fetchActiveStore } from "../../services/owner/MyPageService.js";
+import {
+  fetchActiveStore,
+  fetchStoreList,
+  changeActiveStore,
+} from "../../services/owner/MyPageService.js";
 import dayjs from "dayjs";
+import StoreIcon from "../../assets/icons/StoreIcon.jsx";
+import { motion, AnimatePresence } from "framer-motion";
 
 function OwnerHome() {
   const [currentTime, setCurrentTime] = useState("");
   let today = dayjs();
-  const firstDay = today.format("YYYY-MM-") + "01";
+  const firstDay = today.format("YYYY.MM.") + "01";
   const dat = ["일", "월", "화", "수", "목", "금", "토"];
   const [events, setEvents] = useState([]);
   const [workers, setWorkers] = useState([]);
@@ -29,7 +35,7 @@ function OwnerHome() {
   };
 
   useEffect(() => {
-    async () => {
+    (async () => {
       try {
         today = dayjs();
         const schedules = await fetchSchedules(
@@ -37,11 +43,11 @@ function OwnerHome() {
           today.format("YYYY-MM-DD"),
         );
         const formattedEvents = schedules.map((schedule) => ({
-          worker: schedule.userStoreId,
+          worker: schedule.userName,
           start: schedule.startDatetime,
           end: schedule.endDatetime,
         }));
-        const worker = schedules.map((s) => s.userStoreId);
+        const worker = schedules.map((s) => s.userName);
 
         const activeStore = await fetchActiveStore();
         const fetchedWage = await fetchWage(
@@ -58,13 +64,12 @@ function OwnerHome() {
       } catch (error) {
         console.error(error);
       }
-    };
+    })();
 
     const updateTime = () => {
       const now = new Date();
       const hours = now.getHours().toString().padStart(2, "0");
       const minutes = now.getMinutes().toString().padStart(2, "0");
-      const seconds = now.getSeconds().toString().padStart(2, "0");
       setCurrentTime(`${hours}:${minutes}`);
     };
 
@@ -72,6 +77,80 @@ function OwnerHome() {
     const intervalId = setInterval(updateTime, 1000);
     return () => clearInterval(intervalId);
   }, []);
+
+  const FloatButton = () => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [storeList, setStoreList] = useState([]);
+    const [activeStore, setActiveStore] = useState();
+
+    useEffect(() => {
+      (async () => {
+        try {
+          const response = await fetchStoreList();
+          const stores = response.map((r) => ({
+            storeId: r.storeId,
+            name: r.name,
+          }));
+          const res = await fetchActiveStore();
+
+          setActiveStore(res.storeId);
+          setStoreList(stores);
+        } catch (error) {
+          console.error(error);
+        }
+      })();
+    }, []);
+
+    const changeActive = async (storeId) => {
+      try {
+        const response = changeActiveStore(storeId);
+        setActiveStore(response.storeId);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    return (
+      <div className="fixed bottom-[80px] right-[calc(50%-196.5px+24px)] flex flex-col items-end gap-3">
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.2 }}
+              className="flex flex-col gap-3"
+            >
+              {storeList.map((store) => (
+                <motion.div
+                  key={store.storeId}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`flex items-center justify-center size-[48px] rounded-full bg-white border shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] cursor-pointer ${
+                    store.storeId === activeStore
+                      ? "border-[#68e194]"
+                      : "border-black"
+                  }`}
+                  onClick={() => changeActive(store.storeId)}
+                >
+                  {store.name}
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <motion.div
+          whileHover={{ scale: 1.05, backgroundColor: "#fff" }}
+          whileTap={{ scale: 0.95 }}
+          className="flex items-center justify-center size-[48px] rounded-full bg-[#68e194] shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] cursor-pointer"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <StoreIcon className={isOpen ? "text-[#68e194]" : "text-white"} />
+        </motion.div>
+      </div>
+    );
+  };
 
   return (
     <div className="w-full flex flex-col py-7 px-5">
@@ -135,6 +214,7 @@ function OwnerHome() {
           <img src={character1} alt="character" className="size-[110px] mr-1" />
         </Box>
       </div>
+      <FloatButton />
     </div>
   );
 }
