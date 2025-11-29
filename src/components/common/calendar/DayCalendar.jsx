@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { fetchSchedules } from "../../../services/CalendarService.js";
+import { fetchSchedules } from "../../../services/common/ScheduleService.js";
 
 function DayCalendar({ date }) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
@@ -18,10 +18,10 @@ function DayCalendar({ date }) {
           date.format("YYYY-MM-DD"),
         );
         const uniqueWorkers = [
-          ...new Set(schedules.map((schedule) => schedule.userStoreId)),
+          ...new Set(schedules.map((schedule) => schedule.userName)),
         ];
         const formattedEvents = schedules.map((schedule) => ({
-          worker: schedule.userStoreId,
+          worker: schedule.userName,
           start: schedule.startDatetime,
           end: schedule.endDatetime,
         }));

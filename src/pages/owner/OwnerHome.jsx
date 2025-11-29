@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import character1 from "../../assets/images/character1.png";
 import Note from "../../components/common/Note.jsx";
 import ResourceCalendar from "../../components/common/calendar/ResourceCalendar.jsx";
-import { fetchSchedules } from "../../services/CalendarService.js";
+import { fetchSchedules } from "../../services/common/ScheduleService.js";
 import { fetchWage } from "../../services/owner/WageService.js";
 import {
   fetchActiveStore,

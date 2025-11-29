@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import "dayjs/locale/ko";
-import { fetchSchedules } from "../../../services/CalendarService";
+import { fetchSchedules } from "../../../services/common/ScheduleService.js";
 
 function WeekCalendar({ date }) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
@@ -27,10 +27,10 @@ function WeekCalendar({ date }) {
         startOfWeek.add(6, "day").format("YYYY-MM-DD"),
       );
       const uniqueWorkers = [
-        ...new Set(schedules.map((shedule) => schedules.userStoreId)),
+        ...new Set(schedules.map((schedule) => schedule.userName)),
       ];
       const formattedEvents = schedules.map((schedule) => ({
-        worker: schedule.userStoreId,
+        worker: schedule.userName,
         start: schedule.startDatetime,
         end: schedule.endDatetime,
       }));

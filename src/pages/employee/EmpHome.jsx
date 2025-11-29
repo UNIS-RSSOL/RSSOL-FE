@@ -7,35 +7,40 @@ import GreenBtn from "../../components/common/GreenBtn.jsx";
 import { useEffect, useState } from "react";
 import character2 from "../../assets/images/character2.png";
 import character3 from "../../assets/images/character3.png";
+import { fetchSchedules } from "../../services/common/ScheduleService.js";
+import { fetchWage } from "../../services/employee/WageService.js";
+import { fetchActiveStore } from "../../services/employee/MyPageService.js";
+import dayjs from "dayjs";
 
 function EmpHome() {
   const [currentTime, setCurrentTime] = useState("");
-  const today = new Date();
-  const firstDay =
-    today.getFullYear().toString().slice(-2) +
-    "." +
-    (today.getMonth() + 1) +
-    ".01";
+  const today = dayjs();
+  const firstDay = today.format("YYYY.MM.") + "01";
   const dat = ["일", "월", "화", "수", "목", "금", "토"];
+  const [wage, setWage] = useState(0);
+  const [todo, setTodo] = useState([]);
 
-  const formattedToday =
-    today.getFullYear() +
-    "." +
-    (today.getMonth() + 1) +
-    "." +
-    today.getDate() +
-    "(" +
-    dat[today.getDay()] +
-    ")";
-  const formattedToday2 =
-    today.getFullYear().toString().slice(-2) +
-    "." +
-    (today.getMonth() + 1) +
-    "." +
-    today.getDate();
+  const FormattedDate = (date, day) => {
+    const d = dat[today.format("d")];
+    return day
+      ? date.format("YYYY.MM.DD(") + d + ")"
+      : date.format("YYYY.MM.DD");
+  };
 
   useEffect(() => {
-    // Initialize time
+    (async () => {
+      try {
+        const active = await fetchActiveStore();
+        const wageRes = await fetchWage(
+          active.storeId,
+          today.format("YYYY-MM"),
+        );
+        setWage(wageRes.total_pay);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+
     const updateTime = () => {
       const now = new Date();
       const hours = now.getHours().toString().padStart(2, "0");
@@ -44,13 +49,8 @@ function EmpHome() {
       setCurrentTime(`${hours}:${minutes}`);
     };
 
-    // Update time immediately
     updateTime();
-
-    // Set up interval to update time every second for real-time display
     const intervalId = setInterval(updateTime, 1000);
-
-    // Clean up interval on component unmount
     return () => clearInterval(intervalId);
   }, []);
 
@@ -58,7 +58,7 @@ function EmpHome() {
     <div className="w-full flex flex-col py-7 px-5 ">
       <div className="w-full flex flex-col items-start">
         <div className="rounded-[30px] border py-[4px] px-[20px] bg-white border-[#32d1aa] shadow-[0_2px_4px_0_rbga(0,0,0,0.15)] text-[16px] font-[600] inline-block">
-          {formattedToday}
+          {FormattedDate(today, true)}
         </div>
         <div className="flex items-center mt-2">
           <p className="text-[24px] font-[600] my-1">홍길동님 오늘의 일정은?</p>
@@ -69,9 +69,9 @@ function EmpHome() {
         </p>
       </div>
       <div className="flex justify-center w-full">
-        <Note className="w-full mt-1 mb-5 max-w-[500px]" disabled={true}>
+        <Note className="w-full mt-1 mb-5 max-w-[500px]" hole={4}>
           <img src={character2} alt="character" className="size-[110px] mr-1" />
-          <div className="flex flex-col w-full gap-3">
+          <div className="flex flex-col w-full gap-3 my-2 mx-1 mr-3">
             <div className="flex flex-row w-full border-b border-[#87888c] pb-1 justify-between">
               <p className="text-[16px] font-[500]">알쏠 1호점</p>
               <p className="text-[16px] font-[400]">09:30-13:00</p>
@@ -103,7 +103,7 @@ function EmpHome() {
           <div className="flex flex-col items-center justify-center">
             <p className="text-[16px] font-[500]">서브웨이</p>
             <p className="text-[14px] font-[400] text-[#7a7676]">
-              {formattedToday2}
+              {FormattedDate(today)}
             </p>
           </div>
           <p className="text-[24px] font-[400]">{currentTime}</p>
@@ -124,9 +124,9 @@ function EmpHome() {
           <div className="flex flex-col items-start ">
             <p className="text-[16px] font-[500]">이번 달 누적 월급은?</p>
             <p className="text-[12px] font-[400] mb-5">
-              {firstDay}-{formattedToday2}
+              {firstDay}-{FormattedDate(today)}
             </p>
-            <p className="text-[24px] font-[400]">234,550원</p>
+            <p className="text-[24px] font-[400]">{wage}원</p>
           </div>
           <img src={character3} alt="character" className="size-[110px] mr-1" />
         </Box>
