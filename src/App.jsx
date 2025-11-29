@@ -6,6 +6,7 @@ import Footer from "./components/layout/footer/Footer.jsx";
 
 import Login from "./pages/auth/Login.jsx";
 import Onboarding from "./pages/auth/Onboarding.jsx";
+import KakaoCallback from "./pages/auth/KakaoCallback.jsx";
 
 import OwnerPage from "./pages/owner/mypage/OwnerPage.jsx";
 import ManageStore from "./pages/common/mypage/ManageStore.jsx";
@@ -32,6 +33,7 @@ function App() {
   const hideLayoutPaths = [
     "/login",
     "/onboarding",
+    "/auth/kakao/callback",
     "/calAdd",
     "/calGen",
     "/calAddEmp",
@@ -53,6 +55,7 @@ function App() {
           {/* 로그인/온보딩 */}
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
 
           <Route path="/owner" element={<OwnerHome />} />
           <Route path="/employee" element={<EmpHome />} />

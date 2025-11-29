@@ -45,7 +45,7 @@ export default function Onboarding() {
     }
 
     if (step < 2) setStep(step + 1);
-    else navigate(role === "owner" ? "/ownerpage" : "/employeepage");
+    else navigate(role === "owner" ? "/owner" : "/employee");
   };
 
   const handleBack = () => {

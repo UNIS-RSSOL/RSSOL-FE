@@ -52,6 +52,8 @@ export const goToKakaoLogin = () => {
  *   profileImageUrl?: string;
  *   provider: "kakao";
  *   providerId: string;
+ *   activeStoreId?: number;
+ *   role?: "owner" | "employee";
  * }>}
  */
 export const completeKakaoLogin = async (code) => {
