@@ -23,10 +23,9 @@ function OwnerHome() {
   let today = dayjs();
   const firstDay = today.format("YYYY.MM.") + "01";
   const dat = ["일", "월", "화", "수", "목", "금", "토"];
-  const [events, setEvents] = useState([]);
-  const [workers, setWorkers] = useState([]);
   const [wage, setWage] = useState(0);
-
+  const [workers, setWorkers] = useState([]);
+  const [events, setEvents] = useState([]);
   const FormattedDate = (date, day) => {
     const d = dat[today.format("d")];
     return day
@@ -37,17 +36,27 @@ function OwnerHome() {
   useEffect(() => {
     (async () => {
       try {
-        today = dayjs();
         const schedules = await fetchSchedules(
           today.format("YYYY-MM-DD"),
           today.format("YYYY-MM-DD"),
         );
         const formattedEvents = schedules.map((schedule) => ({
+          id: schedule.id,
+          workerId: schedule.userStoreId,
           worker: schedule.userName,
           start: schedule.startDatetime,
           end: schedule.endDatetime,
         }));
-        const worker = schedules.map((s) => s.userName);
+        const uniqueWorkers = [
+          ...new Set(
+            schedules.map((schedule) => ({
+              id: schedule.userStoreId,
+              name: schedule.userName,
+            })),
+          ),
+        ];
+        setWorkers(uniqueWorkers);
+        setEvents(formattedEvents);
 
         const activeStore = await fetchActiveStore();
         const fetchedWage = await fetchWage(
@@ -58,8 +67,6 @@ function OwnerHome() {
           return sum + payroll.total_pay;
         }, 0);
 
-        setEvents(formattedEvents);
-        setWorkers(worker);
         setWage(totalWage);
       } catch (error) {
         console.error(error);
@@ -91,9 +98,9 @@ function OwnerHome() {
             storeId: r.storeId,
             name: r.name,
           }));
-          const res = await fetchActiveStore();
+          const active = await fetchActiveStore();
 
-          setActiveStore(res.storeId);
+          setActiveStore(active.storeId);
           setStoreList(stores);
         } catch (error) {
           console.error(error);
@@ -101,7 +108,7 @@ function OwnerHome() {
       })();
     }, []);
 
-    const changeActive = async (storeId) => {
+    const handleChangeActive = async (storeId) => {
       try {
         const response = changeActiveStore(storeId);
         setActiveStore(response.storeId);
@@ -131,7 +138,7 @@ function OwnerHome() {
                       ? "border-[#68e194]"
                       : "border-black"
                   }`}
-                  onClick={() => changeActive(store.storeId)}
+                  onClick={() => handleChangeActive(store.storeId)}
                 >
                   {store.name}
                 </motion.div>
@@ -168,7 +175,6 @@ function OwnerHome() {
       <div className="flex justify-center w-full">
         <Note
           className="w-full my-5 max-w-[500px] overflow-x-hidden"
-          disabled={true}
           hole={workers.length}
         >
           <ResourceCalendar e={events} w={workers} />
