@@ -24,6 +24,8 @@ import {
   addWorkshift,
   requestWork,
   deleteWorkshift,
+  fetchAllWorkers,
+  requestSub,
 } from "../../../services/owner/ScheduleService.js";
 import { fetchActiveStore } from "../../../services/owner/MyPageService.js";
 import { info } from "autoprefixer";
@@ -52,6 +54,8 @@ function OwnerCalendar() {
   //추가근무요청완료모달
   const [isMsgOpen2, setIsMsgOpen2] = useState(false);
   //근무일정수정-이벤트블록 선택시 나타나는 토스트
+  const [isEventToastOpen, setIsEventToastOpen] = useState(false);
+  //대타요청하기
   const [isSubToastOpen, setIsSubToastOpen] = useState(false);
   //추가근무요청
   const [addShiftToastOpen, setAddShiftToastOpen] = useState(false);
@@ -64,6 +68,7 @@ function OwnerCalendar() {
   const [activeStore, setActiveStore] = useState("");
   const [newTime, setNewTime] = useState({
     userStoreId: "",
+    workerName: "",
     date: "",
     start: "",
     end: "",
@@ -97,26 +102,13 @@ function OwnerCalendar() {
     setSelectedCalendarEvent(e);
     console.log(e);
     setEventData({
+      id: e.id,
+      workerId: e.workerId,
       worker: e.worker,
       start: dayjs(e.start),
       end: dayjs(e.end),
     });
-    setIsSubToastOpen(true);
-  };
-
-  //추가 근무 요청
-  const handleRequestWork = (shiftId) => {
-    (async () => {
-      try {
-        // await requestWork(shiftId, needWorkers, "");
-
-        setAddShiftToastOpen(false);
-        setIsMsgOpen2(true);
-        setNeedWorkers(1);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
+    setIsEventToastOpen(true);
   };
 
   const MessageModal = ({ isOpen, message, onClose, duration = 1000 }) => {
@@ -192,10 +184,17 @@ function OwnerCalendar() {
   const WorkersDropDown = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [workers, setWorkers] = useState([
-      { userName: "지민", userStoreId: 1 },
-      { userName: "채은", userStoreId: 2 },
-      { userName: "수진", userStoreId: 3 },
+      { name: "지민", id: 1 },
+      { name: "채은", id: 2 },
+      { name: "수진", id: 3 },
     ]);
+
+    useEffect(() => {
+      (async () => {
+        const response = await fetchAllWorkers();
+        // setWorkers(response);
+      })();
+    }, []);
 
     return (
       <div className="relative">
@@ -203,33 +202,24 @@ function OwnerCalendar() {
           className={`flex w-[70px] h-[30px] items-center justify-center border-[#87888C] py-[2px] bg-white gap-1 cursor-pointer ${dropdownOpen ? "border border-b-[#87888c] rounded-t-[7px]" : "border rounded-[7px]"}`}
           onClick={() => setDropdownOpen(!dropdownOpen)}
         >
-          <span className="text-[12px] font-[400]">
-            {newTime.userStoreId &&
-              workers.find(
-                (w) => String(w.userStoreId) === String(newTime.userStoreId),
-              ) &&
-              workers.find(
-                (w) => String(w.userStoreId) === String(newTime.userStoreId),
-              ).userName}
-          </span>
+          <span className="text-[12px] font-[400]">{newTime.workerName}</span>
         </div>
         {dropdownOpen && (
           <div className="absolute left-0 mt-0 rounded-b-[12px] border-x-1 border-b-1 overflow-hidden">
             {workers.map((worker) => (
               <div
-                key={worker.userStoreId}
+                key={worker.id}
                 className="flex items-center justify-center w-[70px] py-[2px] bg-white gap-1 cursor-pointer"
                 onClick={() => {
                   setNewTime((prev) => ({
                     ...prev,
-                    userStoreId: worker.userStoreId,
+                    userStoreId: worker.id,
+                    workerName: worker.name,
                   }));
                   setDropdownOpen(false);
                 }}
               >
-                <span className="text-[12px] font-[400]">
-                  {worker.userName}
-                </span>
+                <span className="text-[12px] font-[400]">{worker.name}</span>
               </div>
             ))}
           </div>
@@ -305,6 +295,24 @@ function OwnerCalendar() {
     );
   };
 
+  //대타요청하기
+  // const handleRequestSub=()
+
+  //추가 근무 요청
+  const handleRequestWork = () => {
+    (async () => {
+      try {
+        // await requestWork(eventData.id, needWorkers);
+
+        setAddShiftToastOpen(false);
+        setIsMsgOpen2(true);
+        setNeedWorkers(1);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+  };
+
   //근무블록추가
   const handleAddWorkshift = async () => {
     try {
@@ -315,9 +323,7 @@ function OwnerCalendar() {
           "T" +
           newTime.start.format("HH:mm"),
         end:
-          newTime.end.format("YYYY-MM-DD") +
-          "T" +
-          newTime.end.format("HH:mm:ss"),
+          newTime.end.format("YYYY-MM-DD") + "T" + newTime.end.format("HH:mm"),
       };
       console.log(data);
       // await addWorkshift(data.userStoreId, data.start, data.end);
@@ -337,7 +343,8 @@ function OwnerCalendar() {
   //근무블록삭제
   const handleDeleteWorkshift = async () => {
     try {
-      // await deleteWorkshift(workShiftId);
+      console.log(eventData.id);
+      // await deleteWorkshift(eventData.id);
       setIsDeleteShift(false);
       setIsMsgOpen3(true);
     } catch (error) {
@@ -358,6 +365,7 @@ function OwnerCalendar() {
       <div>
         <style>{globalStyles}</style>
         {selectedKey === "1" ? <Day /> : <Week />}
+        {/*근무일정추가모달*/}
         {isModalOpen && (
           <Modal onClose={() => setIsModalOpen(false)}>
             <div className="flex flex-col w-full items-center justify-center my-2 gap-3">
@@ -381,7 +389,7 @@ function OwnerCalendar() {
                     suffixIcon={
                       <CalIcon className="size-[15px]" color="#87888c" />
                     }
-                    onChange={(e) => setNewTime({ ...newTime, date: e })}
+                    onChange={(e) => setNewTime({ ...newTime, date: dayjs(e) })}
                   />
                 </div>
                 <div className="flex flex-row w-[285px] items-center gap-1">
@@ -418,7 +426,9 @@ function OwnerCalendar() {
                       return false;
                     }}
                     needConfirm={false}
-                    onChange={(e) => setNewTime({ ...newTime, start: e })}
+                    onChange={(e) =>
+                      setNewTime({ ...newTime, start: dayjs(e) })
+                    }
                   />
                   <p>-</p>
                   <TimePicker
@@ -451,7 +461,7 @@ function OwnerCalendar() {
                       return false;
                     }}
                     needConfirm={false}
-                    onChange={(e) => setNewTime({ ...newTime, end: e })}
+                    onChange={(e) => setNewTime({ ...newTime, end: dayjs(e) })}
                   />
                   <p className="w-[40px] flex-shrink-0 text-[14px] font-[500] text-right gap-1">
                     근무자
@@ -470,10 +480,10 @@ function OwnerCalendar() {
         )}
 
         {/* 이벤트클릭시 나타나는 토스트 */}
-        {isSubToastOpen && (
+        {isEventToastOpen && (
           <Toast
-            isOpen={isSubToastOpen}
-            onClose={() => setIsSubToastOpen(false)}
+            isOpen={isEventToastOpen}
+            onClose={() => setIsEventToastOpen(false)}
           >
             <div className="flex flex-col gap-2">
               <div className="flex flex-row items-center justify-center">
@@ -483,14 +493,20 @@ function OwnerCalendar() {
                   {eventData.end.format("HH:mm")}
                 </p>
               </div>
-              <GreenBtn className="text-[16px] font-[600] py-6 items-center relative">
+              <GreenBtn
+                className="text-[16px] font-[600] py-6 items-center relative"
+                onClick={() => {
+                  setIsEventToastOpen(false);
+                  setIsSubToastOpen(true);
+                }}
+              >
                 <RequestSubIcon className="absolute left-4" />
                 <span className="w-full text-center">대타 요청하기</span>
               </GreenBtn>
               <GreenBtn
                 className="text-[16px] font-[600] py-6 items-center relative"
                 onClick={() => {
-                  setIsSubToastOpen(false);
+                  setIsEventToastOpen(false);
                   setAddShiftToastOpen(true);
                 }}
               >
@@ -500,7 +516,7 @@ function OwnerCalendar() {
               <GreenBtn
                 className="text-[16px] font-[600] py-6 items-center relative"
                 onClick={() => {
-                  setIsSubToastOpen(false);
+                  setIsEventToastOpen(false);
                   setIsDeleteShift(true);
                 }}
               >
@@ -510,6 +526,40 @@ function OwnerCalendar() {
             </div>
           </Toast>
         )}
+        {/*대타요청하기*/}
+        {isSubToastOpen && (
+          <Toast
+            isOpen={isSubToastOpen}
+            onClose={() => setIsSubToastOpen(false)}
+          >
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col justify-center items-center gap-2">
+                <p className="text-[16px] font-[600]">대타 요청하기</p>
+                <p className="text-[12px] font-[400]">
+                  선택한 일정으로 대타를 요청할까요?
+                </p>
+              </div>
+              <div className="flex flex-row items-center justify-center w-full gap-5">
+                <p className="flex-shrink-0 h-[25px] border border-[#32d1aa] text-[12px] font-[400] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] flex items-center justify-center px-2">
+                  {activeStore}
+                </p>
+                <span className="text-[14px] font-[500]">
+                  {eventData.start.format("dd(DD) HH:mm-")}
+                  {eventData.end.format("HH:mm")}
+                </span>
+              </div>
+              <GreenBtn
+                className="text-[16px] font-[600] py-6 items-center relative"
+                onClick={() => {
+                  handleRequestWork();
+                }}
+              >
+                요청하기
+              </GreenBtn>
+            </div>
+          </Toast>
+        )}
+
         {/* 추가 근무 요청 */}
         {addShiftToastOpen && (
           <Toast
@@ -520,7 +570,7 @@ function OwnerCalendar() {
               <div className="flex flex-col justify-center items-center gap-2">
                 <p className="text-[16px] font-[600]">추가 근무 요청하기</p>
                 <p className="text-[12px] font-[400]">
-                  선택한 일정에 각 N,N명으로 추가 근무를 요청할까요?
+                  선택한 일정에 {needWorkers}명으로 추가 근무를 요청할까요?
                 </p>
               </div>
               <div className="flex flex-row items-center justify-between w-full">

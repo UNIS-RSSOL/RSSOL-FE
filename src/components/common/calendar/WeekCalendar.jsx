@@ -7,8 +7,26 @@ function WeekCalendar({ date }) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
   const [week, setWeek] = useState([]);
   const days = ["일", "월", "화", "수", "목", "금", "토"];
-  const [workers, setWorkers] = useState([]);
-  const [events, setEvents] = useState(null);
+  const [workers, setWorkers] = useState([
+    { id: 1, name: "지민" },
+    { id: 2, name: "수진" },
+  ]);
+  const [events, setEvents] = useState([
+    {
+      id: 1,
+      workerId: 1,
+      workerName: "지민",
+      start: "2025-11-30T15:00",
+      end: "2025-11-30T18:00",
+    },
+    {
+      id: 2,
+      workerId: 2,
+      workerName: "수진",
+      start: "2025-12-01T13:00",
+      end: "2025-12-01T18:00",
+    },
+  ]);
   const colors = ["#68e194", "#32d1aa", "#00c1bd"];
 
   useEffect(() => {
@@ -27,22 +45,29 @@ function WeekCalendar({ date }) {
         startOfWeek.add(6, "day").format("YYYY-MM-DD"),
       );
       const uniqueWorkers = [
-        ...new Set(schedules.map((schedule) => schedule.userName)),
+        ...new Set(
+          schedules.map((schedule) => ({
+            id: schedule.userStoreId,
+            name: schedule.userName,
+          })),
+        ),
       ];
       const formattedEvents = schedules.map((schedule) => ({
+        id: schedule.id,
+        workerId: schedule.userStoreId,
         worker: schedule.userName,
         start: schedule.startDatetime,
         end: schedule.endDatetime,
       }));
 
-      setWorkers(uniqueWorkers);
-      setEvents(formattedEvents);
+      // setWorkers(uniqueWorkers);
+      // setEvents(formattedEvents);
     })();
   }, [date]);
 
-  const getEventForCell = (worker, day) => {
+  const getEventForCell = (workerId, day) => {
     return events.find((event) => {
-      if (event.worker !== worker) return false;
+      if (event.workerId !== workerId) return false;
       const date = dayjs(event.start).format("DD");
       return day === date;
     });
@@ -74,30 +99,29 @@ function WeekCalendar({ date }) {
       </div>
       <div className="flex flex-shrink-0 flex-row w-full h-[35px] border-t border-[#e7eaf3]">
         <div className="flex-shrink-0 w-[52px] h-full" />
-        {week.map((day) => (
+        {week.map((w) => (
           <div
-            key={day}
+            key={w}
             className="flex-shrink-0 flex w-[44px] h-full items-center justify-center border-l border-[#e7eaf3]"
           >
-            {day}
+            {w}
           </div>
         ))}
       </div>
       {workers.map((worker) => (
         <div
-          key={worker}
+          key={worker.id}
           className="flex flex-shrink-0 flex-row w-full h-[60px] border-t border-[#e7eaf3]"
         >
           <div className="flex flex-shrink-0 w-[52px] h-full items-center justify-center">
-            {worker}
+            {worker.name}
           </div>
           {week.map((w) => {
-            const event = getEventForCell(worker, w);
-            const eventKey = event ? `${event.worker}-${event.start}` : null;
+            const event = getEventForCell(worker.id, w);
 
             return event ? (
               <div
-                key={`${worker}-${w}`}
+                key={`${worker.id}-${w}`}
                 className="flex flex-col flex-shrink-0 w-[44px] h-full items-center justify-center border-l border-[#e7eaf3]"
                 style={{
                   backgroundColor:
@@ -114,7 +138,7 @@ function WeekCalendar({ date }) {
               </div>
             ) : (
               <div
-                key={`${worker}-${w}`}
+                key={`${worker.id}-${w}`}
                 className="flex flex-shrink-0 w-[44px] h-full items-center justify-center border-l border-[#e7eaf3]"
               ></div>
             );
