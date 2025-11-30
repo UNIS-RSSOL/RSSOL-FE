@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
-import { fetchSchedules } from "../../../services/common/ScheduleService";
 
 function ResourceCalendar({ e, w }) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
@@ -9,13 +8,21 @@ function ResourceCalendar({ e, w }) {
   const colors = ["#68e194", "#32d1aa", "#00c1bd"];
 
   useEffect(() => {
-    setWorkers(w);
-    setEvents(e);
-  }, []);
+    (async () => {
+      try {
+        setWorkers(w);
+        setEvents(e);
+        console.log(w);
+        console.log(e);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+  }, [e, w]);
 
-  const getEventForCell = (worker, hour) => {
+  const getEventForCell = (workerId, hour) => {
     return events.find((event) => {
-      if (event.worker !== worker) return false;
+      if (event.workerId !== workerId) return false;
       const startHour = dayjs(event.start).hour();
       let endHour = dayjs(event.end).hour();
       if (endHour === 0) endHour = 24;
@@ -46,10 +53,10 @@ function ResourceCalendar({ e, w }) {
         <div className="h-[35px]" />
         {workers.map((worker) => (
           <div
-            key={worker}
+            key={worker.id}
             className="h-[35px] flex items-center justify-center border-t border-[#e7eaf3]"
           >
-            {worker}
+            {worker.name}
           </div>
         ))}
       </div>
@@ -65,9 +72,9 @@ function ResourceCalendar({ e, w }) {
           ))}
         </div>
         {workers.map((worker) => (
-          <div key={worker} className="flex flex-shrink-0 flex-row h-[35px]">
+          <div key={worker.id} className="flex flex-shrink-0 flex-row h-[35px]">
             {hours.map((hour) => {
-              const event = getEventForCell(worker, hour);
+              const event = getEventForCell(worker.id, hour);
               const isMiddleHour = (() => {
                 if (!event) return false;
                 const startHour = dayjs(event.start).hour();
@@ -78,7 +85,7 @@ function ResourceCalendar({ e, w }) {
               })();
               return event ? (
                 <div
-                  key={`${worker}-${hour}`}
+                  key={`${worker.id}-${hour}`}
                   className="flex flex-shrink-0 h-full w-[40px] border-r border-t border-[#e7eaf3]"
                   style={{ backgroundColor: getEventColor(event) }}
                 >
@@ -88,7 +95,7 @@ function ResourceCalendar({ e, w }) {
                 </div>
               ) : (
                 <div
-                  key={`${worker}-${hour}`}
+                  key={`${worker.id}-${hour}`}
                   className="flex flex-shrink-0 h-full w-[40px] border-r border-t border-[#e7eaf3]"
                 ></div>
               );
