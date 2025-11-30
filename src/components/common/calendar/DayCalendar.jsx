@@ -10,14 +10,22 @@ function DayCalendar({
 }) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
   const [blank, setBlank] = useState(Array.from({ length: 7 }, () => "."));
-  const [workers, setWorkers] = useState(["수진", "지유", "채은"]);
+  const [workers, setWorkers] = useState([
+    { id: "1", name: "수진" },
+    { id: "2", name: "채은" },
+    { id: "3", name: "지유" },
+  ]);
   const [events, setEvents] = useState([
     {
+      id: "1",
+      workerId: "1",
       worker: "수진",
       start: "2025-11-29T13:00",
       end: "2025-11-29T18:00",
     },
     {
+      id: "2",
+      workerId: "2",
       worker: "채은",
       start: "2025-11-29T13:00",
       end: "2025-11-29T18:00",
@@ -33,9 +41,16 @@ function DayCalendar({
           date.format("YYYY-MM-DD"),
         );
         const uniqueWorkers = [
-          ...new Set(schedules.map((schedule) => schedule.userName)),
+          ...new Set(
+            schedules.map((schedule) => ({
+              id: schedule.userStoreId,
+              name: schedule.userName,
+            })),
+          ),
         ];
         const formattedEvents = schedules.map((schedule) => ({
+          id: schedule.id,
+          workerId: schedule.userStoreId,
           worker: schedule.userName,
           start: schedule.startDatetime,
           end: schedule.endDatetime,
@@ -56,10 +71,6 @@ function DayCalendar({
     })();
   }, [date]);
 
-  const passData = (data) => {
-    onEventClick(data);
-  };
-
   const isFirstHour = (event, hour) => {
     if (!event) return false;
     const startHour = dayjs(event.start).hour();
@@ -73,9 +84,9 @@ function DayCalendar({
     return hour === endHour - 1;
   };
 
-  const getEventForCell = (worker, hour) => {
+  const getEventForCell = (workerId, hour) => {
     return events.find((event) => {
-      if (event.worker !== worker) return false;
+      if (event.workerId !== workerId) return false;
       const startHour = dayjs(event.start).hour();
       let endHour = dayjs(event.end).hour();
       if (endHour === 0) endHour = 24;
@@ -114,17 +125,19 @@ function DayCalendar({
       </div>
       {workers.map((worker) => (
         <div
-          key={worker}
+          key={worker.id}
           className="flex flex-shrink-0 flex-col w-[42px] border-l border-[#e7eaf3]"
         >
           <div className="flex flex-shrink-0 h-[30px]" />
 
           {hours.map((hour) => {
-            const event = getEventForCell(worker, hour);
+            const event = getEventForCell(worker.id, hour);
             const isSelected =
               selectedEventProp &&
-              selectedEventProp.worker === worker &&
-              selectedEventProp.start === event?.start;
+              selectedEventProp.id === event?.id &&
+              selectedEventProp.workerId === worker.id &&
+              selectedEventProp.start === event?.start &&
+              selectedEventProp.end === event?.end;
             const firstHour = isFirstHour(event, hour);
             const lastHour = isLastHour(event, hour);
             const isMiddleHour = (() => {
@@ -138,9 +151,9 @@ function DayCalendar({
 
             return event ? (
               <div
-                key={`${worker}-${hour}`}
+                key={`${worker.id}-${hour}`}
                 className={`flex h-[35px] items-center justify-center border-t border-[#e7eaf3] cursor-pointer 
-                  ${isSelected ? "border-x-2 border-x-black bg-black" : ""}
+                  ${isSelected ? "border-x-2 border-x-black" : ""}
                   ${isSelected && firstHour ? "border-t-2 border-t-black" : ""}
                   ${isSelected && lastHour ? "border-b-2 border-b-black" : ""}`}
                 style={{
@@ -150,23 +163,25 @@ function DayCalendar({
                 onClick={(e) => {
                   e.stopPropagation();
                   const clickedEvent = {
+                    id: event.id,
+                    workerId: event.workerId,
                     worker: event.worker,
                     start: event.start,
                     end: event.end,
                   };
                   setSelectedEventProp(clickedEvent);
-                  passData(clickedEvent);
+                  onEventClick(clickedEvent);
                 }}
               >
                 {isMiddleHour ? (
                   <span className="text-black text-[12px] font-[400]">
-                    {worker}
+                    {worker.name}
                   </span>
                 ) : null}
               </div>
             ) : (
               <div
-                key={`${worker}-${hour}`}
+                key={`${worker.id}-${hour}`}
                 className="flex h-[35px] border-t border-[#e7eaf3] bg-white"
               />
             );

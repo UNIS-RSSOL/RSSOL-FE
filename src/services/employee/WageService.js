@@ -1,6 +1,7 @@
 import api from "../api";
 
-export async function fetchWage(storeId, month, userStoreId) {
+//급여조회
+export async function fetchWage(storeId, userStoreId, month) {
   try {
     const response = api.get("/api/payrolls/preview/monthly", {
       params: {
@@ -9,7 +10,7 @@ export async function fetchWage(storeId, month, userStoreId) {
         month: month,
       },
     });
-    return response.return;
+    return response.data;
   } catch (error) {
     console.error(error);
   }
