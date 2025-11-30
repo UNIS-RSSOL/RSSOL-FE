@@ -82,7 +82,7 @@ export default function CalAdd() {
   };
 
   // -------------------------
-  // 🔥 FullCalendar DOM 업데이트 (날짜 배경 반영)
+  // FullCalendar DOM 업데이트 (날짜 배경 반영)
   // -------------------------
   // visibleMonth가 변경되어도 selectedDates는 유지되도록 의존성에 추가
   useEffect(() => {
