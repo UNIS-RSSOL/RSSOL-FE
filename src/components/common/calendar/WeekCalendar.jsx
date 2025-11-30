@@ -39,9 +39,7 @@ function WeekCalendar({
       let startOfWeek = dayjs(date).locale("ko").startOf("week");
       const weekArray = [];
       weekArray.push(
-        ...Array.from({ length: 7 }, (_, i) =>
-          startOfWeek.add(i, "day").format("DD"),
-        ),
+        ...Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, "day")),
       );
       setWeek(weekArray);
 
@@ -73,7 +71,7 @@ function WeekCalendar({
   const getEventForCell = (workerId, day) => {
     return events.find((event) => {
       if (event.workerId !== workerId) return false;
-      const date = dayjs(event.start).format("DD");
+      const date = dayjs(event.start).format("YYYY-MM-DD");
       return day === date;
     });
   };
@@ -106,10 +104,10 @@ function WeekCalendar({
         <div className="flex-shrink-0 w-[52px] h-full" />
         {week.map((w) => (
           <div
-            key={w}
+            key={w.format("DD")}
             className="flex-shrink-0 flex w-[44px] h-full items-center justify-center border-l border-[#e7eaf3]"
           >
-            {w}
+            {w.format("DD")}
           </div>
         ))}
       </div>
@@ -122,7 +120,7 @@ function WeekCalendar({
             {worker.name}
           </div>
           {week.map((w) => {
-            const event = getEventForCell(worker.id, w);
+            const event = getEventForCell(worker.id, w.format("YYYY-MM-DD"));
             const isSelected =
               selectedEventProp &&
               selectedEventProp.id === event?.id &&
@@ -132,7 +130,7 @@ function WeekCalendar({
 
             return event ? (
               <div
-                key={`${worker.id}-${w}`}
+                key={`${worker.id}-${w.format("DD")}`}
                 className={`flex flex-col flex-shrink-0 w-[44px] h-full items-center justify-center border-l border-[#e7eaf3] cursor-pointer
                   ${isSelected ? "border-2 border-black" : ""}`}
                 style={{
@@ -163,7 +161,7 @@ function WeekCalendar({
               </div>
             ) : (
               <div
-                key={`${worker.id}-${w}`}
+                key={`${worker.id}-${w.format("DD")}`}
                 className="flex flex-shrink-0 w-[44px] h-full items-center justify-center border-l border-[#e7eaf3]"
               ></div>
             );
