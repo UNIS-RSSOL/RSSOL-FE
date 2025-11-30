@@ -1,18 +1,34 @@
 import DayCalendar from "../../../components/common/calendar/DayCalendar.jsx";
 import WeekCalendar from "../../../components/common/calendar/WeekCalendar.jsx";
 import PencilIcon from "../../../assets/icons/PencilIcon.jsx";
+import WhiteBtn from "../../../components/common/WhiteBtn.jsx";
 import GreenBtn from "../../../components/common/GreenBtn.jsx";
 import Modal from "../../../components/common/Modal.jsx";
+import Toast from "../../../components/common/Toast.jsx";
+import { CalIcon } from "../../../assets/icons/CalIcon.jsx";
+import RequestSubIcon from "../../../assets/icons/RequestSubIcon.jsx";
+import RequestWorkIcon from "../../../assets/icons/RequestWorkIcon.jsx";
+import TrashIcon from "../../../assets/icons/TrashIcon.jsx";
+import AddIcon from "../../../assets/icons/AddIcon.jsx";
+import DeleteIcon from "../../../assets/icons/DeleteIcon.jsx";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
+import "dayjs/locale/ko";
 import {
   LeftOutlined,
   RightOutlined,
   CaretDownFilled,
 } from "@ant-design/icons";
-import { TimePicker, ConfigProvider, Input } from "antd";
+import { TimePicker, ConfigProvider, DatePicker } from "antd";
+import {
+  addWorkshift,
+  requestWork,
+  deleteWorkshift,
+} from "../../../services/owner/ScheduleService.js";
+import { fetchActiveStore } from "../../../services/owner/MyPageService.js";
+import { info } from "autoprefixer";
+dayjs.locale("ko");
 
-// Add global style for TimePicker dropdown
 const globalStyles = `
   .ant-picker-dropdown {
     z-index: 10000 !important;
@@ -21,7 +37,6 @@ const globalStyles = `
 
 function OwnerCalendar() {
   const [selectedKey, setSelectedKey] = useState("1");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const today = dayjs();
   const [currentDate, setCurrentDate] = useState(today);
   const [formattedCurrentDate, setFormattedCurrentDate] = useState(
@@ -30,10 +45,40 @@ function OwnerCalendar() {
   const [formattedCurrentWeek, setFormattedCurrentWeek] = useState(
     `${today.format("YY")}.${today.format("MM")} ${Math.ceil(today.date() / 7)}주차`,
   );
+  //근무일정추가모달
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newTime, setNewTime] = useState({ day: "", start: "", end: "" });
-  const week = ["월", "화", "수", "목", "금", "토", "일"];
-  const [weekDropOpen, setWeekDropOpen] = useState(false);
+  //근무일정추가완료모달
+  const [isMsgOpen, setIsMsgOpen] = useState(false);
+  //추가근무요청완료모달
+  const [isMsgOpen2, setIsMsgOpen2] = useState(false);
+  //근무일정수정-이벤트블록 선택시 나타나는 토스트
+  const [isSubToastOpen, setIsSubToastOpen] = useState(false);
+  //추가근무요청
+  const [addShiftToastOpen, setAddShiftToastOpen] = useState(false);
+  //근무일정삭제
+  const [isDeleteShift, setIsDeleteShift] = useState(false);
+  const [isMsgOpen3, setIsMsgOpen3] = useState(false);
+  const [eventData, setEventData] = useState();
+  const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
+  const [needWorkers, setNeedWorkers] = useState(1);
+  const [activeStore, setActiveStore] = useState("");
+  const [newTime, setNewTime] = useState({
+    userStoreId: "",
+    date: "",
+    start: "",
+    end: "",
+  });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await fetchActiveStore();
+        setActiveStore(response.name);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     setFormattedCurrentDate(
@@ -47,6 +92,51 @@ function OwnerCalendar() {
       `${currentDate.format("YY")}.${currentDate.format("MM")} ${Math.ceil(currentDate.date() / 7)}주차`,
     );
   }, [currentDate]);
+
+  const handleEventClick = (e) => {
+    setSelectedCalendarEvent(e);
+    console.log(e);
+    setEventData({
+      worker: e.worker,
+      start: dayjs(e.start),
+      end: dayjs(e.end),
+    });
+    setIsSubToastOpen(true);
+  };
+
+  //추가 근무 요청
+  const handleRequestWork = (shiftId) => {
+    (async () => {
+      try {
+        // await requestWork(shiftId, needWorkers, "");
+
+        setAddShiftToastOpen(false);
+        setIsMsgOpen2(true);
+        setNeedWorkers(1);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+  };
+
+  const MessageModal = ({ isOpen, message, onClose, duration = 1000 }) => {
+    useEffect(() => {
+      if (isOpen && duration) {
+        const timer = setTimeout(() => {
+          onClose?.();
+        }, duration);
+        return () => clearTimeout(timer);
+      }
+    }, [isOpen, duration, onClose]);
+
+    if (!isOpen) return null;
+
+    return (
+      <Modal xx={false}>
+        <p className="py-5">{message}</p>
+      </Modal>
+    );
+  };
 
   const items = [
     {
@@ -70,6 +160,7 @@ function OwnerCalendar() {
   ];
 
   const DropDown = () => {
+    const [dropdownOpen, setDropdownOpen] = useState(false);
     return (
       <div className="relative">
         <div
@@ -98,36 +189,47 @@ function OwnerCalendar() {
     );
   };
 
-  const WeekDropDown = () => {
-    const [selectedDay, setSelectedDay] = useState(week[0]);
-    useEffect(() => {
-      if (newTime.day) {
-        setSelectedDay(newTime.day);
-      }
-    }, [newTime.day]);
+  const WorkersDropDown = () => {
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [workers, setWorkers] = useState([
+      { userName: "지민", userStoreId: 1 },
+      { userName: "채은", userStoreId: 2 },
+      { userName: "수진", userStoreId: 3 },
+    ]);
+
     return (
       <div className="relative">
         <div
-          className={`flex w-[57px] h-[30px] items-center justify-center py-[2px] bg-white gap-1 cursor-pointer ${weekDropOpen ? "border border-b-[#87888c] rounded-t-[10px]" : "border rounded-[10px]"}`}
-          onClick={() => setWeekDropOpen(!weekDropOpen)}
+          className={`flex w-[70px] h-[30px] items-center justify-center border-[#87888C] py-[2px] bg-white gap-1 cursor-pointer ${dropdownOpen ? "border border-b-[#87888c] rounded-t-[7px]" : "border rounded-[7px]"}`}
+          onClick={() => setDropdownOpen(!dropdownOpen)}
         >
-          <span className="text-[14px] font-[400]">{selectedDay}</span>
-          <CaretDownFilled />
+          <span className="text-[12px] font-[400]">
+            {newTime.userStoreId &&
+              workers.find(
+                (w) => String(w.userStoreId) === String(newTime.userStoreId),
+              ) &&
+              workers.find(
+                (w) => String(w.userStoreId) === String(newTime.userStoreId),
+              ).userName}
+          </span>
         </div>
-        {weekDropOpen && (
-          <div className="absolute left-0 mt-0 rounded-b-[10px] border-x-1 border-b-1 overflow-hidden">
-            {week.map((day) => (
+        {dropdownOpen && (
+          <div className="absolute left-0 mt-0 rounded-b-[12px] border-x-1 border-b-1 overflow-hidden">
+            {workers.map((worker) => (
               <div
-                key={day}
-                className="flex items-center justify-center w-[57px] py-[2px] bg-white gap-1 cursor-pointer"
+                key={worker.userStoreId}
+                className="flex items-center justify-center w-[70px] py-[2px] bg-white gap-1 cursor-pointer"
                 onClick={() => {
-                  setSelectedDay(day);
-                  setNewTime({ ...newTime, day: day });
-                  setWeekDropOpen(false);
-                  console.log(day);
+                  setNewTime((prev) => ({
+                    ...prev,
+                    userStoreId: worker.userStoreId,
+                  }));
+                  setDropdownOpen(false);
                 }}
               >
-                <span className="text-[12px] font-[400]">{day}</span>
+                <span className="text-[12px] font-[400]">
+                  {worker.userName}
+                </span>
               </div>
             ))}
           </div>
@@ -160,7 +262,12 @@ function OwnerCalendar() {
           </div>
           <DropDown />
         </div>
-        <DayCalendar date={currentDate} />
+        <DayCalendar
+          date={currentDate}
+          onEventClick={handleEventClick}
+          selectedEventProp={selectedCalendarEvent}
+          setSelectedEventProp={setSelectedCalendarEvent}
+        />
       </div>
     );
   };
@@ -198,6 +305,46 @@ function OwnerCalendar() {
     );
   };
 
+  //근무블록추가
+  const handleAddWorkshift = async () => {
+    try {
+      const data = {
+        userStoreId: newTime.userStoreId,
+        start:
+          newTime.date.format("YYYY-MM-DD") +
+          "T" +
+          newTime.start.format("HH:mm"),
+        end:
+          newTime.end.format("YYYY-MM-DD") +
+          "T" +
+          newTime.end.format("HH:mm:ss"),
+      };
+      console.log(data);
+      // await addWorkshift(data.userStoreId, data.start, data.end);
+      setNewTime({
+        userStoreId: "",
+        date: "",
+        start: "",
+        end: "",
+      });
+      setIsModalOpen(false);
+      setIsMsgOpen(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  //근무블록삭제
+  const handleDeleteWorkshift = async () => {
+    try {
+      // await deleteWorkshift(workShiftId);
+      setIsDeleteShift(false);
+      setIsMsgOpen3(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <ConfigProvider
       theme={{
@@ -221,48 +368,246 @@ function OwnerCalendar() {
                 </p>
               </div>
               <div className="flex flex-col w-full gap-2">
-                <div className="flex flex-row w-full items-center gap-1">
-                  <p className="w-[40px] items-center text-[14px] font-[500] text-right">
-                    요일
+                <div className="flex flex-row w-[285px] items-center gap-1">
+                  <p className="flex-shrink-0 w-[30px] items-center text-[14px] font-[500] text-right">
+                    날짜
                   </p>
-                  <WeekDropDown />
-                  <p className="text-[14px] font-[500] ml-2">시간</p>
+                  <DatePicker
+                    className="w-full"
+                    style={{ borderColor: "#87888C" }}
+                    disabledDate={(current) => {
+                      return current && current < dayjs().startOf("day");
+                    }}
+                    suffixIcon={
+                      <CalIcon className="size-[15px]" color="#87888c" />
+                    }
+                    onChange={(e) => setNewTime({ ...newTime, date: e })}
+                  />
+                </div>
+                <div className="flex flex-row w-[285px] items-center gap-1">
+                  <p className="w-[30px] items-center text-[14px] font-[500] text-right">
+                    시간
+                  </p>
                   <TimePicker
                     className="w-[61px] h-[30px]"
-                    style={{ borderColor: "#26272a" }}
+                    style={{ borderColor: "#87888C" }}
                     format="HH:mm"
                     minuteStep="5"
-                    value={newTime.start}
                     placeholder=""
                     suffixIcon=""
+                    disabledTime={(current) => {
+                      if (!current) {
+                        return false;
+                      }
+                      const now = dayjs();
+                      if (current.isSame(now, "day")) {
+                        return {
+                          disabledHours: () =>
+                            Array.from({ length: now.hour() }, (_, i) => i),
+                          disabledMinutes: (selectedHour) => {
+                            if (selectedHour === now.hour()) {
+                              return Array.from(
+                                { length: now.minute() },
+                                (_, i) => i,
+                              );
+                            }
+                            return [];
+                          },
+                        };
+                      }
+                      return false;
+                    }}
+                    needConfirm={false}
+                    onChange={(e) => setNewTime({ ...newTime, start: e })}
                   />
                   <p>-</p>
                   <TimePicker
                     className="w-[61px] h-[30px]"
-                    style={{ borderColor: "#26272a" }}
+                    style={{ borderColor: "#87888C" }}
                     format="HH:mm"
                     minuteStep="5"
-                    value={newTime.end}
                     placeholder=""
                     suffixIcon=""
+                    disabledTime={(current) => {
+                      if (!current) {
+                        return false;
+                      }
+                      const now = dayjs();
+                      if (current.isSame(now, "day")) {
+                        return {
+                          disabledHours: () =>
+                            Array.from({ length: now.hour() }, (_, i) => i),
+                          disabledMinutes: (selectedHour) => {
+                            if (selectedHour === now.hour()) {
+                              return Array.from(
+                                { length: now.minute() },
+                                (_, i) => i,
+                              );
+                            }
+                            return [];
+                          },
+                        };
+                      }
+                      return false;
+                    }}
+                    needConfirm={false}
+                    onChange={(e) => setNewTime({ ...newTime, end: e })}
                   />
-                </div>
-                <div className="flex flex-row w-full items-center gap-1">
                   <p className="w-[40px] flex-shrink-0 text-[14px] font-[500] text-right gap-1">
                     근무자
                   </p>
-                  <Input
-                    className="rounded-[10px] border-[#87888c]"
-                    style={{ width: "235px" }}
-                  />
+                  <WorkersDropDown />
                 </div>
               </div>
-              <GreenBtn className="w-full h-[35px] text-[14px] font-[500]">
+              <GreenBtn
+                className="w-full h-[35px] text-[14px] font-[500]"
+                onClick={handleAddWorkshift}
+              >
                 추가하기
               </GreenBtn>
             </div>
           </Modal>
         )}
+
+        {/* 이벤트클릭시 나타나는 토스트 */}
+        {isSubToastOpen && (
+          <Toast
+            isOpen={isSubToastOpen}
+            onClose={() => setIsSubToastOpen(false)}
+          >
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-row items-center justify-center">
+                <p className="text-[16px] font-[600] mb-2">
+                  {eventData.start.format("dd")}({eventData.worker}){" "}
+                  {eventData.start.format("HH:mm")}-
+                  {eventData.end.format("HH:mm")}
+                </p>
+              </div>
+              <GreenBtn className="text-[16px] font-[600] py-6 items-center relative">
+                <RequestSubIcon className="absolute left-4" />
+                <span className="w-full text-center">대타 요청하기</span>
+              </GreenBtn>
+              <GreenBtn
+                className="text-[16px] font-[600] py-6 items-center relative"
+                onClick={() => {
+                  setIsSubToastOpen(false);
+                  setAddShiftToastOpen(true);
+                }}
+              >
+                <RequestWorkIcon className="absolute left-4" />
+                <span className="w-full text-center">추가 근무 요청</span>
+              </GreenBtn>
+              <GreenBtn
+                className="text-[16px] font-[600] py-6 items-center relative"
+                onClick={() => {
+                  setIsSubToastOpen(false);
+                  setIsDeleteShift(true);
+                }}
+              >
+                <TrashIcon className="absolute left-4" />
+                <span className="w-full text-center">근무 일정 삭제하기</span>
+              </GreenBtn>
+            </div>
+          </Toast>
+        )}
+        {/* 추가 근무 요청 */}
+        {addShiftToastOpen && (
+          <Toast
+            isOpen={addShiftToastOpen}
+            onClose={() => setAddShiftToastOpen(false)}
+          >
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col justify-center items-center gap-2">
+                <p className="text-[16px] font-[600]">추가 근무 요청하기</p>
+                <p className="text-[12px] font-[400]">
+                  선택한 일정에 각 N,N명으로 추가 근무를 요청할까요?
+                </p>
+              </div>
+              <div className="flex flex-row items-center justify-between w-full">
+                <div className="w-[100px]">
+                  <p className="flex-shrink-0 h-[25px] border border-[#32d1aa] text-[12px] font-[400] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] flex items-center justify-center px-2">
+                    {activeStore}
+                  </p>
+                </div>
+                <span className="text-[14px] font-[500]">
+                  {eventData.start.format("dd(DD) HH:mm-")}
+                  {eventData.end.format("HH:mm")}
+                </span>
+                <div className="flex flex-row w-[100px] items-center gap-3">
+                  <DeleteIcon
+                    className="size-[20px]"
+                    onClick={() => setNeedWorkers(Math.max(needWorkers - 1, 1))}
+                  />
+                  <p className="flex w-[20px] text-[14px] font-[500] justify-center">
+                    {needWorkers}
+                  </p>
+                  <AddIcon
+                    className="size-[20px] cursor-pointer"
+                    onClick={() => setNeedWorkers(needWorkers + 1)}
+                  />
+                </div>
+              </div>
+              <GreenBtn
+                className="text-[16px] font-[600] py-6 items-center relative"
+                onClick={() => {
+                  handleRequestWork();
+                }}
+              >
+                요청하기
+              </GreenBtn>
+            </div>
+          </Toast>
+        )}
+        {/* 근무 일정 삭제 모달 */}
+        {isDeleteShift && (
+          <Modal>
+            <div className="flex flex-col items-center justify-center gap-3 my-2">
+              <div className="flex flex-col items-center justify-center gap-1">
+                <p className="text-[16px] font-[400]">근무 일정 삭제</p>
+                <p className="text-[12px] font-[400]">
+                  선택한 근무 일정을 삭제할까요?
+                </p>
+              </div>
+              <div className="flex flex-row items-center gap-3">
+                <p className="flex-shrink-0 h-[25px] border border-[#32d1aa] text-[12px] font-[400] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] flex items-center justify-center px-2">
+                  {activeStore}
+                </p>
+                <span className="text-[14px] font-[500]">
+                  {eventData.start.format("dd(DD) HH:mm-")}
+                  {eventData.end.format("HH:mm")}
+                </span>
+              </div>
+              <div className="flex flex-row w-full items-center gap-2">
+                <WhiteBtn
+                  className="flex-1/2"
+                  onClick={() => {
+                    setIsDeleteShift(false);
+                  }}
+                >
+                  아니오
+                </WhiteBtn>
+                <GreenBtn className="flex-1/2" onClick={handleDeleteWorkshift}>
+                  예
+                </GreenBtn>
+              </div>
+            </div>
+          </Modal>
+        )}
+        <MessageModal
+          message="근무 일정이 추가 완료되었어요!"
+          isOpen={isMsgOpen}
+          onClose={() => setIsMsgOpen(false)}
+        />
+        <MessageModal
+          message="요청이 완료되었어요."
+          isOpen={isMsgOpen2}
+          onClose={() => setIsMsgOpen2(false)}
+        />
+        <MessageModal
+          message="근무 일정이 삭제되었어요!"
+          isOpen={isMsgOpen3}
+          onClose={() => setIsMsgOpen3(false)}
+        />
       </div>
     </ConfigProvider>
   );

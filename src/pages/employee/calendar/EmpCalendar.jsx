@@ -3,6 +3,7 @@ import PencilIcon from "../../../assets/icons/PencilIcon.jsx";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { fetchSchedules } from "../../../services/common/ScheduleService.js";
 
 function EmpCalendar() {
   const today = dayjs();
@@ -11,16 +12,19 @@ function EmpCalendar() {
     `${today.format("YY")}.${today.format("MM")} ${Math.ceil(today.date() / 7)}주차`,
   );
 
+  useEffect(() => {
+    setFormattedCurrentWeek(
+      `${currentDate.format("YY")}.${currentDate.format("MM")} ${Math.ceil(
+        currentDate.date() / 7,
+      )}주차`,
+    );
+  }, [currentDate]);
+
   const Calendar = ({ date }) => {
     const hours = Array.from({ length: 16 }, (_, i) => i + 8);
     const [week, setWeek] = useState([]);
     const days = ["일", "월", "화", "수", "목", "금", "토"];
-    const [events, setEvents] = useState([
-      {
-        start: "2025-11-27 8:00",
-        end: "2025-11-27 18:00",
-      },
-    ]);
+    const [events, setEvents] = useState([]);
     const colors = ["#68e194", "#32d1aa", "#00c1bd"];
 
     useEffect(() => {
@@ -34,20 +38,18 @@ function EmpCalendar() {
             ),
           );
           setWeek(weekArray);
-          // const schedules = await fetchSchedules(
-          //   date.format("YYYY-MM-DD"),
-          //   date.format("YYYY-MM-DD"),
-          // );
-          // const uniqueWorkers = [
-          //   ...new Set(schedules.map((schedule) => schedule.userStoreId)),
-          // ];
-          // const formattedEvents = schedules.map((schedule) => ({
-          //   worker: schedule.userStoreId,
-          //   start: schedule.startDatetime,
-          //   end: schedule.endDatetime,
-          // }));
 
-          // setEvents(formattedEvents);
+          const schedules = await fetchSchedules(
+            startOfWeek.format("YYYY-MM-DD"),
+            startOfWeek.add(6, "day").format("YYYY-MM-DD"),
+          );
+
+          const formattedEvents = schedules.map((schedule) => ({
+            start: schedule.startDatetime,
+            end: schedule.endDatetime,
+          }));
+
+          setEvents(formattedEvents);
         } catch (error) {
           console.error("Error fetching schedules:", error);
         }
@@ -97,7 +99,10 @@ function EmpCalendar() {
         <div className="flex flex-col flex-shrink-0 w-full h-full">
           <div className="flex flex-row flex-shrink-0 h-[30px]">
             {days.map((day) => (
-              <div className="flex w-[42px] items-center justify-center border-l border-[#e7eaf3]">
+              <div
+                key={day}
+                className="flex w-[42px] items-center justify-center border-l border-[#e7eaf3]"
+              >
                 {day}
               </div>
             ))}
@@ -150,13 +155,13 @@ function EmpCalendar() {
       <div className="flex flex-row w-full justify-center items-center px-4 my-4">
         <div className="flex flex-row items-center justify-between">
           <LeftOutlined
-            onClick={() => setCurrentDate(currentDate.subtract(1, "day"))}
+            onClick={() => setCurrentDate(currentDate.subtract(7, "day"))}
           />
           <p className="h-[20px] w-[150px] text-[20px]/[20px] font-[600] ">
             {formattedCurrentWeek}
           </p>
           <RightOutlined
-            onClick={() => setCurrentDate(currentDate.add(1, "day"))}
+            onClick={() => setCurrentDate(currentDate.add(7, "day"))}
           />
         </div>
       </div>
