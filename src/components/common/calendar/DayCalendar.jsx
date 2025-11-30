@@ -153,7 +153,7 @@ function DayCalendar({
               <div
                 key={`${worker.id}-${hour}`}
                 className={`flex h-[35px] items-center justify-center border-t border-[#e7eaf3] cursor-pointer 
-                  ${isSelected ? "border-x-2 border-x-black bg-black" : ""}
+                  ${isSelected ? "border-x-2 border-x-black" : ""}
                   ${isSelected && firstHour ? "border-t-2 border-t-black" : ""}
                   ${isSelected && lastHour ? "border-b-2 border-b-black" : ""}`}
                 style={{

@@ -3,7 +3,12 @@ import { useEffect, useState } from "react";
 import "dayjs/locale/ko";
 import { fetchSchedules } from "../../../services/common/ScheduleService.js";
 
-function WeekCalendar({ date }) {
+function WeekCalendar({
+  date,
+  onEventClick,
+  selectedEventProp,
+  setSelectedEventProp,
+}) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
   const [week, setWeek] = useState([]);
   const days = ["일", "월", "화", "수", "목", "금", "토"];
@@ -15,14 +20,14 @@ function WeekCalendar({ date }) {
     {
       id: 1,
       workerId: 1,
-      workerName: "지민",
+      worker: "지민",
       start: "2025-11-30T15:00",
       end: "2025-11-30T18:00",
     },
     {
       id: 2,
       workerId: 2,
-      workerName: "수진",
+      worker: "수진",
       start: "2025-12-01T13:00",
       end: "2025-12-01T18:00",
     },
@@ -118,14 +123,34 @@ function WeekCalendar({ date }) {
           </div>
           {week.map((w) => {
             const event = getEventForCell(worker.id, w);
+            const isSelected =
+              selectedEventProp &&
+              selectedEventProp.id === event?.id &&
+              selectedEventProp.workerId === worker.id &&
+              selectedEventProp.start === event?.start &&
+              selectedEventProp.end === event?.end;
 
             return event ? (
               <div
                 key={`${worker.id}-${w}`}
-                className="flex flex-col flex-shrink-0 w-[44px] h-full items-center justify-center border-l border-[#e7eaf3]"
+                className={`flex flex-col flex-shrink-0 w-[44px] h-full items-center justify-center border-l border-[#e7eaf3] cursor-pointer
+                  ${isSelected ? "border-2 border-black" : ""}`}
                 style={{
                   backgroundColor:
                     colors[getColorIndex(dayjs(event.start).hour())],
+                  filter: isSelected ? "brightness(0.8)" : "none",
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const clickedEvent = {
+                    id: event.id,
+                    workerId: event.workerId,
+                    worker: event.worker,
+                    start: event.start,
+                    end: event.end,
+                  };
+                  setSelectedEventProp(clickedEvent);
+                  onEventClick(clickedEvent);
                 }}
               >
                 <span className="text-[12px]/[16px] font-[400]">

@@ -25,10 +25,8 @@ import {
   requestWork,
   deleteWorkshift,
   fetchAllWorkers,
-  requestSub,
 } from "../../../services/owner/ScheduleService.js";
 import { fetchActiveStore } from "../../../services/owner/MyPageService.js";
-import { info } from "autoprefixer";
 dayjs.locale("ko");
 
 const globalStyles = `
@@ -290,7 +288,12 @@ function OwnerCalendar() {
           </div>
           <DropDown />
         </div>
-        <WeekCalendar date={currentDate} />
+        <WeekCalendar
+          date={currentDate}
+          onEventClick={handleEventClick}
+          selectedEventProp={selectedCalendarEvent}
+          setSelectedEventProp={setSelectedCalendarEvent}
+        />
       </div>
     );
   };
