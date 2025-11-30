@@ -64,7 +64,7 @@
     position: relative !important; /* ::before 레이어 사용 위해 */
     cursor: pointer; /* pointer 적용 */
   }
-  
+
   .fc-daygrid-day-number,
   .date-num {
     margin: 0 !important;
@@ -77,12 +77,24 @@
     width: 32px;
     height: 32px;
     position: relative !important; /* 항상 텍스트 맨 위 */
-    z-index: 5 !important;
+    z-index: 10 !important;
   }
   
   /* ============================
      5) 날짜 선택 스타일
      ============================ */
+
+  /* 다른 달 날짜 opacity 제거 -> stacking context 제거 */
+    .fc-day-other {
+      opacity: 1 !important;
+      color: #C5C5C5 !important; /* 색만 흐리게 */
+    }
+
+    .fc-daygrid-day-frame {
+      position: relative !important;
+      z-index: 0 !important;  /* 기준 컨텍스트 */
+    }
+        
   
   /* 시작/끝 날짜 원 */
   .range-start .fc-daygrid-day-frame::before,
@@ -96,7 +108,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 1;
+    z-index: 5 !important;
   }
     
   .range-start .fc-daygrid-day-frame::after {
@@ -133,10 +145,9 @@
     bottom: 0;
     background: rgba(104, 225, 148, 0.4);
     border-radius: 0 !important; /* 좌우 경계 완전 제거 */
-    z-index: 0 !important;       /* 원(시작/종료) 아래로 보내기 */
-    z-index: 1;
+    z-index: 1 !important;       /* 원(시작/종료) 아래로 보내기 */
   }
-  
+
   /* ============================
      6) Hover 제거
      ============================ */
