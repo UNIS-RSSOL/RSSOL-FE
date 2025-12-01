@@ -92,36 +92,10 @@ function EmpCalendar() {
           );
           setWeek(weekArray);
 
-          // const schedules = await fetchSchedules(
-          //   startOfWeek.format("YYYY-MM-DD"),
-          //   startOfWeek.add(6, "day").format("YYYY-MM-DD"),
-          // );
-          const schedules = [
-            {
-              id: 1,
-              storeId: 1,
-              storeName: "투썸플레이스 신촌점",
-              startDatetime: "2025-10-23T10:00:00",
-              endDatetime: "2025-10-23T13:00:00",
-              shiftStatus: "SCHEDULED",
-            },
-            {
-              id: 8,
-              storeId: 1,
-              storeName: "투썸플레이스 신촌점",
-              startDatetime: "2025-10-24T19:00:00",
-              endDatetime: "2025-10-24T23:00:00",
-              shiftStatus: "SCHEDULED",
-            },
-          ];
-
-          const formattedEvents = schedules.map((schedule) => ({
-            id: schedule.id,
-            storeId: schedule.storeId,
-            storeName: schedule.storeName,
-            start: schedule.startDatetime,
-            end: schedule.endDatetime,
-          }));
+          const schedules = await fetchSchedules(
+            startOfWeek.format("YYYY-MM-DD"),
+            startOfWeek.add(6, "day").format("YYYY-MM-DD"),
+          );
 
           setEvents(formattedEvents);
         } catch (error) {

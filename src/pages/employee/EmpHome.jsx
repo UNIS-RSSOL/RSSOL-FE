@@ -17,6 +17,7 @@ function EmpHome() {
   const today = dayjs();
   const firstDay = today.format("YYYY.MM.") + "01";
   const [wage, setWage] = useState(0);
+  const [activeStore, setActiveStore] = useState({ id: 0, name: "서브웨이" });
   const [todo, setTodo] = useState([]);
 
   const FormattedDate = (date, day) => {
@@ -38,12 +39,16 @@ function EmpHome() {
         }));
         setTodo(td);
 
-        // const active = await fetchActiveStore();
-        // const wageRes = await fetchWage(
-        //   active.storeId,
-        //   today.format("YYYY-MM"),
-        // );
-        // setWage(wageRes.total_pay);
+        const active = await fetchActiveStore();
+        setActiveStore({
+          storeId: active.storeId,
+          name: active.name,
+        });
+        const wageRes = await fetchWage(
+          active.storeId,
+          today.format("YYYY-MM"),
+        );
+        setWage(wageRes.total_pay);
       } catch (error) {
         console.error(error);
       }
@@ -112,7 +117,7 @@ function EmpHome() {
           disabled={true}
         >
           <div className="flex flex-col items-center justify-center">
-            <p className="text-[16px] font-[500]">서브웨이</p>
+            <p className="text-[16px] font-[500]">{activeStore?.name}</p>
             <p className="text-[14px] font-[400] text-[#7a7676]">
               {FormattedDate(today)}
             </p>

@@ -47,14 +47,19 @@ function OwnerHome() {
           start: schedule.startDatetime,
           end: schedule.endDatetime,
         }));
-        const uniqueWorkers = [
-          ...new Set(
-            schedules.map((schedule) => ({
-              id: schedule.userStoreId,
-              name: schedule.userName,
-            })),
-          ),
-        ];
+        const uniqueWorkers = Array.from(
+          schedules
+            .reduce((map, schedule) => {
+              if (!map.has(schedule.userStoreId)) {
+                map.set(schedule.userStoreId, {
+                  id: schedule.userStoreId,
+                  name: schedule.userName,
+                });
+              }
+              return map;
+            }, new Map())
+            .values(),
+        );
         setWorkers(uniqueWorkers);
         setEvents(formattedEvents);
 

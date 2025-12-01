@@ -10,27 +10,8 @@ function DayCalendar({
 }) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
   const [blank, setBlank] = useState(Array.from({ length: 7 }, () => "."));
-  const [workers, setWorkers] = useState([
-    { id: "1", name: "수진" },
-    { id: "2", name: "채은" },
-    { id: "3", name: "지유" },
-  ]);
-  const [events, setEvents] = useState([
-    {
-      id: "1",
-      workerId: "1",
-      worker: "수진",
-      start: "2025-11-29T13:00",
-      end: "2025-11-29T18:00",
-    },
-    {
-      id: "2",
-      workerId: "2",
-      worker: "채은",
-      start: "2025-11-29T13:00",
-      end: "2025-11-29T18:00",
-    },
-  ]);
+  const [workers, setWorkers] = useState();
+  const [events, setEvents] = useState();
   const colors = ["#68e194", "#32d1aa", "#00c1bd"];
 
   useEffect(() => {
@@ -56,8 +37,8 @@ function DayCalendar({
           end: schedule.endDatetime,
         }));
 
-        // setWorkers(uniqueWorkers);
-        // setEvents(formattedEvents);
+        setWorkers(uniqueWorkers);
+        setEvents(formattedEvents);
 
         const len = uniqueWorkers?.length || 0;
         const newBlank = Array.from(
@@ -123,7 +104,7 @@ function DayCalendar({
           </div>
         ))}
       </div>
-      {workers.map((worker) => (
+      {workers?.map((worker) => (
         <div
           key={worker.id}
           className="flex flex-shrink-0 flex-col w-[42px] border-l border-[#e7eaf3]"
