@@ -7,7 +7,7 @@ import GreenBtn from "../../components/common/GreenBtn.jsx";
 import { useEffect, useState } from "react";
 import character2 from "../../assets/images/character2.png";
 import character3 from "../../assets/images/character3.png";
-import { fetchSchedules } from "../../services/common/ScheduleService.js";
+import { fetchSchedules } from "../../services/employee/ScheduleService.js";
 import { fetchWage } from "../../services/employee/WageService.js";
 import { fetchActiveStore } from "../../services/employee/MyPageService.js";
 import dayjs from "dayjs";
@@ -16,21 +16,34 @@ function EmpHome() {
   const [currentTime, setCurrentTime] = useState("");
   const today = dayjs();
   const firstDay = today.format("YYYY.MM.") + "01";
-  const dat = ["일", "월", "화", "수", "목", "금", "토"];
   const [wage, setWage] = useState(0);
+  const [activeStore, setActiveStore] = useState({ id: 0, name: "서브웨이" });
   const [todo, setTodo] = useState([]);
 
   const FormattedDate = (date, day) => {
-    const d = dat[today.format("d")];
-    return day
-      ? date.format("YYYY.MM.DD(") + d + ")"
-      : date.format("YYYY.MM.DD");
+    return day ? date.format("YYYY.MM.DD(dd)") : date.format("YYYY.MM.DD");
   };
 
   useEffect(() => {
     (async () => {
       try {
+        const schedules = await fetchSchedules(
+          today.format("YYYY-MM-DD"),
+          today.format("YYYY-MM-DD"),
+        );
+        const td = schedules.map((s) => ({
+          id: s.id,
+          storeName: s.storeName,
+          start: dayjs(s.startDatetime).format("HH:mm"),
+          end: dayjs(s.endDatetime).format("HH:mm"),
+        }));
+        setTodo(td);
+
         const active = await fetchActiveStore();
+        setActiveStore({
+          storeId: active.storeId,
+          name: active.name,
+        });
         const wageRes = await fetchWage(
           active.storeId,
           today.format("YYYY-MM"),
@@ -45,7 +58,6 @@ function EmpHome() {
       const now = new Date();
       const hours = now.getHours().toString().padStart(2, "0");
       const minutes = now.getMinutes().toString().padStart(2, "0");
-      const seconds = now.getSeconds().toString().padStart(2, "0");
       setCurrentTime(`${hours}:${minutes}`);
     };
 
@@ -65,29 +77,33 @@ function EmpHome() {
           <ColoredCalIcon />
         </div>
         <p className="text-[16px] font-[400] mt-2">
-          오늘은 2개의 일정이 있어요!
+          오늘은 {todo.length}개의 일정이 있어요!
         </p>
       </div>
       <div className="flex justify-center w-full">
-        <Note className="w-full mt-1 mb-5 max-w-[500px]" hole={4}>
-          <img src={character2} alt="character" className="size-[110px] mr-1" />
-          <div className="flex flex-col w-full gap-3 my-2 mx-1 mr-3">
-            <div className="flex flex-row w-full border-b border-[#87888c] pb-1 justify-between">
-              <p className="text-[16px] font-[500]">알쏠 1호점</p>
-              <p className="text-[16px] font-[400]">09:30-13:00</p>
-            </div>
-            <div className="flex flex-row w-full border-b border-[#87888c] pb-1 justify-between">
-              <p className="text-[16px] font-[500]">알쏠 1호점</p>
-              <p className="text-[16px] font-[400]">09:30-13:00</p>
-            </div>
-            <div className="flex flex-row w-full border-b border-[#87888c] pb-1 justify-between">
-              <p className="text-[16px] font-[500]">알쏠 1호점</p>
-              <p className="text-[16px] font-[400]">09:30-13:00</p>
-            </div>
-            <div className="flex flex-row w-full border-b border-[#87888c] pb-1 justify-between">
-              <p className="text-[16px] font-[500]">알쏠 1호점</p>
-              <p className="text-[16px] font-[400]">09:30-13:00</p>
-            </div>
+        <Note
+          className="w-full mt-1 mb-5 max-w-[500px] flex-row flex items-center"
+          hole={todo.length - 1}
+        >
+          <div className="flex h-full flex-1/3 items-end">
+            <img
+              src={character2}
+              alt="character"
+              className="size-[90px] mb-1"
+            />
+          </div>
+          <div className="flex flex-2/3 flex-col w-full gap-3 my-2 mr-3">
+            {todo.map((td) => (
+              <div
+                key={td.id}
+                className="flex flex-row w-full border-b border-[#87888c] pb-1 justify-between"
+              >
+                <p className="text-[14px] font-[500]">{td.storeName}</p>
+                <p className="text-[14px] font-[400]">
+                  {td.start}-{td.end}
+                </p>
+              </div>
+            ))}
           </div>
         </Note>
       </div>
@@ -101,7 +117,7 @@ function EmpHome() {
           disabled={true}
         >
           <div className="flex flex-col items-center justify-center">
-            <p className="text-[16px] font-[500]">서브웨이</p>
+            <p className="text-[16px] font-[500]">{activeStore?.name}</p>
             <p className="text-[14px] font-[400] text-[#7a7676]">
               {FormattedDate(today)}
             </p>

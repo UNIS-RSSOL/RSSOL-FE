@@ -1,5 +1,15 @@
 import api from "../api";
 
+//현재매장 모든 근무자들 이름 조회하기
+export async function fetchAllWorkers() {
+  try {
+    const response = api.get("/api/store/staff");
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 //근무블록 추가
 export async function addWorkshift(userStoreId, start, end) {
   try {
@@ -24,8 +34,21 @@ export async function deleteWorkshift(workShiftId) {
   }
 }
 
+//대타요청하기
+export async function requestSub(shiftId, reason = "") {
+  try {
+    const response = await api.post("/api/shift-swap/requests", {
+      shiftId: shiftId,
+      reason: reason,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 //추가인력요청
-export async function requestWork(shiftId, headCount, note) {
+export async function requestWork(shiftId, headCount, note = "") {
   try {
     const response = api.post("/api/staffing/requests", {
       shiftId: shiftId,

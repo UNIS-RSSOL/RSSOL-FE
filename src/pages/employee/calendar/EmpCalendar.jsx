@@ -1,9 +1,13 @@
-import WeekCalendar from "../../../components/common/calendar/WeekCalendar.jsx";
-import PencilIcon from "../../../assets/icons/PencilIcon.jsx";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
+import Toast from "../../../components/common/Toast.jsx";
+import Modal from "../../../components/common/Modal.jsx";
+import GreenBtn from "../../../components/common/GreenBtn.jsx";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import { fetchSchedules } from "../../../services/common/ScheduleService.js";
+import {
+  fetchSchedules,
+  requestSub,
+} from "../../../services/employee/ScheduleService.js";
 
 function EmpCalendar() {
   const today = dayjs();
@@ -11,6 +15,10 @@ function EmpCalendar() {
   const [formattedCurrentWeek, setFormattedCurrentWeek] = useState(
     `${today.format("YY")}.${today.format("MM")} ${Math.ceil(today.date() / 7)}주차`,
   );
+  const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
+  const [eventData, setEventData] = useState();
+  const [isEventToastOpen, setIsEventToastOpen] = useState(false);
+  const [isMsgOpen, setIsMsgOpen] = useState(false);
 
   useEffect(() => {
     setFormattedCurrentWeek(
@@ -20,7 +28,54 @@ function EmpCalendar() {
     );
   }, [currentDate]);
 
-  const Calendar = ({ date }) => {
+  const handleEventClick = (e) => {
+    setSelectedCalendarEvent(e);
+    console.log(e);
+    setEventData({
+      id: e.id,
+      storeId: e.storeId,
+      storeName: e.storeName,
+      start: dayjs(e.start),
+      end: dayjs(e.end),
+    });
+    setIsEventToastOpen(true);
+  };
+
+  const handleRequestSub = async () => {
+    try {
+      await requestSub(eventData.id);
+      setIsEventToastOpen(false);
+      setIsMsgOpen(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const MessageModal = ({ isOpen, message, onClose, duration = 1000 }) => {
+    useEffect(() => {
+      if (isOpen && duration) {
+        const timer = setTimeout(() => {
+          onClose?.();
+        }, duration);
+        return () => clearTimeout(timer);
+      }
+    }, [isOpen, duration, onClose]);
+
+    if (!isOpen) return null;
+
+    return (
+      <Modal xx={false}>
+        <p className="py-5">{message}</p>
+      </Modal>
+    );
+  };
+
+  const Calendar = ({
+    date,
+    onEventClick,
+    selectedEventProp,
+    setSelectedEventProp,
+  }) => {
     const hours = Array.from({ length: 16 }, (_, i) => i + 8);
     const [week, setWeek] = useState([]);
     const days = ["일", "월", "화", "수", "목", "금", "토"];
@@ -33,9 +88,7 @@ function EmpCalendar() {
           let startOfWeek = dayjs(date).locale("ko").startOf("week");
           const weekArray = [];
           weekArray.push(
-            ...Array.from({ length: 7 }, (_, i) =>
-              startOfWeek.add(i, "day").format("DD"),
-            ),
+            ...Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, "day")),
           );
           setWeek(weekArray);
 
@@ -44,11 +97,6 @@ function EmpCalendar() {
             startOfWeek.add(6, "day").format("YYYY-MM-DD"),
           );
 
-          const formattedEvents = schedules.map((schedule) => ({
-            start: schedule.startDatetime,
-            end: schedule.endDatetime,
-          }));
-
           setEvents(formattedEvents);
         } catch (error) {
           console.error("Error fetching schedules:", error);
@@ -56,9 +104,22 @@ function EmpCalendar() {
       })();
     }, [date]);
 
+    const isFirstHour = (event, hour) => {
+      if (!event) return false;
+      const startHour = dayjs(event.start).hour();
+      return hour === startHour;
+    };
+
+    const isLastHour = (event, hour) => {
+      if (!event) return false;
+      let endHour = dayjs(event.end).hour();
+      if (endHour === 0) endHour = 24;
+      return hour === endHour - 1;
+    };
+
     const getEventForCell = (day, hour) => {
       return events.find((event) => {
-        if (dayjs(event.start).format("DD") !== day) return false;
+        if (dayjs(event.start).format("YYYY-MM-DD") !== day) return false;
         const startHour = dayjs(event.start).hour();
         let endHour = dayjs(event.end).hour();
         if (endHour === 0) endHour = 24;
@@ -109,12 +170,19 @@ function EmpCalendar() {
           </div>
           <div className="flex flex-row w-full">
             {week.map((w) => (
-              <div key={w} className="flex flex-col w-[42px] h-full">
+              <div
+                key={w.format("DD")}
+                className="flex flex-col w-[42px] h-full"
+              >
                 <div className="flex h-[30px] border-t border-l border-[#e7eaf3] justify-center items-center">
-                  {w}
+                  {w.format("DD")}
                 </div>
                 {hours.map((hour) => {
-                  const event = getEventForCell(w, hour);
+                  const event = getEventForCell(w.format("YYYY-MM-DD"), hour);
+                  const isSelected =
+                    selectedEventProp && selectedEventProp.id === event?.id;
+                  const firstHour = isFirstHour(event, hour);
+                  const lastHour = isLastHour(event, hour);
                   const isMiddleHour = (() => {
                     if (!event) return false;
                     const startHour = dayjs(event.start).hour();
@@ -125,19 +193,40 @@ function EmpCalendar() {
                     );
                     return hour === middleHour;
                   })();
+
                   return event ? (
                     <div
-                      key={`${w}-${hour}`}
-                      className="flex h-[35px] border-l border-t border-[#e7eaf3]"
-                      style={{ backgroundColor: getEventColor(event) }}
+                      key={`${w.format("DD")}-${hour}`}
+                      className={`flex h-[35px] border-l border-t border-[#e7eaf3] cursor-pointer
+                        ${isSelected ? "border-x-2 border-x-black" : ""}
+                  ${isSelected && firstHour ? "border-t-2 border-t-black" : ""}
+                  ${isSelected && lastHour ? "border-b-2 border-b-black" : ""}`}
+                      style={{
+                        backgroundColor: getEventColor(event),
+                        filter: isSelected ? "brightness(0.8)" : "none",
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const clickedEvent = {
+                          id: event.id,
+                          storeId: event.storeId,
+                          storeName: event.storeName,
+                          start: event.start,
+                          end: event.end,
+                        };
+                        setSelectedEventProp(clickedEvent);
+                        onEventClick(clickedEvent);
+                      }}
                     >
                       {isMiddleHour ? (
-                        <span className="text-black text-[12px] font-[400]"></span>
+                        <span className="text-black text-[12px] font-[400]">
+                          {event.storeName}
+                        </span>
                       ) : null}
                     </div>
                   ) : (
                     <div
-                      key={`${w}-${hour}`}
+                      key={`${w.format("DD")}-${hour}`}
                       className="flex h-[35px] border-l border-t border-[#e7eaf3]"
                     ></div>
                   );
@@ -165,7 +254,47 @@ function EmpCalendar() {
           />
         </div>
       </div>
-      <Calendar date={currentDate} />
+      <Calendar
+        date={currentDate}
+        onEventClick={handleEventClick}
+        selectedEventProp={selectedCalendarEvent}
+        setSelectedEventProp={setSelectedCalendarEvent}
+      />
+      {isEventToastOpen && (
+        <Toast
+          isOpen={isEventToastOpen}
+          onClose={() => setIsEventToastOpen(false)}
+        >
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col justify-center items-center gap-2">
+              <p className="text-[16px] font-[600]">대타 요청하기</p>
+              <p className="text-[12px] font-[400]">
+                선택한 일정으로 대타를 요청할까요?
+              </p>
+            </div>
+            <div className="flex flex-row items-center justify-center w-full gap-5">
+              <p className="flex-shrink-0 h-[25px] border border-[#32d1aa] text-[12px] font-[400] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] flex items-center justify-center px-2">
+                {eventData.storeName}
+              </p>
+              <span className="text-[14px] font-[500]">
+                {eventData.start.format("dd(DD) HH:mm-")}
+                {eventData.end.format("HH:mm")}
+              </span>
+            </div>
+            <GreenBtn
+              className="text-[16px] font-[600] py-6 items-center relative"
+              onClick={handleRequestSub}
+            >
+              요청하기
+            </GreenBtn>
+          </div>
+        </Toast>
+      )}
+      <MessageModal
+        message="요청이 완료되었어요."
+        isOpen={isMsgOpen}
+        onClose={() => setIsMsgOpen(false)}
+      />
     </div>
   );
 }
