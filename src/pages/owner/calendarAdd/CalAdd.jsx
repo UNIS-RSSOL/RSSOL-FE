@@ -420,6 +420,7 @@ export default function CalAdd() {
       <BottomBar 
         leftText="내 스케줄 추가하기" 
         rightText="근무표 생성하기"
+        onLeftClick={() => navigate("/addOwner")}
         onRightClick={handleGenerateSchedule}
       />
     </div>

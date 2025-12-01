@@ -37,3 +37,14 @@ export async function requestWork(shiftId, headCount, note) {
     console.error(error);
   }
 }
+
+//모든 근무자 조회 (사장 포함)
+export async function fetchAllWorkers() {
+  try {
+    const response = await api.get("/api/mypage/owner/workers");
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}

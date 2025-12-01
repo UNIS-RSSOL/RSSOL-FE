@@ -63,3 +63,19 @@ export const generateSchedule = async (
   }
 };
 
+/**
+ * 후보 스케줄 조회
+ * @param {string} candidateKey - 후보 스케줄 키
+ * @param {number} index - 후보 스케줄 인덱스
+ * @returns {Promise<Array<{id: number, userStoreId: number, userName: string, startDatetime: string, endDatetime: string}>>}
+ */
+export const fetchCandidateSchedule = async (candidateKey, index) => {
+  try {
+    const response = await api.get(`/api/schedules/candidate/${candidateKey}/${index}`);
+    return response.data;
+  } catch (error) {
+    console.error("후보 스케줄 조회 실패:", error.response?.data || error.message);
+    throw error;
+  }
+};
+

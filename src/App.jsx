@@ -20,6 +20,8 @@ import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
 import CalAddEmp from "./pages/employee/calendarAdd/CalAddEmp.jsx"
 import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
 import CalGen from "./pages/owner/calendarAdd/CalGen.jsx";
+import AutoCal from "./pages/owner/calendarAdd/AutoCal.jsx";
+import AddOwner from "./pages/owner/calendarAdd/AddOwner.jsx";
 
 import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
@@ -37,7 +39,9 @@ function App() {
     "/auth/kakao/callback",
     "/calAdd",
     "/calGen",
+    "/autoCal",
     "/calAddEmp",
+    "/addOwner",
     "/alarmHomeEmp",
     "/alarmHome",
     "/alarmCheck",
@@ -86,6 +90,8 @@ function App() {
           <Route path="/calAddEmp" element={<CalAddEmp />} />
           <Route path="/calAdd" element={<CalAdd />} />
           <Route path="/calGen" element={<CalGen />} />
+          <Route path="/autoCal" element={<AutoCal />} />
+          <Route path="/addOwner" element={<AddOwner />} />
 
           <Route path="/alarmHomeEmp" element={<AlarmHomeEmp />} />
           <Route path="/alarmHome" element={<AlarmHome />} />
