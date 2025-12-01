@@ -5,8 +5,8 @@ dayjs.locale("ko");
 
 /**
  * AutoCal 전용 주간 캘린더 미리보기
- * - 날짜 행 없음
- * - 항상 기본 그리드 표시 (더미 근무자 포함)
+ * - 날짜 행 없음 (요일만 표시)
+ * - 항상 기본 그리드 표시 (더미 데이터 포함)
  * - 선택 후: 실제 스케줄 데이터 표시
  */
 function AutoCalCalendar({ hasSelection, schedules }) {

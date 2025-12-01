@@ -140,7 +140,7 @@ export default function AutoCal() {
       <div className="flex-1 flex flex-col px-4 py-4 gap-4 overflow-y-scroll scrollbar-hide">
         {/* 제목과 소제목 */}
         <div className="flex flex-col gap-1">
-          <div className="text-[20px] font-semibold">자동 스케줄 생성</div>
+          <div className="text-[16px] font-semibold">자동 스케줄 생성</div>
           <div className="text-[14px] text-[#666]">
             근무표가 생성되었어요. 마음에 드는 근무표를 저장하세요
           </div>
