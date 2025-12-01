@@ -25,6 +25,7 @@ import {
   requestWork,
   deleteWorkshift,
   fetchAllWorkers,
+  requestSub,
 } from "../../../services/owner/ScheduleService.js";
 import { fetchActiveStore } from "../../../services/owner/MyPageService.js";
 dayjs.locale("ko");
@@ -47,16 +48,15 @@ function OwnerCalendar() {
   );
   //근무일정추가모달
   const [isModalOpen, setIsModalOpen] = useState(false);
-  //근무일정추가완료모달
   const [isMsgOpen, setIsMsgOpen] = useState(false);
-  //추가근무요청완료모달
-  const [isMsgOpen2, setIsMsgOpen2] = useState(false);
   //근무일정수정-이벤트블록 선택시 나타나는 토스트
   const [isEventToastOpen, setIsEventToastOpen] = useState(false);
   //대타요청하기
   const [isSubToastOpen, setIsSubToastOpen] = useState(false);
+  const [isMsgOpen1, SetIsMsgOpen1] = useState(false);
   //추가근무요청
   const [addShiftToastOpen, setAddShiftToastOpen] = useState(false);
+  const [isMsgOpen2, setIsMsgOpen2] = useState(false);
   //근무일정삭제
   const [isDeleteShift, setIsDeleteShift] = useState(false);
   const [isMsgOpen3, setIsMsgOpen3] = useState(false);
@@ -181,16 +181,12 @@ function OwnerCalendar() {
 
   const WorkersDropDown = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    const [workers, setWorkers] = useState([
-      { name: "지민", id: 1 },
-      { name: "채은", id: 2 },
-      { name: "수진", id: 3 },
-    ]);
+    const [workers, setWorkers] = useState([]);
 
     useEffect(() => {
       (async () => {
         const response = await fetchAllWorkers();
-        // setWorkers(response);
+        setWorkers(response);
       })();
     }, []);
 
@@ -204,7 +200,7 @@ function OwnerCalendar() {
         </div>
         {dropdownOpen && (
           <div className="absolute left-0 mt-0 rounded-b-[12px] border-x-1 border-b-1 overflow-hidden">
-            {workers.map((worker) => (
+            {workers?.map((worker) => (
               <div
                 key={worker.id}
                 className="flex items-center justify-center w-[70px] py-[2px] bg-white gap-1 cursor-pointer"
@@ -299,7 +295,15 @@ function OwnerCalendar() {
   };
 
   //대타요청하기
-  // const handleRequestSub=()
+  const handleRequestSub = async () => {
+    try {
+      await requestSub(eventData.id);
+      setIsSubToastOpen(false);
+      SetIsMsgOpen1(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   //추가 근무 요청
   const handleRequestWork = () => {
@@ -553,9 +557,7 @@ function OwnerCalendar() {
               </div>
               <GreenBtn
                 className="text-[16px] font-[600] py-6 items-center relative"
-                onClick={() => {
-                  handleRequestWork();
-                }}
+                onClick={handleRequestSub}
               >
                 요청하기
               </GreenBtn>
@@ -660,6 +662,11 @@ function OwnerCalendar() {
           message="근무 일정이 삭제되었어요!"
           isOpen={isMsgOpen3}
           onClose={() => setIsMsgOpen3(false)}
+        />
+        <MessageModal
+          message="요청이 완료되었어요."
+          isOpen={isMsgOpen1}
+          onClose={() => SetIsMsgOpen1(false)}
         />
       </div>
     </ConfigProvider>

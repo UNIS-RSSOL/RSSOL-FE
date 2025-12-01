@@ -12,8 +12,6 @@ function ResourceCalendar({ e, w }) {
       try {
         setWorkers(w);
         setEvents(e);
-        console.log(w);
-        console.log(e);
       } catch (error) {
         console.error(error);
       }

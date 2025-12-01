@@ -12,26 +12,8 @@ function WeekCalendar({
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
   const [week, setWeek] = useState([]);
   const days = ["일", "월", "화", "수", "목", "금", "토"];
-  const [workers, setWorkers] = useState([
-    { id: 1, name: "지민" },
-    { id: 2, name: "수진" },
-  ]);
-  const [events, setEvents] = useState([
-    {
-      id: 1,
-      workerId: 1,
-      worker: "지민",
-      start: "2025-11-30T15:00",
-      end: "2025-11-30T18:00",
-    },
-    {
-      id: 2,
-      workerId: 2,
-      worker: "수진",
-      start: "2025-12-01T13:00",
-      end: "2025-12-01T18:00",
-    },
-  ]);
+  const [workers, setWorkers] = useState([]);
+  const [events, setEvents] = useState([]);
   const colors = ["#68e194", "#32d1aa", "#00c1bd"];
 
   useEffect(() => {
@@ -63,8 +45,8 @@ function WeekCalendar({
         end: schedule.endDatetime,
       }));
 
-      // setWorkers(uniqueWorkers);
-      // setEvents(formattedEvents);
+      setWorkers(uniqueWorkers);
+      setEvents(formattedEvents);
     })();
   }, [date]);
 

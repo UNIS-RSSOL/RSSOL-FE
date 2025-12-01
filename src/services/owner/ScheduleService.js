@@ -35,14 +35,17 @@ export async function deleteWorkshift(workShiftId) {
 }
 
 //대타요청하기
-// export async function requestSub(shiftId, ) {
-//   try {
-//     const response = api.post("/api/shift-swap/requests");
-//     return (await response).data;
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }
+export async function requestSub(shiftId, reason = "") {
+  try {
+    const response = await api.post("/api/shift-swap/requests", {
+      shiftId: shiftId,
+      reason: reason,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 //추가인력요청
 export async function requestWork(shiftId, headCount, note = "") {
