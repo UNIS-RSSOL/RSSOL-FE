@@ -190,3 +190,103 @@
     outline: 2px solid rgba(0, 0, 0, 0.12);
     outline-offset: 2px;
   }
+
+  /* ============================
+     8) 구분선 (캘린더와 근무표 생성단위 사이)
+     ============================ */
+  .divider-line {
+    width: 100%;
+    height: 8px;
+    background: #E7EAF3;
+    margin: 0;
+  }
+
+  /* ============================
+     9) 근무표 생성단위 컨테이너 width 줄이기 및 중앙 정렬
+     ============================ */
+  .schedule-unit-container {
+    max-width: 90%;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* ============================
+     10) 시간 입력 필드 스타일 (흰배경, 작게)
+     ============================ */
+  .time-input {
+    background: white !important;
+    border: 1px solid #E5E5E5 !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    font-size: 14px !important;
+    width: 90px !important;
+    height: 32px !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+  }
+
+  .time-input:focus {
+    outline: none !important;
+    border-color: #68E194 !important;
+  }
+
+  .time-slot-row {
+    align-items: center;
+  }
+
+  /* ============================
+     11) 인원 버튼 (동그라미, 흰배경)
+     ============================ */
+  .personnel-btn {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    background: white !important;
+    border: 1px solid #E5E5E5 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    color: #2d2d2d !important;
+    transition: all 0.2s !important;
+  }
+
+  .personnel-btn:hover {
+    background: #F5F5F5 !important;
+    border-color: #68E194 !important;
+  }
+
+  .personnel-btn:active {
+    background: #E5E5E5 !important;
+  }
+
+  .personnel-btn:focus {
+    outline: none !important;
+  }
+
+  /* ============================
+     12) 타임 추가 버튼 (테두리 없음, 배경 없음)
+     ============================ */
+  .add-time-btn {
+    background: transparent !important;
+    border: none !important;
+    color: #000 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    padding: 0 !important;
+    cursor: pointer !important;
+    text-align: left !important;
+  }
+
+  .add-time-btn:hover {
+    color: #4FC97A !important;
+  }
+
+  .add-time-btn:focus {
+    outline: none !important;
+  }

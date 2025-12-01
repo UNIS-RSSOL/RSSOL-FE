@@ -213,12 +213,16 @@ export default function CalAdd() {
 
         if (result && result.candidateScheduleKey) {
           // candidate 확정 시 시작일자/마무리일자 포함
-          // 여기서는 생성만 하고, 확정은 별도 페이지에서 처리할 수 있음
+          // 생성된 후보들을 선택하는 화면으로 이동
           alert("근무표 후보가 생성되었습니다.");
-          console.log("생성된 후보 키:", result.candidateScheduleKey);
-          console.log("저장된 시작일자:", startDate);
-          console.log("저장된 마무리일자:", endDate);
-          // TODO: 후보 확인 페이지로 이동하거나 확정 로직 추가
+          navigate("/autoCal", {
+            state: {
+              candidateKey: result.candidateScheduleKey,
+              startDate,
+              endDate,
+              generatedCount: result.generatedCount ?? 5,
+            },
+          });
         }
       } else {
         // 지정하지 않음 - 최소 근무시간으로 나눈 경우
@@ -267,7 +271,7 @@ export default function CalAdd() {
 
   return (
     <div className="w-full flex flex-col h-screen">
-      <TopBar title="근무표 생성" onBack={() => navigate(-1)} />
+      <TopBar title="근무표 생성" onBack={() => navigate("/owner")} />
 
       <div className="flex-1 p-4 space-y-4 h-flex">
         {/* ---------- 커스텀 헤더 ---------- */}
@@ -319,7 +323,11 @@ export default function CalAdd() {
           />
         </div>
       </div>
-      <div className="flex-1 overflow-auto p-4 space-y-4">
+      
+      {/* 구분선 */}
+      <div className="divider-line"></div>
+      
+      <div className="flex-1 overflow-auto p-4 space-y-4 schedule-unit-container">
         {/* ---------- 시간 슬롯 ---------- */}
         <div className="space-y-2">
           <div className="font-semibold">근무표 생성 단위</div>
@@ -332,15 +340,14 @@ export default function CalAdd() {
             />
             <span>지정함</span>
           </label>
-
           {unitSpecified && (
-            <div className="space-y-2">
+            <div className="space-y-2 time-slots-container">
               {timeSlots.map((slot, idx) => (
-                <div key={idx} className="flex items-center space-x-2">
+                <div key={idx} className="flex items-center justify-center space-x-2 time-slot-row">
                   <input
                     type="time"
                     value={slot.start}
-                    className="border p-1 rounded w-24"
+                    className="time-input"
                     onChange={(e) =>
                       handleTimeChange(idx, "start", e.target.value)
                     }
@@ -349,7 +356,7 @@ export default function CalAdd() {
                   <input
                     type="time"
                     value={slot.end}
-                    className="border p-1 rounded w-24"
+                    className="time-input"
                     onChange={(e) =>
                       handleTimeChange(idx, "end", e.target.value)
                     }
@@ -357,7 +364,7 @@ export default function CalAdd() {
 
                   <div className="flex items-center space-x-1">
                     <button
-                      className="border rounded px-2"
+                      className="personnel-btn personnel-btn-minus"
                       onClick={() =>
                         handleTimeChange(
                           idx,
@@ -370,7 +377,7 @@ export default function CalAdd() {
                     </button>
                     <span>{slot.count}</span>
                     <button
-                      className="border rounded px-2"
+                      className="personnel-btn personnel-btn-plus"
                       onClick={() =>
                         handleTimeChange(idx, "count", slot.count + 1)
                       }
@@ -383,7 +390,7 @@ export default function CalAdd() {
 
               <button
                 onClick={handleAddTime}
-                className="text-green-600 text-sm font-semibold"
+                className="add-time-btn"
               >
                 + 타임 추가
               </button>
@@ -406,7 +413,7 @@ export default function CalAdd() {
                   type="number"
                   min="1"
                   value={minWorkTime}
-                  className="border p-1 rounded w-12"
+                  className="border p-1 rounded w-12 ml-2 mr-2"
                   onChange={(e) => setMinWorkTime(e.target.value)}
                 />
                 <span>시간</span>
