@@ -30,7 +30,7 @@ function Header() {
     }
     if (menu === "알림") {
       const fromEmployeeSection = location.pathname.startsWith("/employee");
-      navigate(fromEmployeeSection ? "/alarmHomeEmp" : "/alarmHome");
+      navigate(fromEmployeeSection ? "/alarmhomeemp" : "/alarmhome");
     }
   };
 

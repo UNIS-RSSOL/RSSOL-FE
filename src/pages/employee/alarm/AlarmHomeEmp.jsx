@@ -19,8 +19,8 @@ function AlarmHomeEmp() {
           title="맥도날드 신촌점"
           time="10분 전"
         >
-          ‘김혜민’님이 15(월) 13:00~16:00 근무를 부탁했어요!
-          <ActionButtons leftLabel="거절" rightLabel="수락" />
+          사장님이 {new Date().getMonth() + 1}월 시간표 추가를 요청했어요! 근무가능 시간표를 작성해주세요
+          <ActionButtons leftLabel="거절" rightLabel="추가하기" onRightClick={() => navigate("/calAddEmp")} />
         </AlarmItem>
       </div>
     </div>

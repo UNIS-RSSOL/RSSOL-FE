@@ -22,6 +22,7 @@ import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
 import CalGen from "./pages/owner/calendarAdd/CalGen.jsx";
 import AutoCal from "./pages/owner/calendarAdd/AutoCal.jsx";
 import AddOwner from "./pages/owner/calendarAdd/AddOwner.jsx";
+import ScheduleList from "./pages/owner/calendarAdd/ScheduleList.jsx";
 
 import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
@@ -30,6 +31,7 @@ import EmpHome from "./pages/employee/EmpHome.jsx";
 
 function App() {
   const location = useLocation();
+  console.log("📍 Current Path:", location.pathname);
 
   // 헤더·푸터 제외할 페이지
   const hideLayoutPaths = [
@@ -42,9 +44,10 @@ function App() {
     "/autoCal",
     "/calAddEmp",
     "/addOwner",
-    "/alarmHomeEmp",
-    "/alarmHome",
-    "/alarmCheck",
+    "/scheduleList",
+    "/alarmhomeemp",
+    "/alarmhome",
+    "/alarmcheck",
   ];
   const hideLayout = hideLayoutPaths.some((path) => {
     // 루트 경로 (정확히 "/"만 일치)
@@ -92,6 +95,7 @@ function App() {
           <Route path="/calGen" element={<CalGen />} />
           <Route path="/autoCal" element={<AutoCal />} />
           <Route path="/addOwner" element={<AddOwner />} />
+          <Route path="/scheduleList" element={<ScheduleList />} />
 
           <Route path="/alarmHomeEmp" element={<AlarmHomeEmp />} />
           <Route path="/alarmHome" element={<AlarmHome />} />

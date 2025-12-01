@@ -7,7 +7,9 @@ import interactionPlugin from "@fullcalendar/interaction";
 import TopBar from "../../../components/layout/alarm/TopBar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import { generateSchedule, confirmSchedule } from "../../../services/scheduleService.js";
-import { fetchActiveStore } from "../../../services/owner/MyPageService.js";
+import { fetchActiveStore, fetchStoredata } from "../../../services/owner/MyPageService.js";
+import { sendScheduleRequestNotification } from "../../../services/owner/NotificationService.js";
+import { fetchAllWorkers } from "../../../services/owner/ScheduleService.js";
 import "./CalAdd.css";
 
 export default function CalAdd() {
@@ -330,7 +332,7 @@ export default function CalAdd() {
       <div className="flex-1 overflow-auto p-4 space-y-4 schedule-unit-container">
         {/* ---------- 시간 슬롯 ---------- */}
         <div className="space-y-2">
-          <div className="font-semibold">근무표 생성 단위</div>
+          <div className="font-semibold text-18px">근무표 생성 단위</div>
 
           <label className="flex items-center space-x-2">
             <input
@@ -338,12 +340,23 @@ export default function CalAdd() {
               checked={unitSpecified}
               onChange={() => setUnitSpecified(true)}
             />
-            <span>지정함</span>
+            <span style={{ fontSize: "18px", fontWeight: "600" }}>지정함</span>
           </label>
           {unitSpecified && (
             <div className="space-y-2 time-slots-container">
               {timeSlots.map((slot, idx) => (
                 <div key={idx} className="flex items-center justify-center space-x-2 time-slot-row">
+                  <div
+                    className="flex items-center justify-center rounded-full bg-gray-200"
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                    }}
+                  >
+                    {idx + 1}
+                  </div>
                   <input
                     type="time"
                     value={slot.start}
@@ -363,6 +376,7 @@ export default function CalAdd() {
                   />
 
                   <div className="flex items-center space-x-1">
+                    <span>인원</span>
                     <button
                       className="personnel-btn personnel-btn-minus"
                       onClick={() =>
@@ -403,11 +417,11 @@ export default function CalAdd() {
               checked={!unitSpecified}
               onChange={() => setUnitSpecified(false)}
             />
-            <span>지정하지 않음</span>
+            <span style={{ fontSize: "18px", fontWeight: "600" }}>지정하지 않음</span>
           </label>
           {!unitSpecified && (
             <div className="mt-2 space-y-1">
-              <div className="font-medium">
+              <div className="font-medium text-18px">
                 최소 근무시간
                 <input
                   type="number"
@@ -425,10 +439,24 @@ export default function CalAdd() {
       </div>
 
       <BottomBar 
-        leftText="내 스케줄 추가하기" 
-        rightText="근무표 생성하기"
-        onLeftClick={() => navigate("/addOwner")}
-        onRightClick={handleGenerateSchedule}
+        singleButton
+        singleButtonText="근무표 생성 요청하기"
+        onSingleClick={async () => {
+          try {
+            // 매장 정보 가져오기
+            const storeData = await fetchStoredata();
+            const currentMonth = new Date().getMonth() + 1;
+            
+            // 알바생들에게 알림 전송
+            await sendScheduleRequestNotification(storeId, currentMonth);
+            
+            alert("알바생들에게 근무표 작성 요청 알림이 전송되었습니다.");
+            navigate("/scheduleList");
+          } catch (error) {
+            console.error("알림 전송 실패:", error);
+            alert("알림 전송에 실패했습니다. 다시 시도해주세요.");
+          }
+        }}
       />
     </div>
   );
