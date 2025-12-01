@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/alarm/TopBar.jsx";
@@ -8,14 +8,37 @@ import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import Toast from "../../../components/common/Toast.jsx";
 import { fetchAllWorkers } from "../../../services/owner/ScheduleService.js";
 import { fetchSchedules } from "../../../services/common/ScheduleService.js";
+import { generateSchedule } from "../../../services/scheduleService.js";
+import { fetchActiveStore } from "../../../services/owner/MyPageService.js";
 
 function ScheduleList() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [workers, setWorkers] = useState([]);
   const [workerSchedules, setWorkerSchedules] = useState({});
   const [toastOpen, setToastOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedHour, setSelectedHour] = useState(null);
+  const [storeId, setStoreId] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  
+  // CalAdd에서 전달받은 정보 (시간 구간, 시작일, 종료일 등)
+  const scheduleConfig = location.state || {};
+
+  // 매장 ID 가져오기
+  useEffect(() => {
+    const loadStoreId = async () => {
+      try {
+        const activeStore = await fetchActiveStore();
+        if (activeStore && activeStore.storeId) {
+          setStoreId(activeStore.storeId);
+        }
+      } catch (error) {
+        console.error("매장 ID 로드 실패:", error);
+      }
+    };
+    loadStoreId();
+  }, []);
 
   // 직원 리스트 및 스케줄 가져오기
   useEffect(() => {
@@ -125,6 +148,56 @@ function ScheduleList() {
     setToastOpen(true);
   };
 
+  // 근무표 생성하기
+  const handleGenerateSchedule = async () => {
+    if (isGenerating) return;
+    
+    if (!storeId) {
+      alert("매장 정보를 불러올 수 없습니다.");
+      return;
+    }
+
+    try {
+      setIsGenerating(true);
+
+      // CalAdd에서 전달받은 정보가 있으면 사용, 없으면 기본값 사용
+      const timeSegments = scheduleConfig.timeSegments || [
+        { startTime: "09:00:00", endTime: "18:00:00", requiredStaff: 1 }
+      ];
+      const openTime = scheduleConfig.openTime || "09:00:00";
+      const closeTime = scheduleConfig.closeTime || "18:00:00";
+
+      const result = await generateSchedule(
+        storeId,
+        openTime,
+        closeTime,
+        timeSegments,
+        { candidateCount: 5 }
+      );
+
+      if (result && result.candidateScheduleKey) {
+        const startDate = scheduleConfig.startDate || dayjs().locale("ko").startOf("week").format("YYYY-MM-DD");
+        const endDate = scheduleConfig.endDate || dayjs().locale("ko").startOf("week").add(6, "day").format("YYYY-MM-DD");
+        
+        navigate("/autoCal", {
+          state: {
+            candidateKey: result.candidateScheduleKey,
+            startDate,
+            endDate,
+            generatedCount: result.generatedCount ?? 5,
+          },
+        });
+      } else {
+        alert("근무표 생성에 실패했습니다. 다시 시도해주세요.");
+      }
+    } catch (error) {
+      console.error("근무표 생성 실패:", error);
+      alert("근무표 생성에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f9fd]">
       <TopBar title="근무표 생성" onBack={() => navigate(-1)} />
@@ -189,8 +262,8 @@ function ScheduleList() {
       
       <BottomBar
         singleButton
-        singleButtonText="생성하기"
-        onSingleClick={() => navigate("/autoCal")}
+        singleButtonText={isGenerating ? "생성 중..." : "생성하기"}
+        onSingleClick={handleGenerateSchedule}
       />
 
       <Toast isOpen={toastOpen} onClose={() => setToastOpen(false)}>

@@ -5,6 +5,7 @@ import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/alarm/TopBar.jsx";
 import OwnerScheduleCalendar from "../../../components/common/calendar/OwnerScheduleCalendar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
+import Toast from "../../../components/common/Toast.jsx";
 import { addWorkshift, fetchAllWorkers } from "../../../services/owner/ScheduleService.js";
 import { fetchSchedules } from "../../../services/common/ScheduleService.js";
 
@@ -14,6 +15,7 @@ function AddOwner() {
   const [selectedTimeSlots, setSelectedTimeSlots] = useState(new Set());
   const [ownerUserStoreId, setOwnerUserStoreId] = useState(null);
   const [existingSchedules, setExistingSchedules] = useState([]);
+  const [toastOpen, setToastOpen] = useState(false);
 
   // 사장의 userStoreId 가져오기
   useEffect(() => {
@@ -141,8 +143,11 @@ function AddOwner() {
       for (const schedule of schedulesToAdd) {
         await addWorkshift(ownerUserStoreId, schedule.start, schedule.end);
       }
-      alert("스케줄이 추가되었습니다.");
-      navigate(-1);
+      setToastOpen(true);
+      setTimeout(() => {
+        setToastOpen(false);
+        navigate("/scheduleList");
+      }, 2000);
     } catch (error) {
       console.error("스케줄 추가 실패:", error);
       alert("스케줄 추가에 실패했습니다. 다시 시도해주세요.");
@@ -170,6 +175,10 @@ function AddOwner() {
         singleButtonText="스케줄 추가하기"
         onSingleClick={handleAddSchedule}
       />
+
+      <Toast isOpen={toastOpen} onClose={() => setToastOpen(false)}>
+        <p className="text-lg font-bold">완료되었습니다</p>
+      </Toast>
     </div>
   );
 }

@@ -14,7 +14,7 @@ function Header() {
     const path = location.pathname;
     if (path === "/" || path.includes("/calendar") || path.includes("/cal")) {
       setSelectedMenu("캘린더생성");
-    } else if (path.includes("/alarm-home")) {
+    } else if (path.includes("/alarmHome")) {
       setSelectedMenu("알림");
     } else {
       setSelectedMenu("");
@@ -30,7 +30,7 @@ function Header() {
     }
     if (menu === "알림") {
       const fromEmployeeSection = location.pathname.startsWith("/employee");
-      navigate(fromEmployeeSection ? "/alarmhomeemp" : "/alarmhome");
+      navigate(fromEmployeeSection ? "/alarmHomeEmp" : "/alarmHome");
     }
   };
 

@@ -45,9 +45,9 @@ function App() {
     "/calAddEmp",
     "/addOwner",
     "/scheduleList",
-    "/alarmhomeemp",
-    "/alarmhome",
-    "/alarmcheck",
+    "/alarmHomeEmp",
+    "/alarmHome",
+    "/alarmCheck",
   ];
   const hideLayout = hideLayoutPaths.some((path) => {
     // 루트 경로 (정확히 "/"만 일치)

@@ -4,6 +4,8 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import koLocale from "@fullcalendar/core/locales/ko";
 import interactionPlugin from "@fullcalendar/interaction";
+import dayjs from "dayjs";
+import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/alarm/TopBar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import { generateSchedule, confirmSchedule } from "../../../services/scheduleService.js";
@@ -332,7 +334,7 @@ export default function CalAdd() {
       <div className="flex-1 overflow-auto p-4 space-y-4 schedule-unit-container">
         {/* ---------- 시간 슬롯 ---------- */}
         <div className="space-y-2">
-          <div className="font-semibold text-18px">근무표 생성 단위</div>
+          <div className="font-semibold text-20px">근무표 생성 단위</div>
 
           <label className="flex items-center space-x-2">
             <input
@@ -450,8 +452,33 @@ export default function CalAdd() {
             // 알바생들에게 알림 전송
             await sendScheduleRequestNotification(storeId, currentMonth);
             
-            alert("알바생들에게 근무표 작성 요청 알림이 전송되었습니다.");
-            navigate("/scheduleList");
+            // ScheduleList로 이동하면서 설정한 정보 전달
+            const timeSegments = unitSpecified
+              ? timeSlots
+                  .filter((slot) => slot.start && slot.end && slot.count > 0)
+                  .map((slot) => ({
+                    startTime: `${slot.start}:00`,
+                    endTime: `${slot.end}:00`,
+                    requiredStaff: slot.count,
+                  }))
+              : null;
+
+            const allTimes = unitSpecified && timeSegments.length > 0
+              ? timeSegments.flatMap((seg) => [seg.startTime, seg.endTime])
+              : [];
+            const sortedTimes = allTimes.sort();
+            const openTime = sortedTimes.length > 0 ? sortedTimes[0] : "09:00:00";
+            const closeTime = sortedTimes.length > 0 ? sortedTimes[sortedTimes.length - 1] : "18:00:00";
+
+            navigate("/scheduleList", {
+              state: {
+                timeSegments,
+                openTime,
+                closeTime,
+                startDate: startDate || dayjs().locale("ko").startOf("week").format("YYYY-MM-DD"),
+                endDate: endDate || dayjs().locale("ko").startOf("week").add(6, "day").format("YYYY-MM-DD"),
+              },
+            });
           } catch (error) {
             console.error("알림 전송 실패:", error);
             alert("알림 전송에 실패했습니다. 다시 시도해주세요.");

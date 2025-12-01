@@ -130,7 +130,11 @@ export default function AutoCal() {
 
   const handleModalButton = (action) => {
     setIsModalOpen(false);
-    navigate("/owner/calendar");
+    if (action === "view") {
+      navigate("/owner/calendar");
+    } else if (action === "edit") {
+      navigate("/owner/calendar");
+    }
   };
 
   return (
