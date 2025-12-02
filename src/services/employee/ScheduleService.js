@@ -80,10 +80,13 @@ export async function addAvailability(payload) {
 // 근무 가능 시간 삭제
 export async function deleteAvailability(availabilityId) {
   try {
+    if (!availabilityId) {
+      throw new Error("availabilityId가 필요합니다.");
+    }
     const response = await api.delete(`/api/me/availabilities/${availabilityId}`);
     return response.data;
   } catch (error) {
-    console.error("근무 가능 시간 삭제 실패:", error);
+    // api.js의 interceptor에서 이미 로깅하므로 여기서는 에러만 throw
     throw error;
   }
 }
