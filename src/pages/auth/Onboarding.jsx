@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
+const ONBOARDING_ROLE_KEY = "onboardingRole";
+const ONBOARDING_DATA_KEY = "onboardingData";
 
 export default function Onboarding() {
   const [step, setStep] = useState(1);
@@ -16,6 +19,37 @@ export default function Onboarding() {
   });
 
   const navigate = useNavigate();
+
+  // 컴포넌트 마운트 시 localStorage에서 데이터 복원
+  useEffect(() => {
+    const savedRole = localStorage.getItem(ONBOARDING_ROLE_KEY);
+    const savedData = localStorage.getItem(ONBOARDING_DATA_KEY);
+    
+    if (savedRole) {
+      setRole(savedRole);
+    }
+    
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        setFormData(parsedData);
+      } catch (error) {
+        console.error("온보딩 데이터 파싱 실패:", error);
+      }
+    }
+  }, []);
+
+  // role이 변경될 때마다 localStorage에 저장
+  useEffect(() => {
+    if (role) {
+      localStorage.setItem(ONBOARDING_ROLE_KEY, role);
+    }
+  }, [role]);
+
+  // formData가 변경될 때마다 localStorage에 저장
+  useEffect(() => {
+    localStorage.setItem(ONBOARDING_DATA_KEY, JSON.stringify(formData));
+  }, [formData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,6 +76,10 @@ export default function Onboarding() {
           return;
         }
       }
+      
+      // 최종 데이터 localStorage에 저장
+      localStorage.setItem(ONBOARDING_ROLE_KEY, role);
+      localStorage.setItem(ONBOARDING_DATA_KEY, JSON.stringify(formData));
     }
 
     if (step < 2) setStep(step + 1);
