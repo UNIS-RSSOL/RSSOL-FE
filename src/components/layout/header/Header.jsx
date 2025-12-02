@@ -89,11 +89,18 @@ function Header() {
   // work availability 확인 (알바용)
   const checkExistingAvailability = async () => {
     try {
+      console.log("🔍 Header: work availability 확인 시작");
       const availabilities = await fetchMyAvailabilities();
+      console.log("🔍 Header: fetchMyAvailabilities 응답:", availabilities);
+      
       // availabilities가 배열이고 길이가 0보다 크면 true
-      return availabilities && Array.isArray(availabilities) && availabilities.length > 0;
+      const hasAvailability = availabilities && Array.isArray(availabilities) && availabilities.length > 0;
+      console.log("🔍 Header: availability 존재 여부:", hasAvailability, "개수:", availabilities?.length || 0);
+      
+      return hasAvailability;
     } catch (error) {
-      console.error("work availability 확인 실패:", error);
+      console.error("❌ Header: work availability 확인 실패:", error);
+      console.error("❌ Header: 에러 상세:", error.response?.data || error.message);
       return false;
     }
   };

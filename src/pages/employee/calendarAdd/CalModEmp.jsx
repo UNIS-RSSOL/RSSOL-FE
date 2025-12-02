@@ -106,11 +106,16 @@ function CalModEmp() {
     const loadAvailabilities = async () => {
       setIsLoadingAvailabilities(true);
       try {
+        console.log("🔍 CalModEmp: work availability 불러오기 시작");
         const availabilityData = await fetchMyAvailabilities();
+        console.log("🔍 CalModEmp: fetchMyAvailabilities 응답:", availabilityData);
+        console.log("🔍 CalModEmp: availability 개수:", availabilityData?.length || 0);
+        
         setAvailabilities(availabilityData || []);
 
         // work availability를 selectedTimeSlots에 추가
         if (availabilityData && Array.isArray(availabilityData) && availabilityData.length > 0) {
+          console.log("🔍 CalModEmp: availability 데이터가 있음, selectedTimeSlots 설정 시작");
           const days = ["일", "월", "화", "수", "목", "금", "토"];
           const initialSelected = new Set();
           const startOfWeek = dayjs(currentDate).locale("ko").startOf("week");
@@ -155,16 +160,23 @@ function CalModEmp() {
           });
 
           setSelectedTimeSlots(initialSelected);
+          console.log("🔍 CalModEmp: selectedTimeSlots 설정 완료, 개수:", initialSelected.size);
+        } else {
+          console.log("🔍 CalModEmp: availability 데이터가 없음");
         }
       } catch (error) {
-        console.error("work availability 로드 실패:", error);
+        console.error("❌ CalModEmp: work availability 로드 실패:", error);
+        console.error("❌ CalModEmp: 에러 상세:", error.response?.data || error.message);
       } finally {
         setIsLoadingAvailabilities(false);
       }
     };
     
-    loadAvailabilities();
-  }, [currentDate]);
+    // employeeUserId와 employeeStoreId가 로드된 후에만 실행
+    if (!isLoadingEmployeeInfo && employeeUserId && employeeStoreId) {
+      loadAvailabilities();
+    }
+  }, [currentDate, isLoadingEmployeeInfo, employeeUserId, employeeStoreId]);
 
   // 시간 블록 클릭 핸들러
   const handleTimeSlotClick = (day, hour) => {

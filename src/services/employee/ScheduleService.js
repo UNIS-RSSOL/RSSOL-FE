@@ -31,10 +31,34 @@ export async function requestSub(shiftId, reason = "") {
 // 내 근무 가능 시간 조회 (work availability)
 export async function fetchMyAvailabilities() {
   try {
+    console.log("🔍 fetchMyAvailabilities: API 요청 시작");
     const response = await api.get("/api/me/availabilities");
-    return response.data;
+    console.log("🔍 fetchMyAvailabilities: API 응답:", response.data);
+    console.log("🔍 fetchMyAvailabilities: 응답 타입:", typeof response.data);
+    console.log("🔍 fetchMyAvailabilities: 배열 여부:", Array.isArray(response.data));
+    
+    // 응답이 배열이 아닌 경우 처리
+    let availabilities = response.data;
+    if (!Array.isArray(availabilities)) {
+      // 만약 응답이 객체이고 내부에 배열이 있다면
+      if (availabilities && availabilities.availabilities && Array.isArray(availabilities.availabilities)) {
+        availabilities = availabilities.availabilities;
+      } else if (availabilities && availabilities.data && Array.isArray(availabilities.data)) {
+        availabilities = availabilities.data;
+      } else {
+        // 배열이 아니면 빈 배열로 처리
+        console.warn("⚠️ fetchMyAvailabilities: 응답이 배열이 아님, 빈 배열 반환");
+        availabilities = [];
+      }
+    }
+    
+    console.log("🔍 fetchMyAvailabilities: 최종 반환 데이터:", availabilities);
+    console.log("🔍 fetchMyAvailabilities: 최종 반환 데이터 개수:", availabilities.length);
+    
+    return availabilities;
   } catch (error) {
-    console.error("근무 가능 시간 조회 실패:", error);
+    console.error("❌ fetchMyAvailabilities: 근무 가능 시간 조회 실패:", error);
+    console.error("❌ fetchMyAvailabilities: 에러 응답:", error.response?.data);
     throw error;
   }
 }
