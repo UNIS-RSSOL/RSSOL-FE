@@ -4,10 +4,10 @@
  * 플로우:
  * 1. 사용자가 카카오 로그인 버튼 클릭
  * 2. 카카오 인증 페이지로 이동 (redirect_uri는 프론트엔드 콜백 URL)
- * 3. 카카오가 프론트엔드 콜백 URL로 code를 전달
- * 4. 프론트엔드가 code를 받아서 백엔드로 전달
- * 5. 백엔드가 code를 받아서 카카오 토큰 교환 및 사용자 정보 처리
- * 6. 프론트엔드가 백엔드 응답을 받아서 저장하고 적절한 페이지로 이동
+ * 3. 카카오가 프론트엔드로 code를 전달 (/auth/kakao/callback?code=...)
+ * 4. 프론트엔드 KakaoCallback 컴포넌트가 code를 백엔드로 GET 요청 (쿼리 파라미터)
+ * 5. 백엔드가 code를 받아서 카카오 토큰 교환 및 사용자 정보 처리 후 응답
+ * 6. 프론트엔드가 토큰을 저장하고 적절한 페이지로 이동
  */
 
 import api from "./api.js";
@@ -15,26 +15,29 @@ import api from "./api.js";
 const KAKAO_AUTH_BASE_URL = "https://kauth.kakao.com/oauth/authorize";
 const KAKAO_CLIENT_ID = "3ddfc329270e2ce7e4ab45f3fcca3891";
 
-// 프론트엔드 콜백 URL (카카오가 리다이렉트할 주소)
-const LOCAL_REDIRECT_URI = "http://localhost:5173/api/auth/kakao/callback";
-const PROD_REDIRECT_URI = "https://connecti.store/api/auth/kakao/callback";
+/**
+ * 프론트엔드 콜백 URL을 동적으로 생성합니다.
+ * 개발 환경: localhost:5173
+ * 프로덕션 환경: 현재 도메인 기준
+ */
+const getFrontendCallbackUrl = () => {
+  const currentHost = window.location.hostname;
+  const currentProtocol = window.location.protocol;
+  const currentPort = window.location.port;
+  
+  // 개발 환경
+  if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+    const port = currentPort || '5173';
+    return `${currentProtocol}//${currentHost}:${port}/auth/kakao/callback`;
+  }
+  
+  // 프로덕션 환경 - 현재 도메인 사용
+  return `${currentProtocol}//${currentHost}/auth/kakao/callback`;
+};
 
 const TOKEN_REFRESH_PATH = "/api/auth/token/refresh";
 const ACCESS_TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
-
-/**
- * 프론트엔드 콜백 URL 반환합니다 (카카오 OAuth redirect_uri)
- */
-const getRedirectUri = () => {
-  // 프로덕션 환경 체크: Vite의 PROD 모드 또는 connecti.store 도메인 사용 시
-  const isProduction =
-    import.meta.env.PROD ||
-    window.location.hostname === "connecti.store" ||
-    window.location.hostname.includes("connecti.store");
-
-  return isProduction ? PROD_REDIRECT_URI : LOCAL_REDIRECT_URI;
-};
 
 const persistSession = ({ accessToken, refreshToken }) => {
   if (accessToken) {
@@ -50,12 +53,12 @@ const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY);
 /**
  * 카카오 인증 페이지 URL을 생성합니다.
  * redirect_uri는 프론트엔드 콜백 URL을 사용합니다.
+ * 카카오가 프론트엔드로 직접 리다이렉트하고, 프론트엔드에서 코드를 백엔드로 전달합니다.
  * @returns {string}
  */
 export const getKakaoAuthorizeUrl = () => {
-  const redirectUri = encodeURIComponent(getRedirectUri());
-  // prompt=login 파라미터를 추가하여 항상 로그인 페이지를 보여줍니다
-  return `${KAKAO_AUTH_BASE_URL}?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&prompt=login`;
+  const redirectUri = getFrontendCallbackUrl();
+  return `${KAKAO_AUTH_BASE_URL}?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
 };
 
 /**
@@ -71,8 +74,7 @@ export const goToKakaoLogin = (e) => {
   const url = getKakaoAuthorizeUrl();
   console.log("카카오 로그인 버튼 클릭됨");
   console.log("카카오 로그인 URL:", url);
-
-  // 명시적으로 카카오 인증 페이지로 이동
+  
   window.location.href = url;
 };
 
@@ -90,8 +92,8 @@ export const handleKakaoSession = (session) => {
 };
 
 /**
- * Refresh Token으로 Access Token을 재발급받습니다.
- * @returns {Promise<string>} 새 Access Token
+ * Refresh Token - Access Token 재발급
+ * @returns {Promise<string>}
  */
 export const refreshAccessToken = async () => {
   const refreshToken = getRefreshToken();

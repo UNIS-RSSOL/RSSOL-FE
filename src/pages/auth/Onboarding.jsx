@@ -41,6 +41,7 @@ export default function Onboarding() {
     }
   }, []);
 
+  // localStorage
   // role이 변경될 때마다 localStorage에 저장
   useEffect(() => {
     if (role) {

@@ -50,8 +50,19 @@ function KakaoCallback() {
         // 세션 정보 저장
         handleKakaoSession(session);
 
-        // 응답에서 isNewUser 확인 (옵셔널 체이닝으로 안전하게 처리)
-        if (session.isNewUser) {
+        // newUser 필드 확인 (백엔드에서 newUser 또는 isNewUser로 반환할 수 있음)
+        const isNewUser = session.newUser !== undefined ? session.newUser : session.isNewUser;
+        
+        console.log("카카오 로그인 응답 데이터:", {
+          userId: session.userId,
+          newUser: session.newUser,
+          isNewUser: session.isNewUser,
+          username: session.username,
+          provider: session.provider
+        });
+
+        // 신규 회원인 경우 온보딩으로 이동
+        if (isNewUser) {
           console.log("신규 회원 -> 온보딩으로 이동");
           window.history.replaceState({}, document.title, window.location.pathname);
           navigate("/onboarding");
