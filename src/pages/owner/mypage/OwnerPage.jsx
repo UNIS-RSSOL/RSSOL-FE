@@ -8,7 +8,7 @@ import TypeIcon from "../../../assets/icons/TypeIcon.jsx";
 import MapIcon from "../../../assets/icons/MapIcon.jsx";
 import PhoneIcon from "../../../assets/icons/PhoneIcon.jsx";
 import NoteIcon from "../../../assets/icons/NoteIcon.jsx";
-import character1 from "../../../assets/images/character1.png";
+import character from "../../../assets/images/character4.png";
 import {
   fetchMydata,
   fetchStoredata,
@@ -141,7 +141,7 @@ function OwnerPage() {
       <div className="flex items-center justify-center">
         <div className="flex items-center justify-center size-[130px] bg-[#68e194] border-3 border-[#fdfffe] shadow-[0_4px_8px_0_rgba(0,0,0,0.2)] overflow-hidden rounded-full my-7">
           {profile === "" ? (
-            <img src={character1} alt="profile" />
+            <img src={character} alt="profile" />
           ) : (
             <img src={profile} alt="profile" />
           )}
