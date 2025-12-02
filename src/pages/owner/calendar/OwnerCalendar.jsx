@@ -65,6 +65,7 @@ function OwnerCalendar() {
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
   const [needWorkers, setNeedWorkers] = useState(1);
   const [activeStore, setActiveStore] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [newTime, setNewTime] = useState({
     userStoreId: "",
     workerName: "",
@@ -162,7 +163,6 @@ function OwnerCalendar() {
   };
 
   const WorkersDropDown = () => {
-    const [dropdownOpen, setDropdownOpen] = useState(false);
     const [workers, setWorkers] = useState([]);
 
     useEffect(() => {

@@ -17,7 +17,9 @@ export async function addWorkshift(userStoreId, start, end) {
 //근무블록삭제
 export async function deleteWorkshift(workShiftId) {
   try {
-    const response = await api.delete(`/api/schedules/workshifts/${workShiftId}`);
+    const response = await api.delete(
+      `/api/schedules/workshifts/${workShiftId}`,
+    );
     return response.data;
   } catch (error) {
     console.error(error);
@@ -54,7 +56,7 @@ export async function requestWork(shiftId, headCount, note = "") {
 //모든 근무자 조회 (사장 포함)
 export async function fetchAllWorkers() {
   try {
-    const response = await api.get("/api/mypage/owner/workers");
+    const response = await api.get("/api/store/staff");
     return response.data;
   } catch (error) {
     console.error(error);
