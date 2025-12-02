@@ -11,6 +11,7 @@ import {
   fetchStoreList,
   updateMydata,
 } from "../../../services/employee/MyPageService.js";
+import { logout } from "../../../services/authService.js";
 
 function EmployeePage() {
   const [mydata, setMydata] = useState([]);
@@ -89,6 +90,20 @@ function EmployeePage() {
     return bank.length > 10;
   };
 
+  //로그아웃
+  const handleLogout = async () => {
+    try {
+      await logout();
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      alert("로그아웃 되었습니다.");
+      navigate("/");
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+      alert("로그아웃 실패");
+    }
+  };
+
   return (
     <div className="flex flex-col divide-y-8 divide-[#e7eaf3]">
       <div className="flex items-center justify-center">
@@ -106,6 +121,14 @@ function EmployeePage() {
         myData={mydata}
         onDataUpdate={handleMyDataUpdate}
       />
+      <div className="flex items-center justify-center py-5">
+        <p
+          className="text-[12px]/[12px] font-[400] border-b border-black hover:text-[#68e194] hover:border-[#68e194] transition-colors duration-100 cursor-pointer"
+          onClick={handleLogout}
+        >
+          로그아웃
+        </p>
+      </div>
     </div>
   );
 }

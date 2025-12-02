@@ -128,14 +128,14 @@ function OwnerPage() {
   //로그아웃
   const handleLogout = async () => {
     try {
-      // await logout();
+      await logout();
       localStorage.removeItem("accessToken");
-      localStorage.removeItem(ACCESS_TOKEN_KEY);
-      localStorage.removeItem(REFRESH_TOKEN_KEY);
+      localStorage.removeItem("refreshToken");
       alert("로그아웃 되었습니다.");
       navigate("/");
     } catch (error) {
       console.error("로그아웃 실패:", error);
+      alert("로그아웃 실패");
     }
   };
 
@@ -184,7 +184,7 @@ function OwnerPage() {
       />
       <div className="flex items-center justify-center py-5">
         <p
-          className="text-[12px]/[12px] font-[500] cursor-pointer border-b text-black border-black  transition-colors duration-200"
+          className="text-[12px]/[12px] font-[400] border-b border-black hover:text-[#68e194] hover:border-[#68e194] transition-colors duration-100 cursor-pointer"
           onClick={handleLogout}
         >
           로그아웃
