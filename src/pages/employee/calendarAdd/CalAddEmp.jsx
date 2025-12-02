@@ -314,16 +314,16 @@ function CalAddEmp() {
         }
       });
 
-      // 백엔드 DTO 구조에 맞게 payload 생성 (단일 객체)
+      // 백엔드 DTO 구조에 맞게 payload 생성 (단일 객체 안에 availabilities 배열)
       const payload = {
         userStoreId: employeeStoreId,
         userName: employeeUserName,
-        availabilities: availabilities,
+        availabilities: availabilities, // 배열
       };
 
       console.log("sending payload:", JSON.stringify(payload, null, 2));
 
-      // work availability 추가
+      // work availability 추가 (한 번에 모든 availability 전송)
       await addAvailability(payload);
       
       alert("근무 가능 시간이 추가되었습니다.");
