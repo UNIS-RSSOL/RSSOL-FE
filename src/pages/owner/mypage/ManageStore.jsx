@@ -58,7 +58,7 @@ function ManageStore() {
         console.error(error);
       }
     })();
-  }, [addToast]);
+  }, [addToast, deleteModal]);
 
   const StoreItem = ({ index, store }) => {
     return (
