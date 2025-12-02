@@ -190,13 +190,13 @@ function OwnerCalendar() {
                   setNewTime((prev) => ({
                     ...prev,
                     userStoreId: worker.userStoreId,
-                    userName: worker.userName,
+                    userName: worker.username,
                   }));
                   setDropdownOpen(false);
                 }}
               >
                 <span className="text-[12px] font-[400]">
-                  {worker.userName}
+                  {worker.username}
                 </span>
               </div>
             ))}
