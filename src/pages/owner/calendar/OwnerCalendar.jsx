@@ -167,7 +167,7 @@ function OwnerCalendar() {
 
     useEffect(() => {
       (async () => {
-        // const response = await fetchAllWorkers();
+        const response = await fetchAllWorkers();
         setWorkers(response);
       })();
     }, []);
