@@ -9,7 +9,6 @@ import character2 from "../../assets/images/character2.png";
 import StoreIcon from "../../assets/icons/StoreIcon.jsx";
 import character3 from "../../assets/images/character3.png";
 import { fetchSchedules } from "../../services/employee/ScheduleService.js";
-import { fetchWage } from "../../services/employee/WageService.js";
 import {
   fetchActiveStore,
   fetchMydata,
@@ -55,11 +54,6 @@ function EmpHome() {
           storeId: active.storeId,
           name: active.name,
         });
-        const wageRes = await fetchWage(
-          active.storeId,
-          today.format("YYYY-MM"),
-        );
-        setWage(wageRes.total_pay);
       } catch (error) {
         console.error(error);
       }
