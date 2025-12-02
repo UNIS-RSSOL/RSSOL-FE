@@ -16,8 +16,8 @@ const KAKAO_AUTH_BASE_URL = "https://kauth.kakao.com/oauth/authorize";
 const KAKAO_CLIENT_ID = "3ddfc329270e2ce7e4ab45f3fcca3891";
 
 // 프론트엔드 콜백 URL (카카오가 리다이렉트할 주소)
-const LOCAL_REDIRECT_URI = "http://localhost:5173/auth/kakao/callback";
-const PROD_REDIRECT_URI = "https://connecti.store/auth/kakao/callback";
+const LOCAL_REDIRECT_URI = "http://localhost:5173/api/auth/kakao/callback";
+const PROD_REDIRECT_URI = "https://connecti.store/api/auth/kakao/callback";
 
 const TOKEN_REFRESH_PATH = "/api/auth/token/refresh";
 const ACCESS_TOKEN_KEY = "accessToken";

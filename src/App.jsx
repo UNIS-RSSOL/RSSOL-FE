@@ -17,7 +17,7 @@ import AlarmHomeEmp from "./pages/employee/alarm/AlarmHomeEmp.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
 
-import CalAddEmp from "./pages/employee/calendarAdd/CalAddEmp.jsx"
+import CalAddEmp from "./pages/employee/calendarAdd/CalAddEmp.jsx";
 import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
 import CalGen from "./pages/owner/calendarAdd/CalGen.jsx";
 import AutoCal from "./pages/owner/calendarAdd/AutoCal.jsx";
@@ -38,7 +38,7 @@ function App() {
     "/",
     "/login",
     "/onboarding",
-    "/auth/kakao/callback",
+    "/api/auth/kakao/callback",
     "/calAdd",
     "/calGen",
     "/autoCal",
@@ -74,7 +74,7 @@ function App() {
           {/* 로그인/온보딩 */}
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
+          <Route path="/api/auth/kakao/callback" element={<KakaoCallback />} />
 
           <Route path="/owner" element={<OwnerHome />} />
           <Route path="/employee" element={<EmpHome />} />
