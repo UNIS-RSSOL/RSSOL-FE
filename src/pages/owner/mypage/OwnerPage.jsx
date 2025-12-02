@@ -20,12 +20,13 @@ import {
 function OwnerPage() {
   const [mydata, setMydata] = useState([]);
   const [storedata, setStoredata] = useState([]);
+  const [profile, setProfile] = useState("");
 
   useEffect(() => {
     (async () => {
       try {
         const my = await fetchMydata();
-
+        const profile = my.profileImageUrl;
         const store = await fetchStoredata();
         const storeList = await fetchStoreList();
 
@@ -139,7 +140,11 @@ function OwnerPage() {
     <div className="flex flex-col divide-y-8 divide-[#e7eaf3]">
       <div className="flex items-center justify-center">
         <div className="flex items-center justify-center size-[130px] bg-[#68e194] border-3 border-[#fdfffe] shadow-[0_4px_8px_0_rgba(0,0,0,0.2)] overflow-hidden rounded-full my-7">
-          <img src={character1} alt="profile" />
+          {profile === "" ? (
+            <img src={character1} alt="profile" />
+          ) : (
+            <img src={profile} alt="profile" />
+          )}
         </div>
       </div>
       <InfoBox

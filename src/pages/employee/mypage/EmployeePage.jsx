@@ -14,11 +14,13 @@ import {
 
 function EmployeePage() {
   const [mydata, setMydata] = useState([]);
+  const [profile, setProfile] = useState("");
 
   useEffect(() => {
     (async () => {
       try {
         const my = await fetchMydata();
+        setProfile(my.profileImageUrl);
 
         const storeList = await fetchStoreList();
 
@@ -91,7 +93,11 @@ function EmployeePage() {
     <div className="flex flex-col divide-y-8 divide-[#e7eaf3]">
       <div className="flex items-center justify-center">
         <div className="flex items-center justify-center size-[130px] bg-[#68e194] border-3 border-[#fdfffe] shadow-[0_4px_8px_0_rgba(0,0,0,0.2)] overflow-hidden rounded-full my-7">
-          <img src={character1} alt="profile" />
+          {profile === "" ? (
+            <img src={character1} alt="profile" />
+          ) : (
+            <img src={profile} alt="profile" />
+          )}
         </div>
       </div>
       <InfoBox
