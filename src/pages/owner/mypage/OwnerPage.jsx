@@ -26,7 +26,7 @@ function OwnerPage() {
     (async () => {
       try {
         const my = await fetchMydata();
-        const profile = my.profileImageUrl;
+        setProfile(my.profileImageUrl);
         const store = await fetchStoredata();
         const storeList = await fetchStoreList();
 
