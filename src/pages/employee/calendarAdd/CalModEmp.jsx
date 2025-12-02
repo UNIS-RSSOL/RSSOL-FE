@@ -114,6 +114,7 @@ function CalModEmp() {
         // availability 데이터 구조 확인
         if (availabilityData && availabilityData.length > 0) {
           console.log("🔍 CalModEmp: 첫 번째 availability 샘플:", availabilityData[0]);
+          console.log("🔍 CalModEmp: 모든 availability ID 목록:", availabilityData.map(a => a.id || 'NO_ID'));
         }
         
         setAvailabilities(availabilityData || []);
@@ -358,22 +359,51 @@ function CalModEmp() {
     // work availability 수정 (기존 삭제 후 새로 추가)
     try {
       // 기존 availability 삭제 (에러가 발생해도 계속 진행)
+      console.log("🔍 삭제할 availability 목록:", availabilitiesToDelete.map(a => ({ id: a.id, dayOfWeek: a.dayOfWeek, startTime: a.startTime, endTime: a.endTime })));
+      
       const deletePromises = [];
+      const deleteResults = [];
+      
       for (const availability of availabilitiesToDelete) {
         if (availability.id) {
+          console.log(`🔍 availability ${availability.id} 삭제 시도 중...`);
           deletePromises.push(
-            deleteAvailability(availability.id).catch((error) => {
-              console.warn(`⚠️ availability ${availability.id} 삭제 실패:`, error);
-              // 삭제 실패해도 계속 진행 (이미 삭제되었거나 존재하지 않는 경우)
-              return null;
-            })
+            deleteAvailability(availability.id)
+              .then((result) => {
+                console.log(`✅ availability ${availability.id} 삭제 성공`);
+                deleteResults.push({ id: availability.id, success: true });
+                return result;
+              })
+              .catch((error) => {
+                const errorMessage = error.response?.data?.message || error.message || '알 수 없는 오류';
+                const errorStatus = error.response?.status || 'N/A';
+                console.warn(`⚠️ availability ${availability.id} 삭제 실패 (${errorStatus}):`, errorMessage);
+                console.warn(`⚠️ 삭제 실패 상세:`, {
+                  id: availability.id,
+                  status: errorStatus,
+                  message: errorMessage,
+                  response: error.response?.data
+                });
+                deleteResults.push({ id: availability.id, success: false, error: errorMessage });
+                // 삭제 실패해도 계속 진행 (이미 삭제되었거나 존재하지 않는 경우)
+                return null;
+              })
           );
+        } else {
+          console.warn(`⚠️ ID가 없는 availability 발견:`, availability);
         }
       }
       
       // 모든 삭제 요청 병렬 처리
       await Promise.all(deletePromises);
-      console.log("✅ 기존 availability 삭제 완료");
+      
+      const successCount = deleteResults.filter(r => r.success).length;
+      const failCount = deleteResults.filter(r => !r.success).length;
+      console.log(`✅ 기존 availability 삭제 완료 (성공: ${successCount}, 실패: ${failCount})`);
+      
+      if (failCount > 0) {
+        console.warn(`⚠️ 일부 availability 삭제 실패했지만 계속 진행합니다.`);
+      }
 
       // 새로운 availability 추가 (백엔드 DTO 구조에 맞게 payload 생성)
       if (availabilitiesList.length > 0) {
