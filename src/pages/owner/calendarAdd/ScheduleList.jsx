@@ -44,12 +44,23 @@ function ScheduleList() {
   useEffect(() => {
     const loadWorkersAndSchedules = async () => {
       try {
+        if (!storeId) return; // storeId가 없으면 로드하지 않음
+        
         const startOfWeek = dayjs().locale("ko").startOf("week");
         const endOfWeek = startOfWeek.add(6, "day");
         
         // 직원 리스트 가져오기
         const workersList = await fetchAllWorkers();
-        setWorkers(workersList || []);
+        
+        // 같은 매장의 알바생들만 필터링 (사장 제외)
+        const storeWorkers = (workersList || []).filter(worker => {
+          const workerStoreId = worker.storeId || worker.userStore?.storeId || worker.store?.storeId;
+          return workerStoreId === storeId && 
+                 worker.role !== 'OWNER' && 
+                 worker.userType !== 'OWNER';
+        });
+        
+        setWorkers(storeWorkers);
 
         // 각 직원의 스케줄 가져오기
         const schedules = await fetchSchedules(
@@ -74,7 +85,7 @@ function ScheduleList() {
       }
     };
     loadWorkersAndSchedules();
-  }, []);
+  }, [storeId]);
 
   // 근무 가능 시간대 포맷팅
   const formatAvailableTimes = (workerId) => {
@@ -119,7 +130,9 @@ function ScheduleList() {
 
     const availableWorkers = [];
     workers.forEach((worker) => {
-      const schedules = workerSchedules[worker.id] || [];
+      // worker.userStoreId 또는 worker.id를 사용하여 스케줄 찾기
+      const workerId = worker.userStoreId || worker.id;
+      const schedules = workerSchedules[workerId] || [];
       const hasSchedule = schedules.some((schedule) => {
         const scheduleDate = dayjs(schedule.startDatetime).locale("ko");
         const scheduleDay = scheduleDate.day();
@@ -146,6 +159,11 @@ function ScheduleList() {
     setSelectedDay(day);
     setSelectedHour(hour);
     setToastOpen(true);
+  };
+
+  // 셀 배경색 진하게 하기 위한 "해당 칸 가능 인원 수" 반환 함수
+  const getAvailabilityCount = (day, hour) => {
+    return getAvailableWorkers(day, hour).length;
   };
 
   // 근무표 생성하기
@@ -206,7 +224,10 @@ function ScheduleList() {
         <p className="text-center font-bold text-lg">직원 스케줄 목록</p>
         
         <div className="flex justify-center">
-          <TimeSlotCalendar onTimeSlotClick={handleTimeSlotClick} />
+          <TimeSlotCalendar
+            onTimeSlotClick={handleTimeSlotClick}
+            getAvailabilityCount={getAvailabilityCount}
+          />
         </div>
 
         <div className="w-[90%] mx-auto">
@@ -235,9 +256,11 @@ function ScheduleList() {
             </div>
 
             <div className="flex flex-col gap-3 mt-3">
-            {workers.map((worker) => (
+            {workers.map((worker) => {
+                const workerId = worker.userStoreId || worker.id;
+                return (
                 <div
-                key={worker.id}
+                key={worker.id || worker.userStoreId}
                 className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm"
                 >
                 <div className="flex-shrink-0 w-12 h-12 bg-[#68E194] rounded-full border-2 border-white shadow-sm" />
@@ -246,11 +269,12 @@ function ScheduleList() {
                     {worker.name || worker.userName || "이름 없음"}
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
-                    {formatAvailableTimes(worker.id)}
+                    {formatAvailableTimes(workerId)}
                     </p>
                 </div>
                 </div>
-            ))}
+                );
+            })}
             {workers.length === 0 && (
                 <p className="text-center text-gray-500 py-4">
                 등록된 직원이 없습니다.
