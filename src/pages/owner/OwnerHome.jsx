@@ -26,6 +26,7 @@ function OwnerHome() {
   const [wage, setWage] = useState(0);
   const [workers, setWorkers] = useState([]);
   const [events, setEvents] = useState([]);
+  const [activeStore, setActiveStore] = useState(null);
   const FormattedDate = (date, day) => {
     const d = dat[today.format("d")];
     return day
@@ -64,6 +65,7 @@ function OwnerHome() {
         setEvents(formattedEvents);
 
         const activeStore = await fetchActiveStore();
+        setActiveStore(activeStore);
         const fetchedWage = await fetchWage(
           activeStore.storeId,
           today.format("YYYY-MM"),
@@ -93,7 +95,6 @@ function OwnerHome() {
   const FloatButton = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [storeList, setStoreList] = useState([]);
-    const [activeStore, setActiveStore] = useState();
 
     useEffect(() => {
       (async () => {
@@ -172,7 +173,7 @@ function OwnerHome() {
         </div>
         <div className="flex items-center mt-2">
           <p className="text-[24px] font-[600] my-1">
-            알쏠 1호점 오늘의 일정은?
+            {activeStore?.name} 오늘의 일정은?
           </p>
           <ColoredCalIcon />
         </div>
