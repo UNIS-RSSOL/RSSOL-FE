@@ -39,7 +39,7 @@ export async function updateMydata(
 }
 
 //가게정보 수정
-export async function updateStoredate(
+export async function updateStoredata(
   name,
   address,
   phoneNumber,

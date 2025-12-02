@@ -1,4 +1,4 @@
-function PencilIcon({ className, onClick, isFilled }) {
+function PencilIcon({ className, onClick, isFilled = false }) {
   return (
     <svg
       width="25"

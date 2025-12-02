@@ -21,7 +21,8 @@ function Footer() {
     if (
       path === "/owner/mypage" ||
       path === "/owner/mypage/managestore" ||
-      path === "/employee/mypage"
+      path === "/employee/mypage" ||
+      path === "/employee/mypage/managestore"
     ) {
       setSelectedMenu("마이페이지");
     } else if (

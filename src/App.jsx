@@ -9,10 +9,11 @@ import Onboarding from "./pages/auth/Onboarding.jsx";
 import KakaoCallback from "./pages/auth/KakaoCallback.jsx";
 
 import OwnerPage from "./pages/owner/mypage/OwnerPage.jsx";
-import ManageStore from "./pages/common/mypage/ManageStore.jsx";
+import OwnerManageStore from "./pages/owner/mypage/ManageStore.jsx";
 import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
 import EmpCalendar from "./pages/employee/calendar/EmpCalendar.jsx";
 import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
+import EmpManageStore from "./pages/employee/mypage/ManageStore.jsx";
 import AlarmHomeEmp from "./pages/employee/alarm/AlarmHomeEmp.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
@@ -90,12 +91,12 @@ function App() {
           <Route path="/owner/mypage" element={<OwnerPage />} />
           <Route
             path="/owner/mypage/managestore"
-            element={<ManageStore isOwner={true} />}
+            element={<OwnerManageStore />}
           />
           <Route path="/employee/mypage" element={<EmployeePage />} />
           <Route
             path="/employee/mypage/managestore"
-            element={<ManageStore isOwner={false} />}
+            element={<EmpManageStore />}
           />
 
           <Route path="/calAddEmp" element={<CalAddEmp />} />
