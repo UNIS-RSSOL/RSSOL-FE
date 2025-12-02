@@ -10,8 +10,8 @@ import TopBar from "../../../components/layout/alarm/TopBar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import { generateSchedule, confirmSchedule } from "../../../services/scheduleService.js";
 import { fetchActiveStore, fetchStoredata } from "../../../services/owner/MyPageService.js";
-import { sendScheduleRequestNotification } from "../../../services/owner/NotificationService.js";
 import { fetchAllWorkers } from "../../../services/owner/ScheduleService.js";
+import { addNotificationToEmployees } from "../../../utils/notificationUtils.js";
 import "./CalAdd.css";
 
 export default function CalAdd() {
@@ -445,14 +445,82 @@ export default function CalAdd() {
         singleButtonText="근무표 생성 요청하기"
         onSingleClick={async () => {
           try {
-            // 매장 정보 가져오기
+            // 1. 매장 정보 가져오기
             const storeData = await fetchStoredata();
-            const currentMonth = new Date().getMonth() + 1;
-            
-            // 알바생들에게 알림 전송
-            await sendScheduleRequestNotification(storeId, currentMonth);
-            
-            // ScheduleList로 이동하면서 설정한 정보 전달
+            if (!storeData || !storeData.storeId) {
+              alert("매장 정보를 불러올 수 없습니다.");
+              return;
+            }
+
+            // 2. 날짜 범위 확인 (지정함인 경우 필수)
+            if (unitSpecified && (!startDate || !endDate)) {
+              alert("시작일자와 마무리일자를 모두 선택해주세요.");
+              return;
+            }
+
+            // 3. 지정함인 경우 시간 슬롯 검증
+            if (unitSpecified) {
+              const validSlots = timeSlots.filter(
+                (slot) => slot.start && slot.end && slot.count > 0
+              );
+              if (validSlots.length === 0) {
+                alert("최소 하나의 시간 구간을 설정해주세요.");
+                return;
+              }
+            }
+
+            // 4. 같은 매장의 알바생 목록 가져오기
+            const allWorkers = await fetchAllWorkers();
+            if (!allWorkers || !Array.isArray(allWorkers)) {
+              alert("알바생 목록을 불러올 수 없습니다.");
+              return;
+            }
+
+            // 같은 매장의 알바생들만 필터링 (사장 제외)
+            const storeWorkers = allWorkers.filter(worker => {
+              const workerStoreId = worker.storeId || worker.userStore?.storeId || worker.store?.storeId;
+              return workerStoreId === storeData.storeId && 
+                     worker.role !== 'OWNER' && 
+                     worker.userType !== 'OWNER';
+            });
+
+            if (storeWorkers.length === 0) {
+              alert("해당 매장에 알바생이 없습니다.");
+              return;
+            }
+
+            // 5. 날짜 범위 문자열 생성
+            let dateRange;
+            if (startDate && endDate) {
+              dateRange = `${dayjs(startDate).format("YYYY.MM.DD")} ~ ${dayjs(endDate).format("YYYY.MM.DD")}`;
+            } else {
+              const currentMonth = new Date().getMonth() + 1;
+              dateRange = `${currentMonth}월`;
+            }
+
+            // 6. 알림 데이터 준비
+            const notification = {
+              type: 'schedule_request',
+              storeName: storeData.name || '매장',
+              message: `사장님이 ${dateRange} 시간표 추가를 요청했어요! 근무가능 시간표를 작성해주세요`,
+              startDate: startDate || null,
+              endDate: endDate || null,
+              unitSpecified: unitSpecified,
+              timeSlots: unitSpecified ? timeSlots.filter(slot => slot.start && slot.end && slot.count > 0) : null,
+              minWorkTime: !unitSpecified ? minWorkTime : null,
+            };
+
+            // 7. 각 알바생의 알림에 추가 (localStorage)
+            const employeeIds = storeWorkers.map(worker => {
+              return worker.userId || worker.id || worker.employeeId;
+            }).filter(id => id); // 유효한 ID만
+
+            if (employeeIds.length > 0) {
+              addNotificationToEmployees(employeeIds, notification);
+              alert("알바생들에게 알림이 전송되었습니다!");
+            }
+
+            // 8. ScheduleList로 이동하면서 설정한 정보 전달
             const timeSegments = unitSpecified
               ? timeSlots
                   .filter((slot) => slot.start && slot.end && slot.count > 0)
@@ -463,7 +531,7 @@ export default function CalAdd() {
                   }))
               : null;
 
-            const allTimes = unitSpecified && timeSegments.length > 0
+            const allTimes = unitSpecified && timeSegments && timeSegments.length > 0
               ? timeSegments.flatMap((seg) => [seg.startTime, seg.endTime])
               : [];
             const sortedTimes = allTimes.sort();
@@ -475,13 +543,14 @@ export default function CalAdd() {
                 timeSegments,
                 openTime,
                 closeTime,
+                minWorkTime: !unitSpecified ? minWorkTime : null,
                 startDate: startDate || dayjs().locale("ko").startOf("week").format("YYYY-MM-DD"),
                 endDate: endDate || dayjs().locale("ko").startOf("week").add(6, "day").format("YYYY-MM-DD"),
               },
             });
           } catch (error) {
-            console.error("알림 전송 실패:", error);
-            alert("알림 전송에 실패했습니다. 다시 시도해주세요.");
+            console.error("근무표 생성 요청 실패:", error);
+            alert("근무표 생성 요청에 실패했습니다. 다시 시도해주세요.");
           }
         }}
       />
