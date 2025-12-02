@@ -15,26 +15,42 @@ function CalAddEmp() {
   const [selectedTimeSlots, setSelectedTimeSlots] = useState(new Set());
   const [employeeUserStoreId, setEmployeeUserStoreId] = useState(null);
   const [existingSchedules, setExistingSchedules] = useState([]);
+  const [isLoadingEmployeeInfo, setIsLoadingEmployeeInfo] = useState(true);
 
   // 알바생의 userStoreId 가져오기
   useEffect(() => {
     const loadEmployeeInfo = async () => {
+      setIsLoadingEmployeeInfo(true);
       try {
         // 먼저 activeStore에서 userStoreId 확인
         const activeStore = await fetchActiveStore();
+        console.log("fetchActiveStore 응답:", activeStore);
+        
         if (activeStore && activeStore.userStoreId) {
+          console.log("activeStore에서 userStoreId 찾음:", activeStore.userStoreId);
           setEmployeeUserStoreId(activeStore.userStoreId);
+          setIsLoadingEmployeeInfo(false);
           return;
         }
+        
         // activeStore에 없으면 mydata에서 확인
         const mydata = await fetchMydata();
+        console.log("fetchMydata 응답:", mydata);
+        
         if (mydata && mydata.userStoreId) {
+          console.log("mydata에서 userStoreId 찾음:", mydata.userStoreId);
           setEmployeeUserStoreId(mydata.userStoreId);
         } else if (mydata && mydata.id) {
+          console.log("mydata에서 id 찾음:", mydata.id);
           setEmployeeUserStoreId(mydata.id);
+        } else {
+          console.error("userStoreId를 찾을 수 없습니다. activeStore:", activeStore, "mydata:", mydata);
         }
       } catch (error) {
         console.error("알바생 정보 로드 실패:", error);
+        console.error("에러 상세:", error.response?.data || error.message);
+      } finally {
+        setIsLoadingEmployeeInfo(false);
       }
     };
     loadEmployeeInfo();
@@ -85,7 +101,13 @@ function CalAddEmp() {
       return;
     }
 
+    if (isLoadingEmployeeInfo) {
+      alert("알바생 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
     if (!employeeUserStoreId) {
+      console.error("employeeUserStoreId가 null입니다. 현재 상태를 확인하세요.");
       alert("알바생 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.");
       return;
     }
