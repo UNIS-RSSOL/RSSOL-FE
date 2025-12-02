@@ -37,10 +37,7 @@ function Footer() {
       setSelectedMenu("마이페이지");
     } else if (path.includes(`/${role}/calendar`)) {
       setSelectedMenu("캘린더");
-    } else if (
-      path.includes("/owner/manage") ||
-      path.includes("/employee/manage")
-    ) {
+    } else if (path.includes(`/${role}/manage`)) {
       setSelectedMenu("직원관리");
     } else if (path.includes(`/${role}`)) {
       setSelectedMenu("홈");

@@ -153,6 +153,7 @@ function OwnerPage() {
         onDataUpdate={handleMyDataUpdate}
       />
       <InfoBox
+        role="owner"
         head="가게 정보"
         myData={storedata}
         onDataUpdate={handleStoreDataUpdate}

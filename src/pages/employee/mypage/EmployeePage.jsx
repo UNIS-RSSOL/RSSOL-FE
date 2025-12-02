@@ -101,6 +101,7 @@ function EmployeePage() {
         </div>
       </div>
       <InfoBox
+        role="employee"
         head="내 정보"
         myData={mydata}
         onDataUpdate={handleMyDataUpdate}
