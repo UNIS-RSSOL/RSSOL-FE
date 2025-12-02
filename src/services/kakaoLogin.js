@@ -41,7 +41,7 @@ const getFrontendBaseUrl = () => {
   return "https://rssol-fe.vercel.app";
 };
 
-const TOKEN_REFRESH_PATH = "/api/auth/token/refresh";
+const TOKEN_REFRESH_PATH = "/api/auth/refresh-token";
 const ACCESS_TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
 

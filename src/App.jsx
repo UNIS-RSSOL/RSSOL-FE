@@ -1,14 +1,14 @@
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import "./App.css";
 import "./index.css";
+
 import Header from "./components/layout/header/Header.jsx";
 import Footer from "./components/layout/footer/Footer.jsx";
 
 import Login from "./pages/auth/Login.jsx";
 import Onboarding from "./pages/auth/Onboarding.jsx";
 import KakaoCallback from "./pages/auth/KakaoCallback.jsx";
-
 import OwnerPage from "./pages/owner/mypage/OwnerPage.jsx";
 import OwnerManageStore from "./pages/owner/mypage/ManageStore.jsx";
 import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
@@ -18,14 +18,12 @@ import EmpManageStore from "./pages/employee/mypage/ManageStore.jsx";
 import AlarmHomeEmp from "./pages/employee/alarm/AlarmHomeEmp.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
-
 import CalAddEmp from "./pages/employee/calendarAdd/CalAddEmp.jsx";
 import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
 import CalGen from "./pages/owner/calendarAdd/CalGen.jsx";
 import AutoCal from "./pages/owner/calendarAdd/AutoCal.jsx";
 import AddOwner from "./pages/owner/calendarAdd/AddOwner.jsx";
 import ScheduleList from "./pages/owner/calendarAdd/ScheduleList.jsx";
-
 import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
@@ -39,139 +37,132 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
-  console.log("📍 Current Path:", location.pathname);
 
-  // 초기 인증 상태 체크 (루트 경로에서만 실행)
-  useEffect(() => {
-    const checkAuthAndRedirect = async () => {
-      // 루트 경로("/")가 아니면 체크하지 않음
-      if (location.pathname !== "/") {
+  console.log("📍 PATH:", location.pathname);
+
+  /** -------------------------
+   *  공통 Redirect Helper
+   --------------------------*/
+  const goLogin = () => navigate("/login", { replace: true });
+  const goOnboarding = () => navigate("/onboarding", { replace: true });
+  const goHomeByRole = async () => {
+    try {
+      await api.get("/api/mypage/owner/profile");
+      return navigate("/owner", { replace: true });
+    } catch (_) {
+      await api.get("/api/mypage/staff/profile");
+      return navigate("/employee", { replace: true });
+    }
+  };
+
+  /** -------------------------
+   *  Access / Refresh 인증 처리
+   --------------------------*/
+  const checkAuthAndRedirect = useCallback(async () => {
+    setIsCheckingAuth(true);
+
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+
+      // 🚫 refreshToken 없음 → 로그인 안한 상태
+      if (!refreshToken) {
+        console.log("❌ refreshToken 없음 → 로그인 필요");
+        if (location.pathname === "/" || location.pathname === "/login") goLogin();
         return;
       }
 
-      setIsCheckingAuth(true);
+      /** 🔄 AccessToken 갱신 시도 */
+      let hasValidToken = false;
 
       try {
-        // refreshToken 확인
-        const refreshToken = localStorage.getItem("refreshToken");
-        const accessToken = localStorage.getItem("accessToken");
-
-        // refreshToken이 있으면 토큰 갱신 시도
-        if (refreshToken) {
-          try {
-            console.log("refreshToken으로 accessToken 갱신 시도");
-            const newAccessToken = await refreshAccessToken();
-            if (newAccessToken) {
-              console.log("토큰 갱신 성공");
-            }
-          } catch (refreshError) {
-            console.log("토큰 갱신 실패:", refreshError);
-            // refreshToken이 만료되었거나 유효하지 않으면 로그인 페이지로
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-            navigate("/login", { replace: true });
-            return;
-          }
-        }
-
-        // accessToken이 없으면 로그인 페이지로
-        const currentAccessToken = localStorage.getItem("accessToken");
-        if (!currentAccessToken) {
-          console.log("accessToken 없음 -> 로그인 페이지로");
-          navigate("/login", { replace: true });
-          return;
-        }
-
-        // 온보딩 완료 여부 확인 (활성 매장 정보 확인)
-        try {
-          const activeStoreRes = await api.get("/api/mypage/active-store");
-          const activeStore = activeStoreRes.data;
-
-          console.log("활성 매장 정보:", activeStore);
-
-          // 활성 매장이 있으면 정보 등록 완료 -> 홈페이지로 이동
-          if (activeStore && activeStore.storeId) {
-            // 사용자 역할 확인을 위해 프로필 정보 조회 시도
-            // owner 프로필을 먼저 시도
-            try {
-              await api.get("/api/mypage/owner/profile");
-              console.log("사장님 프로필 확인 성공 -> /owner로 이동");
-              navigate("/owner", { replace: true });
-              return;
-            } catch (ownerError) {
-              // owner 프로필이 없으면 staff로 시도
-              try {
-                await api.get("/api/mypage/staff/profile");
-                console.log("알바생 프로필 확인 성공 -> /employee로 이동");
-                navigate("/employee", { replace: true });
-                return;
-              } catch (staffError) {
-                // 둘 다 실패하면 정보 미등록으로 간주
-                console.log("프로필 확인 실패 -> 온보딩으로 이동");
-                navigate("/onboarding", { replace: true });
-                return;
-              }
-            }
-          } else {
-            // 활성 매장이 없으면 정보 미등록 -> 온보딩으로 이동
-            console.log("활성 매장 없음 -> 온보딩으로 이동");
-            navigate("/onboarding", { replace: true });
-            return;
-          }
-        } catch (storeError) {
-          // 활성 매장 조회 실패 (404 등) -> 정보 미등록으로 간주
-          console.log(
-            "활성 매장 조회 실패 (정보 미등록) -> 온보딩으로 이동:",
-            storeError.response?.status,
-          );
-          navigate("/onboarding", { replace: true });
-          return;
-        }
+        const newAccessToken = await refreshAccessToken();
+        if (newAccessToken) hasValidToken = true;
       } catch (err) {
-        console.error("인증 체크 중 에러:", err);
-        // 에러 발생 시 로그인 페이지로
-        navigate("/login", { replace: true });
-      } finally {
-        setIsCheckingAuth(false);
-      }
-    };
+        const status = err.response?.status;
 
-    checkAuthAndRedirect();
+        // refreshToken 만료
+        if (status === 401 || status === 403) {
+          console.log("❌ Refresh 토큰 만료");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          goLogin();
+          return;
+        }
+
+        // 서버 오류 → 기존 accessToken 있으면 사용
+        const existing = localStorage.getItem("accessToken");
+        if (existing) hasValidToken = true;
+      }
+
+      // accessToken 확인
+      if (!localStorage.getItem("accessToken") && !hasValidToken) {
+        console.log("❌ accessToken 없음 → 온보딩");
+        goOnboarding();
+        return;
+      }
+
+      /** -------------------------
+       *  온보딩 완료 여부 → 활성 매장 체크
+       --------------------------*/
+      let activeStore = null;
+      try {
+        const res = await api.get("/api/mypage/active-store");
+        activeStore = res.data;
+      } catch (err) {
+        // 매장 없음 → 온보딩
+        const status = err.response?.status;
+        if (status === 401) return goLogin();
+        return goOnboarding();
+      }
+
+      if (!activeStore?.storeId) {
+        console.log("❕ 활성 매장 없음 → 온보딩");
+        return goOnboarding();
+      }
+
+      /** -------------------------
+       *  사용자 역할 확인
+       --------------------------*/
+      if (location.pathname === "/" || location.pathname === "/login") {
+        await goHomeByRole();
+      }
+    } catch (err) {
+      const status = err.response?.status;
+      if (status === 401) return goLogin();
+      goOnboarding();
+    } finally {
+      setIsCheckingAuth(false);
+    }
   }, [location.pathname, navigate]);
 
-  // 헤더·푸터 제외할 페이지
-  const hideLayoutPaths = [
-    "/",
-    "/login",
-    "/onboarding",
-    "/auth/kakao/callback",
-    "/calAdd",
-    "/calGen",
-    "/autoCal",
-    "/calAddEmp",
-    "/addOwner",
-    "/scheduleList",
-    "/alarmHomeEmp",
-    "/alarmHome",
-    "/alarmCheck",
-  ];
-  const hideLayout = hideLayoutPaths.some((path) => {
-    // 루트 경로 (정확히 "/"만 일치)
-    if (path === "/" && location.pathname === "/") {
-      return true;
+  /** -------------------------
+   *  루트/로그인에서만 인증 체크
+   --------------------------*/
+  useEffect(() => {
+    const checkPages = ["/", "/login"];
+    if (checkPages.includes(location.pathname)) {
+      checkAuthAndRedirect();
     }
-    // 나머지 경로 (정확히 일치하거나, 해당 경로로 시작하는 하위 경로)
-    if (
-      path !== "/" &&
-      (location.pathname === path || location.pathname.startsWith(path + "/"))
-    ) {
-      return true;
-    }
-    return false;
-  });
+  }, [location.pathname, checkAuthAndRedirect]);
 
-  // 인증 체크 중일 때 스플래시 표시
-  if (isCheckingAuth && location.pathname === "/") {
+  /** -------------------------
+   *  레이아웃 제외 경로
+   --------------------------*/
+  const hideLayoutPages = [
+    "/", "/login", "/onboarding", "/auth/kakao/callback",
+    "/calAdd", "/calGen", "/autoCal", "/calAddEmp",
+    "/addOwner", "/scheduleList", "/alarmHomeEmp",
+    "/alarmHome", "/alarmCheck"
+  ];
+
+  const hideLayout = hideLayoutPages.some((p) =>
+    p === "/" ? location.pathname === "/" : location.pathname.startsWith(p)
+  );
+
+  /** -------------------------
+   *  인증 체크 중 → 스플래시
+   --------------------------*/
+  if (isCheckingAuth && (location.pathname === "/" || location.pathname === "/login")) {
     return <Splash />;
   }
 
@@ -182,32 +173,17 @@ function App() {
       <main className="flex-1 overflow-y-auto">
         <Routes>
           <Route path="/" element={<Login />} />
-          {/* 로그인/온보딩 */}
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
-          {/* 
-            카카오 로그인 콜백 라우트
-            주의: OAuth 인증 코드(code)는 백엔드에서 처리합니다.
-            백엔드가 인증 완료 후 이 경로로 리다이렉트합니다.
-            이 페이지에서 세션 확인 후 적절한 페이지로 이동합니다.
-            - 신규 회원 또는 온보딩 미실행 → /onboarding
-            - 기존 회원(온보딩 실행) → 사장: /owner, 알바: /employee
-          */}
           <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
 
           <Route path="/owner" element={<OwnerHome />} />
           <Route path="/employee" element={<EmpHome />} />
 
           <Route path="/owner/mypage" element={<OwnerPage />} />
-          <Route
-            path="/owner/mypage/managestore"
-            element={<OwnerManageStore />}
-          />
+          <Route path="/owner/mypage/managestore" element={<OwnerManageStore />} />
           <Route path="/employee/mypage" element={<EmployeePage />} />
-          <Route
-            path="/employee/mypage/managestore"
-            element={<EmpManageStore />}
-          />
+          <Route path="/employee/mypage/managestore" element={<EmpManageStore />} />
 
           <Route path="/calAddEmp" element={<CalAddEmp />} />
           <Route path="/calAdd" element={<CalAdd />} />
@@ -222,7 +198,6 @@ function App() {
 
           <Route path="/owner/manage" element={<ManageEmpPage />} />
           <Route path="/employee/manage" element={<ManageSalary />} />
-
           <Route path="/owner/calendar" element={<OwnerCalendar />} />
           <Route path="/employee/calendar" element={<EmpCalendar />} />
         </Routes>
