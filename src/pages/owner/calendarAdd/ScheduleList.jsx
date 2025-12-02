@@ -15,6 +15,7 @@ function ScheduleList() {
   const location = useLocation();
   const [workers, setWorkers] = useState([]);
   const [workerSchedules, setWorkerSchedules] = useState({});
+  const [workerErrors, setWorkerErrors] = useState({}); // 실패한 직원 추적: { staffId: errorInfo }
   const [toastOpen, setToastOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedHour, setSelectedHour] = useState(null);
@@ -81,44 +82,88 @@ function ScheduleList() {
 
         // 각 직원의 work availability 가져오기
         const schedulesByWorker = {};
+        const errorsByWorker = {};
         
         // 각 직원의 work availability를 병렬로 가져오기
         const availabilityPromises = storeWorkers.map(async (worker) => {
           // 백엔드 API가 staffId를 요구하는지 확인 필요
           // 일반적으로 userStoreId가 staffId와 동일할 가능성이 높음
           const staffId = worker.staffId || worker.userStoreId || worker.id || worker.userId;
+          const workerName = worker.name || worker.username || '이름없음';
           
           if (!staffId) {
-            console.error(`❌ 직원 ID를 찾을 수 없습니다:`, {
+            const errorMsg = "직원 ID를 찾을 수 없습니다";
+            console.error(`❌ ${workerName}:`, errorMsg, {
               worker,
               availableFields: Object.keys(worker),
             });
+            errorsByWorker[staffId] = {
+              staffId,
+              workerName,
+              error: new Error(errorMsg),
+              status: null,
+            };
             return;
           }
           
-          console.log(`🔍 직원 ${worker.name || worker.username || '이름없음'} (ID: ${staffId})의 근무 가능 시간 조회 시작`);
+          console.log(`🔍 직원 ${workerName} (ID: ${staffId})의 근무 가능 시간 조회 시작`);
           
           try {
             const availabilities = await fetchEmployeeAvailabilities(staffId);
+            
             if (availabilities && Array.isArray(availabilities)) {
               schedulesByWorker[staffId] = availabilities;
-              console.log(`✅ 직원 ${staffId}의 근무 가능 시간: ${availabilities.length}개`);
+              console.log(`✅ 직원 ${workerName} (ID: ${staffId}) 근무 가능 시간: ${availabilities.length}개`);
             } else {
               schedulesByWorker[staffId] = [];
-              console.log(`⚠️ 직원 ${staffId}의 근무 가능 시간이 배열이 아닙니다:`, availabilities);
+              console.log(`⚠️ 직원 ${workerName} (ID: ${staffId})의 근무 가능 시간이 배열이 아닙니다:`, availabilities);
             }
           } catch (error) {
-            console.error(`❌ 직원 ${staffId}의 근무 가능 시간 조회 실패:`, error);
+            // ❗ 실패를 명시적으로 기록
+            const errorInfo = {
+              staffId,
+              workerName,
+              error,
+              status: error.response?.status || null,
+              statusText: error.response?.statusText || null,
+              errorData: error.response?.data || null,
+              errorMessage: error.message,
+            };
+            
+            console.error(`❌ 직원 ${workerName} (ID: ${staffId}) 근무 가능시간 조회 실패:`, errorInfo);
+            
+            // 실패한 직원은 빈 배열로 설정하되, 에러 정보도 저장
             schedulesByWorker[staffId] = [];
+            errorsByWorker[staffId] = errorInfo;
+            
+            // 500 에러인 경우 추가 경고
+            if (error.response?.status === 500) {
+              console.warn(`⚠️ [서버 오류] 직원 ${workerName} (ID: ${staffId})의 데이터를 서버에서 불러올 수 없습니다.`, {
+                serverError: error.response?.data,
+                requestURL: error.config?.url,
+              });
+            }
           }
         });
         
         await Promise.all(availabilityPromises);
-        console.log("✅ 모든 직원의 스케줄 로드 완료:", {
+        
+        const successCount = Object.keys(schedulesByWorker).length - Object.keys(errorsByWorker).length;
+        const errorCount = Object.keys(errorsByWorker).length;
+        
+        console.log("📊 모든 직원의 스케줄 로드 완료:", {
           totalWorkers: storeWorkers.length,
+          successCount,
+          errorCount,
           schedulesCount: Object.keys(schedulesByWorker).length,
         });
+        
+        if (errorCount > 0) {
+          console.warn(`⚠️ ${errorCount}명의 직원 데이터 로드 실패:`, errorsByWorker);
+        }
+        
         setWorkerSchedules(schedulesByWorker);
+        setWorkerErrors(errorsByWorker);
       } catch (error) {
         console.error("❌ 직원 및 스케줄 로드 실패:", error);
       }
@@ -131,6 +176,19 @@ function ScheduleList() {
     // worker 객체에서 staffId 추출
     const staffId = worker?.staffId || worker?.userStoreId || worker?.id || worker?.userId;
     const schedules = workerSchedules[staffId] || [];
+    const error = workerErrors[staffId];
+    
+    // 에러가 있는 경우 에러 메시지 반환
+    if (error) {
+      if (error.status === 500) {
+        return "⚠️ 서버 오류로 데이터를 불러올 수 없습니다";
+      } else if (error.status === 404) {
+        return "⚠️ 데이터를 찾을 수 없습니다";
+      } else {
+        return "⚠️ 데이터 로드 실패";
+      }
+    }
+    
     if (schedules.length === 0) {
       return "근무 가능 시간 없음";
     }
@@ -299,19 +357,48 @@ function ScheduleList() {
             <div className="flex flex-col gap-3 mt-3">
             {workers.map((worker) => {
                 const workerId = worker.staffId || worker.userStoreId || worker.id || worker.userId;
+                const hasError = workerErrors[workerId];
+                const errorStatus = hasError?.status;
+                
                 return (
                 <div
                 key={worker.id || worker.userStoreId || worker.staffId}
-                className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm"
+                className={`flex items-center gap-3 p-3 rounded-lg shadow-sm ${
+                  hasError 
+                    ? "bg-red-50 border border-red-200" 
+                    : "bg-white"
+                }`}
                 >
-                <div className="flex-shrink-0 w-12 h-12 bg-[#68E194] rounded-full border-2 border-white shadow-sm" />
+                <div 
+                  className={`flex-shrink-0 w-12 h-12 rounded-full border-2 border-white shadow-sm ${
+                    hasError 
+                      ? "bg-red-300" 
+                      : "bg-[#68E194]"
+                  }`} 
+                />
                 <div className="flex-1 min-w-0">
-                    <p className="text-base font-semibold truncate">
-                    {worker.name || worker.username || worker.userName || "이름 없음"}
+                    <div className="flex items-center gap-2">
+                      <p className="text-base font-semibold truncate">
+                        {worker.name || worker.username || worker.userName || "이름 없음"}
+                      </p>
+                      {hasError && (
+                        <span className="text-xs text-red-600 font-medium whitespace-nowrap">
+                          ⚠️ 오류
+                        </span>
+                      )}
+                    </div>
+                    <p className={`text-sm mt-1 ${
+                      hasError 
+                        ? "text-red-600 font-medium" 
+                        : "text-gray-600"
+                    }`}>
+                      {formatAvailableTimes(worker)}
                     </p>
-                    <p className="text-sm text-gray-600 mt-1">
-                    {formatAvailableTimes(worker)}
-                    </p>
+                    {hasError && errorStatus === 500 && (
+                      <p className="text-xs text-red-500 mt-1">
+                        서버 오류 (500) - 백엔드 개발자에게 문의 필요
+                      </p>
+                    )}
                 </div>
                 </div>
                 );

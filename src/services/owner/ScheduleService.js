@@ -68,8 +68,9 @@ export async function fetchAllWorkers() {
 // staffId를 사용하여 조회 (백엔드 API 스펙에 맞춤)
 export async function fetchEmployeeAvailabilities(staffId) {
   if (!staffId) {
-    console.error("❌ fetchEmployeeAvailabilities: staffId가 없습니다.", { staffId });
-    return [];
+    const error = new Error("staffId가 없습니다.");
+    console.error("❌ fetchEmployeeAvailabilities:", error.message, { staffId });
+    throw error;
   }
 
   try {
@@ -92,7 +93,7 @@ export async function fetchEmployeeAvailabilities(staffId) {
     return response.data || [];
   } catch (error) {
     // 디버깅: 상세 에러 로깅
-    console.error(`❌ [API 실패] 직원 근무 가능 시간 조회 실패:`, {
+    console.error(`🚨 [API 실패] 직원 ID:${staffId} 근무 가능시간 요청 실패:`, {
       staffId,
       endpoint: `/api/store/staff/${staffId}/availabilities`,
       status: error.response?.status,
@@ -103,24 +104,22 @@ export async function fetchEmployeeAvailabilities(staffId) {
 
     // 500 에러인 경우 상세 정보 출력
     if (error.response?.status === 500) {
-      console.error("⚠️ 서버 500 에러 상세:", {
+      console.error("⚠️ [서버 500 에러 상세]:", {
         requestURL: error.config?.url,
         requestMethod: error.config?.method,
         requestHeaders: error.config?.headers,
         responseData: error.response?.data,
+        // 백엔드 개발자에게 전달할 수 있도록 상세 정보
+        serverError: {
+          message: error.response?.data?.message || "서버 내부 오류",
+          timestamp: new Date().toISOString(),
+          path: error.config?.url,
+          method: error.config?.method?.toUpperCase(),
+        },
       });
     }
 
-    return [];
+    // ❗ 에러를 그대로 throw하여 호출하는 쪽에서 처리할 수 있도록 함
+    throw error;
   }
 }
-    // 다른 엔드포인트 시도
-    //try {
-    //  const response = await api.get(`/api/store/availabilities`, {
-    //    params: { userId },
-    //    });
-    //  }
-
-    //return [];
-  //}
-//}
