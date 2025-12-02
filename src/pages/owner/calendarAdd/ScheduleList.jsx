@@ -6,8 +6,7 @@ import TopBar from "../../../components/layout/alarm/TopBar.jsx";
 import TimeSlotCalendar from "../../../components/common/calendar/TimeSlotCalendar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import Toast from "../../../components/common/Toast.jsx";
-import { fetchAllWorkers } from "../../../services/owner/ScheduleService.js";
-import { fetchSchedules } from "../../../services/common/ScheduleService.js";
+import { fetchAllWorkers, fetchEmployeeAvailabilities } from "../../../services/owner/ScheduleService.js";
 import { generateSchedule } from "../../../services/scheduleService.js";
 import { fetchActiveStore } from "../../../services/owner/MyPageService.js";
 
@@ -50,35 +49,40 @@ function ScheduleList() {
         const endOfWeek = startOfWeek.add(6, "day");
         
         // 직원 리스트 가져오기
+        // /api/store/staff는 이미 활성 매장의 직원들만 반환하므로 필터링 불필요
         const workersList = await fetchAllWorkers();
         
-        // 같은 매장의 알바생들만 필터링 (사장 제외)
+        // 사장 제외하고 알바생만 필터링
         const storeWorkers = (workersList || []).filter(worker => {
-          const workerStoreId = worker.storeId || worker.userStore?.storeId || worker.store?.storeId;
-          return workerStoreId === storeId && 
-                 worker.role !== 'OWNER' && 
-                 worker.userType !== 'OWNER';
+          // role이나 userType으로 사장 필터링
+          const isOwner = worker.role === 'OWNER' || 
+                         worker.userType === 'OWNER' ||
+                         worker.position === 'OWNER';
+          return !isOwner;
         });
         
         setWorkers(storeWorkers);
 
-        // 각 직원의 스케줄 가져오기
-        const schedules = await fetchSchedules(
-          startOfWeek.format("YYYY-MM-DD"),
-          endOfWeek.format("YYYY-MM-DD")
-        );
-
-        // 직원별로 스케줄 그룹화
+        // 각 직원의 work availability 가져오기
         const schedulesByWorker = {};
-        if (schedules && Array.isArray(schedules)) {
-          schedules.forEach((schedule) => {
-            const workerId = schedule.userStoreId;
-            if (!schedulesByWorker[workerId]) {
-              schedulesByWorker[workerId] = [];
+        
+        // 각 직원의 work availability를 병렬로 가져오기
+        const availabilityPromises = storeWorkers.map(async (worker) => {
+          const workerId = worker.userId || worker.id || worker.userStoreId;
+          if (!workerId) return;
+          
+          try {
+            const availabilities = await fetchEmployeeAvailabilities(workerId);
+            if (availabilities && Array.isArray(availabilities)) {
+              schedulesByWorker[workerId] = availabilities;
             }
-            schedulesByWorker[workerId].push(schedule);
-          });
-        }
+          } catch (error) {
+            console.error(`직원 ${workerId}의 근무 가능 시간 조회 실패:`, error);
+            schedulesByWorker[workerId] = [];
+          }
+        });
+        
+        await Promise.all(availabilityPromises);
         setWorkerSchedules(schedulesByWorker);
       } catch (error) {
         console.error("직원 및 스케줄 로드 실패:", error);

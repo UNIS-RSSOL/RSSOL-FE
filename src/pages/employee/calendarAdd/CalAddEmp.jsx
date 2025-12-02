@@ -5,7 +5,7 @@ import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/alarm/TopBar.jsx";
 import EmployeeScheduleCalendar from "../../../components/common/calendar/EmployeeScheduleCalendar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
-import { addWorkshift } from "../../../services/owner/ScheduleService.js";
+import { addAvailability } from "../../../services/employee/ScheduleService.js";
 import { fetchSchedules } from "../../../services/common/ScheduleService.js";
 import {
   fetchActiveStore,
@@ -18,6 +18,7 @@ function CalAddEmp() {
   const [selectedTimeSlots, setSelectedTimeSlots] = useState(new Set());
   const [employeeUserId, setEmployeeUserId] = useState(null);
   const [employeeStoreId, setEmployeeStoreId] = useState(null);
+  const [employeeUserName, setEmployeeUserName] = useState(null);
   const [existingSchedules, setExistingSchedules] = useState([]);
   const [isLoadingEmployeeInfo, setIsLoadingEmployeeInfo] = useState(true);
 
@@ -38,7 +39,7 @@ function CalAddEmp() {
           storeId = activeStore.id;
         }
 
-        // mydata에서 userId 가져오기
+        // mydata에서 userId와 userName 가져오기
         const mydata = await fetchMydata();
         console.log("fetchMydata 응답:", mydata);
 
@@ -47,6 +48,15 @@ function CalAddEmp() {
           userId = mydata.userId;
         } else if (mydata && mydata.id) {
           userId = mydata.id;
+        }
+
+        let userName = null;
+        if (mydata && mydata.username) {
+          userName = mydata.username;
+        } else if (mydata && mydata.userName) {
+          userName = mydata.userName;
+        } else if (mydata && mydata.name) {
+          userName = mydata.name;
         }
 
         // storeId가 없으면 mydata의 currentStore에서 가져오기
@@ -58,16 +68,19 @@ function CalAddEmp() {
           }
         }
 
-        if (userId && storeId) {
-          console.log("userId와 storeId 찾음:", { userId, storeId });
+        if (userId && storeId && userName) {
+          console.log("userId, storeId, userName 찾음:", { userId, storeId, userName });
           setEmployeeUserId(userId);
           setEmployeeStoreId(storeId);
+          setEmployeeUserName(userName);
         } else {
           console.error(
-            "userId 또는 storeId를 찾을 수 없습니다. userId:",
+            "userId, storeId 또는 userName을 찾을 수 없습니다. userId:",
             userId,
             "storeId:",
             storeId,
+            "userName:",
+            userName,
             "activeStore:",
             activeStore,
             "mydata:",
@@ -134,12 +147,14 @@ function CalAddEmp() {
       return;
     }
 
-    if (!employeeUserId || !employeeStoreId) {
+    if (!employeeUserId || !employeeStoreId || !employeeUserName) {
       console.error(
-        "employeeUserId 또는 employeeStoreId가 null입니다. userId:",
+        "employeeUserId, employeeStoreId 또는 employeeUserName이 null입니다. userId:",
         employeeUserId,
         "storeId:",
         employeeStoreId,
+        "userName:",
+        employeeUserName,
       );
       alert("알바생 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.");
       return;
@@ -212,21 +227,111 @@ function CalAddEmp() {
       return;
     }
 
-    // 스케줄 추가
+    // work availability 추가 (백엔드 DTO 구조에 맞게 변환)
     try {
-      for (const schedule of schedulesToAdd) {
-        await addWorkshift(
-          employeeUserId,
-          employeeStoreId,
-          schedule.start,
-          schedule.end,
-        );
+      // 요일을 영어 약자로 변환하는 함수
+      const getDayOfWeek = (dayjsDate) => {
+        const day = dayjsDate.day(); // 0=일요일, 1=월요일, ..., 6=토요일
+        const dayMap = {
+          0: "SUN",
+          1: "MON",
+          2: "TUE",
+          3: "WED",
+          4: "THU",
+          5: "FRI",
+          6: "SAT",
+        };
+        return dayMap[day];
+      };
+
+      // 날짜별로 그룹화한 후, 각 날짜 내에서 연속된 시간대만 하나로 합침
+      const schedulesByDate = {};
+      if (schedulesToAdd.length > 0) {
+        // 날짜와 시간으로 정렬
+        const sortedSchedules = [...schedulesToAdd].sort((a, b) => {
+          const dateA = new Date(a.start);
+          const dateB = new Date(b.start);
+          return dateA - dateB;
+        });
+
+        // 날짜별로 그룹화
+        sortedSchedules.forEach((schedule) => {
+          const scheduleStart = dayjs(schedule.start);
+          const dateKey = scheduleStart.format("YYYY-MM-DD");
+          
+          if (!schedulesByDate[dateKey]) {
+            schedulesByDate[dateKey] = [];
+          }
+          schedulesByDate[dateKey].push({
+            start: scheduleStart,
+            end: dayjs(schedule.end),
+          });
+        });
       }
-      alert("스케줄이 추가되었습니다.");
+
+      // 각 날짜별로 연속된 시간대를 그룹화하여 availabilities 배열 생성
+      const availabilities = [];
+      Object.keys(schedulesByDate).forEach((dateKey) => {
+        const daySchedules = schedulesByDate[dateKey];
+        const firstSchedule = daySchedules[0];
+        const dayOfWeek = getDayOfWeek(firstSchedule.start);
+        
+        // 같은 날짜의 연속된 시간대를 하나로 합침
+        let currentGroup = null;
+        daySchedules.forEach((schedule) => {
+          if (!currentGroup) {
+            currentGroup = {
+              start: schedule.start,
+              end: schedule.end,
+            };
+          } else {
+            // 같은 날짜에서 연속된 시간대인지 확인 (끝 시간과 시작 시간이 같음)
+            if (currentGroup.end.isSame(schedule.start)) {
+              // 연속된 시간대이므로 합침
+              currentGroup.end = schedule.end;
+            } else {
+              // 연속되지 않은 시간대이므로 별도 availability로 추가
+              availabilities.push({
+                dayOfWeek: dayOfWeek,
+                startTime: currentGroup.start.format("HH:mm"),
+                endTime: currentGroup.end.format("HH:mm"),
+              });
+              currentGroup = {
+                start: schedule.start,
+                end: schedule.end,
+              };
+            }
+          }
+        });
+        
+        // 마지막 그룹 추가
+        if (currentGroup) {
+          availabilities.push({
+            dayOfWeek: dayOfWeek,
+            startTime: currentGroup.start.format("HH:mm"),
+            endTime: currentGroup.end.format("HH:mm"),
+          });
+        }
+      });
+
+      // 백엔드 DTO 구조에 맞게 payload 생성 (단일 객체 안에 availabilities 배열)
+      const payload = {
+        userStoreId: employeeStoreId,
+        userName: employeeUserName,
+        availabilities: availabilities, // 배열
+      };
+
+      console.log("sending payload:", JSON.stringify(payload, null, 2));
+
+      // work availability 추가 (한 번에 모든 availability 전송)
+      await addAvailability(payload);
+      
+      alert("근무 가능 시간이 추가되었습니다.");
       navigate(-1);
     } catch (error) {
-      console.error("스케줄 추가 실패:", error);
-      alert("스케줄 추가에 실패했습니다. 다시 시도해주세요.");
+      console.error("근무 가능 시간 추가 실패:", error);
+      console.error("에러 상세:", error.response?.data || error.message);
+      alert("근무 가능 시간 추가에 실패했습니다. 다시 시도해주세요.");
     }
   };
 

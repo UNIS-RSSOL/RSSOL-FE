@@ -11,7 +11,7 @@ import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import { generateSchedule, confirmSchedule } from "../../../services/scheduleService.js";
 import { fetchActiveStore, fetchStoredata } from "../../../services/owner/MyPageService.js";
 import { fetchAllWorkers } from "../../../services/owner/ScheduleService.js";
-import { addNotificationToEmployees } from "../../../utils/notificationUtils.js";
+import { createScheduleRequestNotification } from "../../../services/common/NotificationService.js";
 import "./CalAdd.css";
 
 export default function CalAdd() {
@@ -489,7 +489,17 @@ export default function CalAdd() {
               return;
             }
 
-            // 5. 날짜 범위 문자열 생성
+            // 5. 알바생 ID 추출
+            const employeeIds = storeWorkers.map(worker => {
+              return worker.userId || worker.id || worker.employeeId;
+            }).filter(id => id); // 유효한 ID만
+
+            if (employeeIds.length === 0) {
+              alert("알바생 ID를 가져올 수 없습니다.");
+              return;
+            }
+
+            // 6. 날짜 범위 문자열 생성
             let dateRange;
             if (startDate && endDate) {
               dateRange = `${dayjs(startDate).format("YYYY.MM.DD")} ~ ${dayjs(endDate).format("YYYY.MM.DD")}`;
@@ -498,26 +508,23 @@ export default function CalAdd() {
               dateRange = `${currentMonth}월`;
             }
 
-            // 6. 알림 데이터 준비
-            const notification = {
-              type: 'schedule_request',
-              storeName: storeData.name || '매장',
-              message: `사장님이 ${dateRange} 시간표 추가를 요청했어요! 근무가능 시간표를 작성해주세요`,
-              startDate: startDate || null,
-              endDate: endDate || null,
-              unitSpecified: unitSpecified,
-              timeSlots: unitSpecified ? timeSlots.filter(slot => slot.start && slot.end && slot.count > 0) : null,
-              minWorkTime: !unitSpecified ? minWorkTime : null,
-            };
-
-            // 7. 각 알바생의 알림에 추가 (localStorage)
-            const employeeIds = storeWorkers.map(worker => {
-              return worker.userId || worker.id || worker.employeeId;
-            }).filter(id => id); // 유효한 ID만
-
-            if (employeeIds.length > 0) {
-              addNotificationToEmployees(employeeIds, notification);
+            // 8. 백엔드 API로 알림 생성
+            try {
+              await createScheduleRequestNotification({
+                storeId: storeData.storeId,
+                employeeIds: employeeIds,
+                message: `사장님이 ${dateRange} 시간표 추가를 요청했어요! 근무가능 시간표를 작성해주세요`,
+                startDate: startDate || null,
+                endDate: endDate || null,
+                unitSpecified: unitSpecified,
+                timeSlots: unitSpecified ? timeSlots.filter(slot => slot.start && slot.end && slot.count > 0) : null,
+                minWorkTime: !unitSpecified ? minWorkTime : null,
+              });
               alert("알바생들에게 알림이 전송되었습니다!");
+            } catch (error) {
+              console.error("알림 전송 실패:", error);
+              alert("알림 전송에 실패했습니다. 다시 시도해주세요.");
+              return;
             }
 
             // 8. ScheduleList로 이동하면서 설정한 정보 전달
