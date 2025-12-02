@@ -96,7 +96,7 @@ function OwnerHome() {
     updateTime();
     const intervalId = setInterval(updateTime, 1000);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [activeStore]);
 
   const FloatButton = () => {
     const [isOpen, setIsOpen] = useState(false);
