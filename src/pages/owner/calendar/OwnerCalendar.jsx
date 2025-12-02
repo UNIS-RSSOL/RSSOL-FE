@@ -392,28 +392,6 @@ function OwnerCalendar() {
                     minuteStep="5"
                     placeholder=""
                     suffixIcon=""
-                    disabledTime={(current) => {
-                      if (!current) {
-                        return false;
-                      }
-                      const now = dayjs();
-                      if (current.isSame(now, "day")) {
-                        return {
-                          disabledHours: () =>
-                            Array.from({ length: now.hour() }, (_, i) => i),
-                          disabledMinutes: (selectedHour) => {
-                            if (selectedHour === now.hour()) {
-                              return Array.from(
-                                { length: now.minute() },
-                                (_, i) => i,
-                              );
-                            }
-                            return [];
-                          },
-                        };
-                      }
-                      return false;
-                    }}
                     needConfirm={false}
                     onChange={(e) =>
                       setNewTime({ ...newTime, start: dayjs(e) })
@@ -427,28 +405,6 @@ function OwnerCalendar() {
                     minuteStep="5"
                     placeholder=""
                     suffixIcon=""
-                    disabledTime={(current) => {
-                      if (!current) {
-                        return false;
-                      }
-                      const now = dayjs();
-                      if (current.isSame(now, "day")) {
-                        return {
-                          disabledHours: () =>
-                            Array.from({ length: now.hour() }, (_, i) => i),
-                          disabledMinutes: (selectedHour) => {
-                            if (selectedHour === now.hour()) {
-                              return Array.from(
-                                { length: now.minute() },
-                                (_, i) => i,
-                              );
-                            }
-                            return [];
-                          },
-                        };
-                      }
-                      return false;
-                    }}
                     needConfirm={false}
                     onChange={(e) => setNewTime({ ...newTime, end: dayjs(e) })}
                   />
