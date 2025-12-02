@@ -4,11 +4,24 @@ import {
   onboardingOwner,
   onboardingStaff,
 } from "../../services/authService.js";
+import { CaretDownFilled } from "@ant-design/icons";
 import character4 from "../../assets/images/character4.png";
 import character2 from "../../assets/images/character2.png";
 
 const ONBOARDING_ROLE_KEY = "onboardingRole";
 const ONBOARDING_DATA_KEY = "onboardingData";
+
+// 은행 드롭다운 목록
+const bankItems = [
+  { label: "국민은행", key: 1 },
+  { label: "신한은행", key: 2 },
+  { label: "우리은행", key: 3 },
+  { label: "하나은행", key: 4 },
+  { label: "농협은행", key: 5 },
+  { label: "기업은행", key: 6 },
+  { label: "카카오은행", key: 7 },
+  { label: "토스은행", key: 8 },
+];
 
 export default function Onboarding() {
   const [step, setStep] = useState(1);
@@ -21,10 +34,11 @@ export default function Onboarding() {
     storePhone: "",
     businessNumber: "",
     storeCode: "",
-    bankName: "",
+    bankId: 0,
     account: "",
     hireDate: "",
   });
+  const [bankDropdownOpen, setBankDropdownOpen] = useState(false);
   const [errors, setErrors] = useState({
     storePhone: "",
     businessNumber: "",
@@ -138,8 +152,8 @@ export default function Onboarding() {
         }
         return;
       } else {
-        const { storeCode, bankName, account, hireDate } = formData;
-        if (!storeCode || !bankName || !account || !hireDate) {
+        const { storeCode, bankId, account, hireDate } = formData;
+        if (!storeCode || !bankId || bankId === 0 || !account || !hireDate) {
           alert("모든 정보를 입력해주세요.");
           return;
         }
@@ -154,9 +168,7 @@ export default function Onboarding() {
         setIsLoading(true);
         setError("");
         try {
-          // bankName을 bankId로 전달 (백엔드에서 처리하거나 매핑 필요)
-          // 일단 bankName을 그대로 전달하도록 수정 (API 수정 필요할 수 있음)
-          await onboardingStaff(storeCode, bankName, account, hireDate);
+          await onboardingStaff(storeCode, bankId, account, hireDate);
           // 성공 시 알바생 홈으로 이동
           navigate("/employee");
         } catch (err) {
@@ -203,10 +215,11 @@ export default function Onboarding() {
           businessNumber.length === 10
         );
       } else if (role === "employee") {
-        const { storeCode, bankName, account, hireDate } = formData;
+        const { storeCode, bankId, account, hireDate } = formData;
         return (
           storeCode &&
-          bankName &&
+          bankId &&
+          bankId !== 0 &&
           account &&
           /^\d+$/.test(account) &&
           hireDate
@@ -373,15 +386,50 @@ export default function Onboarding() {
 
               <div className="flex flex-col">
                 <div className="flex gap-2 w-full">
-                  <div className="flex-[3]">
+                  <div className="flex-[3] relative">
                     <p className="text-sm mb-1 text-left">은행</p>
-                    <input
-                      name="bankName"
-                      value={formData.bankName}
-                      onChange={handleChange}
-                      placeholder="은행 이름"
-                      className="border p-2 rounded-lg w-full"
-                    />
+                    <div
+                      className={`flex w-full items-center justify-between py-2 px-3 bg-white border rounded-lg cursor-pointer ${
+                        bankDropdownOpen
+                          ? "border-b-0 rounded-b-none"
+                          : "border"
+                      }`}
+                      onClick={() => setBankDropdownOpen(!bankDropdownOpen)}
+                    >
+                      <span className="text-sm">
+                        {formData.bankId === 0
+                          ? "은행 선택"
+                          : bankItems.find((item) => item.key === formData.bankId)
+                              ?.label || "은행 선택"}
+                      </span>
+                      <CaretDownFilled
+                        style={{
+                          fontSize: "12px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      />
+                    </div>
+                    {bankDropdownOpen && (
+                      <div className="absolute left-0 top-full mt-0 w-full border border-t-0 rounded-b-lg overflow-hidden z-10 bg-white">
+                        {bankItems.map((item) => (
+                          <div
+                            key={item.key}
+                            className="flex items-center justify-start w-full py-2 px-3 bg-white hover:bg-gray-100 cursor-pointer"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                bankId: item.key,
+                              }));
+                              setBankDropdownOpen(false);
+                            }}
+                          >
+                            <span className="text-sm">{item.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex-[7]">
