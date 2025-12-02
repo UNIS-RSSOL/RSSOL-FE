@@ -23,6 +23,25 @@ api.interceptors.request.use(
       }
     }
 
+    // DELETE 요청 시 Content-Type 제거 (일부 서버에서 문제 발생 가능)
+    if (config.method?.toLowerCase() === 'delete') {
+      // DELETE 요청은 일반적으로 body가 없으므로 Content-Type 제거
+      delete config.headers['Content-Type'];
+    }
+
+    // 개발 환경에서 요청 정보 로깅
+    if (import.meta.env.DEV && config.method?.toLowerCase() === 'delete') {
+      console.log(`🔍 DELETE 요청:`, {
+        url: config.url,
+        baseURL: config.baseURL,
+        fullURL: `${config.baseURL}${config.url}`,
+        headers: {
+          Authorization: config.headers.Authorization ? 'Bearer ***' : '없음',
+          'Content-Type': config.headers['Content-Type'] || '없음',
+        },
+      });
+    }
+
     return config;
   },
   (error) => {

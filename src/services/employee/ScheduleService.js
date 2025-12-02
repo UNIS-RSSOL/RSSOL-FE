@@ -83,10 +83,43 @@ export async function deleteAvailability(availabilityId) {
     if (!availabilityId) {
       throw new Error("availabilityId가 필요합니다.");
     }
-    const response = await api.delete(`/api/me/availabilities/${availabilityId}`);
+    
+    // ID 타입 확인 및 정규화 (숫자로 변환 시도)
+    const normalizedId = typeof availabilityId === 'string' 
+      ? parseInt(availabilityId, 10) 
+      : availabilityId;
+    
+    if (isNaN(normalizedId)) {
+      throw new Error(`유효하지 않은 availabilityId: ${availabilityId}`);
+    }
+    
+    // DELETE 요청 (body 없이 URL param만 사용)
+    const url = `/api/me/availabilities/${normalizedId}`;
+    
+    if (import.meta.env.DEV) {
+      console.log(`🔍 DELETE 요청: ${url}`, { id: normalizedId, idType: typeof normalizedId });
+    }
+    
+    const response = await api.delete(url);
     return response.data;
   } catch (error) {
-    // api.js의 interceptor에서 이미 로깅하므로 여기서는 에러만 throw
+    // 상세 에러 정보 로깅
+    if (error.response) {
+      console.error(`❌ DELETE 실패 상세:`, {
+        url: error.config?.url,
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data,
+        headers: error.config?.headers,
+      });
+    } else if (error.request) {
+      console.error(`❌ DELETE 요청 실패 (응답 없음):`, {
+        url: error.config?.url,
+        message: error.message,
+      });
+    } else {
+      console.error(`❌ DELETE 요청 설정 실패:`, error.message);
+    }
     throw error;
   }
 }

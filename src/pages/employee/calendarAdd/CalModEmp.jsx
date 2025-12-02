@@ -429,28 +429,56 @@ function CalModEmp() {
       
       for (const availability of availabilitiesToDeleteFiltered) {
         if (availability.id) {
+          // ID 타입 및 유효성 확인
+          const id = availability.id;
+          const idType = typeof id;
+          const idValue = typeof id === 'string' ? parseInt(id, 10) : id;
+          
+          if (isNaN(idValue) || idValue <= 0) {
+            console.warn(`⚠️ 유효하지 않은 ID:`, { id, idType, availability });
+            continue;
+          }
+          
           // 중복 ID 체크
-          if (deleteIds.has(availability.id)) {
+          if (deleteIds.has(idValue)) {
             continue; // 중복 삭제 요청 무시
           }
-          deleteIds.add(availability.id);
+          deleteIds.add(idValue);
+          
+          // ID 정보 로깅 (개발 환경)
+          if (import.meta.env.DEV) {
+            console.log(`🔍 삭제 시도: availability ID ${idValue} (원본: ${id}, 타입: ${idType})`);
+          }
           
           deletePromises.push(
-            deleteAvailability(availability.id)
+            deleteAvailability(idValue)
               .then((result) => {
-                deleteResults.push({ id: availability.id, success: true });
+                if (import.meta.env.DEV) {
+                  console.log(`✅ availability ${idValue} 삭제 성공`);
+                }
+                deleteResults.push({ id: idValue, success: true });
                 return result;
               })
               .catch((error) => {
                 const errorMessage = error.response?.data?.message || error.message || '알 수 없는 오류';
                 const errorStatus = error.response?.status || 'N/A';
+                const errorData = error.response?.data;
                 
-                // "No static resource" 에러는 라우팅 문제로 간주하고 조용히 처리
-                if (!errorMessage.includes('No static resource') && errorStatus !== 500) {
-                  console.warn(`⚠️ availability ${availability.id} 삭제 실패 (${errorStatus}):`, errorMessage);
-                }
+                // 상세 에러 정보 로깅
+                console.warn(`⚠️ availability ${idValue} 삭제 실패:`, {
+                  id: idValue,
+                  status: errorStatus,
+                  message: errorMessage,
+                  errorData: errorData,
+                  url: error.config?.url,
+                });
                 
-                deleteResults.push({ id: availability.id, success: false, error: errorMessage });
+                deleteResults.push({ 
+                  id: idValue, 
+                  success: false, 
+                  error: errorMessage,
+                  status: errorStatus,
+                });
                 // 삭제 실패해도 계속 진행 (이미 삭제되었거나 존재하지 않는 경우)
                 return null;
               })
