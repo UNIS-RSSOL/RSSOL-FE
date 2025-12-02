@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import InfoBox from "../../../components/common/mypage/InfoBox.jsx";
 import { MypageIcon } from "../../../assets/icons/MypageIcon.jsx";
 import MsgIcon from "../../../assets/icons/MsgIcon.jsx";
@@ -9,6 +10,7 @@ import MapIcon from "../../../assets/icons/MapIcon.jsx";
 import PhoneIcon from "../../../assets/icons/PhoneIcon.jsx";
 import NoteIcon from "../../../assets/icons/NoteIcon.jsx";
 import character from "../../../assets/images/OwnerBtn.png";
+
 import {
   fetchMydata,
   fetchStoredata,
@@ -16,8 +18,10 @@ import {
   updateStoredata,
   fetchStoreList,
 } from "../../../services/owner/MyPageService.js";
+import { logout } from "../../../services/authService.js";
 
 function OwnerPage() {
+  const navigate = useNavigate();
   const [mydata, setMydata] = useState([]);
   const [storedata, setStoredata] = useState([]);
   const [profile, setProfile] = useState("");
@@ -95,24 +99,44 @@ function OwnerPage() {
 
   //내정보수정
   const handleMyDataUpdate = async (updatedData) => {
-    setMydata(updatedData);
-    await updateMydata(
-      updatedData[0].content,
-      updatedData[1].content,
-      updatedData[2].content,
-    );
-    console.log(updatedData);
+    try {
+      setMydata(updatedData);
+      await updateMydata(
+        updatedData[0].content,
+        updatedData[1].content,
+        updatedData[2].content,
+      );
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   //가게정보 수정
   const handleStoreDataUpdate = async (updatedData) => {
-    setStoredata(updatedData);
-    await updateStoredata(
-      updatedData[1].content,
-      updatedData[2].content,
-      updatedData[3].content,
-    );
-    console.log(updatedData);
+    try {
+      setStoredata(updatedData);
+      await updateStoredata(
+        updatedData[1].content,
+        updatedData[2].content,
+        updatedData[3].content,
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  //로그아웃
+  const handleLogout = async () => {
+    try {
+      // await logout();
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem(ACCESS_TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+      alert("로그아웃 되었습니다.");
+      navigate("/");
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+    }
   };
 
   //이메일 체크
@@ -158,6 +182,14 @@ function OwnerPage() {
         myData={storedata}
         onDataUpdate={handleStoreDataUpdate}
       />
+      <div className="flex items-center justify-center py-5">
+        <p
+          className="text-[12px]/[12px] font-[500] cursor-pointer border-b text-black border-black  transition-colors duration-200"
+          onClick={handleLogout}
+        >
+          로그아웃
+        </p>
+      </div>
     </div>
   );
 }
