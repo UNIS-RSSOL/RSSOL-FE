@@ -64,3 +64,25 @@ export async function fetchAllWorkers() {
     throw error;
   }
 }
+
+// 특정 직원의 work availability 조회 (사장용)
+// API 엔드포인트가 정확하지 않을 수 있으므로, Swagger 문서 확인 필요
+// 대안: /api/store/availabilities 또는 /api/store/staff/availabilities
+export async function fetchEmployeeAvailabilities(userId) {
+  try {
+    // 먼저 /api/store/staff/{userId}/availabilities 시도
+    const response = await api.get(`/api/store/staff/${userId}/availabilities`);
+    return response.data;
+  } catch (error) {
+    // 다른 엔드포인트 시도
+    try {
+      const response = await api.get(`/api/store/availabilities`, {
+        params: { userId }
+      });
+      return response.data;
+    } catch (error2) {
+      console.error("직원 근무 가능 시간 조회 실패:", error2);
+      return [];
+    }
+  }
+}

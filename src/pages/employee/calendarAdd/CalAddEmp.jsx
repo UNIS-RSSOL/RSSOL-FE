@@ -258,11 +258,12 @@ function CalAddEmp() {
       }
 
       // work availability 추가
+      console.log("work availability 추가 시작, 그룹 수:", availabilityGroups.length);
       for (const group of availabilityGroups) {
-        await addAvailability(
-          group.start.format("YYYY-MM-DDTHH:mm:ss"),
-          group.end.format("YYYY-MM-DDTHH:mm:ss")
-        );
+        const startStr = group.start.format("YYYY-MM-DDTHH:mm:ss");
+        const endStr = group.end.format("YYYY-MM-DDTHH:mm:ss");
+        console.log("availability 추가:", { startStr, endStr });
+        await addAvailability(startStr, endStr);
       }
       
       alert("근무 가능 시간이 추가되었습니다.");
