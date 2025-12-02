@@ -5,7 +5,7 @@ import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/alarm/TopBar.jsx";
 import EmployeeScheduleCalendar from "../../../components/common/calendar/EmployeeScheduleCalendar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
-import { addWorkshift } from "../../../services/owner/ScheduleService.js";
+import { addAvailability } from "../../../services/employee/ScheduleService.js";
 import { fetchSchedules } from "../../../services/common/ScheduleService.js";
 import {
   fetchActiveStore,
@@ -212,21 +212,64 @@ function CalAddEmp() {
       return;
     }
 
-    // 스케줄 추가
+    // work availability 추가 (연속된 시간대를 하나의 availability로 그룹화)
     try {
-      for (const schedule of schedulesToAdd) {
-        await addWorkshift(
-          employeeUserId,
-          employeeStoreId,
-          schedule.start,
-          schedule.end,
+      // 연속된 시간대를 하나의 availability로 그룹화
+      const availabilityGroups = [];
+      if (schedulesToAdd.length > 0) {
+        // 날짜와 시간으로 정렬
+        const sortedSchedules = [...schedulesToAdd].sort((a, b) => {
+          const dateA = new Date(a.start);
+          const dateB = new Date(b.start);
+          return dateA - dateB;
+        });
+
+        let currentGroup = null;
+        sortedSchedules.forEach((schedule) => {
+          const scheduleStart = dayjs(schedule.start);
+          const scheduleEnd = dayjs(schedule.end);
+
+          if (!currentGroup) {
+            currentGroup = {
+              start: scheduleStart,
+              end: scheduleEnd,
+            };
+          } else {
+            // 연속된 시간대인지 확인 (같은 날짜이고 1시간 차이)
+            if (
+              currentGroup.end.isSame(scheduleStart) &&
+              currentGroup.start.format("YYYY-MM-DD") === scheduleStart.format("YYYY-MM-DD")
+            ) {
+              currentGroup.end = scheduleEnd;
+            } else {
+              // 새로운 그룹 시작
+              availabilityGroups.push(currentGroup);
+              currentGroup = {
+                start: scheduleStart,
+                end: scheduleEnd,
+              };
+            }
+          }
+        });
+        
+        if (currentGroup) {
+          availabilityGroups.push(currentGroup);
+        }
+      }
+
+      // work availability 추가
+      for (const group of availabilityGroups) {
+        await addAvailability(
+          group.start.format("YYYY-MM-DDTHH:mm:ss"),
+          group.end.format("YYYY-MM-DDTHH:mm:ss")
         );
       }
-      alert("스케줄이 추가되었습니다.");
+      
+      alert("근무 가능 시간이 추가되었습니다.");
       navigate(-1);
     } catch (error) {
-      console.error("스케줄 추가 실패:", error);
-      alert("스케줄 추가에 실패했습니다. 다시 시도해주세요.");
+      console.error("근무 가능 시간 추가 실패:", error);
+      alert("근무 가능 시간 추가에 실패했습니다. 다시 시도해주세요.");
     }
   };
 

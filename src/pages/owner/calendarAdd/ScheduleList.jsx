@@ -50,14 +50,16 @@ function ScheduleList() {
         const endOfWeek = startOfWeek.add(6, "day");
         
         // 직원 리스트 가져오기
+        // /api/store/staff는 이미 활성 매장의 직원들만 반환하므로 필터링 불필요
         const workersList = await fetchAllWorkers();
         
-        // 같은 매장의 알바생들만 필터링 (사장 제외)
+        // 사장 제외하고 알바생만 필터링
         const storeWorkers = (workersList || []).filter(worker => {
-          const workerStoreId = worker.storeId || worker.userStore?.storeId || worker.store?.storeId;
-          return workerStoreId === storeId && 
-                 worker.role !== 'OWNER' && 
-                 worker.userType !== 'OWNER';
+          // role이나 userType으로 사장 필터링
+          const isOwner = worker.role === 'OWNER' || 
+                         worker.userType === 'OWNER' ||
+                         worker.position === 'OWNER';
+          return !isOwner;
         });
         
         setWorkers(storeWorkers);
