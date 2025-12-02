@@ -6,24 +6,75 @@ import TopBar from "../../../components/layout/alarm/TopBar.jsx";
 import OwnerScheduleCalendar from "../../../components/common/calendar/OwnerScheduleCalendar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import Toast from "../../../components/common/Toast.jsx";
-import { addWorkshift, fetchAllWorkers } from "../../../services/owner/ScheduleService.js";
+import {
+  addWorkshift,
+  fetchAllWorkers,
+} from "../../../services/owner/ScheduleService.js";
 import { fetchSchedules } from "../../../services/common/ScheduleService.js";
+import {
+  fetchMydata,
+  fetchStoredata,
+  fetchActiveStore,
+} from "../../../services/owner/MyPageService.js";
 
 function AddOwner() {
   const navigate = useNavigate();
   const [currentDate] = useState(dayjs().locale("ko"));
   const [selectedTimeSlots, setSelectedTimeSlots] = useState(new Set());
-  const [ownerUserStoreId, setOwnerUserStoreId] = useState(null);
+  const [ownerUserId, setOwnerUserId] = useState(null);
+  const [ownerStoreId, setOwnerStoreId] = useState(null);
   const [existingSchedules, setExistingSchedules] = useState([]);
   const [toastOpen, setToastOpen] = useState(false);
 
-  // 사장의 userStoreId 가져오기
+  // 사장의 userId와 storeId 가져오기
   useEffect(() => {
     const loadOwnerInfo = async () => {
       try {
-        const workers = await fetchAllWorkers();
-        if (workers && workers.length > 0) {
-          setOwnerUserStoreId(workers[0]?.id || null);
+        // 사장 정보 가져오기
+        const mydata = await fetchMydata();
+        console.log("owner fetchMydata 응답:", mydata);
+
+        let userId = null;
+        if (mydata && mydata.userId) {
+          userId = mydata.userId;
+        } else if (mydata && mydata.id) {
+          userId = mydata.id;
+        }
+
+        // 매장 정보 가져오기 (activeStore 우선)
+        const activeStore = await fetchActiveStore();
+        console.log("owner fetchActiveStore 응답:", activeStore);
+
+        let storeId = null;
+        if (activeStore && activeStore.storeId) {
+          storeId = activeStore.storeId;
+        } else if (activeStore && activeStore.id) {
+          storeId = activeStore.id;
+        }
+
+        // activeStore에 없으면 fetchStoredata에서 가져오기
+        if (!storeId) {
+          const storedata = await fetchStoredata();
+          console.log("owner fetchStoredata 응답:", storedata);
+
+          if (storedata && storedata.storeId) {
+            storeId = storedata.storeId;
+          } else if (storedata && storedata.id) {
+            storeId = storedata.id;
+          }
+        }
+
+        if (userId && storeId) {
+          console.log("owner userId와 storeId 찾음:", { userId, storeId });
+          setOwnerUserId(userId);
+          setOwnerStoreId(storeId);
+        } else {
+          console.error(
+            "owner userId 또는 storeId를 찾을 수 없습니다. userId:",
+            userId,
+            "storeId:",
+            storeId,
+          );
         }
       } catch (error) {
         console.error("사장 정보 로드 실패:", error);
@@ -40,7 +91,7 @@ function AddOwner() {
         const endOfWeek = startOfWeek.add(6, "day");
         const schedules = await fetchSchedules(
           startOfWeek.format("YYYY-MM-DD"),
-          endOfWeek.format("YYYY-MM-DD")
+          endOfWeek.format("YYYY-MM-DD"),
         );
         setExistingSchedules(schedules || []);
       } catch (error) {
@@ -60,13 +111,13 @@ function AddOwner() {
     const targetDate = startOfWeek.add(dayIndex, "day");
     const key = `${targetDate.format("YYYY-MM-DD")}-${day}-${hour}`;
     const newSelected = new Set(selectedTimeSlots);
-    
+
     if (newSelected.has(key)) {
       newSelected.delete(key);
     } else {
       newSelected.add(key);
     }
-    
+
     setSelectedTimeSlots(newSelected);
   };
 
@@ -77,7 +128,13 @@ function AddOwner() {
       return;
     }
 
-    if (!ownerUserStoreId) {
+    if (!ownerUserId || !ownerStoreId) {
+      console.error(
+        "ownerUserId 또는 ownerStoreId가 null입니다. userId:",
+        ownerUserId,
+        "storeId:",
+        ownerStoreId,
+      );
       alert("사장 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.");
       return;
     }
@@ -86,15 +143,15 @@ function AddOwner() {
     const days = ["일", "월", "화", "수", "목", "금", "토"];
     const schedulesToAdd = [];
     const conflictMessages = [];
-    
+
     selectedTimeSlots.forEach((slotKey) => {
       const parts = slotKey.split("-");
       if (parts.length < 5) return;
-      
+
       const dateStr = `${parts[0]}-${parts[1]}-${parts[2]}`;
       const dayName = parts[3];
       const hourStr = parts[4];
-      
+
       const targetDate = dayjs(dateStr);
       const hour = parseInt(hourStr);
       const startDatetime = targetDate.hour(hour).minute(0).second(0);
@@ -102,7 +159,16 @@ function AddOwner() {
 
       // 기존 스케줄과 중복 확인
       const hasConflict = existingSchedules.some((schedule) => {
-        if (ownerUserStoreId && schedule.userStoreId !== ownerUserStoreId) {
+        // userId로 중복 확인 (schedule에 userId 필드가 있는 경우)
+        if (ownerUserId && schedule.userId && schedule.userId !== ownerUserId) {
+          return false;
+        }
+        // userStoreId로 중복 확인 (기존 호환성을 위해)
+        if (
+          ownerUserId &&
+          schedule.userStoreId &&
+          schedule.userStoreId !== ownerUserId
+        ) {
           return false;
         }
         const scheduleStart = dayjs(schedule.startDatetime);
@@ -114,9 +180,7 @@ function AddOwner() {
       });
 
       if (hasConflict) {
-        conflictMessages.push(
-          `${targetDate.format("MM월 DD일")} ${hour}시`
-        );
+        conflictMessages.push(`${targetDate.format("MM월 DD일")} ${hour}시`);
         return;
       }
 
@@ -128,7 +192,7 @@ function AddOwner() {
 
     if (conflictMessages.length > 0) {
       alert(
-        `다음 시간에 이미 스케줄이 있습니다:\n${conflictMessages.join(", ")}\n\n중복되지 않는 시간을 선택해주세요.`
+        `다음 시간에 이미 스케줄이 있습니다:\n${conflictMessages.join(", ")}\n\n중복되지 않는 시간을 선택해주세요.`,
       );
       return;
     }
@@ -141,7 +205,12 @@ function AddOwner() {
     // 스케줄 추가
     try {
       for (const schedule of schedulesToAdd) {
-        await addWorkshift(ownerUserStoreId, schedule.start, schedule.end);
+        await addWorkshift(
+          ownerUserId,
+          ownerStoreId,
+          schedule.start,
+          schedule.end,
+        );
       }
       setToastOpen(true);
       setTimeout(() => {
@@ -184,4 +253,3 @@ function AddOwner() {
 }
 
 export default AddOwner;
-
