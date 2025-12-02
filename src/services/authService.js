@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "./api.js";
 
 /**
  * 체크용 로그인 - 개발 토큰 발급

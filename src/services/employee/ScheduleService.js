@@ -1,4 +1,4 @@
-import api from "../api";
+import api from "../api.js";
 
 //기간지정 스케쥴 불러오기
 export async function fetchSchedules(start, end) {

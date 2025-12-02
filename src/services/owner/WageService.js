@@ -1,7 +1,7 @@
 import api from "../api.js";
 
 //급여계산
-export const calculateWage = (
+export const calculateWage = async (
   storeId,
   month,
   userStoreId,
@@ -12,7 +12,7 @@ export const calculateWage = (
   totalPay,
 ) => {
   try {
-    const response = api.post("/api/payroll/calculate", {
+    const response = await api.post("/api/payroll/calculate", {
       store_id: storeId,
       month: month,
       user_store_id: userStoreId,
@@ -31,9 +31,9 @@ export const calculateWage = (
 };
 
 //급여조회
-export const fetchWage = (storeId, month, userStoreId) => {
+export const fetchWage = async (storeId, month, userStoreId) => {
   try {
-    const response = api.get("/api/payrolls/preview/monthly", {
+    const response = await api.get("/api/payrolls/preview/monthly", {
       params: {
         store_id: storeId,
         month: month,

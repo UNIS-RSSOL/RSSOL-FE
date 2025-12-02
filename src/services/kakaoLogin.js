@@ -10,7 +10,7 @@
  * 6. 프론트엔드가 백엔드 응답을 받아서 저장하고 적절한 페이지로 이동
  */
 
-import api from "./api";
+import api from "./api.js";
 
 const KAKAO_AUTH_BASE_URL = "https://kauth.kakao.com/oauth/authorize";
 const KAKAO_CLIENT_ID = "3ddfc329270e2ce7e4ab45f3fcca3891";

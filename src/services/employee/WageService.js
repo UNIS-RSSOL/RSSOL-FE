@@ -1,9 +1,9 @@
-import api from "../api";
+import api from "../api.js";
 
 //급여조회
 export async function fetchWage(storeId, userStoreId, month) {
   try {
-    const response = api.get("/api/payrolls/preview/monthly", {
+    const response = await api.get("/api/payrolls/preview/monthly", {
       params: {
         store_id: storeId,
         user_store_id: userStoreId,
