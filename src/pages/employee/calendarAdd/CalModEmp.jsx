@@ -141,14 +141,15 @@ function CalModEmp() {
               
               // availability가 이 날짜와 겹치는지 확인
               if (availabilityStart.isBefore(dayEnd) && availabilityEnd.isAfter(dayStart)) {
-                // 겹치는 시간대 계산
-                const overlapStart = dayjs.max(availabilityStart, dayStart);
-                const overlapEnd = dayjs.min(availabilityEnd, dayEnd);
+                // 겹치는 시간대 계산 (dayjs.max/min 대신 직접 비교)
+                const overlapStart = availabilityStart.isAfter(dayStart) ? availabilityStart : dayStart;
+                const overlapEnd = availabilityEnd.isBefore(dayEnd) ? availabilityEnd : dayEnd;
                 
                 let currentHour = overlapStart.hour();
                 const endHour = overlapEnd.hour();
                 
-                while (currentHour < endHour) {
+                // 같은 시간대인 경우도 포함 (currentHour <= endHour)
+                while (currentHour <= endHour) {
                   const slotKey = `${currentDate.format("YYYY-MM-DD")}-${dayName}-${currentHour}`;
                   initialSelected.add(slotKey);
                   currentHour++;
