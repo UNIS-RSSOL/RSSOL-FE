@@ -19,6 +19,7 @@ import AlarmHomeEmp from "./pages/employee/alarm/AlarmHomeEmp.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
 import CalAddEmp from "./pages/employee/calendarAdd/CalAddEmp.jsx";
+import CalModEmp from "./pages/employee/calendarAdd/CalModEmp.jsx";
 import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
 import CalGen from "./pages/owner/calendarAdd/CalGen.jsx";
 import AutoCal from "./pages/owner/calendarAdd/AutoCal.jsx";
@@ -150,7 +151,7 @@ function App() {
    --------------------------*/
   const hideLayoutPages = [
     "/", "/login", "/onboarding", "/auth/kakao/callback",
-    "/calAdd", "/calGen", "/autoCal", "/calAddEmp",
+    "/calAdd", "/calGen", "/autoCal", "/calAddEmp", "/calModEmp",
     "/addOwner", "/scheduleList", "/alarmHomeEmp",
     "/alarmHome", "/alarmCheck"
   ];
@@ -186,6 +187,7 @@ function App() {
           <Route path="/employee/mypage/managestore" element={<EmpManageStore />} />
 
           <Route path="/calAddEmp" element={<CalAddEmp />} />
+          <Route path="/calModEmp" element={<CalModEmp />} />
           <Route path="/calAdd" element={<CalAdd />} />
           <Route path="/calGen" element={<CalGen />} />
           <Route path="/autoCal" element={<AutoCal />} />
