@@ -365,6 +365,43 @@ function CalModEmp() {
       }
     });
 
+    // 변경 사항이 있는지 확인
+    // 기존 availability를 dayOfWeek, startTime, endTime 기준으로 정규화하여 비교
+    const normalizeAvailability = (avail) => {
+      if (avail.dayOfWeek && avail.startTime && avail.endTime) {
+        return `${avail.dayOfWeek}-${avail.startTime}-${avail.endTime}`;
+      }
+      return null;
+    };
+
+    // 기존 availability 정규화
+    const existingAvailabilitiesNormalized = new Set(
+      availabilities
+        .map(normalizeAvailability)
+        .filter(Boolean)
+    );
+
+    // 새로운 availability 정규화
+    const newAvailabilitiesNormalized = new Set(
+      availabilitiesList.map(normalizeAvailability).filter(Boolean)
+    );
+
+    // 변경 사항이 있는지 확인
+    const hasChanges = 
+      existingAvailabilitiesNormalized.size !== newAvailabilitiesNormalized.size ||
+      Array.from(existingAvailabilitiesNormalized).some(
+        (key) => !newAvailabilitiesNormalized.has(key)
+      ) ||
+      Array.from(newAvailabilitiesNormalized).some(
+        (key) => !existingAvailabilitiesNormalized.has(key)
+      );
+
+    if (!hasChanges) {
+      alert("변경된 내용이 없습니다.");
+      setIsSubmitting(false);
+      return;
+    }
+
     // work availability 수정 (기존 삭제 후 새로 추가)
     try {
       // 삭제 전에 최신 availability 목록을 다시 가져와서 실제 존재하는 ID만 삭제
@@ -423,12 +460,17 @@ function CalModEmp() {
         }
       }
       
-      // 모든 삭제 요청 병렬 처리 (하지만 순차적으로 처리하여 서버 부하 감소)
+      // 모든 삭제 요청 순차 처리 (서버 부하 감소 및 안정성 향상)
       if (deletePromises.length > 0) {
-        // 병렬 처리 대신 순차 처리로 변경 (서버 부하 감소)
+        console.log(`🔍 ${deletePromises.length}개의 availability 삭제 시작...`);
+        // 순차 처리로 변경 (서버 부하 감소)
         for (let i = 0; i < deletePromises.length; i++) {
           try {
             await deletePromises[i];
+            // 각 삭제 사이에 짧은 딜레이 추가 (서버 부하 분산)
+            if (i < deletePromises.length - 1) {
+              await new Promise(resolve => setTimeout(resolve, 100));
+            }
           } catch (error) {
             // 이미 catch에서 처리됨
           }
@@ -440,6 +482,11 @@ function CalModEmp() {
       
       if (availabilitiesToDeleteFiltered.length > 0) {
         console.log(`✅ availability 삭제 완료 (성공: ${successCount}, 실패: ${failCount})`);
+        
+        // 삭제가 모두 실패한 경우 경고
+        if (successCount === 0 && failCount > 0) {
+          console.warn("⚠️ 모든 availability 삭제가 실패했습니다. 백엔드 라우팅 문제일 수 있습니다.");
+        }
       }
 
       // 새로운 availability 추가 (백엔드 DTO 구조에 맞게 payload 생성)
@@ -450,16 +497,24 @@ function CalModEmp() {
           availabilities: availabilitiesList, // 배열
         };
 
-        console.log("sending payload:", JSON.stringify(payload, null, 2));
+        console.log("🔍 새로운 availability 추가 중...");
         const response = await addAvailability(payload);
         
-        console.log("✅ 백엔드 저장 성공 응답:", JSON.stringify(response, null, 2));
-        console.log("✅ 근무 가능 시간이 성공적으로 수정되었습니다.");
+        console.log("✅ 백엔드 저장 성공");
       } else {
-        console.log("⚠️ 추가할 availability가 없습니다.");
+        console.log("ℹ️ 추가할 availability가 없습니다. (모든 시간대가 삭제됨)");
       }
       
-      alert("근무 가능 시간이 수정되었습니다.");
+      // 삭제 실패가 있었지만 추가는 성공한 경우
+      const hasDeleteFailures = failCount > 0;
+      if (hasDeleteFailures && availabilitiesList.length > 0) {
+        alert("근무 가능 시간이 수정되었습니다.\n일부 기존 시간대 삭제에 실패했지만, 새로운 시간대는 추가되었습니다.");
+      } else if (hasDeleteFailures) {
+        alert("기존 시간대 삭제에 실패했습니다. 백엔드 문제일 수 있습니다.");
+      } else {
+        alert("근무 가능 시간이 수정되었습니다.");
+      }
+      
       navigate(-1);
     } catch (error) {
       console.error("근무 가능 시간 수정 실패:", error);
