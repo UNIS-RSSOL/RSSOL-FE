@@ -196,7 +196,7 @@ function OwnerHome() {
           disabled={true}
         >
           <div className="flex flex-col items-center justify-center">
-            <p className="text-[16px] font-[500]">{activeStore}</p>
+            <p className="text-[16px] font-[500]">{activeStore?.name}</p>
             <p className="text-[14px] font-[400] text-[#7a7676]">
               {FormattedDate(today)}
             </p>
