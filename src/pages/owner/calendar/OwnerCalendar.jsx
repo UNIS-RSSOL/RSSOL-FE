@@ -67,7 +67,7 @@ function OwnerCalendar() {
   const [activeStore, setActiveStore] = useState("");
   const [newTime, setNewTime] = useState({
     userStoreId: "",
-    workerName: "",
+    userName: "",
     date: "",
     start: "",
     end: "",
@@ -102,8 +102,8 @@ function OwnerCalendar() {
     console.log(e);
     setEventData({
       id: e.id,
-      workerId: e.workerId,
-      worker: e.worker,
+      userStoreId: e.userStoreId,
+      userName: e.userName,
       start: dayjs(e.start),
       end: dayjs(e.end),
     });
@@ -178,7 +178,7 @@ function OwnerCalendar() {
           className={`flex w-[70px] h-[30px] items-center justify-center border-[#87888C] py-[2px] bg-white gap-1 cursor-pointer ${dropdownOpen ? "border border-b-[#87888c] rounded-t-[7px]" : "border rounded-[7px]"}`}
           onClick={() => setDropdownOpen(!dropdownOpen)}
         >
-          <span className="text-[12px] font-[400]">{newTime.workerName}</span>
+          <span className="text-[12px] font-[400]">{newTime.userName}</span>
         </div>
         {dropdownOpen && (
           <div className="absolute left-0 mt-0 rounded-b-[12px] border-x-1 border-b-1 overflow-hidden">
@@ -190,7 +190,7 @@ function OwnerCalendar() {
                   setNewTime((prev) => ({
                     ...prev,
                     userStoreId: worker.userStoreId,
-                    workerName: worker.username,
+                    userName: worker.username,
                   }));
                   setDropdownOpen(false);
                 }}
@@ -435,7 +435,7 @@ function OwnerCalendar() {
             <div className="flex flex-col gap-2">
               <div className="flex flex-row items-center justify-center">
                 <p className="text-[16px] font-[600] mb-2">
-                  {eventData.start.format("dd")}({eventData.worker}){" "}
+                  {eventData.start.format("dd")}({eventData.userName}){" "}
                   {eventData.start.format("HH:mm")}-
                   {eventData.end.format("HH:mm")}
                 </p>

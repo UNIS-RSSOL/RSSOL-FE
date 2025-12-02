@@ -21,18 +21,22 @@ function DayCalendar({
           date.format("YYYY-MM-DD"),
           date.format("YYYY-MM-DD"),
         );
-        const uniqueWorkers = [
-          ...new Set(
-            schedules.map((schedule) => ({
-              id: schedule.userStoreId,
-              name: schedule.userName,
-            })),
-          ),
-        ];
+
+        const uniqueWorkers = Array.from(
+          new Map(
+            schedules.map((schedule) => [
+              `${schedule.userStoreId}-${schedule.userId}`, // Combine both IDs for uniqueness
+              {
+                userStoreId: schedule.userStoreId,
+                userName: schedule.userName,
+              },
+            ]),
+          ).values(),
+        );
         const formattedEvents = schedules.map((schedule) => ({
           id: schedule.id,
-          workerId: schedule.userStoreId,
-          worker: schedule.userName,
+          userStoreId: schedule.userStoreId,
+          userName: schedule.userName,
           start: schedule.startDatetime,
           end: schedule.endDatetime,
         }));
@@ -65,9 +69,9 @@ function DayCalendar({
     return hour === endHour - 1;
   };
 
-  const getEventForCell = (workerId, hour) => {
+  const getEventForCell = (userStoreId, hour) => {
     return events.find((event) => {
-      if (event.workerId !== workerId) return false;
+      if (event.userStoreId !== userStoreId) return false;
       const startHour = dayjs(event.start).hour();
       let endHour = dayjs(event.end).hour();
       if (endHour === 0) endHour = 24;
@@ -106,17 +110,17 @@ function DayCalendar({
       </div>
       {workers?.map((worker) => (
         <div
-          key={worker.id}
+          key={worker.userStoreId}
           className="flex flex-shrink-0 flex-col w-[42px] border-l border-[#e7eaf3]"
         >
           <div className="flex flex-shrink-0 h-[30px]" />
 
           {hours.map((hour) => {
-            const event = getEventForCell(worker.id, hour);
+            const event = getEventForCell(worker.userStoreId, hour);
             const isSelected =
               selectedEventProp &&
               selectedEventProp.id === event?.id &&
-              selectedEventProp.workerId === worker.id &&
+              selectedEventProp.userStoreId === worker.userStoreId &&
               selectedEventProp.start === event?.start &&
               selectedEventProp.end === event?.end;
             const firstHour = isFirstHour(event, hour);
@@ -132,7 +136,7 @@ function DayCalendar({
 
             return event ? (
               <div
-                key={`${worker.id}-${hour}`}
+                key={`${worker.userStoreId}-${hour}`}
                 className={`flex h-[35px] items-center justify-center border-t border-[#e7eaf3] cursor-pointer 
                   ${isSelected ? "border-x-2 border-x-black" : ""}
                   ${isSelected && firstHour ? "border-t-2 border-t-black" : ""}
@@ -145,8 +149,8 @@ function DayCalendar({
                   e.stopPropagation();
                   const clickedEvent = {
                     id: event.id,
-                    workerId: event.workerId,
-                    worker: event.worker,
+                    userStoreId: event.userStoreId,
+                    userName: event.userName,
                     start: event.start,
                     end: event.end,
                   };
@@ -156,13 +160,13 @@ function DayCalendar({
               >
                 {isMiddleHour ? (
                   <span className="text-black text-[12px] font-[400]">
-                    {worker.name}
+                    {worker.userName}
                   </span>
                 ) : null}
               </div>
             ) : (
               <div
-                key={`${worker.id}-${hour}`}
+                key={`${worker.userStoreId}-${hour}`}
                 className="flex h-[35px] border-t border-[#e7eaf3] bg-white"
               />
             );
