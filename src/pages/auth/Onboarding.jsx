@@ -19,6 +19,10 @@ export default function Onboarding() {
     bankId: "",
     account: "",
   });
+  const [errors, setErrors] = useState({
+    storePhone: "",
+    businessNumber: "",
+  });
 
   const navigate = useNavigate();
 
@@ -58,6 +62,21 @@ export default function Onboarding() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setError("");
+    
+    // Validation 체크
+    if (name === "storePhone") {
+      if (value.length > 0 && value.length <= 7) {
+        setErrors((prev) => ({ ...prev, storePhone: "*최소 8자리부터 입력가능합니다" }));
+      } else {
+        setErrors((prev) => ({ ...prev, storePhone: "" }));
+      }
+    } else if (name === "businessNumber") {
+      if (value.length > 0 && value.length !== 10) {
+        setErrors((prev) => ({ ...prev, businessNumber: "*총 10자리를 입력해주세요." }));
+      } else {
+        setErrors((prev) => ({ ...prev, businessNumber: "" }));
+      }
+    }
   };
 
   const handleNext = async () => {
@@ -133,6 +152,29 @@ export default function Onboarding() {
     setStep(step - 1);
   };
 
+  // 완료 조건 체크
+  const isStepComplete = () => {
+    if (step === 1) {
+      return role !== null;
+    } else if (step === 2) {
+      if (role === "owner") {
+        const { storeName, storeAddress, storePhone, businessNumber } = formData;
+        return (
+          storeName &&
+          storeAddress &&
+          storePhone &&
+          storePhone.length >= 8 &&
+          businessNumber &&
+          businessNumber.length === 10
+        );
+      } else if (role === "employee") {
+        const { storeCode, bankId, account } = formData;
+        return storeCode && bankId && account;
+      }
+    }
+    return false;
+  };
+
   return (
     <div className="w-full min-h-screen bg-white flex flex-col items-center py-10 px-4 font-Pretendard">
   
@@ -204,6 +246,12 @@ export default function Onboarding() {
                     placeholder={item.placeholder}
                     className="border p-2 rounded-lg w-full"
                   />
+                  {item.name === "storePhone" && errors.storePhone && (
+                    <p className="text-[10px] text-[#f74a4a] text-left mt-1">{errors.storePhone}</p>
+                  )}
+                  {item.name === "businessNumber" && errors.businessNumber && (
+                    <p className="text-[10px] text-[#f74a4a] text-left mt-1">{errors.businessNumber}</p>
+                  )}
                 </div>
               ))}
             </div>
@@ -261,7 +309,10 @@ export default function Onboarding() {
           <button
             onClick={handleNext}
             disabled={isLoading}
-            className="w-full py-3 bg-blue-500 text-black rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="w-full py-3 text-black rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+            style={{
+              backgroundColor: isStepComplete() ? "#68E194" : "#3b82f6",
+            }}
           >
             {isLoading ? "처리 중..." : step === 2 ? "입력 완료" : "선택 완료"}
           </button>
