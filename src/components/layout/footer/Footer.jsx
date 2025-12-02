@@ -10,6 +10,7 @@ import {
   MypageIcon,
   SelectedMypageIcon,
 } from "../../../assets/icons/MypageIcon.jsx";
+import { fetchActiveStore } from "../../../services/owner/MyPageService.js";
 
 function Footer() {
   const navigate = useNavigate();
@@ -18,8 +19,16 @@ function Footer() {
   const [role, setRole] = useState(null);
 
   useEffect(() => {
-    r = localStorage.getItem(ONBOARDING_ROLE_KEY);
-    setRole(r);
+    (async () => {
+      try {
+        const response = await fetchActiveStore();
+        const r = response.position;
+        if (r === "OWNER") setRole("owner");
+        else setRole("employee");
+      } catch (error) {
+        console.error(error);
+      }
+    })();
   }, []);
 
   useEffect(() => {
