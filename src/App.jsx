@@ -17,9 +17,12 @@ import AlarmHomeEmp from "./pages/employee/alarm/AlarmHomeEmp.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
 
-import CalAddEmp from "./pages/employee/calendarAdd/CalAddEmp.jsx"
+import CalAddEmp from "./pages/employee/calendarAdd/CalAddEmp.jsx";
 import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
 import CalGen from "./pages/owner/calendarAdd/CalGen.jsx";
+import AutoCal from "./pages/owner/calendarAdd/AutoCal.jsx";
+import AddOwner from "./pages/owner/calendarAdd/AddOwner.jsx";
+import ScheduleList from "./pages/owner/calendarAdd/ScheduleList.jsx";
 
 import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
@@ -28,16 +31,20 @@ import EmpHome from "./pages/employee/EmpHome.jsx";
 
 function App() {
   const location = useLocation();
+  console.log("📍 Current Path:", location.pathname);
 
   // 헤더·푸터 제외할 페이지
   const hideLayoutPaths = [
     "/",
     "/login",
     "/onboarding",
-    "/auth/kakao/callback",
+    "/api/auth/kakao/callback",
     "/calAdd",
     "/calGen",
+    "/autoCal",
     "/calAddEmp",
+    "/addOwner",
+    "/scheduleList",
     "/alarmHomeEmp",
     "/alarmHome",
     "/alarmCheck",
@@ -67,7 +74,7 @@ function App() {
           {/* 로그인/온보딩 */}
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
+          <Route path="/api/auth/kakao/callback" element={<KakaoCallback />} />
 
           <Route path="/owner" element={<OwnerHome />} />
           <Route path="/employee" element={<EmpHome />} />
@@ -86,6 +93,9 @@ function App() {
           <Route path="/calAddEmp" element={<CalAddEmp />} />
           <Route path="/calAdd" element={<CalAdd />} />
           <Route path="/calGen" element={<CalGen />} />
+          <Route path="/autoCal" element={<AutoCal />} />
+          <Route path="/addOwner" element={<AddOwner />} />
+          <Route path="/scheduleList" element={<ScheduleList />} />
 
           <Route path="/alarmHomeEmp" element={<AlarmHomeEmp />} />
           <Route path="/alarmHome" element={<AlarmHome />} />

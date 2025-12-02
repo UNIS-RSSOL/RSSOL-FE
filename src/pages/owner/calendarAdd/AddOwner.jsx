@@ -3,41 +3,33 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/alarm/TopBar.jsx";
-import EmployeeScheduleCalendar from "../../../components/common/calendar/EmployeeScheduleCalendar.jsx";
+import OwnerScheduleCalendar from "../../../components/common/calendar/OwnerScheduleCalendar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
-import { addWorkshift } from "../../../services/owner/ScheduleService.js";
+import Toast from "../../../components/common/Toast.jsx";
+import { addWorkshift, fetchAllWorkers } from "../../../services/owner/ScheduleService.js";
 import { fetchSchedules } from "../../../services/common/ScheduleService.js";
-import { fetchActiveStore, fetchMydata } from "../../../services/employee/MyPageService.js";
 
-function CalAddEmp() {
+function AddOwner() {
   const navigate = useNavigate();
   const [currentDate] = useState(dayjs().locale("ko"));
   const [selectedTimeSlots, setSelectedTimeSlots] = useState(new Set());
-  const [employeeUserStoreId, setEmployeeUserStoreId] = useState(null);
+  const [ownerUserStoreId, setOwnerUserStoreId] = useState(null);
   const [existingSchedules, setExistingSchedules] = useState([]);
+  const [toastOpen, setToastOpen] = useState(false);
 
-  // 알바생의 userStoreId 가져오기
+  // 사장의 userStoreId 가져오기
   useEffect(() => {
-    const loadEmployeeInfo = async () => {
+    const loadOwnerInfo = async () => {
       try {
-        // 먼저 activeStore에서 userStoreId 확인
-        const activeStore = await fetchActiveStore();
-        if (activeStore && activeStore.userStoreId) {
-          setEmployeeUserStoreId(activeStore.userStoreId);
-          return;
-        }
-        // activeStore에 없으면 mydata에서 확인
-        const mydata = await fetchMydata();
-        if (mydata && mydata.userStoreId) {
-          setEmployeeUserStoreId(mydata.userStoreId);
-        } else if (mydata && mydata.id) {
-          setEmployeeUserStoreId(mydata.id);
+        const workers = await fetchAllWorkers();
+        if (workers && workers.length > 0) {
+          setOwnerUserStoreId(workers[0]?.id || null);
         }
       } catch (error) {
-        console.error("알바생 정보 로드 실패:", error);
+        console.error("사장 정보 로드 실패:", error);
       }
     };
-    loadEmployeeInfo();
+    loadOwnerInfo();
   }, []);
 
   // 현재 주의 기존 스케줄 확인
@@ -85,8 +77,8 @@ function CalAddEmp() {
       return;
     }
 
-    if (!employeeUserStoreId) {
-      alert("알바생 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.");
+    if (!ownerUserStoreId) {
+      alert("사장 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.");
       return;
     }
 
@@ -110,7 +102,7 @@ function CalAddEmp() {
 
       // 기존 스케줄과 중복 확인
       const hasConflict = existingSchedules.some((schedule) => {
-        if (employeeUserStoreId && schedule.userStoreId !== employeeUserStoreId) {
+        if (ownerUserStoreId && schedule.userStoreId !== ownerUserStoreId) {
           return false;
         }
         const scheduleStart = dayjs(schedule.startDatetime);
@@ -149,10 +141,13 @@ function CalAddEmp() {
     // 스케줄 추가
     try {
       for (const schedule of schedulesToAdd) {
-        await addWorkshift(employeeUserStoreId, schedule.start, schedule.end);
+        await addWorkshift(ownerUserStoreId, schedule.start, schedule.end);
       }
-      alert("스케줄이 추가되었습니다.");
-      navigate(-1);
+      setToastOpen(true);
+      setTimeout(() => {
+        setToastOpen(false);
+        navigate("/scheduleList");
+      }, 2000);
     } catch (error) {
       console.error("스케줄 추가 실패:", error);
       alert("스케줄 추가에 실패했습니다. 다시 시도해주세요.");
@@ -167,7 +162,7 @@ function CalAddEmp() {
         <div className="text-lg font-semibold">내 스케줄 추가</div>
 
         <div className="flex justify-center">
-          <EmployeeScheduleCalendar
+          <OwnerScheduleCalendar
             date={currentDate}
             onTimeSlotClick={handleTimeSlotClick}
             selectedTimeSlots={selectedTimeSlots}
@@ -180,8 +175,13 @@ function CalAddEmp() {
         singleButtonText="스케줄 추가하기"
         onSingleClick={handleAddSchedule}
       />
+
+      <Toast isOpen={toastOpen} onClose={() => setToastOpen(false)}>
+        <p className="text-lg font-bold">완료되었습니다</p>
+      </Toast>
     </div>
   );
 }
 
-export default CalAddEmp;
+export default AddOwner;
+

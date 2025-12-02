@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { onboardingOwner, onboardingStaff } from "../../services/authService.js";
 
 const ONBOARDING_ROLE_KEY = "onboardingRole";
 const ONBOARDING_DATA_KEY = "onboardingData";
@@ -7,14 +8,15 @@ const ONBOARDING_DATA_KEY = "onboardingData";
 export default function Onboarding() {
   const [step, setStep] = useState(1);
   const [role, setRole] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     storeName: "",
     storeAddress: "",
     storePhone: "",
     businessNumber: "",
     storeCode: "",
-    joinDate: "",
-    bank: "",
+    bankId: "",
     account: "",
   });
 
@@ -54,9 +56,10 @@ export default function Onboarding() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setError("");
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 1 && !role) {
       alert("역할을 선택해주세요!");
       return;
@@ -69,12 +72,48 @@ export default function Onboarding() {
           alert("모든 정보를 입력해주세요.");
           return;
         }
+
+        // 사장님 온보딩 API 호출
+        setIsLoading(true);
+        setError("");
+        try {
+          await onboardingOwner(storeName, storeAddress, storePhone, businessNumber);
+          // 성공 시 사장님 홈으로 이동
+          navigate("/owner");
+        } catch (err) {
+          console.error("온보딩(사장님) 실패:", err);
+          setError(err.response?.data?.message || "온보딩 등록에 실패했습니다.");
+        } finally {
+          setIsLoading(false);
+        }
+        return;
       } else {
-        const { storeCode, joinDate, bank, account } = formData;
-        if (!storeCode || !joinDate || !bank || !account) {
+        const { storeCode, bankId, account } = formData;
+        if (!storeCode || !bankId || !account) {
           alert("모든 정보를 입력해주세요.");
           return;
         }
+
+        // 알바생 온보딩 API 호출
+        setIsLoading(true);
+        setError("");
+        try {
+          const bankIdNum = parseInt(bankId, 10);
+          if (isNaN(bankIdNum)) {
+            setError("은행 ID는 숫자여야 합니다.");
+            setIsLoading(false);
+            return;
+          }
+          await onboardingStaff(storeCode, bankIdNum, account);
+          // 성공 시 알바생 홈으로 이동
+          navigate("/employee");
+        } catch (err) {
+          console.error("온보딩(알바생) 실패:", err);
+          setError(err.response?.data?.message || "온보딩 등록에 실패했습니다.");
+        } finally {
+          setIsLoading(false);
+        }
+        return;
       }
       
       // 최종 데이터 localStorage에 저장
@@ -83,7 +122,6 @@ export default function Onboarding() {
     }
 
     if (step < 2) setStep(step + 1);
-    else navigate(role === "owner" ? "/owner" : "/employee");
   };
 
   const handleBack = () => {
@@ -107,6 +145,11 @@ export default function Onboarding() {
   
       {/* 컨텐츠 영역 */}
       <div className="w-full max-w-[360px] mt-8 flex flex-col items-center px-4">
+        {error && (
+          <div className="w-full mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
   
         {/* --- STEP CONTENT --- */}
         {step === 1 && (
@@ -187,23 +230,13 @@ export default function Onboarding() {
               </div>
   
               <div>
-                <p className="text-sm mb-1 text-left">입사 날짜</p>
+                <p className="text-sm mb-1 text-left">은행 ID</p>
                 <input
-                  name="joinDate"
-                  type="date"
-                  value={formData.joinDate}
+                  name="bankId"
+                  type="number"
+                  value={formData.bankId}
                   onChange={handleChange}
-                  className="border p-2 rounded-lg w-full"
-                />
-              </div>
-  
-              <div>
-                <p className="text-sm mb-1 text-left">은행</p>
-                <input
-                  name="bank"
-                  value={formData.bank}
-                  onChange={handleChange}
-                  placeholder="은행명"
+                  placeholder="은행 ID를 입력해주세요"
                   className="border p-2 rounded-lg w-full"
                 />
               </div>
@@ -226,9 +259,10 @@ export default function Onboarding() {
         <div className="w-full sticky bottom-0 bg-white pt-6 pb-4">
           <button
             onClick={handleNext}
-            className="w-full py-3 bg-blue-500 text-black rounded-lg"
+            disabled={isLoading}
+            className="w-full py-3 bg-blue-500 text-black rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {step === 2 ? "입력 완료" : "선택 완료"}
+            {isLoading ? "처리 중..." : step === 2 ? "입력 완료" : "선택 완료"}
           </button>
         </div>
   

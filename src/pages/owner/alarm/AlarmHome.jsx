@@ -14,7 +14,7 @@ function AlarmHome() {
         <div className="w-full h-full bg-[#F8FBFE] overflow-y-auto">
             <TopBar
                 title="알림"
-                onBack={() => navigate(-1)} />
+                onBack={() => navigate("/owner")} />
             <NavBar currentTab={tab} setCurrentTab={setTab} />
 
             <div className="px-4 mt-4 text-[15px] font-semibold">09.15(월)</div>

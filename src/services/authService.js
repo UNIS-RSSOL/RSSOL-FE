@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "./api.js";
 
 /**
  * 체크용 로그인 - 개발 토큰 발급
@@ -7,22 +7,47 @@ import api from "./api";
  */
 export const getDevToken = async (email) => {
   try {
-    const response = await api.post("/auth/dev-token", { email });
-    const { success = true, message = "", data: rawData } = response.data ?? {};
-
-    const normalizedToken =
-      typeof rawData === "string"
-        ? rawData
-        : rawData?.accessToken || rawData?.token || null;
+    const response = await api.post("/api/auth/dev-token", { email });
+    
+    // 디버깅: 응답 전체 구조 확인
+    console.log("Dev token 응답 전체:", response.data);
+    
+    // 다양한 응답 형식 지원
+    let normalizedToken = null;
+    
+    // 1. response.data가 직접 토큰 문자열인 경우
+    if (typeof response.data === "string") {
+      normalizedToken = response.data;
+    }
+    // 2. response.data.accessToken인 경우 (카카오 로그인과 동일한 형식)
+    else if (response.data?.accessToken) {
+      normalizedToken = response.data.accessToken;
+    }
+    // 3. response.data.data가 토큰인 경우
+    else if (response.data?.data) {
+      const rawData = response.data.data;
+      if (typeof rawData === "string") {
+        normalizedToken = rawData;
+      } else if (rawData?.accessToken) {
+        normalizedToken = rawData.accessToken;
+      } else if (rawData?.token) {
+        normalizedToken = rawData.token;
+      }
+    }
+    // 4. response.data.token인 경우
+    else if (response.data?.token) {
+      normalizedToken = response.data.token;
+    }
 
     if (!normalizedToken) {
-      throw new Error("발급된 토큰을 확인할 수 없습니다.");
+      console.error("토큰을 찾을 수 없습니다. 응답 구조:", response.data);
+      throw new Error("발급된 토큰을 확인할 수 없습니다. 응답: " + JSON.stringify(response.data));
     }
 
     return {
-      success,
+      success: true,
       data: normalizedToken,
-      message,
+      message: response.data?.message || "",
     };
   } catch (error) {
     console.error(
