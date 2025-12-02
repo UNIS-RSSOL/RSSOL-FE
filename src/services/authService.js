@@ -64,8 +64,9 @@ export const getDevToken = async (email) => {
 /**
  * 온보딩 - 알바생 역할 등록
  * @param {string} storeCode
- * @param {number} bankId
+ * @param {string} bankName
  * @param {string} accountNumber
+ * @param {string} hireDate
  * @returns {Promise<{
  *   userId: number;
  *   userStoreId: number;
@@ -82,13 +83,19 @@ export const getDevToken = async (email) => {
  *   accountNumber: string;
  * }>}
  */
-export const onboardingStaff = async (storeCode, bankId, accountNumber) => {
+export const onboardingStaff = async (
+  storeCode,
+  bankName,
+  accountNumber,
+  hireDate,
+) => {
   try {
     const response = await api.post("/api/auth/onboarding", {
       role: "STAFF",
       storeCode,
-      bankId,
+      bankName,
       accountNumber,
+      hireDate,
     });
     return response.data;
   } catch (error) {

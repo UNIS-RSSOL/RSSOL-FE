@@ -21,12 +21,14 @@ export default function Onboarding() {
     storePhone: "",
     businessNumber: "",
     storeCode: "",
-    bankId: "",
+    bankName: "",
     account: "",
+    hireDate: "",
   });
   const [errors, setErrors] = useState({
     storePhone: "",
     businessNumber: "",
+    account: "",
   });
 
   const navigate = useNavigate();
@@ -87,6 +89,15 @@ export default function Onboarding() {
       } else {
         setErrors((prev) => ({ ...prev, businessNumber: "" }));
       }
+    } else if (name === "account") {
+      if (value.length > 0 && !/^\d+$/.test(value)) {
+        setErrors((prev) => ({
+          ...prev,
+          account: "*계좌번호는 숫자만 입력 가능합니다.",
+        }));
+      } else {
+        setErrors((prev) => ({ ...prev, account: "" }));
+      }
     }
   };
 
@@ -127,9 +138,15 @@ export default function Onboarding() {
         }
         return;
       } else {
-        const { storeCode, bankId, account } = formData;
-        if (!storeCode || !bankId || !account) {
+        const { storeCode, bankName, account, hireDate } = formData;
+        if (!storeCode || !bankName || !account || !hireDate) {
           alert("모든 정보를 입력해주세요.");
+          return;
+        }
+
+        // 계좌번호 숫자 검증
+        if (!/^\d+$/.test(account)) {
+          setError("계좌번호는 숫자만 입력 가능합니다.");
           return;
         }
 
@@ -137,13 +154,9 @@ export default function Onboarding() {
         setIsLoading(true);
         setError("");
         try {
-          const bankIdNum = parseInt(bankId, 10);
-          if (isNaN(bankIdNum)) {
-            setError("은행 ID는 숫자여야 합니다.");
-            setIsLoading(false);
-            return;
-          }
-          await onboardingStaff(storeCode, bankIdNum, account);
+          // bankName을 bankId로 전달 (백엔드에서 처리하거나 매핑 필요)
+          // 일단 bankName을 그대로 전달하도록 수정 (API 수정 필요할 수 있음)
+          await onboardingStaff(storeCode, bankName, account, hireDate);
           // 성공 시 알바생 홈으로 이동
           navigate("/employee");
         } catch (err) {
@@ -190,8 +203,14 @@ export default function Onboarding() {
           businessNumber.length === 10
         );
       } else if (role === "employee") {
-        const { storeCode, bankId, account } = formData;
-        return storeCode && bankId && account;
+        const { storeCode, bankName, account, hireDate } = formData;
+        return (
+          storeCode &&
+          bankName &&
+          account &&
+          /^\d+$/.test(account) &&
+          hireDate
+        );
       }
     }
     return false;
@@ -342,27 +361,50 @@ export default function Onboarding() {
               </div>
 
               <div>
-                <p className="text-sm mb-1 text-left">은행 ID</p>
+                <p className="text-sm mb-1 text-left">입사날짜</p>
                 <input
-                  name="bankId"
-                  type="number"
-                  value={formData.bankId}
+                  name="hireDate"
+                  type="date"
+                  value={formData.hireDate}
                   onChange={handleChange}
-                  placeholder="은행 ID를 입력해주세요"
                   className="border p-2 rounded-lg w-full"
                 />
               </div>
 
-              <div>
-                <p className="text-sm mb-1 text-left">계좌번호</p>
-                <input
-                  name="account"
-                  value={formData.account}
-                  onChange={handleChange}
-                  placeholder="계좌번호"
-                  className="border p-2 rounded-lg w-full"
-                />
+              <div className="flex flex-col">
+                <div className="flex gap-2 w-full">
+                  <div className="flex-[3]">
+                    <p className="text-sm mb-1 text-left">은행</p>
+                    <input
+                      name="bankName"
+                      value={formData.bankName}
+                      onChange={handleChange}
+                      placeholder="은행 이름"
+                      className="border p-2 rounded-lg w-full"
+                    />
+                  </div>
+
+                  <div className="flex-[7]">
+                    <p className="text-sm mb-1 text-left">계좌번호</p>
+                    <input
+                      name="account"
+                      type="text"
+                      inputMode="numeric"
+                      value={formData.account}
+                      onChange={handleChange}
+                      placeholder="계좌번호를 입력해주세요"
+                      className="border p-2 rounded-lg w-full"
+                    />
+                  </div>
+                </div>
+                {errors.account && (
+                  <p className="text-[10px] text-[#f74a4a] text-left mt-1">
+                    {errors.account}
+                  </p>
+                )}
               </div>
+
+
             </div>
           </>
         )}
