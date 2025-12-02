@@ -1,6 +1,6 @@
 /**
  * 카카오 로그인 서비스
- * 
+ *
  * 플로우:
  * 1. 사용자가 카카오 로그인 버튼 클릭
  * 2. 카카오 인증 페이지로 이동 (redirect_uri는 프론트엔드 콜백 URL)
@@ -24,15 +24,15 @@ const ACCESS_TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
 
 /**
- * 프론트엔드 콜백 URL을 반환합니다 (카카오 OAuth redirect_uri)
+ * 프론트엔드 콜백 URL 반환합니다 (카카오 OAuth redirect_uri)
  */
 const getRedirectUri = () => {
   // 프로덕션 환경 체크: Vite의 PROD 모드 또는 connecti.store 도메인 사용 시
-  const isProduction = 
-    import.meta.env.PROD || 
-    window.location.hostname === 'connecti.store' ||
-    window.location.hostname.includes('connecti.store');
-  
+  const isProduction =
+    import.meta.env.PROD ||
+    window.location.hostname === "connecti.store" ||
+    window.location.hostname.includes("connecti.store");
+
   return isProduction ? PROD_REDIRECT_URI : LOCAL_REDIRECT_URI;
 };
 
@@ -67,11 +67,11 @@ export const goToKakaoLogin = (e) => {
     e.preventDefault();
     e.stopPropagation();
   }
-  
+
   const url = getKakaoAuthorizeUrl();
   console.log("카카오 로그인 버튼 클릭됨");
   console.log("카카오 로그인 URL:", url);
-  
+
   // 명시적으로 카카오 인증 페이지로 이동
   window.location.href = url;
 };
