@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { LogoImage } from "../../assets/icons/logo2.jsx";
 import { getDevToken } from "../../services/authService.js";
@@ -9,9 +9,26 @@ import api from "../../services/api.js";
 
 function Login() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  // URL 파라미터에서 에러 확인
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    const errorCode = searchParams.get("code");
+    
+    if (errorParam === "kakao_login_failed") {
+      if (errorCode === "KOE101") {
+        setError("카카오 로그인 설정 오류(KOE101)가 발생했습니다. 관리자에게 문의하세요.");
+      } else {
+        setError("카카오 로그인에 실패했습니다. 다시 시도해주세요.");
+      }
+      // 에러 파라미터 제거
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleLogin = () => {
     navigate("/onboarding");
@@ -114,6 +131,13 @@ function Login() {
           번거로운 알바 스케줄링, 원터치로 끝!
         </p>
       </div>
+
+      {/* 에러 메시지 표시 */}
+      {error && (
+        <div className="w-[80%] max-w-[300px] mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-600 text-sm text-center">{error}</p>
+        </div>
+      )}
 
       {/* 로그인 버튼들 */}
       <div className="flex flex-col gap-4 w-[80%] max-w-[300px] mb-[20px]">

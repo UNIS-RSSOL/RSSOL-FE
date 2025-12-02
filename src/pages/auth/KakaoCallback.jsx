@@ -29,10 +29,30 @@ function KakaoCallback() {
     const handleCallback = async () => {
       // 백엔드에서 리다이렉트된 경우 에러 파라미터 확인
       const error = searchParams.get("error");
+      const errorDescription = searchParams.get("error_description");
+      const errorCode = searchParams.get("error_code");
 
-      if (error) {
-        console.error("카카오 로그인 에러:", error);
-        navigate("/login?error=kakao_login_failed");
+      // KOE101 에러 처리
+      if (error || errorCode === "KOE101" || errorDescription?.includes("KOE101")) {
+        console.error("❌ 카카오 로그인 에러 발생:", {
+          error,
+          errorCode,
+          errorDescription,
+        });
+        
+        let errorMessage = "카카오 로그인에 실패했습니다.";
+        
+        if (errorCode === "KOE101" || errorDescription?.includes("KOE101")) {
+          errorMessage = "카카오 로그인 설정 오류(KOE101)가 발생했습니다.\n\n" +
+            "가능한 원인:\n" +
+            "1. 카카오 개발자 콘솔에 redirect_uri가 등록되지 않았습니다.\n" +
+            "2. 앱 키(REST API 키)가 잘못되었습니다.\n" +
+            "3. 환경변수 설정이 올바르지 않습니다.\n\n" +
+            "관리자에게 문의하세요.";
+        }
+        
+        alert(errorMessage);
+        navigate("/login?error=kakao_login_failed&code=" + (errorCode || error));
         return;
       }
 
