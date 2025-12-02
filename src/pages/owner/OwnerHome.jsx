@@ -105,7 +105,7 @@ function OwnerHome() {
           }));
           const active = await fetchActiveStore();
 
-          setActiveStore(active.storeId);
+          setActiveStore(active);
           setStoreList(stores);
         } catch (error) {
           console.error(error);
@@ -116,7 +116,7 @@ function OwnerHome() {
     const handleChangeActive = async (storeId) => {
       try {
         const response = changeActiveStore(storeId);
-        setActiveStore(response.storeId);
+        setActiveStore(response);
       } catch (error) {
         console.error(error);
       }
