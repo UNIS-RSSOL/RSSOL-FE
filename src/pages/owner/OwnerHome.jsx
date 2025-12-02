@@ -66,15 +66,15 @@ function OwnerHome() {
 
         const activeStore = await fetchActiveStore();
         setActiveStore(activeStore);
-        const fetchedWage = await fetchWage(
-          activeStore.storeId,
-          today.format("YYYY-MM"),
-        );
-        const totalWage = fetchedWage.payrolls.reduce((sum, payroll) => {
-          return sum + payroll.total_pay;
-        }, 0);
+        // const fetchedWage = await fetchWage(
+        //   activeStore.storeId,
+        //   today.format("YYYY-MM"),
+        // );
+        // const totalWage = fetchedWage.payrolls.reduce((sum, payroll) => {
+        //   return sum + payroll.total_pay;
+        // }, 0);
 
-        setWage(totalWage);
+        // setWage(totalWage);
       } catch (error) {
         console.error(error);
       }
