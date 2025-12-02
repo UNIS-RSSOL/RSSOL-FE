@@ -5,7 +5,7 @@ import MsgIcon from "../../../assets/icons/MsgIcon.jsx";
 import CoinIcon from "../../../assets/icons/CoinIcon.jsx";
 import StoreIcon from "../../../assets/icons/StoreIcon.jsx";
 import NoteIcon from "../../../assets/icons/NoteIcon.jsx";
-import character1 from "../../../assets/images/Character1.png";
+import character1 from "../../../assets/images/character1.png";
 import {
   fetchMydata,
   fetchStoreList,
