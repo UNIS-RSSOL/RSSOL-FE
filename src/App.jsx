@@ -110,8 +110,8 @@ function App() {
           <Route path="/alarmHome" element={<AlarmHome />} />
           <Route path="/alarmCheck" element={<AlarmCheck />} />
 
-          <Route path="/owner/manageemp" element={<ManageEmpPage />} />
-          <Route path="/employee/managesalary" element={<ManageSalary />} />
+          <Route path="/owner/manage" element={<ManageEmpPage />} />
+          <Route path="/employee/manage" element={<ManageSalary />} />
 
           <Route path="/owner/calendar" element={<OwnerCalendar />} />
           <Route path="/employee/calendar" element={<EmpCalendar />} />

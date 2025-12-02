@@ -19,6 +19,7 @@ function EmployeePage() {
     (async () => {
       try {
         const my = await fetchMydata();
+
         const storeList = await fetchStoreList();
 
         let storeStr = storeList.map((store) => store.name).join(", ");
@@ -61,7 +62,7 @@ function EmployeePage() {
         console.error(error);
       }
     })();
-  }, []);
+  }, [mydata]);
 
   //내정보수정
   const handleMyDataUpdate = async (updatedData) => {
