@@ -121,8 +121,9 @@ function OwnerHome() {
 
     const handleChangeActive = async (storeId) => {
       try {
-        const response = changeActiveStore(storeId);
+        const response = await changeActiveStore(storeId);
         setActiveStore({ storeId: response.storeId, name: response.name });
+        setIsOpen(false);
         console.log({ storeId: response.storeId, name: response.name });
       } catch (error) {
         console.error(error);
