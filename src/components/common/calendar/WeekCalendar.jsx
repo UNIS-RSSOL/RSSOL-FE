@@ -29,18 +29,22 @@ function WeekCalendar({
         startOfWeek.format("YYYY-MM-DD"),
         startOfWeek.add(6, "day").format("YYYY-MM-DD"),
       );
-      const uniqueWorkers = [
-        ...new Set(
-          schedules.map((schedule) => ({
-            id: schedule.userStoreId,
-            name: schedule.userName,
-          })),
-        ),
-      ];
+
+      const uniqueWorkers = Array.from(
+        new Map(
+          schedules.map((schedule) => [
+            `${schedule.userStoreId}-${schedule.userId}`, // Combine both IDs for uniqueness
+            {
+              userStoreId: schedule.userStoreId,
+              userName: schedule.userName,
+            },
+          ]),
+        ).values(),
+      );
       const formattedEvents = schedules.map((schedule) => ({
         id: schedule.id,
-        workerId: schedule.userStoreId,
-        worker: schedule.userName,
+        userStoreId: schedule.userStoreId,
+        userName: schedule.userName,
         start: schedule.startDatetime,
         end: schedule.endDatetime,
       }));
@@ -50,9 +54,9 @@ function WeekCalendar({
     })();
   }, [date]);
 
-  const getEventForCell = (workerId, day) => {
+  const getEventForCell = (userStoreId, day) => {
     return events.find((event) => {
-      if (event.workerId !== workerId) return false;
+      if (event.userStoreId !== userStoreId) return false;
       const date = dayjs(event.start).format("YYYY-MM-DD");
       return day === date;
     });
@@ -95,24 +99,27 @@ function WeekCalendar({
       </div>
       {workers.map((worker) => (
         <div
-          key={worker.id}
+          key={worker.userStoreId}
           className="flex flex-shrink-0 flex-row w-full h-[60px] border-t border-[#e7eaf3]"
         >
           <div className="flex flex-shrink-0 w-[52px] h-full items-center justify-center">
-            {worker.name}
+            {worker.userName}
           </div>
           {week.map((w) => {
-            const event = getEventForCell(worker.id, w.format("YYYY-MM-DD"));
+            const event = getEventForCell(
+              worker.userStoreId,
+              w.format("YYYY-MM-DD"),
+            );
             const isSelected =
               selectedEventProp &&
               selectedEventProp.id === event?.id &&
-              selectedEventProp.workerId === worker.id &&
+              selectedEventProp.userStoreId === worker.userStoreId &&
               selectedEventProp.start === event?.start &&
               selectedEventProp.end === event?.end;
 
             return event ? (
               <div
-                key={`${worker.id}-${w.format("DD")}`}
+                key={`${worker.userStoreId}-${w.format("DD")}`}
                 className={`flex flex-col flex-shrink-0 w-[44px] h-full items-center justify-center border-l border-[#e7eaf3] cursor-pointer
                   ${isSelected ? "border-2 border-black" : ""}`}
                 style={{
@@ -124,8 +131,8 @@ function WeekCalendar({
                   e.stopPropagation();
                   const clickedEvent = {
                     id: event.id,
-                    workerId: event.workerId,
-                    worker: event.worker,
+                    userStoreId: event.userStoreId,
+                    userName: event.userName,
                     start: event.start,
                     end: event.end,
                   };
@@ -143,7 +150,7 @@ function WeekCalendar({
               </div>
             ) : (
               <div
-                key={`${worker.id}-${w.format("DD")}`}
+                key={`${worker.userStoreId}-${w.format("DD")}`}
                 className="flex flex-shrink-0 w-[44px] h-full items-center justify-center border-l border-[#e7eaf3]"
               ></div>
             );
