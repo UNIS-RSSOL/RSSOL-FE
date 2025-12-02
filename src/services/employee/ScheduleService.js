@@ -40,15 +40,15 @@ export async function fetchMyAvailabilities() {
 }
 
 // 근무 가능 시간 추가
-export async function addAvailability(startDatetime, endDatetime) {
+// payload: [{ userStoreId: number, userName: string, availabilities: [{ dayOfWeek: string, startTime: string, endTime: string }] }]
+export async function addAvailability(payload) {
   try {
-    const response = await api.post("/api/me/availabilities", {
-      startDatetime: startDatetime,
-      endDatetime: endDatetime,
-    });
+    console.log("API 요청 payload:", JSON.stringify(payload, null, 2));
+    const response = await api.post("/api/me/availabilities", payload);
     return response.data;
   } catch (error) {
     console.error("근무 가능 시간 추가 실패:", error);
+    console.error("에러 응답:", error.response?.data);
     throw error;
   }
 }
