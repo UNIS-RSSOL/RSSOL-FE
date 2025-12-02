@@ -1,10 +1,11 @@
 import api from "../api.js";
 
 //근무블록 추가
-export async function addWorkshift(userStoreId, start, end) {
+export async function addWorkshift(userId, storeId, start, end) {
   try {
     const response = await api.post("/api/schedules/workshifts", {
-      userStoreId: userStoreId,
+      userId: userId,
+      storeId: storeId,
       startDatetime: start,
       endDatetime: end,
     });

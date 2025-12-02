@@ -7,44 +7,72 @@ import EmployeeScheduleCalendar from "../../../components/common/calendar/Employ
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import { addWorkshift } from "../../../services/owner/ScheduleService.js";
 import { fetchSchedules } from "../../../services/common/ScheduleService.js";
-import { fetchActiveStore, fetchMydata } from "../../../services/employee/MyPageService.js";
+import {
+  fetchActiveStore,
+  fetchMydata,
+} from "../../../services/employee/MyPageService.js";
 
 function CalAddEmp() {
   const navigate = useNavigate();
   const [currentDate] = useState(dayjs().locale("ko"));
   const [selectedTimeSlots, setSelectedTimeSlots] = useState(new Set());
-  const [employeeUserStoreId, setEmployeeUserStoreId] = useState(null);
+  const [employeeUserId, setEmployeeUserId] = useState(null);
+  const [employeeStoreId, setEmployeeStoreId] = useState(null);
   const [existingSchedules, setExistingSchedules] = useState([]);
   const [isLoadingEmployeeInfo, setIsLoadingEmployeeInfo] = useState(true);
 
-  // 알바생의 userStoreId 가져오기
+  // 알바생의 userId와 storeId 가져오기
   useEffect(() => {
     const loadEmployeeInfo = async () => {
       setIsLoadingEmployeeInfo(true);
       try {
-        // 먼저 activeStore에서 userStoreId 확인
+        // 먼저 activeStore에서 storeId 확인
         const activeStore = await fetchActiveStore();
         console.log("fetchActiveStore 응답:", activeStore);
-        
-        if (activeStore && activeStore.userStoreId) {
-          console.log("activeStore에서 userStoreId 찾음:", activeStore.userStoreId);
-          setEmployeeUserStoreId(activeStore.userStoreId);
-          setIsLoadingEmployeeInfo(false);
-          return;
+
+        // activeStore에서 storeId 가져오기
+        let storeId = null;
+        if (activeStore && activeStore.storeId) {
+          storeId = activeStore.storeId;
+        } else if (activeStore && activeStore.id) {
+          storeId = activeStore.id;
         }
-        
-        // activeStore에 없으면 mydata에서 확인
+
+        // mydata에서 userId 가져오기
         const mydata = await fetchMydata();
         console.log("fetchMydata 응답:", mydata);
-        
-        if (mydata && mydata.userStoreId) {
-          console.log("mydata에서 userStoreId 찾음:", mydata.userStoreId);
-          setEmployeeUserStoreId(mydata.userStoreId);
+
+        let userId = null;
+        if (mydata && mydata.userId) {
+          userId = mydata.userId;
         } else if (mydata && mydata.id) {
-          console.log("mydata에서 id 찾음:", mydata.id);
-          setEmployeeUserStoreId(mydata.id);
+          userId = mydata.id;
+        }
+
+        // storeId가 없으면 mydata의 currentStore에서 가져오기
+        if (!storeId && mydata && mydata.currentStore) {
+          if (mydata.currentStore.storeId) {
+            storeId = mydata.currentStore.storeId;
+          } else if (mydata.currentStore.id) {
+            storeId = mydata.currentStore.id;
+          }
+        }
+
+        if (userId && storeId) {
+          console.log("userId와 storeId 찾음:", { userId, storeId });
+          setEmployeeUserId(userId);
+          setEmployeeStoreId(storeId);
         } else {
-          console.error("userStoreId를 찾을 수 없습니다. activeStore:", activeStore, "mydata:", mydata);
+          console.error(
+            "userId 또는 storeId를 찾을 수 없습니다. userId:",
+            userId,
+            "storeId:",
+            storeId,
+            "activeStore:",
+            activeStore,
+            "mydata:",
+            mydata,
+          );
         }
       } catch (error) {
         console.error("알바생 정보 로드 실패:", error);
@@ -64,7 +92,7 @@ function CalAddEmp() {
         const endOfWeek = startOfWeek.add(6, "day");
         const schedules = await fetchSchedules(
           startOfWeek.format("YYYY-MM-DD"),
-          endOfWeek.format("YYYY-MM-DD")
+          endOfWeek.format("YYYY-MM-DD"),
         );
         setExistingSchedules(schedules || []);
       } catch (error) {
@@ -84,13 +112,13 @@ function CalAddEmp() {
     const targetDate = startOfWeek.add(dayIndex, "day");
     const key = `${targetDate.format("YYYY-MM-DD")}-${day}-${hour}`;
     const newSelected = new Set(selectedTimeSlots);
-    
+
     if (newSelected.has(key)) {
       newSelected.delete(key);
     } else {
       newSelected.add(key);
     }
-    
+
     setSelectedTimeSlots(newSelected);
   };
 
@@ -106,8 +134,13 @@ function CalAddEmp() {
       return;
     }
 
-    if (!employeeUserStoreId) {
-      console.error("employeeUserStoreId가 null입니다. 현재 상태를 확인하세요.");
+    if (!employeeUserId || !employeeStoreId) {
+      console.error(
+        "employeeUserId 또는 employeeStoreId가 null입니다. userId:",
+        employeeUserId,
+        "storeId:",
+        employeeStoreId,
+      );
       alert("알바생 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.");
       return;
     }
@@ -116,15 +149,15 @@ function CalAddEmp() {
     const days = ["일", "월", "화", "수", "목", "금", "토"];
     const schedulesToAdd = [];
     const conflictMessages = [];
-    
+
     selectedTimeSlots.forEach((slotKey) => {
       const parts = slotKey.split("-");
       if (parts.length < 5) return;
-      
+
       const dateStr = `${parts[0]}-${parts[1]}-${parts[2]}`;
       const dayName = parts[3];
       const hourStr = parts[4];
-      
+
       const targetDate = dayjs(dateStr);
       const hour = parseInt(hourStr);
       const startDatetime = targetDate.hour(hour).minute(0).second(0);
@@ -132,7 +165,20 @@ function CalAddEmp() {
 
       // 기존 스케줄과 중복 확인
       const hasConflict = existingSchedules.some((schedule) => {
-        if (employeeUserStoreId && schedule.userStoreId !== employeeUserStoreId) {
+        // userId로 중복 확인 (schedule에 userId 필드가 있는 경우)
+        if (
+          employeeUserId &&
+          schedule.userId &&
+          schedule.userId !== employeeUserId
+        ) {
+          return false;
+        }
+        // userStoreId로 중복 확인 (기존 호환성을 위해)
+        if (
+          employeeUserId &&
+          schedule.userStoreId &&
+          schedule.userStoreId !== employeeUserId
+        ) {
           return false;
         }
         const scheduleStart = dayjs(schedule.startDatetime);
@@ -144,9 +190,7 @@ function CalAddEmp() {
       });
 
       if (hasConflict) {
-        conflictMessages.push(
-          `${targetDate.format("MM월 DD일")} ${hour}시`
-        );
+        conflictMessages.push(`${targetDate.format("MM월 DD일")} ${hour}시`);
         return;
       }
 
@@ -158,7 +202,7 @@ function CalAddEmp() {
 
     if (conflictMessages.length > 0) {
       alert(
-        `다음 시간에 이미 스케줄이 있습니다:\n${conflictMessages.join(", ")}\n\n중복되지 않는 시간을 선택해주세요.`
+        `다음 시간에 이미 스케줄이 있습니다:\n${conflictMessages.join(", ")}\n\n중복되지 않는 시간을 선택해주세요.`,
       );
       return;
     }
@@ -171,7 +215,12 @@ function CalAddEmp() {
     // 스케줄 추가
     try {
       for (const schedule of schedulesToAdd) {
-        await addWorkshift(employeeUserStoreId, schedule.start, schedule.end);
+        await addWorkshift(
+          employeeUserId,
+          employeeStoreId,
+          schedule.start,
+          schedule.end,
+        );
       }
       alert("스케줄이 추가되었습니다.");
       navigate(-1);
