@@ -40,7 +40,7 @@ function ManageStore() {
         console.error(error);
       }
     })();
-  }, [addToast]);
+  }, [addToast, deleteToast]);
 
   const StoreItem = ({ index, store }) => {
     return (
