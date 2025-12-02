@@ -1,4 +1,4 @@
-function StoreIcon({ className }) {
+function StoreIcon({ className, filled = true }) {
   return (
     <svg
       width="20"
@@ -23,13 +23,13 @@ function StoreIcon({ className }) {
         width="18"
         height="18"
         rx="1"
-        fill="#FDFFFE"
+        fill={filled ? "#FDFFFE" : ""}
         stroke="#26272A"
         strokeWidth="2"
       />
       <path
         d="M8 10H13C13.5523 10 14 10.4477 14 11V19H7V11C7 10.4477 7.44772 10 8 10Z"
-        fill="#68E194"
+        fill={filled ? "#68E194" : ""}
         stroke="#26272A"
         strokeWidth="2"
       />

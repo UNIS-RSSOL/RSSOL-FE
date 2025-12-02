@@ -11,6 +11,7 @@ import RequestWorkIcon from "../../../assets/icons/RequestWorkIcon.jsx";
 import TrashIcon from "../../../assets/icons/TrashIcon.jsx";
 import AddIcon from "../../../assets/icons/AddIcon.jsx";
 import DeleteIcon from "../../../assets/icons/DeleteIcon.jsx";
+import MessageModal from "../../../components/common/MessageModal.jsx";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
@@ -107,25 +108,6 @@ function OwnerCalendar() {
       end: dayjs(e.end),
     });
     setIsEventToastOpen(true);
-  };
-
-  const MessageModal = ({ isOpen, message, onClose, duration = 1000 }) => {
-    useEffect(() => {
-      if (isOpen && duration) {
-        const timer = setTimeout(() => {
-          onClose?.();
-        }, duration);
-        return () => clearTimeout(timer);
-      }
-    }, [isOpen, duration, onClose]);
-
-    if (!isOpen) return null;
-
-    return (
-      <Modal xx={false}>
-        <p className="py-5">{message}</p>
-      </Modal>
-    );
   };
 
   const items = [
