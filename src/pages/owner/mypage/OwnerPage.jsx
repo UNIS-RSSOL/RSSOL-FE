@@ -8,7 +8,7 @@ import TypeIcon from "../../../assets/icons/TypeIcon.jsx";
 import MapIcon from "../../../assets/icons/MapIcon.jsx";
 import PhoneIcon from "../../../assets/icons/PhoneIcon.jsx";
 import NoteIcon from "../../../assets/icons/NoteIcon.jsx";
-import character1 from "../../../assets/images/Character1.png";
+import character1 from "../../../assets/images/character1.png";
 import {
   fetchMydata,
   fetchStoredata,
