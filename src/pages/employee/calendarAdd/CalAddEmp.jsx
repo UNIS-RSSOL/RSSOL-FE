@@ -212,9 +212,9 @@ function CalAddEmp() {
       return;
     }
 
-    // work availability 추가 (연속된 시간대를 하나의 availability로 그룹화)
+    // work availability 추가 (같은 날짜의 연속된 시간대만 하나로 그룹화)
     try {
-      // 연속된 시간대를 하나의 availability로 그룹화
+      // 날짜별로 그룹화한 후, 각 날짜 내에서 연속된 시간대만 하나로 합침
       const availabilityGroups = [];
       if (schedulesToAdd.length > 0) {
         // 날짜와 시간으로 정렬
@@ -224,37 +224,53 @@ function CalAddEmp() {
           return dateA - dateB;
         });
 
-        let currentGroup = null;
+        // 날짜별로 그룹화
+        const schedulesByDate = {};
         sortedSchedules.forEach((schedule) => {
           const scheduleStart = dayjs(schedule.start);
-          const scheduleEnd = dayjs(schedule.end);
+          const dateKey = scheduleStart.format("YYYY-MM-DD");
+          
+          if (!schedulesByDate[dateKey]) {
+            schedulesByDate[dateKey] = [];
+          }
+          schedulesByDate[dateKey].push({
+            start: scheduleStart,
+            end: dayjs(schedule.end),
+          });
+        });
 
-          if (!currentGroup) {
-            currentGroup = {
-              start: scheduleStart,
-              end: scheduleEnd,
-            };
-          } else {
-            // 연속된 시간대인지 확인 (같은 날짜이고 1시간 차이)
-            if (
-              currentGroup.end.isSame(scheduleStart) &&
-              currentGroup.start.format("YYYY-MM-DD") === scheduleStart.format("YYYY-MM-DD")
-            ) {
-              currentGroup.end = scheduleEnd;
-            } else {
-              // 새로운 그룹 시작
-              availabilityGroups.push(currentGroup);
+        // 각 날짜별로 연속된 시간대만 그룹화
+        Object.keys(schedulesByDate).forEach((dateKey) => {
+          const daySchedules = schedulesByDate[dateKey];
+          
+          let currentGroup = null;
+          daySchedules.forEach((schedule) => {
+            if (!currentGroup) {
               currentGroup = {
-                start: scheduleStart,
-                end: scheduleEnd,
+                start: schedule.start,
+                end: schedule.end,
               };
+            } else {
+              // 같은 날짜에서 연속된 시간대인지 확인 (끝 시간과 시작 시간이 같음)
+              if (currentGroup.end.isSame(schedule.start)) {
+                // 연속된 시간대이므로 합침
+                currentGroup.end = schedule.end;
+              } else {
+                // 연속되지 않은 시간대이므로 별도 그룹으로 추가
+                availabilityGroups.push(currentGroup);
+                currentGroup = {
+                  start: schedule.start,
+                  end: schedule.end,
+                };
+              }
             }
+          });
+          
+          // 마지막 그룹 추가
+          if (currentGroup) {
+            availabilityGroups.push(currentGroup);
           }
         });
-        
-        if (currentGroup) {
-          availabilityGroups.push(currentGroup);
-        }
       }
 
       // work availability 추가
