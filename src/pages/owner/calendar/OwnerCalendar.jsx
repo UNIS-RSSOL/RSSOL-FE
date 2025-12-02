@@ -65,7 +65,6 @@ function OwnerCalendar() {
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
   const [needWorkers, setNeedWorkers] = useState(1);
   const [activeStore, setActiveStore] = useState("");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [newTime, setNewTime] = useState({
     userStoreId: "",
     workerName: "",
@@ -164,6 +163,7 @@ function OwnerCalendar() {
 
   const WorkersDropDown = () => {
     const [workers, setWorkers] = useState([]);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     useEffect(() => {
       (async () => {
@@ -184,18 +184,20 @@ function OwnerCalendar() {
           <div className="absolute left-0 mt-0 rounded-b-[12px] border-x-1 border-b-1 overflow-hidden">
             {workers?.map((worker) => (
               <div
-                key={worker.id}
+                key={worker.userStoreId}
                 className="flex items-center justify-center w-[70px] py-[2px] bg-white gap-1 cursor-pointer"
                 onClick={() => {
                   setNewTime((prev) => ({
                     ...prev,
-                    userStoreId: worker.id,
-                    workerName: worker.name,
+                    userStoreId: worker.userStoreId,
+                    workerName: worker.username,
                   }));
                   setDropdownOpen(false);
                 }}
               >
-                <span className="text-[12px] font-[400]">{worker.name}</span>
+                <span className="text-[12px] font-[400]">
+                  {worker.username}
+                </span>
               </div>
             ))}
           </div>
