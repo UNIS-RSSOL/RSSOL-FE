@@ -3,11 +3,10 @@
  *
  * 플로우:
  * 1. 사용자가 카카오 로그인 버튼 클릭
- * 2. 카카오 인증 페이지로 이동 (redirect_uri는 프론트엔드 콜백 URL)
- * 3. 카카오가 프론트엔드로 code를 전달 (/auth/kakao/callback?code=...)
- * 4. 프론트엔드 KakaoCallback 컴포넌트가 code를 백엔드로 GET 요청 (쿼리 파라미터)
- * 5. 백엔드가 code를 받아서 카카오 토큰 교환 및 사용자 정보 처리 후 응답
- * 6. 프론트엔드가 토큰을 저장하고 적절한 페이지로 이동
+ * 2. 카카오 인증 페이지로 이동 (redirect_uri는 백엔드 콜백 URL)
+ * 3. 카카오가 백엔드로 code를 전달 (https://connecti.store/api/auth/kakao/callback?code=...)
+ * 4. 백엔드가 code를 받아서 카카오 토큰 교환 및 사용자 정보 처리
+ * 5. 백엔드가 프론트엔드로 리다이렉트 (세션/쿠키/응답 포함)
  */
 
 import api from "./api.js";
@@ -15,25 +14,10 @@ import api from "./api.js";
 const KAKAO_AUTH_BASE_URL = "https://kauth.kakao.com/oauth/authorize";
 const KAKAO_CLIENT_ID = "3ddfc329270e2ce7e4ab45f3fcca3891";
 
-/**
- * 프론트엔드 콜백 URL을 동적으로 생성합니다.
- * 개발 환경: localhost:5173
- * 프로덕션 환경: 현재 도메인 기준
- */
-const getFrontendCallbackUrl = () => {
-  const currentHost = window.location.hostname;
-  const currentProtocol = window.location.protocol;
-  const currentPort = window.location.port;
-  
-  // 개발 환경
-  if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
-    const port = currentPort || '5173';
-    return `${currentProtocol}//${currentHost}:${port}/auth/kakao/callback`;
-  }
-  
-  // 프로덕션 환경 - 현재 도메인 사용
-  return `${currentProtocol}//${currentHost}/auth/kakao/callback`;
-};
+// 항상 배포용 백엔드 콜백 URL 사용
+const REDIRECT_URI = "https://connecti.store/api/auth/kakao/callback";
+
+const KAKAO_LOGIN_URL = `${KAKAO_AUTH_BASE_URL}?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code`;
 
 const TOKEN_REFRESH_PATH = "/api/auth/token/refresh";
 const ACCESS_TOKEN_KEY = "accessToken";
@@ -51,17 +35,6 @@ const persistSession = ({ accessToken, refreshToken }) => {
 const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY);
 
 /**
- * 카카오 인증 페이지 URL을 생성합니다.
- * redirect_uri는 프론트엔드 콜백 URL을 사용합니다.
- * 카카오가 프론트엔드로 직접 리다이렉트하고, 프론트엔드에서 코드를 백엔드로 전달합니다.
- * @returns {string}
- */
-export const getKakaoAuthorizeUrl = () => {
-  const redirectUri = getFrontendCallbackUrl();
-  return `${KAKAO_AUTH_BASE_URL}?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
-};
-
-/**
  * 카카오 인증 페이지로 이동합니다.
  */
 export const goToKakaoLogin = (e) => {
@@ -70,12 +43,11 @@ export const goToKakaoLogin = (e) => {
     e.preventDefault();
     e.stopPropagation();
   }
-
-  const url = getKakaoAuthorizeUrl();
-  console.log("카카오 로그인 버튼 클릭됨");
-  console.log("카카오 로그인 URL:", url);
   
-  window.location.href = url;
+  console.log("카카오 로그인 버튼 클릭됨");
+  console.log("카카오 로그인 URL:", KAKAO_LOGIN_URL);
+  
+  window.location.href = KAKAO_LOGIN_URL;
 };
 
 /**
