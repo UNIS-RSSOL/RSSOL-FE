@@ -314,14 +314,12 @@ function CalAddEmp() {
         }
       });
 
-      // 백엔드 DTO 구조에 맞게 payload 생성
-      const payload = [
-        {
-          userStoreId: employeeStoreId,
-          userName: employeeUserName,
-          availabilities: availabilities,
-        },
-      ];
+      // 백엔드 DTO 구조에 맞게 payload 생성 (단일 객체)
+      const payload = {
+        userStoreId: employeeStoreId,
+        userName: employeeUserName,
+        availabilities: availabilities,
+      };
 
       console.log("sending payload:", JSON.stringify(payload, null, 2));
 

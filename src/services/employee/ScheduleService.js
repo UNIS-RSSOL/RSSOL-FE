@@ -40,7 +40,7 @@ export async function fetchMyAvailabilities() {
 }
 
 // 근무 가능 시간 추가
-// payload: [{ userStoreId: number, userName: string, availabilities: [{ dayOfWeek: string, startTime: string, endTime: string }] }]
+// payload: { userStoreId: number, userName: string, availabilities: [{ dayOfWeek: string, startTime: string, endTime: string }] }
 export async function addAvailability(payload) {
   try {
     console.log("API 요청 payload:", JSON.stringify(payload, null, 2));
