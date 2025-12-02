@@ -167,29 +167,7 @@ function OwnerCalendar() {
 
     useEffect(() => {
       (async () => {
-        // const response = await fetchAllWorkers();
-        const response = [
-          {
-            userStoreId: 1,
-            username: "사장A",
-          },
-          {
-            userStoreId: 2,
-            username: "알바1",
-          },
-          {
-            userStoreId: 3,
-            username: "알바2",
-          },
-          {
-            userStoreId: 4,
-            username: "알바3",
-          },
-          {
-            userStoreId: 9,
-            username: "이시은",
-          },
-        ];
+        const response = await fetchAllWorkers();
         setWorkers(response);
       })();
     }, []);
