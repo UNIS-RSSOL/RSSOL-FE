@@ -4,7 +4,7 @@ import PencilIcon from "../../../assets/icons/PencilIcon.jsx";
 import InfoItem from "./InfoItem.jsx";
 import ArrowIcon from "../../../assets/icons/ArrowIcon.jsx";
 
-function InfoBox({ head, myData, onDataUpdate }) {
+function InfoBox({ head, myData, onDataUpdate, role }) {
   const [isEdit, setIsEdit] = useState(false);
   const [tempData, setTempData] = useState(myData);
   const navigate = useNavigate();
@@ -67,7 +67,7 @@ function InfoBox({ head, myData, onDataUpdate }) {
                 </p>
               </div>
               <ArrowIcon
-                onClick={() => navigate("/employee/mypage/managestore")}
+                onClick={() => navigate(`/${role}/mypage/managestore`)}
               />
             </div>
           ) : (
