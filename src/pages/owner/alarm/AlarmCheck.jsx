@@ -13,7 +13,7 @@ function AlarmCheck() {
         <div className="w-full h-full bg-[#F8FBFE] overflow-y-auto">
             <TopBar
                 title="알림"
-                onBack={() => navigate(-1)} />
+                onBack={() => navigate("/owner")} />
             <NavBar currentTab="final" setCurrentTab={() => {}} />
 
 

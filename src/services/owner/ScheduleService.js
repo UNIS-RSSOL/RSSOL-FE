@@ -1,19 +1,9 @@
-import api from "../api";
-
-//현재매장 모든 근무자들 이름 조회하기
-export async function fetchAllWorkers() {
-  try {
-    const response = api.get("/api/store/staff");
-    return response.data;
-  } catch (error) {
-    console.error(error);
-  }
-}
+import api from "../api.js";
 
 //근무블록 추가
 export async function addWorkshift(userStoreId, start, end) {
   try {
-    const response = api.post("/api/schedules/workshifts", {
+    const response = await api.post("/api/schedules/workshifts", {
       userStoreId: userStoreId,
       startDatetime: start,
       endDatetime: end,
@@ -27,7 +17,7 @@ export async function addWorkshift(userStoreId, start, end) {
 //근무블록삭제
 export async function deleteWorkshift(workShiftId) {
   try {
-    const response = api.delete(`/api/schedules/workshifts/${workShiftId}`);
+    const response = await api.delete(`/api/schedules/workshifts/${workShiftId}`);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -50,7 +40,7 @@ export async function requestSub(shiftId, reason = "") {
 //추가인력요청
 export async function requestWork(shiftId, headCount, note = "") {
   try {
-    const response = api.post("/api/staffing/requests", {
+    const response = await api.post("/api/staffing/requests", {
       shiftId: shiftId,
       headcount: headCount,
       note: note,
@@ -58,5 +48,16 @@ export async function requestWork(shiftId, headCount, note = "") {
     return response;
   } catch (error) {
     console.error(error);
+  }
+}
+
+//모든 근무자 조회 (사장 포함)
+export async function fetchAllWorkers() {
+  try {
+    const response = await api.get("/api/mypage/owner/workers");
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
 }

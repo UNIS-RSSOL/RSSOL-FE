@@ -7,8 +7,8 @@ function NavBar({ currentTab, setCurrentTab }) {
   const handleTabClick = (tab) => {
     setCurrentTab(tab);
 
-    if (tab === "all") navigate("/alarmhome");     // AlarmHome.jsx
-    if (tab === "final") navigate("/alarmcheck");  // AlarmCheck.jsx
+    if (tab === "all") navigate("/alarmHome");     // AlarmHome.jsx
+    if (tab === "final") navigate("/alarmCheck");  // AlarmCheck.jsx
   };
 
   return (
