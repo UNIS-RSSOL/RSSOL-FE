@@ -1,4 +1,5 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import "./App.css";
 import "./index.css";
 import Header from "./components/layout/header/Header.jsx";
@@ -29,10 +30,114 @@ import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
 import EmpHome from "./pages/employee/EmpHome.jsx";
+import Splash from "./pages/common/Splash.jsx";
+
+import { refreshAccessToken } from "./services/kakaoLogin.js";
+import api from "./services/api.js";
 
 function App() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
   console.log("📍 Current Path:", location.pathname);
+
+  // 초기 인증 상태 체크 (루트 경로에서만 실행)
+  useEffect(() => {
+    const checkAuthAndRedirect = async () => {
+      // 루트 경로("/")가 아니면 체크하지 않음
+      if (location.pathname !== "/") {
+        return;
+      }
+
+      setIsCheckingAuth(true);
+
+      try {
+        // refreshToken 확인
+        const refreshToken = localStorage.getItem("refreshToken");
+        const accessToken = localStorage.getItem("accessToken");
+
+        // refreshToken이 있으면 토큰 갱신 시도
+        if (refreshToken) {
+          try {
+            console.log("refreshToken으로 accessToken 갱신 시도");
+            const newAccessToken = await refreshAccessToken();
+            if (newAccessToken) {
+              console.log("토큰 갱신 성공");
+            }
+          } catch (refreshError) {
+            console.log("토큰 갱신 실패:", refreshError);
+            // refreshToken이 만료되었거나 유효하지 않으면 로그인 페이지로
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            navigate("/login", { replace: true });
+            return;
+          }
+        }
+
+        // accessToken이 없으면 로그인 페이지로
+        const currentAccessToken = localStorage.getItem("accessToken");
+        if (!currentAccessToken) {
+          console.log("accessToken 없음 -> 로그인 페이지로");
+          navigate("/login", { replace: true });
+          return;
+        }
+
+        // 온보딩 완료 여부 확인 (활성 매장 정보 확인)
+        try {
+          const activeStoreRes = await api.get("/api/mypage/active-store");
+          const activeStore = activeStoreRes.data;
+
+          console.log("활성 매장 정보:", activeStore);
+
+          // 활성 매장이 있으면 정보 등록 완료 -> 홈페이지로 이동
+          if (activeStore && activeStore.storeId) {
+            // 사용자 역할 확인을 위해 프로필 정보 조회 시도
+            // owner 프로필을 먼저 시도
+            try {
+              await api.get("/api/mypage/owner/profile");
+              console.log("사장님 프로필 확인 성공 -> /owner로 이동");
+              navigate("/owner", { replace: true });
+              return;
+            } catch (ownerError) {
+              // owner 프로필이 없으면 staff로 시도
+              try {
+                await api.get("/api/mypage/staff/profile");
+                console.log("알바생 프로필 확인 성공 -> /employee로 이동");
+                navigate("/employee", { replace: true });
+                return;
+              } catch (staffError) {
+                // 둘 다 실패하면 정보 미등록으로 간주
+                console.log("프로필 확인 실패 -> 온보딩으로 이동");
+                navigate("/onboarding", { replace: true });
+                return;
+              }
+            }
+          } else {
+            // 활성 매장이 없으면 정보 미등록 -> 온보딩으로 이동
+            console.log("활성 매장 없음 -> 온보딩으로 이동");
+            navigate("/onboarding", { replace: true });
+            return;
+          }
+        } catch (storeError) {
+          // 활성 매장 조회 실패 (404 등) -> 정보 미등록으로 간주
+          console.log(
+            "활성 매장 조회 실패 (정보 미등록) -> 온보딩으로 이동:",
+            storeError.response?.status,
+          );
+          navigate("/onboarding", { replace: true });
+          return;
+        }
+      } catch (err) {
+        console.error("인증 체크 중 에러:", err);
+        // 에러 발생 시 로그인 페이지로
+        navigate("/login", { replace: true });
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAuthAndRedirect();
+  }, [location.pathname, navigate]);
 
   // 헤더·푸터 제외할 페이지
   const hideLayoutPaths = [
@@ -64,6 +169,11 @@ function App() {
     }
     return false;
   });
+
+  // 인증 체크 중일 때 스플래시 표시
+  if (isCheckingAuth && location.pathname === "/") {
+    return <Splash />;
+  }
 
   return (
     <div className="w-[393px] bg-[#F8FBFE] min-[393px]:w-[393px] mx-auto h-screen flex flex-col font-Pretendard">

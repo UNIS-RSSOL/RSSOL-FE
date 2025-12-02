@@ -66,6 +66,7 @@ export const getDevToken = async (email) => {
  * @param {string} storeCode
  * @param {number} bankId
  * @param {string} accountNumber
+ * @param {string} hireDate
  * @returns {Promise<{
  *   userId: number;
  *   userStoreId: number;
@@ -82,13 +83,19 @@ export const getDevToken = async (email) => {
  *   accountNumber: string;
  * }>}
  */
-export const onboardingStaff = async (storeCode, bankId, accountNumber) => {
+export const onboardingStaff = async (
+  storeCode,
+  bankId,
+  accountNumber,
+  hireDate,
+) => {
   try {
     const response = await api.post("/api/auth/onboarding", {
       role: "STAFF",
       storeCode,
       bankId,
       accountNumber,
+      hireDate,
     });
     return response.data;
   } catch (error) {
