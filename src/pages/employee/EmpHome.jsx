@@ -9,7 +9,10 @@ import character2 from "../../assets/images/character2.png";
 import character3 from "../../assets/images/character3.png";
 import { fetchSchedules } from "../../services/employee/ScheduleService.js";
 import { fetchWage } from "../../services/employee/WageService.js";
-import { fetchActiveStore } from "../../services/employee/MyPageService.js";
+import {
+  fetchActiveStore,
+  fetchMydata,
+} from "../../services/employee/MyPageService.js";
 import dayjs from "dayjs";
 
 function EmpHome() {
@@ -17,7 +20,9 @@ function EmpHome() {
   const today = dayjs();
   const firstDay = today.format("YYYY.MM.") + "01";
   const [wage, setWage] = useState(0);
-  const [activeStore, setActiveStore] = useState({ id: 0, name: "서브웨이" });
+  const [activeStore, setActiveStore] = useState({ id: null, name: "" });
+  const [username, setUsername] = useState();
+
   const [todo, setTodo] = useState([]);
 
   const FormattedDate = (date, day) => {
@@ -37,6 +42,8 @@ function EmpHome() {
           start: dayjs(s.startDatetime).format("HH:mm"),
           end: dayjs(s.endDatetime).format("HH:mm"),
         }));
+        const my = await fetchMydata();
+        setUsername(my.username);
         setTodo(td);
 
         const active = await fetchActiveStore();
@@ -73,7 +80,9 @@ function EmpHome() {
           {FormattedDate(today, true)}
         </div>
         <div className="flex items-center mt-2">
-          <p className="text-[24px] font-[600] my-1">홍길동님 오늘의 일정은?</p>
+          <p className="text-[24px] font-[600] my-1">
+            {username}님 오늘의 일정은?
+          </p>
           <ColoredCalIcon />
         </div>
         <p className="text-[16px] font-[400] mt-2">
