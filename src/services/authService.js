@@ -153,12 +153,26 @@ export const onboardingOwner = async (
   }
 };
 
+//토큰 갱신
+export async function refreshToken() {
+  try {
+    const response = await api.post("/api/auth/refresh-token");
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 //로그아웃
 export async function logout() {
   try {
     const response = await api.post("/api/auth/logout");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     return response.data;
   } catch (error) {
-    console.error(error);
+    console.log("로그아웃 실패: ", error);
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
   }
 }
