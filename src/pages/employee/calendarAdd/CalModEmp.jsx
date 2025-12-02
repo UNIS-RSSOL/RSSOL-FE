@@ -111,6 +111,11 @@ function CalModEmp() {
         console.log("🔍 CalModEmp: fetchMyAvailabilities 응답:", availabilityData);
         console.log("🔍 CalModEmp: availability 개수:", availabilityData?.length || 0);
         
+        // availability 데이터 구조 확인
+        if (availabilityData && availabilityData.length > 0) {
+          console.log("🔍 CalModEmp: 첫 번째 availability 샘플:", availabilityData[0]);
+        }
+        
         setAvailabilities(availabilityData || []);
 
         // work availability를 selectedTimeSlots에 추가
@@ -119,37 +124,72 @@ function CalModEmp() {
           const days = ["일", "월", "화", "수", "목", "금", "토"];
           const initialSelected = new Set();
           const startOfWeek = dayjs(currentDate).locale("ko").startOf("week");
+          const endOfWeek = startOfWeek.add(6, "day").endOf("day");
 
           availabilityData.forEach((availability) => {
-            const availabilityStart = dayjs(availability.startDatetime);
-            const availabilityEnd = dayjs(availability.endDatetime);
+            // availability 데이터 구조 확인: startDatetime/endDatetime 또는 dayOfWeek/startTime/endTime
+            let availabilityStart, availabilityEnd;
+            
+            if (availability.startDatetime && availability.endDatetime) {
+              // 특정 날짜/시간 형식
+              availabilityStart = dayjs(availability.startDatetime);
+              availabilityEnd = dayjs(availability.endDatetime);
+            } else if (availability.dayOfWeek && availability.startTime && availability.endTime) {
+              // 주기적 패턴 형식 (dayOfWeek, startTime, endTime)
+              // 현재 주의 해당 요일 찾기
+              const dayMap = { "SUN": 0, "MON": 1, "TUE": 2, "WED": 3, "THU": 4, "FRI": 5, "SAT": 6 };
+              const targetDayIndex = dayMap[availability.dayOfWeek.toUpperCase()];
+              
+              if (targetDayIndex === undefined) {
+                console.warn("⚠️ 알 수 없는 요일:", availability.dayOfWeek);
+                return;
+              }
+              
+              // 현재 주의 해당 요일 찾기
+              const targetDate = startOfWeek.add(targetDayIndex, "day");
+              
+              // startTime과 endTime을 파싱 (HH:mm 형식)
+              const [startHour, startMinute] = availability.startTime.split(":").map(Number);
+              const [endHour, endMinute] = availability.endTime.split(":").map(Number);
+              
+              availabilityStart = targetDate.hour(startHour).minute(startMinute || 0).second(0);
+              availabilityEnd = targetDate.hour(endHour).minute(endMinute || 0).second(0);
+            } else {
+              console.warn("⚠️ 알 수 없는 availability 형식:", availability);
+              return;
+            }
             
             // 현재 주의 범위 내에 있는 availability만 표시
-            const endOfWeek = startOfWeek.add(6, "day");
             if (availabilityStart.isAfter(endOfWeek) || availabilityEnd.isBefore(startOfWeek)) {
               return;
             }
 
-            // 주의 시작일부터 끝일까지 반복
-            let currentDate = startOfWeek;
-            while (currentDate.isBefore(endOfWeek) || currentDate.isSame(endOfWeek, "day")) {
+            // 겹치는 날짜 범위 계산
+            const overlapStartDate = availabilityStart.isAfter(startOfWeek) ? availabilityStart : startOfWeek;
+            const overlapEndDate = availabilityEnd.isBefore(endOfWeek) ? availabilityEnd : endOfWeek;
+            
+            // 겹치는 날짜들에 대해 시간 슬롯 추가
+            let currentDate = overlapStartDate.startOf("day");
+            while (currentDate.isBefore(overlapEndDate) || currentDate.isSame(overlapEndDate, "day")) {
               const dayName = days[currentDate.day()];
-              
-              // 이 날짜에 해당하는 availability 시간대 확인
               const dayStart = currentDate.startOf("day");
               const dayEnd = currentDate.endOf("day");
               
-              // availability가 이 날짜와 겹치는지 확인
+              // 이 날짜에 availability가 겹치는지 확인
               if (availabilityStart.isBefore(dayEnd) && availabilityEnd.isAfter(dayStart)) {
-                // 겹치는 시간대 계산 (dayjs.max/min 대신 직접 비교)
-                const overlapStart = availabilityStart.isAfter(dayStart) ? availabilityStart : dayStart;
-                const overlapEnd = availabilityEnd.isBefore(dayEnd) ? availabilityEnd : dayEnd;
+                // 이 날짜에서 겹치는 시간 범위 계산
+                const dayOverlapStart = availabilityStart.isAfter(dayStart) ? availabilityStart : dayStart;
+                const dayOverlapEnd = availabilityEnd.isBefore(dayEnd) ? availabilityEnd : dayEnd;
                 
-                let currentHour = overlapStart.hour();
-                const endHour = overlapEnd.hour();
+                // 시간 단위로 슬롯 추가
+                let currentHour = dayOverlapStart.hour();
+                const endHour = dayOverlapEnd.hour();
                 
-                // 같은 시간대인 경우도 포함 (currentHour <= endHour)
-                while (currentHour <= endHour) {
+                // endHour가 dayOverlapEnd의 분이 0이 아니면 포함
+                const shouldIncludeEndHour = dayOverlapEnd.minute() > 0 || dayOverlapEnd.second() > 0;
+                const finalEndHour = shouldIncludeEndHour ? endHour : endHour - 1;
+                
+                while (currentHour <= finalEndHour) {
                   const slotKey = `${currentDate.format("YYYY-MM-DD")}-${dayName}-${currentHour}`;
                   initialSelected.add(slotKey);
                   currentHour++;
@@ -162,6 +202,7 @@ function CalModEmp() {
 
           setSelectedTimeSlots(initialSelected);
           console.log("🔍 CalModEmp: selectedTimeSlots 설정 완료, 개수:", initialSelected.size);
+          console.log("🔍 CalModEmp: selectedTimeSlots 샘플:", Array.from(initialSelected).slice(0, 5));
         } else {
           console.log("🔍 CalModEmp: availability 데이터가 없음");
         }
@@ -316,12 +357,23 @@ function CalModEmp() {
 
     // work availability 수정 (기존 삭제 후 새로 추가)
     try {
-      // 기존 availability 삭제
+      // 기존 availability 삭제 (에러가 발생해도 계속 진행)
+      const deletePromises = [];
       for (const availability of availabilitiesToDelete) {
         if (availability.id) {
-          await deleteAvailability(availability.id);
+          deletePromises.push(
+            deleteAvailability(availability.id).catch((error) => {
+              console.warn(`⚠️ availability ${availability.id} 삭제 실패:`, error);
+              // 삭제 실패해도 계속 진행 (이미 삭제되었거나 존재하지 않는 경우)
+              return null;
+            })
+          );
         }
       }
+      
+      // 모든 삭제 요청 병렬 처리
+      await Promise.all(deletePromises);
+      console.log("✅ 기존 availability 삭제 완료");
 
       // 새로운 availability 추가 (백엔드 DTO 구조에 맞게 payload 생성)
       if (availabilitiesList.length > 0) {
@@ -336,6 +388,8 @@ function CalModEmp() {
         
         console.log("✅ 백엔드 저장 성공 응답:", JSON.stringify(response, null, 2));
         console.log("✅ 근무 가능 시간이 성공적으로 수정되었습니다.");
+      } else {
+        console.log("⚠️ 추가할 availability가 없습니다.");
       }
       
       alert("근무 가능 시간이 수정되었습니다.");
