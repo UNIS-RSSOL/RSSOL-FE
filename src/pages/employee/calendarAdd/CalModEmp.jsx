@@ -358,13 +358,37 @@ function CalModEmp() {
 
     // work availability 수정 (기존 삭제 후 새로 추가)
     try {
-      // 기존 availability 삭제 (에러가 발생해도 계속 진행)
-      console.log("🔍 삭제할 availability 목록:", availabilitiesToDelete.map(a => ({ id: a.id, dayOfWeek: a.dayOfWeek, startTime: a.startTime, endTime: a.endTime })));
+      // 삭제 전에 최신 availability 목록을 다시 가져와서 실제 존재하는 ID만 삭제
+      console.log("🔍 삭제 전 최신 availability 목록 확인 중...");
+      let currentAvailabilities = [];
+      try {
+        currentAvailabilities = await fetchMyAvailabilities();
+        console.log("🔍 최신 availability 목록:", currentAvailabilities.map(a => ({ id: a.id, dayOfWeek: a.dayOfWeek, startTime: a.startTime, endTime: a.endTime })));
+        console.log("🔍 최신 availability ID 목록:", currentAvailabilities.map(a => a.id).filter(Boolean));
+      } catch (error) {
+        console.warn("⚠️ 최신 availability 목록 조회 실패, 기존 목록 사용:", error);
+        currentAvailabilities = availabilitiesToDelete;
+      }
       
+      // 실제 존재하는 ID만 필터링
+      const validIds = new Set(currentAvailabilities.map(a => a.id).filter(Boolean));
+      const availabilitiesToDeleteFiltered = availabilitiesToDelete.filter(a => a.id && validIds.has(a.id));
+      
+      console.log("🔍 삭제할 availability 목록 (필터링 전):", availabilitiesToDelete.map(a => ({ id: a.id, dayOfWeek: a.dayOfWeek, startTime: a.startTime, endTime: a.endTime })));
+      console.log("🔍 삭제할 availability 목록 (필터링 후):", availabilitiesToDeleteFiltered.map(a => ({ id: a.id, dayOfWeek: a.dayOfWeek, startTime: a.startTime, endTime: a.endTime })));
+      console.log("🔍 유효한 ID 목록:", Array.from(validIds));
+      
+      if (availabilitiesToDeleteFiltered.length === 0 && availabilitiesToDelete.length > 0) {
+        console.warn("⚠️ 삭제할 유효한 availability가 없습니다. 모든 ID가 서버에 존재하지 않을 수 있습니다.");
+        console.warn("⚠️ 기존 state의 ID:", availabilitiesToDelete.map(a => a.id));
+        console.warn("⚠️ 서버의 실제 ID:", Array.from(validIds));
+      }
+      
+      // 기존 availability 삭제 (에러가 발생해도 계속 진행)
       const deletePromises = [];
       const deleteResults = [];
       
-      for (const availability of availabilitiesToDelete) {
+      for (const availability of availabilitiesToDeleteFiltered) {
         if (availability.id) {
           console.log(`🔍 availability ${availability.id} 삭제 시도 중...`);
           deletePromises.push(
@@ -395,7 +419,9 @@ function CalModEmp() {
       }
       
       // 모든 삭제 요청 병렬 처리
-      await Promise.all(deletePromises);
+      if (deletePromises.length > 0) {
+        await Promise.all(deletePromises);
+      }
       
       const successCount = deleteResults.filter(r => r.success).length;
       const failCount = deleteResults.filter(r => !r.success).length;
@@ -403,6 +429,10 @@ function CalModEmp() {
       
       if (failCount > 0) {
         console.warn(`⚠️ 일부 availability 삭제 실패했지만 계속 진행합니다.`);
+      }
+      
+      if (availabilitiesToDeleteFiltered.length === 0) {
+        console.log("ℹ️ 삭제할 유효한 availability가 없어 삭제 단계를 건너뜁니다.");
       }
 
       // 새로운 availability 추가 (백엔드 DTO 구조에 맞게 payload 생성)
