@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { onboardingOwner, onboardingStaff } from "../../services/authService.js";
+import character4 from "../../assets/images/character4.png";
+import character2 from "../../assets/images/character2.png";
 
 const ONBOARDING_ROLE_KEY = "onboardingRole";
 const ONBOARDING_DATA_KEY = "onboardingData";
@@ -203,22 +205,28 @@ export default function Onboarding() {
             <div className="flex flex-col gap-4 w-full">
               <button
                 onClick={() => setRole("owner")}
-                className={`p-4 rounded-xl border ${
+                className={`p-4 rounded-xl border flex items-center gap-4 ${
                   role === "owner" ? "bg-blue-500 text-black" : "bg-white"
                 }`}
               >
-                <p className="text-base font-bold text-left">사장님</p>
-                <p className="text-sm text-left">매장 및 직원 관리를 할 수 있어요!</p>
+                <img src={character4} alt="사장님 캐릭터" className="w-16 h-16 object-contain" />
+                <div className="flex flex-col items-start">
+                  <p className="text-base font-bold text-left">사장님</p>
+                  <p className="text-sm text-left">매장 및 직원 관리를 할 수 있어요!</p>
+                </div>
               </button>
-  
+
               <button
                 onClick={() => setRole("employee")}
-                className={`p-4 rounded-xl border ${
+                className={`p-4 rounded-xl border flex items-center gap-4 ${
                   role === "employee" ? "bg-[#68E194] text-black" : "bg-white"
                 }`}
               >
-                <p className="text-base font-bold text-left">알바생</p>
-                <p className="text-sm text-left">월급 확인과 대타 신청을 할 수 있어요!</p>
+                <img src={character2} alt="알바생 캐릭터" className="w-16 h-16 object-contain" />
+                <div className="flex flex-col items-start">
+                  <p className="text-base font-bold text-left">알바생</p>
+                  <p className="text-sm text-left">월급 확인과 대타 신청을 할 수 있어요!</p>
+                </div>
               </button>
             </div>
           </>
@@ -308,13 +316,9 @@ export default function Onboarding() {
         <div className="w-full sticky bottom-0 bg-white pt-6 pb-4">
           <button
             onClick={handleNext}
-            disabled={isLoading}
-            className="w-full py-3 text-black rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
-            style={{
-              backgroundColor: isStepComplete() ? "#68E194" : "#3b82f6",
-            }}
+            className="w-full py-3 bg-blue-500 text-black rounded-lg"
           >
-            {isLoading ? "처리 중..." : step === 2 ? "입력 완료" : "선택 완료"}
+            {step === 2 ? "입력 완료" : "선택 완료"}
           </button>
         </div>
   
