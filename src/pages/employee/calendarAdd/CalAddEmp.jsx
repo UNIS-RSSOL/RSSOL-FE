@@ -324,7 +324,10 @@ function CalAddEmp() {
       console.log("sending payload:", JSON.stringify(payload, null, 2));
 
       // work availability 추가 (한 번에 모든 availability 전송)
-      await addAvailability(payload);
+      const response = await addAvailability(payload);
+      
+      console.log("✅ 백엔드 저장 성공 응답:", JSON.stringify(response, null, 2));
+      console.log("✅ 근무 가능 시간이 성공적으로 저장되었습니다.");
       
       alert("근무 가능 시간이 추가되었습니다.");
       navigate(-1);

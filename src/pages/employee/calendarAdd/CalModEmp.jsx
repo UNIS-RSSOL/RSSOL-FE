@@ -21,6 +21,7 @@ function CalModEmp() {
   const [selectedTimeSlots, setSelectedTimeSlots] = useState(new Set());
   const [employeeUserId, setEmployeeUserId] = useState(null);
   const [employeeStoreId, setEmployeeStoreId] = useState(null);
+  const [employeeUserName, setEmployeeUserName] = useState(null);
   const [availabilities, setAvailabilities] = useState([]);
   const [isLoadingEmployeeInfo, setIsLoadingEmployeeInfo] = useState(true);
   const [isLoadingAvailabilities, setIsLoadingAvailabilities] = useState(true);
@@ -42,7 +43,7 @@ function CalModEmp() {
           storeId = activeStore.id;
         }
 
-        // mydata에서 userId 가져오기
+        // mydata에서 userId와 userName 가져오기
         const mydata = await fetchMydata();
         console.log("fetchMydata 응답:", mydata);
 
@@ -51,6 +52,15 @@ function CalModEmp() {
           userId = mydata.userId;
         } else if (mydata && mydata.id) {
           userId = mydata.id;
+        }
+
+        let userName = null;
+        if (mydata && mydata.username) {
+          userName = mydata.username;
+        } else if (mydata && mydata.userName) {
+          userName = mydata.userName;
+        } else if (mydata && mydata.name) {
+          userName = mydata.name;
         }
 
         // storeId가 없으면 mydata의 currentStore에서 가져오기
@@ -62,16 +72,19 @@ function CalModEmp() {
           }
         }
 
-        if (userId && storeId) {
-          console.log("userId와 storeId 찾음:", { userId, storeId });
+        if (userId && storeId && userName) {
+          console.log("userId, storeId, userName 찾음:", { userId, storeId, userName });
           setEmployeeUserId(userId);
           setEmployeeStoreId(storeId);
+          setEmployeeUserName(userName);
         } else {
           console.error(
-            "userId 또는 storeId를 찾을 수 없습니다. userId:",
+            "userId, storeId 또는 userName을 찾을 수 없습니다. userId:",
             userId,
             "storeId:",
             storeId,
+            "userName:",
+            userName,
             "activeStore:",
             activeStore,
             "mydata:",
@@ -93,11 +106,16 @@ function CalModEmp() {
     const loadAvailabilities = async () => {
       setIsLoadingAvailabilities(true);
       try {
+        console.log("🔍 CalModEmp: work availability 불러오기 시작");
         const availabilityData = await fetchMyAvailabilities();
+        console.log("🔍 CalModEmp: fetchMyAvailabilities 응답:", availabilityData);
+        console.log("🔍 CalModEmp: availability 개수:", availabilityData?.length || 0);
+        
         setAvailabilities(availabilityData || []);
 
         // work availability를 selectedTimeSlots에 추가
         if (availabilityData && Array.isArray(availabilityData) && availabilityData.length > 0) {
+          console.log("🔍 CalModEmp: availability 데이터가 있음, selectedTimeSlots 설정 시작");
           const days = ["일", "월", "화", "수", "목", "금", "토"];
           const initialSelected = new Set();
           const startOfWeek = dayjs(currentDate).locale("ko").startOf("week");
@@ -142,16 +160,23 @@ function CalModEmp() {
           });
 
           setSelectedTimeSlots(initialSelected);
+          console.log("🔍 CalModEmp: selectedTimeSlots 설정 완료, 개수:", initialSelected.size);
+        } else {
+          console.log("🔍 CalModEmp: availability 데이터가 없음");
         }
       } catch (error) {
-        console.error("work availability 로드 실패:", error);
+        console.error("❌ CalModEmp: work availability 로드 실패:", error);
+        console.error("❌ CalModEmp: 에러 상세:", error.response?.data || error.message);
       } finally {
         setIsLoadingAvailabilities(false);
       }
     };
     
-    loadAvailabilities();
-  }, [currentDate]);
+    // employeeUserId와 employeeStoreId가 로드된 후에만 실행
+    if (!isLoadingEmployeeInfo && employeeUserId && employeeStoreId) {
+      loadAvailabilities();
+    }
+  }, [currentDate, isLoadingEmployeeInfo, employeeUserId, employeeStoreId]);
 
   // 시간 블록 클릭 핸들러
   const handleTimeSlotClick = (day, hour) => {
@@ -180,12 +205,14 @@ function CalModEmp() {
       return;
     }
 
-    if (!employeeUserId || !employeeStoreId) {
+    if (!employeeUserId || !employeeStoreId || !employeeUserName) {
       console.error(
-        "employeeUserId 또는 employeeStoreId가 null입니다. userId:",
+        "employeeUserId, employeeStoreId 또는 employeeUserName이 null입니다. userId:",
         employeeUserId,
         "storeId:",
         employeeStoreId,
+        "userName:",
+        employeeUserName,
       );
       alert("알바생 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.");
       return;
@@ -197,54 +224,94 @@ function CalModEmp() {
     // 기존 availability 삭제
     const availabilitiesToDelete = availabilities || [];
 
+    // 요일을 영어 약자로 변환하는 함수
+    const getDayOfWeek = (dayjsDate) => {
+      const day = dayjsDate.day(); // 0=일요일, 1=월요일, ..., 6=토요일
+      const dayMap = {
+        0: "SUN",
+        1: "MON",
+        2: "TUE",
+        3: "WED",
+        4: "THU",
+        5: "FRI",
+        6: "SAT",
+      };
+      return dayMap[day];
+    };
+
     // 새로운 availability 추가할 시간대 계산
-    // 연속된 시간대를 하나의 availability로 그룹화
-    const availabilityGroups = [];
+    // 날짜별로 그룹화한 후, 각 날짜 내에서 연속된 시간대만 하나로 합침
+    const schedulesByDate = {};
     const sortedSlots = Array.from(selectedTimeSlots).sort();
     
     if (sortedSlots.length > 0) {
-      let currentGroup = null;
-      
       sortedSlots.forEach((slotKey) => {
         const parts = slotKey.split("-");
         if (parts.length < 5) return;
 
         const dateStr = `${parts[0]}-${parts[1]}-${parts[2]}`;
-        const dayName = parts[3];
         const hourStr = parts[4];
 
         const targetDate = dayjs(dateStr);
         const hour = parseInt(hourStr);
         const startDatetime = targetDate.hour(hour).minute(0).second(0);
         const endDatetime = startDatetime.add(1, "hour");
+        
+        const dateKey = targetDate.format("YYYY-MM-DD");
+        if (!schedulesByDate[dateKey]) {
+          schedulesByDate[dateKey] = [];
+        }
+        schedulesByDate[dateKey].push({
+          start: startDatetime,
+          end: endDatetime,
+        });
+      });
+    }
 
+    // 각 날짜별로 연속된 시간대를 그룹화하여 availabilities 배열 생성
+    const availabilitiesList = [];
+    Object.keys(schedulesByDate).forEach((dateKey) => {
+      const daySchedules = schedulesByDate[dateKey];
+      const firstSchedule = daySchedules[0];
+      const dayOfWeek = getDayOfWeek(firstSchedule.start);
+      
+      // 같은 날짜의 연속된 시간대를 하나로 합침
+      let currentGroup = null;
+      daySchedules.forEach((schedule) => {
         if (!currentGroup) {
           currentGroup = {
-            start: startDatetime,
-            end: endDatetime,
+            start: schedule.start,
+            end: schedule.end,
           };
         } else {
-          // 연속된 시간대인지 확인 (같은 날짜이고 1시간 차이)
-          if (
-            currentGroup.end.isSame(startDatetime) &&
-            currentGroup.start.format("YYYY-MM-DD") === startDatetime.format("YYYY-MM-DD")
-          ) {
-            currentGroup.end = endDatetime;
+          // 같은 날짜에서 연속된 시간대인지 확인 (끝 시간과 시작 시간이 같음)
+          if (currentGroup.end.isSame(schedule.start)) {
+            // 연속된 시간대이므로 합침
+            currentGroup.end = schedule.end;
           } else {
-            // 새로운 그룹 시작
-            availabilityGroups.push(currentGroup);
+            // 연속되지 않은 시간대이므로 별도 availability로 추가
+            availabilitiesList.push({
+              dayOfWeek: dayOfWeek,
+              startTime: currentGroup.start.format("HH:mm"),
+              endTime: currentGroup.end.format("HH:mm"),
+            });
             currentGroup = {
-              start: startDatetime,
-              end: endDatetime,
+              start: schedule.start,
+              end: schedule.end,
             };
           }
         }
       });
       
+      // 마지막 그룹 추가
       if (currentGroup) {
-        availabilityGroups.push(currentGroup);
+        availabilitiesList.push({
+          dayOfWeek: dayOfWeek,
+          startTime: currentGroup.start.format("HH:mm"),
+          endTime: currentGroup.end.format("HH:mm"),
+        });
       }
-    }
+    });
 
     // work availability 수정 (기존 삭제 후 새로 추가)
     try {
@@ -255,18 +322,26 @@ function CalModEmp() {
         }
       }
 
-      // 새로운 availability 추가
-      for (const group of availabilityGroups) {
-        await addAvailability(
-          group.start.format("YYYY-MM-DDTHH:mm:ss"),
-          group.end.format("YYYY-MM-DDTHH:mm:ss")
-        );
+      // 새로운 availability 추가 (백엔드 DTO 구조에 맞게 payload 생성)
+      if (availabilitiesList.length > 0) {
+        const payload = {
+          userStoreId: employeeStoreId,
+          userName: employeeUserName,
+          availabilities: availabilitiesList, // 배열
+        };
+
+        console.log("sending payload:", JSON.stringify(payload, null, 2));
+        const response = await addAvailability(payload);
+        
+        console.log("✅ 백엔드 저장 성공 응답:", JSON.stringify(response, null, 2));
+        console.log("✅ 근무 가능 시간이 성공적으로 수정되었습니다.");
       }
       
       alert("근무 가능 시간이 수정되었습니다.");
       navigate(-1);
     } catch (error) {
       console.error("근무 가능 시간 수정 실패:", error);
+      console.error("에러 상세:", error.response?.data || error.message);
       alert("근무 가능 시간 수정에 실패했습니다. 다시 시도해주세요.");
     }
   };
