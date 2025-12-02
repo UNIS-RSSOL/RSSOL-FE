@@ -6,6 +6,8 @@ import { getDevToken } from "../../services/authService.js";
 import { goToKakaoLogin } from "../../services/kakaoLogin.js";
 import GreenBtn from "../../components/common/GreenBtn.jsx";
 import api from "../../services/api.js";
+import EmpBtn from "../../assets/images/EmpBtn.png";
+import OwnerBtn from "../../assets/images/OwnerBtn.png";
 
 function Login() {
   const navigate = useNavigate();
@@ -13,6 +15,7 @@ function Login() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isOwnerBtn, setIsOwnerBtn] = useState(true);
   
   // URL 파라미터에서 에러 확인
   useEffect(() => {
@@ -115,17 +118,34 @@ function Login() {
   };
 
   return (
-    <div className="w-full h-screen bg-white flex flex-col justify-center items-center">
+    <div className="w-full h-screen bg-linear-to-r from-[#5EDEAB] to-[#68E194] flex flex-col justify-center items-center">
       {isLoading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg">
-            <p className="text-center">로그인 처리 중...</p>
-          </div>
+          <Splash />
         </div>
       )}
       
       {/* 로고 */}
       <div className="mb-10 flex flex-col items-center text-center">
+        <button
+          onClick={() => setIsOwnerBtn(!isOwnerBtn)}
+          className="mb-3 cursor-pointer rounded-full overflow-hidden bg-transparent border-none p-0 outline-none focus:outline-none"
+          style={{ 
+            width: "170px", 
+            height: "170px",
+            background: "transparent",
+            border: "none",
+            padding: 0,
+            outline: "none",
+            boxShadow: "none"
+          }}
+        >
+          <img
+            src={isOwnerBtn ? OwnerBtn : EmpBtn}
+            alt="character button"
+            style={{ width: "170px", height: "170px", objectFit: "cover" }}
+          />
+        </button>
         <LogoImage className="w-[180px] h-auto mb-3" />
         <p className="text-[15px] font-medium text-[#000]">
           번거로운 알바 스케줄링, 원터치로 끝!
