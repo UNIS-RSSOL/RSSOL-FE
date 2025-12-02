@@ -38,7 +38,7 @@ function App() {
     "/",
     "/login",
     "/onboarding",
-    "/api/auth/kakao/callback",
+    "/auth/kakao/callback",
     "/calAdd",
     "/calGen",
     "/autoCal",
@@ -74,7 +74,15 @@ function App() {
           {/* 로그인/온보딩 */}
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/api/auth/kakao/callback" element={<KakaoCallback />} />
+          {/* 
+            카카오 로그인 콜백 라우트
+            주의: OAuth 인증 코드(code)는 백엔드에서 처리합니다.
+            백엔드가 인증 완료 후 이 경로로 리다이렉트합니다.
+            이 페이지에서 세션 확인 후 적절한 페이지로 이동합니다.
+            - 신규 회원 또는 온보딩 미실행 → /onboarding
+            - 기존 회원(온보딩 실행) → 사장: /owner, 알바: /employee
+          */}
+          <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
 
           <Route path="/owner" element={<OwnerHome />} />
           <Route path="/employee" element={<EmpHome />} />

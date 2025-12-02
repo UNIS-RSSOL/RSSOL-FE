@@ -1,3 +1,21 @@
+/**
+ * 카카오 로그인 콜백 페이지 (/auth/kakao/callback)
+ * 
+ * ✨ OAuth 인증 코드(code)는 백엔드에서 처리합니다.
+ * 프론트엔드는 백엔드에서 리다이렉트된 후 토큰 저장 및 라우팅만 담당합니다.
+ * 
+ * 플로우:
+ * 1. 사용자가 카카오 로그인 버튼 클릭
+ * 2. 프론트엔드가 카카오 인증 URL 생성 (redirect_uri: 백엔드 콜백 URL)
+ * 3. 카카오 인증 페이지로 이동
+ * 4. 카카오가 백엔드로 code 전달 (/api/auth/kakao/callback?redirect_uri={프론트 URL})
+ * 5. 백엔드가 code를 받아서 카카오 토큰 교환 및 사용자 정보 처리
+ * 6. 백엔드가 프론트엔드 redirect_uri(/auth/kakao/callback)로 리다이렉트 (accessToken, refreshToken, userId 전달)
+ * 7. 이 페이지에서 토큰 저장 및 적절한 페이지로 이동:
+ *    - 신규 회원 또는 기존 회원(온보딩 미실행) → /onboarding
+ *    - 기존 회원(온보딩 실행) → 사장: /owner, 알바: /employee
+ */
+
 import React, { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { handleKakaoSession } from "../../services/kakaoLogin.js";
@@ -9,8 +27,7 @@ function KakaoCallback() {
 
   useEffect(() => {
     const handleCallback = async () => {
-      // URL에서 code 읽기
-      const code = new URL(window.location.href).searchParams.get("code");
+      // 백엔드에서 리다이렉트된 경우 에러 파라미터 확인
       const error = searchParams.get("error");
 
       if (error) {
@@ -19,58 +36,63 @@ function KakaoCallback() {
         return;
       }
 
-      if (!code) {
-        console.error("인증 코드가 없습니다.");
-        navigate("/login?error=no_code");
-        return;
-      }
-
       try {
-        console.log("카카오 콜백 처리 시작 - code:", code);
-        console.log(
-          "백엔드 요청 URL:",
-          `${api.defaults.baseURL}/api/auth/kakao/callback?code=${code}`,
-        );
+        console.log("백엔드에서 리다이렉트됨 - 세션 확인 시작");
 
-        // 백엔드로 code 전달 (GET 요청으로 쿼리 파라미터로 전달)
-        const res = await api.get("/api/auth/kakao/callback", {
-          params: { code },
-        });
+        // 백엔드에서 이미 인증 처리를 완료했으므로,
+        // 세션 정보를 확인하여 적절한 페이지로 이동
+        // 백엔드가 URL 파라미터로 세션 정보를 전달할 수도 있고,
+        // 쿠키/세션으로 설정했을 수도 있음
 
-        console.log("백엔드 응답 성공:", res.status, res.data);
-        const session = res.data;
-        console.log("카카오 로그인 응답:", session);
+        // URL 파라미터에서 세션 정보 확인 (백엔드가 전달한 경우)
+        const accessToken = searchParams.get("accessToken");
+        const refreshToken = searchParams.get("refreshToken");
+        const userId = searchParams.get("userId");
+        const newUser = searchParams.get("newUser");
+        const isNewUser = newUser === "true" || newUser === "1";
 
-        if (!session || !session.accessToken) {
-          console.error("세션 데이터가 없습니다. 응답:", res.data);
-          navigate("/login?error=no_session");
-          return;
-        }
-
-        // 세션 정보 저장
-        handleKakaoSession(session);
-
-        // newUser 필드 확인 (백엔드에서 newUser 또는 isNewUser로 반환할 수 있음)
-        const isNewUser = session.newUser !== undefined ? session.newUser : session.isNewUser;
-        
-        console.log("카카오 로그인 응답 데이터:", {
-          userId: session.userId,
-          newUser: session.newUser,
-          isNewUser: session.isNewUser,
-          username: session.username,
-          provider: session.provider
-        });
-
-        // 신규 회원인 경우 온보딩으로 이동
-        if (isNewUser) {
-          console.log("신규 회원 -> 온보딩으로 이동");
-          window.history.replaceState({}, document.title, window.location.pathname);
-          navigate("/onboarding");
-          return;
+        if (accessToken) {
+          // URL 파라미터로 토큰이 전달된 경우
+          const session = {
+            accessToken,
+            refreshToken: refreshToken || null,
+            userId: userId || null,
+            newUser: isNewUser,
+            isNewUser,
+          };
+          handleKakaoSession(session);
+          
+          // 신규 회원인 경우 온보딩으로 이동
+          if (isNewUser) {
+            console.log("신규 회원 -> 온보딩으로 이동");
+            window.history.replaceState({}, document.title, window.location.pathname);
+            navigate("/onboarding");
+            return;
+          }
+        } else {
+          // 쿠키/세션으로 설정된 경우, 백엔드 API로 사용자 정보 확인
+          // (백엔드가 쿠키에 세션을 설정했다면 자동으로 인증됨)
+          try {
+            const profileRes = await api.get("/api/auth/me");
+            const userInfo = profileRes.data;
+            
+            if (userInfo && userInfo.newUser !== undefined) {
+              const isNewUserFromBackend = userInfo.newUser || userInfo.isNewUser;
+              
+              if (isNewUserFromBackend) {
+                console.log("신규 회원 -> 온보딩으로 이동");
+                window.history.replaceState({}, document.title, window.location.pathname);
+                navigate("/onboarding");
+                return;
+              }
+            }
+          } catch (profileError) {
+            console.log("프로필 조회 실패, 활성 매장 정보로 확인 시도");
+          }
         }
 
         // 기존 회원인 경우 정보 등록 상태 확인
-        // 활성 매장 정보를 확인하여 정보 등록 여부 판단
+        // 활성 매장 정보를 확인하여 온보딩 실행 여부 판단
         try {
           const activeStoreRes = await api.get("/api/mypage/active-store");
           const activeStore = activeStoreRes.data;
@@ -124,18 +146,7 @@ function KakaoCallback() {
           message: err.message,
           response: err.response?.data,
           status: err.response?.status,
-          statusText: err.response?.statusText,
-          config: {
-            url: err.config?.url,
-            baseURL: err.config?.baseURL,
-            method: err.config?.method,
-          },
         });
-        
-        // CORS 에러 체크
-        if (err.message?.includes("CORS") || err.code === "ERR_NETWORK") {
-          console.error("⚠️ CORS 또는 네트워크 에러 발생 - 로컬 프론트에서 배포 백엔드로 요청 시 발생할 수 있음");
-        }
         
         navigate("/login?error=kakao_login_failed");
       }
