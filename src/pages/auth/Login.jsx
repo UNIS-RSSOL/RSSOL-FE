@@ -147,18 +147,6 @@ function Login() {
         >
           카카오 로그인
         </GreenBtn>
-        <GreenBtn
-          className="h-[48px] text-[15px] font-semibold text-white bg-[#03C75A] hover:bg-[#03C75A]"
-          onClick={handleLogin}
-        >
-          네이버 로그인
-        </GreenBtn>
-        <GreenBtn
-          className="h-[48px] text-[15px] font-semibold text-black bg-[#ffffff] hover:bg-[#ffffff]"
-          onClick={handleLogin}
-        >
-          구글 로그인
-        </GreenBtn>
       </div>
 
       {/* 체크용 로그인 (개발용) */}
