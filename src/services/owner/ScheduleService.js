@@ -1,11 +1,10 @@
 import api from "../api.js";
 
 //근무블록 추가
-export async function addWorkshift(userId, storeId, start, end) {
+export async function addWorkshift(userStoreId, start, end) {
   try {
     const response = await api.post("/api/schedules/workshifts", {
-      userId: userId,
-      storeId: storeId,
+      userStoreId: userStoreId,
       startDatetime: start,
       endDatetime: end,
     });
@@ -115,3 +114,13 @@ export async function fetchEmployeeAvailabilities(staffId) {
     return [];
   }
 }
+    // 다른 엔드포인트 시도
+    //try {
+    //  const response = await api.get(`/api/store/availabilities`, {
+    //    params: { userId },
+    //    });
+    //  }
+
+    //return [];
+  //}
+//}

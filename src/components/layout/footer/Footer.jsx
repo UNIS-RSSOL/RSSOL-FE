@@ -33,13 +33,11 @@ function Footer() {
 
   useEffect(() => {
     const path = location.pathname;
-    if (path === `/${role}/mypage` || path === `/${role}/mypage/managestore`) {
-      setSelectedMenu("마이페이지");
-    } else if (path.includes(`/${role}/calendar`)) {
+    if (path.includes("calendar")) {
       setSelectedMenu("캘린더");
-    } else if (path.includes(`/${role}/manage`)) {
-      setSelectedMenu("직원관리");
-    } else if (path.includes(`/${role}`)) {
+    } else if (path.includes("mypage")) {
+      setSelectedMenu("마이페이지");
+    } else {
       setSelectedMenu("홈");
     }
   }, [location.pathname]);

@@ -293,7 +293,7 @@ function OwnerCalendar() {
   const handleRequestWork = () => {
     (async () => {
       try {
-        // await requestWork(eventData.id, needWorkers);
+        await requestWork(eventData.id, needWorkers);
 
         setAddShiftToastOpen(false);
         setIsMsgOpen2(true);
@@ -317,7 +317,7 @@ function OwnerCalendar() {
           newTime.end.format("YYYY-MM-DD") + "T" + newTime.end.format("HH:mm"),
       };
       console.log(data);
-      // await addWorkshift(data.userStoreId, data.start, data.end);
+      await addWorkshift(data.userStoreId, data.start, data.end);
       setNewTime({
         userStoreId: "",
         date: "",
@@ -335,7 +335,7 @@ function OwnerCalendar() {
   const handleDeleteWorkshift = async () => {
     try {
       console.log(eventData.id);
-      // await deleteWorkshift(eventData.id);
+      await deleteWorkshift(eventData.id);
       setIsDeleteShift(false);
       setIsMsgOpen3(true);
     } catch (error) {
