@@ -90,7 +90,7 @@ function OwnerPage() {
         console.error(error);
       }
     })();
-  }, [mydata, storedata]);
+  }, []);
 
   //내정보수정
   const handleMyDataUpdate = async (updatedData) => {

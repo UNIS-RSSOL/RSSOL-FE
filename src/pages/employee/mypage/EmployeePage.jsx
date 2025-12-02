@@ -62,7 +62,7 @@ function EmployeePage() {
         console.error(error);
       }
     })();
-  }, [mydata]);
+  }, []);
 
   //내정보수정
   const handleMyDataUpdate = async (updatedData) => {
