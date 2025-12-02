@@ -10,10 +10,7 @@ import MapIcon from "../../../assets/icons/MapIcon.jsx";
 import PhoneIcon from "../../../assets/icons/PhoneIcon.jsx";
 import NoteIcon from "../../../assets/icons/NoteIcon.jsx";
 import character from "../../../assets/images/OwnerBtn.png";
-import {
-  ACCESS_TOKEN_KEY,
-  REFRESH_TOKEN_KEY,
-} from "../../../services/kakaoLogin";
+
 import {
   fetchMydata,
   fetchStoredata,
