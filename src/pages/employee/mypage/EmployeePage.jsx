@@ -5,7 +5,7 @@ import MsgIcon from "../../../assets/icons/MsgIcon.jsx";
 import CoinIcon from "../../../assets/icons/CoinIcon.jsx";
 import StoreIcon from "../../../assets/icons/StoreIcon.jsx";
 import NoteIcon from "../../../assets/icons/NoteIcon.jsx";
-import character from "../../../assets/images/character2.png";
+import character from "../../../assets/images/EmpBtn.png";
 import {
   fetchMydata,
   fetchStoreList,
@@ -92,13 +92,13 @@ function EmployeePage() {
   return (
     <div className="flex flex-col divide-y-8 divide-[#e7eaf3]">
       <div className="flex items-center justify-center">
-        <div className="flex items-center justify-center size-[130px] bg-[#68e194] border-3 border-[#fdfffe] shadow-[0_4px_8px_0_rgba(0,0,0,0.2)] overflow-hidden rounded-full my-7">
-          {profile === "" ? (
-            <img src={character} alt="profile" />
-          ) : (
+        {profile === "" ? (
+          <img src={character} alt="profile" className="size-[150px] my-5" />
+        ) : (
+          <div className="flex items-center justify-center size-[130px] bg-[#68e194] border-3 border-[#fdfffe] shadow-[0_4px_8px_0_rgba(0,0,0,0.2)] overflow-hidden rounded-full my-7">
             <img src={profile} alt="profile" />
-          )}
-        </div>
+          </div>
+        )}
       </div>
       <InfoBox
         role="employee"
