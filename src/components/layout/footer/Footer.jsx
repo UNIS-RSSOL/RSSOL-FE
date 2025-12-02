@@ -10,32 +10,39 @@ import {
   MypageIcon,
   SelectedMypageIcon,
 } from "../../../assets/icons/MypageIcon.jsx";
+import { fetchActiveStore } from "../../../services/owner/MyPageService.js";
 
 function Footer() {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedMenu, setSelectedMenu] = useState("홈");
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await fetchActiveStore();
+        const r = response.position;
+        if (r === "OWNER") setRole("owner");
+        else setRole("employee");
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     const path = location.pathname;
-    if (
-      path === "/owner/mypage" ||
-      path === "/owner/mypage/managestore" ||
-      path === "/employee/mypage" ||
-      path === "/employee/mypage/managestore"
-    ) {
+    if (path === `/${role}/mypage` || path === `/${role}/mypage/managestore`) {
       setSelectedMenu("마이페이지");
-    } else if (
-      path.includes("/owner/calendar") ||
-      path.includes("/employee/calendar")
-    ) {
+    } else if (path.includes(`/${role}/calendar`)) {
       setSelectedMenu("캘린더");
     } else if (
-      path.includes("/owner/manageemp") ||
-      path.includes("/employee/managesalary")
+      path.includes("/owner/manage") ||
+      path.includes("/employee/manage")
     ) {
       setSelectedMenu("직원관리");
-    } else if (path.includes("/owner")) {
+    } else if (path.includes(`/${role}`)) {
       setSelectedMenu("홈");
     }
   }, [location.pathname]);
@@ -52,7 +59,7 @@ function Footer() {
           title="홈"
           onClick={() => {
             handleMenuClick("홈");
-            navigate("/owner");
+            navigate(`/${role}`);
           }}
         />
       ) : (
@@ -61,7 +68,7 @@ function Footer() {
           title="홈"
           onClick={() => {
             handleMenuClick("홈");
-            navigate("/owner");
+            navigate(`/${role}`);
           }}
         />
       )}
@@ -71,7 +78,7 @@ function Footer() {
           title="캘린더"
           onClick={() => {
             handleMenuClick("캘린더");
-            navigate("/owner/calendar");
+            navigate(`/${role}/calendar`);
           }}
         />
       ) : (
@@ -80,7 +87,7 @@ function Footer() {
           title="캘린더"
           onClick={() => {
             handleMenuClick("캘린더");
-            navigate("/owner/calendar");
+            navigate(`/${role}/calendar`);
           }}
         />
       )}
@@ -90,7 +97,7 @@ function Footer() {
           title="직원관리"
           onClick={() => {
             handleMenuClick("직원관리");
-            navigate("/owner/manageemp");
+            navigate(`/${role}/manage`);
           }}
         />
       ) : (
@@ -99,7 +106,7 @@ function Footer() {
           title="직원관리"
           onClick={() => {
             handleMenuClick("직원관리");
-            navigate("/owner/manageemp");
+            navigate(`/${role}/manage`);
           }}
         />
       )}
@@ -109,7 +116,7 @@ function Footer() {
           title="마이페이지"
           onClick={() => {
             handleMenuClick("마이페이지");
-            navigate("/owner/mypage");
+            navigate(`/${role}/mypage`);
           }}
         />
       ) : (
@@ -118,7 +125,7 @@ function Footer() {
           title="마이페이지"
           onClick={() => {
             handleMenuClick("마이페이지");
-            navigate("/owner/mypage");
+            navigate(`/${role}/mypage`);
           }}
         />
       )}

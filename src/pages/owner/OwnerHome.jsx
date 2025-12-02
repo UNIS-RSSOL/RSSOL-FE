@@ -26,6 +26,7 @@ function OwnerHome() {
   const [wage, setWage] = useState(0);
   const [workers, setWorkers] = useState([]);
   const [events, setEvents] = useState([]);
+  const [activeStore, setActiveStore] = useState(null);
   const FormattedDate = (date, day) => {
     const d = dat[today.format("d")];
     return day
@@ -64,15 +65,16 @@ function OwnerHome() {
         setEvents(formattedEvents);
 
         const activeStore = await fetchActiveStore();
-        const fetchedWage = await fetchWage(
-          activeStore.storeId,
-          today.format("YYYY-MM"),
-        );
-        const totalWage = fetchedWage.payrolls.reduce((sum, payroll) => {
-          return sum + payroll.total_pay;
-        }, 0);
+        setActiveStore(activeStore);
+        // const fetchedWage = await fetchWage(
+        //   activeStore.storeId,
+        //   today.format("YYYY-MM"),
+        // );
+        // const totalWage = fetchedWage.payrolls.reduce((sum, payroll) => {
+        //   return sum + payroll.total_pay;
+        // }, 0);
 
-        setWage(totalWage);
+        // setWage(totalWage);
       } catch (error) {
         console.error(error);
       }
@@ -93,7 +95,6 @@ function OwnerHome() {
   const FloatButton = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [storeList, setStoreList] = useState([]);
-    const [activeStore, setActiveStore] = useState();
 
     useEffect(() => {
       (async () => {
@@ -172,7 +173,7 @@ function OwnerHome() {
         </div>
         <div className="flex items-center mt-2">
           <p className="text-[24px] font-[600] my-1">
-            알쏠 1호점 오늘의 일정은?
+            {activeStore?.name} 오늘의 일정은?
           </p>
           <ColoredCalIcon />
         </div>
@@ -195,7 +196,7 @@ function OwnerHome() {
           disabled={true}
         >
           <div className="flex flex-col items-center justify-center">
-            <p className="text-[16px] font-[500]">서브웨이</p>
+            <p className="text-[16px] font-[500]">{activeStore}</p>
             <p className="text-[14px] font-[400] text-[#7a7676]">
               {FormattedDate(today)}
             </p>

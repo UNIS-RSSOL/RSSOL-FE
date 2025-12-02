@@ -14,6 +14,7 @@ import {
   fetchStoredata,
   updateMydata,
   updateStoredata,
+  fetchStoreList,
 } from "../../../services/owner/MyPageService.js";
 
 function OwnerPage() {
@@ -24,6 +25,7 @@ function OwnerPage() {
     (async () => {
       try {
         const my = await fetchMydata();
+
         const store = await fetchStoredata();
         const storeList = await fetchStoreList();
 
@@ -83,6 +85,7 @@ function OwnerPage() {
         ];
         setMydata(initialMydata);
         setStoredata(initialStoredata);
+        console.log(initialMydata);
       } catch (error) {
         console.error(error);
       }

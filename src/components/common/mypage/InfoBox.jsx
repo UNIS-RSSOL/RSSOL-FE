@@ -6,11 +6,12 @@ import ArrowIcon from "../../../assets/icons/ArrowIcon.jsx";
 
 function InfoBox({ head, myData, onDataUpdate }) {
   const [isEdit, setIsEdit] = useState(false);
-  const [tempData, setTempData] = useState([...myData]);
+  const [tempData, setTempData] = useState(myData);
   const navigate = useNavigate();
 
   useEffect(() => {
-    setTempData([...myData]);
+    setTempData(myData);
+    console.log(myData);
   }, [myData]);
 
   const handleUpdate = (title, newValue, id) => {

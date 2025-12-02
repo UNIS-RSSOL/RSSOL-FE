@@ -1,9 +1,9 @@
 /**
  * 카카오 로그인 서비스
- * 
+ *
  * ✨ 프론트엔드에서 직접 카카오 인증 URL을 생성합니다.
  * 백엔드는 카카오 콜백을 받아 토큰을 발급하고 프론트엔드로 리다이렉트합니다.
- * 
+ *
  * 플로우:
  * 1. 사용자가 카카오 로그인 버튼 클릭
  * 2. 프론트엔드가 카카오 인증 URL 생성 (redirect_uri: 백엔드 콜백 URL만 사용, 쿼리 파라미터 없음)
@@ -12,7 +12,7 @@
  * 5. 백엔드가 code를 받아서 카카오 토큰 교환 및 사용자 정보 처리
  * 6. 백엔드가 프론트엔드로 리다이렉트 (accessToken, refreshToken, userId 전달)
  * 7. 프론트엔드에서 토큰 저장 및 적절한 페이지로 이동
- * 
+ *
  * ⚠️ 중요: redirect_uri는 오직 백엔드 콜백 URL만 사용합니다.
  * 프론트엔드 URL을 쿼리 파라미터로 추가하면 KOE101 에러가 발생합니다.
  */
@@ -59,7 +59,7 @@ const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY);
 /**
  * 프론트엔드 콜백 URL을 생성합니다.
  * 환경에 따라 다른 URL을 반환합니다.
- * 
+ *
  * @returns {string} 프론트엔드 콜백 URL
  */
 const getFrontendCallbackUrl = () => {
@@ -70,7 +70,7 @@ const getFrontendCallbackUrl = () => {
 /**
  * 카카오 로그인을 시작합니다.
  * 프론트엔드에서 직접 카카오 인증 URL을 생성하여 이동합니다.
- * 
+ *
  * @param {Event} e - 이벤트 객체 (선택사항)
  */
 export const goToKakaoLogin = (e) => {
@@ -82,14 +82,16 @@ export const goToKakaoLogin = (e) => {
 
   // 카카오 클라이언트 ID 확인
   if (!KAKAO_CLIENT_ID || KAKAO_CLIENT_ID.trim() === "") {
-    console.error("❌ KAKAO_CLIENT_ID가 설정되지 않았습니다. 환경변수 VITE_KAKAO_CLIENT_ID를 확인하세요.");
+    console.error(
+      "❌ KAKAO_CLIENT_ID가 설정되지 않았습니다. 환경변수 VITE_KAKAO_CLIENT_ID를 확인하세요.",
+    );
     alert("카카오 로그인 설정 오류가 발생했습니다. 관리자에게 문의하세요.");
     return;
   }
 
   // 클라이언트 ID에 불필요한 문자 제거 (중괄호 등)
   const cleanClientId = KAKAO_CLIENT_ID.trim().replace(/[{}]/g, "");
-  
+
   if (!cleanClientId) {
     console.error("❌ KAKAO_CLIENT_ID가 유효하지 않습니다.");
     alert("카카오 로그인 설정 오류가 발생했습니다. 관리자에게 문의하세요.");
@@ -100,21 +102,23 @@ export const goToKakaoLogin = (e) => {
   // 프론트엔드 URL을 쿼리 파라미터로 추가하면 redirect_uri가 중첩되어 KOE101 에러가 발생합니다.
   // 백엔드 콜백 URL (쿼리 파라미터 없음)
   const backendCallbackUrl = `${BACKEND_BASE_URL}${BACKEND_CALLBACK_PATH}`;
-  
+
   // 카카오 인증 URL 생성
   // redirect_uri는 백엔드 콜백 URL만 사용 (프론트엔드 URL 절대 포함하지 않음)
   // prompt=login: 항상 로그인 화면을 보여줌 (기존 세션 무시)zzzzzzzzzzz
   const kakaoLoginUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${cleanClientId}&redirect_uri=${encodeURIComponent(backendCallbackUrl)}&response_type=code&prompt=login`;
-  
+
   console.log("🔐 카카오 로그인 시작");
   console.log("📋 설정 정보:", {
     clientId: cleanClientId.substring(0, 10) + "...", // 보안을 위해 일부만 표시
     backendCallbackUrl: backendCallbackUrl,
   });
   console.log("✅ redirect_uri는 백엔드 콜백 URL만 사용 (쿼리 파라미터 없음)");
-  console.log("⚠️ 카카오 개발자 콘솔에 다음 redirect_uri가 정확히 등록되어 있어야 합니다:");
+  console.log(
+    "⚠️ 카카오 개발자 콘솔에 다음 redirect_uri가 정확히 등록되어 있어야 합니다:",
+  );
   console.log(`   ${backendCallbackUrl}`);
-  
+
   // 카카오 인증 페이지로 이동
   window.location.href = kakaoLoginUrl;
 };

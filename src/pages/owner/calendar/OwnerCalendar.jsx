@@ -65,6 +65,7 @@ function OwnerCalendar() {
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
   const [needWorkers, setNeedWorkers] = useState(1);
   const [activeStore, setActiveStore] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [newTime, setNewTime] = useState({
     userStoreId: "",
     workerName: "",
@@ -162,7 +163,6 @@ function OwnerCalendar() {
   };
 
   const WorkersDropDown = () => {
-    const [dropdownOpen, setDropdownOpen] = useState(false);
     const [workers, setWorkers] = useState([]);
 
     useEffect(() => {
@@ -392,28 +392,6 @@ function OwnerCalendar() {
                     minuteStep="5"
                     placeholder=""
                     suffixIcon=""
-                    disabledTime={(current) => {
-                      if (!current) {
-                        return false;
-                      }
-                      const now = dayjs();
-                      if (current.isSame(now, "day")) {
-                        return {
-                          disabledHours: () =>
-                            Array.from({ length: now.hour() }, (_, i) => i),
-                          disabledMinutes: (selectedHour) => {
-                            if (selectedHour === now.hour()) {
-                              return Array.from(
-                                { length: now.minute() },
-                                (_, i) => i,
-                              );
-                            }
-                            return [];
-                          },
-                        };
-                      }
-                      return false;
-                    }}
                     needConfirm={false}
                     onChange={(e) =>
                       setNewTime({ ...newTime, start: dayjs(e) })
@@ -427,28 +405,6 @@ function OwnerCalendar() {
                     minuteStep="5"
                     placeholder=""
                     suffixIcon=""
-                    disabledTime={(current) => {
-                      if (!current) {
-                        return false;
-                      }
-                      const now = dayjs();
-                      if (current.isSame(now, "day")) {
-                        return {
-                          disabledHours: () =>
-                            Array.from({ length: now.hour() }, (_, i) => i),
-                          disabledMinutes: (selectedHour) => {
-                            if (selectedHour === now.hour()) {
-                              return Array.from(
-                                { length: now.minute() },
-                                (_, i) => i,
-                              );
-                            }
-                            return [];
-                          },
-                        };
-                      }
-                      return false;
-                    }}
                     needConfirm={false}
                     onChange={(e) => setNewTime({ ...newTime, end: dayjs(e) })}
                   />

@@ -8,13 +8,13 @@ import api from "./api.js";
 export const getDevToken = async (email) => {
   try {
     const response = await api.post("/api/auth/dev-token", { email });
-    
+
     // 디버깅: 응답 전체 구조 확인
     console.log("Dev token 응답 전체:", response.data);
-    
+
     // 다양한 응답 형식 지원
     let normalizedToken = null;
-    
+
     // 1. response.data가 직접 토큰 문자열인 경우
     if (typeof response.data === "string") {
       normalizedToken = response.data;
@@ -41,7 +41,10 @@ export const getDevToken = async (email) => {
 
     if (!normalizedToken) {
       console.error("토큰을 찾을 수 없습니다. 응답 구조:", response.data);
-      throw new Error("발급된 토큰을 확인할 수 없습니다. 응답: " + JSON.stringify(response.data));
+      throw new Error(
+        "발급된 토큰을 확인할 수 없습니다. 응답: " +
+          JSON.stringify(response.data),
+      );
     }
 
     return {
@@ -142,3 +145,13 @@ export const onboardingOwner = async (
     throw error;
   }
 };
+
+//로그아웃
+export async function logout() {
+  try {
+    const response = await api.post("/api/auth/logout");
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+}

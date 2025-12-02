@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { onboardingOwner, onboardingStaff } from "../../services/authService.js";
+import {
+  onboardingOwner,
+  onboardingStaff,
+} from "../../services/authService.js";
 import character4 from "../../assets/images/character4.png";
 import character2 from "../../assets/images/character2.png";
 
@@ -32,11 +35,11 @@ export default function Onboarding() {
   useEffect(() => {
     const savedRole = localStorage.getItem(ONBOARDING_ROLE_KEY);
     const savedData = localStorage.getItem(ONBOARDING_DATA_KEY);
-    
+
     if (savedRole) {
       setRole(savedRole);
     }
-    
+
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
@@ -64,17 +67,23 @@ export default function Onboarding() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setError("");
-    
+
     // Validation 체크
     if (name === "storePhone") {
       if (value.length > 0 && value.length <= 7) {
-        setErrors((prev) => ({ ...prev, storePhone: "*최소 8자리부터 입력가능합니다" }));
+        setErrors((prev) => ({
+          ...prev,
+          storePhone: "*최소 8자리부터 입력가능합니다",
+        }));
       } else {
         setErrors((prev) => ({ ...prev, storePhone: "" }));
       }
     } else if (name === "businessNumber") {
       if (value.length > 0 && value.length !== 10) {
-        setErrors((prev) => ({ ...prev, businessNumber: "*총 10자리를 입력해주세요." }));
+        setErrors((prev) => ({
+          ...prev,
+          businessNumber: "*총 10자리를 입력해주세요.",
+        }));
       } else {
         setErrors((prev) => ({ ...prev, businessNumber: "" }));
       }
@@ -89,7 +98,8 @@ export default function Onboarding() {
 
     if (step === 2) {
       if (role === "owner") {
-        const { storeName, storeAddress, storePhone, businessNumber } = formData;
+        const { storeName, storeAddress, storePhone, businessNumber } =
+          formData;
         if (!storeName || !storeAddress || !storePhone || !businessNumber) {
           alert("모든 정보를 입력해주세요.");
           return;
@@ -99,12 +109,19 @@ export default function Onboarding() {
         setIsLoading(true);
         setError("");
         try {
-          await onboardingOwner(storeName, storeAddress, storePhone, businessNumber);
+          await onboardingOwner(
+            storeName,
+            storeAddress,
+            storePhone,
+            businessNumber,
+          );
           // 성공 시 사장님 홈으로 이동
           navigate("/owner");
         } catch (err) {
           console.error("온보딩(사장님) 실패:", err);
-          setError(err.response?.data?.message || "온보딩 등록에 실패했습니다.");
+          setError(
+            err.response?.data?.message || "온보딩 등록에 실패했습니다.",
+          );
         } finally {
           setIsLoading(false);
         }
@@ -131,13 +148,15 @@ export default function Onboarding() {
           navigate("/employee");
         } catch (err) {
           console.error("온보딩(알바생) 실패:", err);
-          setError(err.response?.data?.message || "온보딩 등록에 실패했습니다.");
+          setError(
+            err.response?.data?.message || "온보딩 등록에 실패했습니다.",
+          );
         } finally {
           setIsLoading(false);
         }
         return;
       }
-      
+
       // 최종 데이터 localStorage에 저장
       localStorage.setItem(ONBOARDING_ROLE_KEY, role);
       localStorage.setItem(ONBOARDING_DATA_KEY, JSON.stringify(formData));
@@ -160,7 +179,8 @@ export default function Onboarding() {
       return role !== null;
     } else if (step === 2) {
       if (role === "owner") {
-        const { storeName, storeAddress, storePhone, businessNumber } = formData;
+        const { storeName, storeAddress, storePhone, businessNumber } =
+          formData;
         return (
           storeName &&
           storeAddress &&
@@ -179,7 +199,6 @@ export default function Onboarding() {
 
   return (
     <div className="w-full min-h-screen bg-white flex flex-col items-center py-10 px-4 font-Pretendard">
-  
       {/* 상단 이전 버튼 */}
       <button
         onClick={handleBack}
@@ -187,7 +206,7 @@ export default function Onboarding() {
       >
         이전
       </button>
-  
+
       {/* 컨텐츠 영역 */}
       <div className="w-full max-w-[360px] mt-8 flex flex-col items-center px-4">
         {error && (
@@ -195,13 +214,15 @@ export default function Onboarding() {
             {error}
           </div>
         )}
-  
+
         {/* --- STEP CONTENT --- */}
         {step === 1 && (
           <>
             <h2 className="text-3xl font-bold mb-2 w-full text-left">회원님</h2>
-            <p className="text-base mb-6 w-full text-left">계정 유형을 선택해주세요</p>
-  
+            <p className="text-base mb-6 w-full text-left">
+              계정 유형을 선택해주세요
+            </p>
+
             <div className="flex flex-col gap-4 w-full">
               <button
                 onClick={() => setRole("owner")}
@@ -209,10 +230,16 @@ export default function Onboarding() {
                   role === "owner" ? "bg-blue-500 text-black" : "bg-white"
                 }`}
               >
-                <img src={character4} alt="사장님 캐릭터" className="w-16 h-16 object-contain" />
+                <img
+                  src={character4}
+                  alt="사장님 캐릭터"
+                  className="w-16 h-16 object-contain"
+                />
                 <div className="flex flex-col items-start">
                   <p className="text-base font-bold text-left">사장님</p>
-                  <p className="text-sm text-left">매장 및 직원 관리를 할 수 있어요!</p>
+                  <p className="text-sm text-left">
+                    매장 및 직원 관리를 할 수 있어요!
+                  </p>
                 </div>
               </button>
 
@@ -222,28 +249,52 @@ export default function Onboarding() {
                   role === "employee" ? "bg-[#68E194] text-black" : "bg-white"
                 }`}
               >
-                <img src={character2} alt="알바생 캐릭터" className="w-16 h-16 object-contain" />
+                <img
+                  src={character2}
+                  alt="알바생 캐릭터"
+                  className="w-16 h-16 object-contain"
+                />
                 <div className="flex flex-col items-start">
                   <p className="text-base font-bold text-left">알바생</p>
-                  <p className="text-sm text-left">월급 확인과 대타 신청을 할 수 있어요!</p>
+                  <p className="text-sm text-left">
+                    월급 확인과 대타 신청을 할 수 있어요!
+                  </p>
                 </div>
               </button>
             </div>
           </>
         )}
-  
+
         {/* STEP 2 - Owner */}
         {step === 2 && role === "owner" && (
           <>
             <h2 className="text-3xl font-bold mb-2 w-full text-left">회원님</h2>
-            <p className="text-base mb-6 w-full text-left">매장 정보를 입력해주세요</p>
-  
+            <p className="text-base mb-6 w-full text-left">
+              매장 정보를 입력해주세요
+            </p>
+
             <div className="flex flex-col gap-4 w-full">
               {[
-                { label: "매장 이름", name: "storeName", placeholder: "매장 이름을 입력해주세요." },
-                { label: "매장 주소", name: "storeAddress", placeholder: "매장 주소를 입력해주세요." },
-                { label: "매장 전화번호", name: "storePhone", placeholder: "매장 전화번호를 입력해주세요." },
-                { label: "사업자 등록 번호", name: "businessNumber", placeholder: "사업자 등록 번호를 입력해주세요." },
+                {
+                  label: "매장 이름",
+                  name: "storeName",
+                  placeholder: "매장 이름을 입력해주세요.",
+                },
+                {
+                  label: "매장 주소",
+                  name: "storeAddress",
+                  placeholder: "매장 주소를 입력해주세요.",
+                },
+                {
+                  label: "매장 전화번호",
+                  name: "storePhone",
+                  placeholder: "매장 전화번호를 입력해주세요.",
+                },
+                {
+                  label: "사업자 등록 번호",
+                  name: "businessNumber",
+                  placeholder: "사업자 등록 번호를 입력해주세요.",
+                },
               ].map((item) => (
                 <div key={item.name} className="flex flex-col">
                   <p className="text-sm mb-1 text-left">{item.label}</p>
@@ -255,17 +306,21 @@ export default function Onboarding() {
                     className="border p-2 rounded-lg w-full"
                   />
                   {item.name === "storePhone" && errors.storePhone && (
-                    <p className="text-[10px] text-[#f74a4a] text-left mt-1">{errors.storePhone}</p>
+                    <p className="text-[10px] text-[#f74a4a] text-left mt-1">
+                      {errors.storePhone}
+                    </p>
                   )}
                   {item.name === "businessNumber" && errors.businessNumber && (
-                    <p className="text-[10px] text-[#f74a4a] text-left mt-1">{errors.businessNumber}</p>
+                    <p className="text-[10px] text-[#f74a4a] text-left mt-1">
+                      {errors.businessNumber}
+                    </p>
                   )}
                 </div>
               ))}
             </div>
           </>
         )}
-  
+
         {/* STEP 2 - Employee */}
         {step === 2 && role === "employee" && (
           <>
@@ -273,7 +328,7 @@ export default function Onboarding() {
             <p className="text-base mb-6 w-full text-left">
               매장 정보, 급여 계좌 정보를 등록해주세요
             </p>
-  
+
             <div className="flex flex-col gap-4 w-full">
               <div>
                 <p className="text-sm mb-1 text-left">매장 등록번호</p>
@@ -285,7 +340,7 @@ export default function Onboarding() {
                   className="border p-2 rounded-lg w-full"
                 />
               </div>
-  
+
               <div>
                 <p className="text-sm mb-1 text-left">은행 ID</p>
                 <input
@@ -297,7 +352,7 @@ export default function Onboarding() {
                   className="border p-2 rounded-lg w-full"
                 />
               </div>
-  
+
               <div>
                 <p className="text-sm mb-1 text-left">계좌번호</p>
                 <input
@@ -311,7 +366,7 @@ export default function Onboarding() {
             </div>
           </>
         )}
-  
+
         {/* --- Bottom Fixed Button --- */}
         <div className="w-full sticky bottom-0 bg-white pt-6 pb-4">
           <button
@@ -321,8 +376,7 @@ export default function Onboarding() {
             {step === 2 ? "입력 완료" : "선택 완료"}
           </button>
         </div>
-  
       </div>
     </div>
   );
-}  
+}
