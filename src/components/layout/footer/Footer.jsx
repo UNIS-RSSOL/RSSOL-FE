@@ -6,6 +6,7 @@ import FooterMenu from "./FooterMenu.jsx";
 import { HomeIcon, SelectedHomeIcon } from "../../../assets/icons/HomeIcon.jsx";
 import { CalIcon, SelectedCalIcon } from "../../../assets/icons/CalIcon.jsx";
 import { EditIcon, SelectedEditIcon } from "../../../assets/icons/EditIcon.jsx";
+import { CoinIcon, SelectedCoinIcon } from "../../../assets/icons/CoinIcon.jsx";
 import {
   MypageIcon,
   SelectedMypageIcon,
@@ -37,6 +38,8 @@ function Footer() {
       setSelectedMenu("캘린더");
     } else if (path.includes("mypage")) {
       setSelectedMenu("마이페이지");
+    } else if (path.includes("manage")) {
+      setSelectedMenu("관리");
     } else {
       setSelectedMenu("홈");
     }
@@ -86,22 +89,42 @@ function Footer() {
           }}
         />
       )}
-      {selectedMenu === "직원관리" ? (
+      {role === "owner" ? (
+        selectedMenu === "관리" ? (
+          <FooterMenu
+            MenuIcon={<SelectedEditIcon />}
+            title="직원관리"
+            onClick={() => {
+              handleMenuClick("관리");
+              navigate("/owner/manage");
+            }}
+          />
+        ) : (
+          <FooterMenu
+            MenuIcon={<EditIcon />}
+            title="직원관리"
+            onClick={() => {
+              handleMenuClick("관리");
+              navigate("/owner/manage");
+            }}
+          />
+        )
+      ) : selectedMenu === "관리" ? (
         <FooterMenu
-          MenuIcon={<SelectedEditIcon />}
-          title="직원관리"
+          MenuIcon={<SelectedCoinIcon />}
+          title="급여관리"
           onClick={() => {
-            handleMenuClick("직원관리");
-            navigate(`/${role}/manage`);
+            handleMenuClick("관리");
+            navigate("/employee/manage");
           }}
         />
       ) : (
         <FooterMenu
-          MenuIcon={<EditIcon />}
-          title="직원관리"
+          MenuIcon={<CoinIcon />}
+          title="급여관리"
           onClick={() => {
-            handleMenuClick("직원관리");
-            navigate(`/${role}/manage`);
+            handleMenuClick("관리");
+            navigate("/employee/manage");
           }}
         />
       )}
