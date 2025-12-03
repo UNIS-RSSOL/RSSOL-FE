@@ -153,7 +153,7 @@ function App() {
     "/", "/login", "/onboarding", "/auth/kakao/callback",
     "/calAdd", "/calGen", "/autoCal", "/calAddEmp", "/calModEmp",
     "/addOwner", "/scheduleList", "/alarmHomeEmp",
-    "/alarmHome", "/alarmCheck"
+    "/alarmHome", "/alarmCheck", "/scheduleList"
   ];
 
   const hideLayout = hideLayoutPages.some((p) =>

@@ -65,23 +65,61 @@ export async function fetchAllWorkers() {
 }
 
 // 특정 직원의 work availability 조회 (사장용)
-// API 엔드포인트가 정확하지 않을 수 있으므로, Swagger 문서 확인 필요
-// 대안: /api/store/availabilities 또는 /api/store/staff/availabilities
-export async function fetchEmployeeAvailabilities(userId) {
+// staffId를 사용하여 조회 (백엔드 API 스펙에 맞춤)
+export async function fetchEmployeeAvailabilities(staffId) {
+  if (!staffId) {
+    const error = new Error("staffId가 없습니다.");
+    console.error("❌ fetchEmployeeAvailabilities:", error.message, { staffId });
+    throw error;
+  }
+
   try {
-    // 먼저 /api/store/staff/{userId}/availabilities 시도
-    const response = await api.get(`/api/store/staff/${userId}/availabilities`);
-    return response.data;
+    // 디버깅: 요청 정보 로깅
+    console.log(`🔍 [API 요청] 직원 근무 가능 시간 조회:`, {
+      endpoint: `/api/store/staff/${staffId}/availabilities`,
+      staffId,
+      fullURL: `${api.defaults.baseURL}/api/store/staff/${staffId}/availabilities`,
+    });
+
+    const response = await api.get(`/api/store/staff/${staffId}/availabilities`);
+    
+    // 디버깅: 성공 응답 로깅
+    console.log(`✅ [API 성공] 직원 근무 가능 시간 조회:`, {
+      staffId,
+      dataCount: Array.isArray(response.data) ? response.data.length : 0,
+      data: response.data,
+    });
+
+    return response.data || [];
   } catch (error) {
-    // 다른 엔드포인트 시도
-    try {
-      const response = await api.get(`/api/store/availabilities`, {
-        params: { userId },
+    // 디버깅: 상세 에러 로깅
+    console.error(`🚨 [API 실패] 직원 ID:${staffId} 근무 가능시간 요청 실패:`, {
+      staffId,
+      endpoint: `/api/store/staff/${staffId}/availabilities`,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      errorData: error.response?.data,
+      errorMessage: error.message,
+    });
+
+    // 500 에러인 경우 상세 정보 출력
+    if (error.response?.status === 500) {
+      console.error("⚠️ [서버 500 에러 상세]:", {
+        requestURL: error.config?.url,
+        requestMethod: error.config?.method,
+        requestHeaders: error.config?.headers,
+        responseData: error.response?.data,
+        // 백엔드 개발자에게 전달할 수 있도록 상세 정보
+        serverError: {
+          message: error.response?.data?.message || "서버 내부 오류",
+          timestamp: new Date().toISOString(),
+          path: error.config?.url,
+          method: error.config?.method?.toUpperCase(),
+        },
       });
-      return response.data;
-    } catch (error2) {
-      console.error("직원 근무 가능 시간 조회 실패:", error2);
-      return [];
     }
+
+    // ❗ 에러를 그대로 throw하여 호출하는 쪽에서 처리할 수 있도록 함
+    throw error;
   }
 }
