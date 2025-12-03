@@ -50,8 +50,8 @@ function ManageStore() {
           <p className="text-[18px] font-[600] text-left">{store.name}</p>
           <DeleteIcon
             onClick={() => {
-              setDeleteModal(true);
               setDeletedStore(store);
+              setDeleteModal(true);
             }}
           />
         </div>
@@ -64,7 +64,7 @@ function ManageStore() {
     try {
       await deleteStore(deletedStore.storeId);
       setDeleteModal(false);
-      setDeletedStore("");
+      setDeletedStore(null);
     } catch (error) {
       console.error(error);
     }

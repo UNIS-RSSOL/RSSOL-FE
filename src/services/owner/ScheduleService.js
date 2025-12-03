@@ -42,7 +42,7 @@ export async function requestSub(shiftId, reason = "") {
 //추가인력요청
 export async function requestWork(shiftId, headCount, note = "") {
   try {
-    const response = await api.post("/api/staffing/requests", {
+    const response = await api.post("/api/extra-shift/requests", {
       shiftId: shiftId,
       headcount: headCount,
       note: note,
@@ -66,19 +66,21 @@ export async function fetchAllWorkers() {
 
 /**
  * 특정 직원의 근무 가능 시간 조회 (사장용 API)
- * 
+ *
  * @param {number} staffId - 조회할 직원의 staffId
  * @returns {Promise<Array>} - 근무 가능 시간 배열
- * 
+ *
  * API 엔드포인트: GET /api/store/staff/{staffId}/availabilities
- * 
+ *
  * 사장(Owner) 권한에서 사용하는 API입니다.
  * 직원 페이지에서는 /api/me/availabilities를 사용합니다.
  */
 export async function fetchEmployeeAvailabilities(staffId) {
   if (!staffId) {
     const error = new Error("staffId가 없습니다.");
-    console.error("❌ fetchEmployeeAvailabilities:", error.message, { staffId });
+    console.error("❌ fetchEmployeeAvailabilities:", error.message, {
+      staffId,
+    });
     throw error;
   }
 
@@ -90,8 +92,10 @@ export async function fetchEmployeeAvailabilities(staffId) {
       fullURL: `${api.defaults.baseURL}/api/store/staff/${staffId}/availabilities`,
     });
 
-    const response = await api.get(`/api/store/staff/${staffId}/availabilities`);
-    
+    const response = await api.get(
+      `/api/store/staff/${staffId}/availabilities`,
+    );
+
     // 디버깅: 성공 응답 로깅
     console.log(`✅ [API 성공] 직원 근무 가능 시간 조회:`, {
       staffId,
