@@ -64,8 +64,17 @@ export async function fetchAllWorkers() {
   }
 }
 
-// 특정 직원의 work availability 조회 (사장용)
-// staffId를 사용하여 조회 (백엔드 API 스펙에 맞춤)
+/**
+ * 특정 직원의 근무 가능 시간 조회 (사장용 API)
+ * 
+ * @param {number} staffId - 조회할 직원의 staffId
+ * @returns {Promise<Array>} - 근무 가능 시간 배열
+ * 
+ * API 엔드포인트: GET /api/store/staff/{staffId}/availabilities
+ * 
+ * 사장(Owner) 권한에서 사용하는 API입니다.
+ * 직원 페이지에서는 /api/me/availabilities를 사용합니다.
+ */
 export async function fetchEmployeeAvailabilities(staffId) {
   if (!staffId) {
     const error = new Error("staffId가 없습니다.");

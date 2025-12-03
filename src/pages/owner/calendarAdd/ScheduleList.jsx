@@ -81,13 +81,13 @@ function ScheduleList() {
         setWorkers(storeWorkers);
 
         // 각 직원의 work availability 가져오기
+        // 사장용 API: GET /api/store/staff/{staffId}/availabilities 사용
         const schedulesByWorker = {};
         const errorsByWorker = {};
         
         // 각 직원의 work availability를 병렬로 가져오기
         const availabilityPromises = storeWorkers.map(async (worker) => {
-          // 백엔드 API가 staffId를 요구하는지 확인 필요
-          // 일반적으로 userStoreId가 staffId와 동일할 가능성이 높음
+          // 사장용 API는 staffId를 사용하여 특정 직원의 근무 가능 시간을 조회합니다
           const staffId = worker.staffId || worker.userStoreId || worker.id || worker.userId;
           const workerName = worker.name || worker.username || '이름없음';
           
