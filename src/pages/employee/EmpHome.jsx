@@ -6,18 +6,26 @@ import CheckIcon from "../../assets/icons/CheckIcon.jsx";
 import GreenBtn from "../../components/common/GreenBtn.jsx";
 import { useEffect, useState } from "react";
 import character2 from "../../assets/images/character2.png";
+import StoreIcon from "../../assets/icons/StoreIcon.jsx";
 import character3 from "../../assets/images/character3.png";
 import { fetchSchedules } from "../../services/employee/ScheduleService.js";
-import { fetchWage } from "../../services/employee/WageService.js";
-import { fetchActiveStore } from "../../services/employee/MyPageService.js";
+import {
+  fetchActiveStore,
+  fetchMydata,
+  fetchStoreList,
+  changeActiveStore,
+} from "../../services/employee/MyPageService.js";
 import dayjs from "dayjs";
+import { motion, AnimatePresence } from "framer-motion";
 
 function EmpHome() {
   const [currentTime, setCurrentTime] = useState("");
   const today = dayjs();
   const firstDay = today.format("YYYY.MM.") + "01";
   const [wage, setWage] = useState(0);
-  const [activeStore, setActiveStore] = useState({ id: 0, name: "서브웨이" });
+  const [activeStore, setActiveStore] = useState({ id: null, name: "" });
+  const [username, setUsername] = useState();
+
   const [todo, setTodo] = useState([]);
 
   const FormattedDate = (date, day) => {
@@ -37,6 +45,8 @@ function EmpHome() {
           start: dayjs(s.startDatetime).format("HH:mm"),
           end: dayjs(s.endDatetime).format("HH:mm"),
         }));
+        const my = await fetchMydata();
+        setUsername(my.username);
         setTodo(td);
 
         const active = await fetchActiveStore();
@@ -44,11 +54,6 @@ function EmpHome() {
           storeId: active.storeId,
           name: active.name,
         });
-        const wageRes = await fetchWage(
-          active.storeId,
-          today.format("YYYY-MM"),
-        );
-        setWage(wageRes.total_pay);
       } catch (error) {
         console.error(error);
       }
@@ -66,6 +71,80 @@ function EmpHome() {
     return () => clearInterval(intervalId);
   }, []);
 
+  const FloatButton = () => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [storeList, setStoreList] = useState([]);
+
+    useEffect(() => {
+      (async () => {
+        try {
+          const response = await fetchStoreList();
+
+          const stores = response.map((r) => ({
+            storeId: r.storeId,
+            name: r.name,
+          }));
+
+          setStoreList(stores);
+        } catch (error) {
+          console.error(error);
+        }
+      })();
+    }, [activeStore]);
+
+    const handleChangeActive = async (storeId) => {
+      try {
+        const response = await changeActiveStore(storeId);
+        setActiveStore({ storeId: response.storeId, name: response.name });
+        setIsOpen(false);
+        console.log({ storeId: response.storeId, name: response.name });
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    return (
+      <div className="fixed bottom-[80px] right-[calc(50%-196.5px+24px)] flex flex-col items-end gap-3">
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.2 }}
+              className="flex flex-col gap-3"
+            >
+              {storeList.map((store) => (
+                <motion.div
+                  key={store.storeId}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`flex items-center justify-center text-[10px] font-[500] size-[48px] rounded-full bg-white border-2 shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] cursor-pointer ${
+                    Number(store.storeId) === Number(activeStore?.storeId)
+                      ? "border-[#68e194]"
+                      : "border-black"
+                  }`}
+                  onClick={() => handleChangeActive(store.storeId)}
+                >
+                  {store.name}
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <motion.div
+          whileHover={{ scale: 1.05, backgroundColor: "#fff" }}
+          whileTap={{ scale: 0.95 }}
+          className="flex items-center justify-center size-[48px] rounded-full bg-[#68e194] shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] cursor-pointer"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <StoreIcon className={isOpen ? "text-[#68e194]" : "text-white"} />
+        </motion.div>
+      </div>
+    );
+  };
+
   return (
     <div className="w-full flex flex-col py-7 px-5 ">
       <div className="w-full flex flex-col items-start">
@@ -73,7 +152,9 @@ function EmpHome() {
           {FormattedDate(today, true)}
         </div>
         <div className="flex items-center mt-2">
-          <p className="text-[24px] font-[600] my-1">홍길동님 오늘의 일정은?</p>
+          <p className="text-[24px] font-[600] my-1">
+            {username}님 오늘의 일정은?
+          </p>
           <ColoredCalIcon />
         </div>
         <p className="text-[16px] font-[400] mt-2">
@@ -147,6 +228,7 @@ function EmpHome() {
           <img src={character3} alt="character" className="size-[110px] mr-1" />
         </Box>
       </div>
+      <FloatButton />
     </div>
   );
 }

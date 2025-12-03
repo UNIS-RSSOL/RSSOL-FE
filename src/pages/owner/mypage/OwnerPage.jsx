@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import InfoBox from "../../../components/common/mypage/InfoBox.jsx";
 import { MypageIcon } from "../../../assets/icons/MypageIcon.jsx";
 import MsgIcon from "../../../assets/icons/MsgIcon.jsx";
-import CoinIcon from "../../../assets/icons/CoinIcon.jsx";
+import { CoinIcon } from "../../../assets/icons/CoinIcon.jsx";
 import SaveIcon from "../../../assets/icons/SaveIcon.jsx";
 import TypeIcon from "../../../assets/icons/TypeIcon.jsx";
 import MapIcon from "../../../assets/icons/MapIcon.jsx";
 import PhoneIcon from "../../../assets/icons/PhoneIcon.jsx";
 import NoteIcon from "../../../assets/icons/NoteIcon.jsx";
-import character1 from "../../../assets/images/character1.png";
+import character from "../../../assets/images/OwnerBtn.png";
+
 import {
   fetchMydata,
   fetchStoredata,
@@ -16,16 +18,19 @@ import {
   updateStoredata,
   fetchStoreList,
 } from "../../../services/owner/MyPageService.js";
+import { logout } from "../../../services/authService.js";
 
 function OwnerPage() {
+  const navigate = useNavigate();
   const [mydata, setMydata] = useState([]);
   const [storedata, setStoredata] = useState([]);
+  const [profile, setProfile] = useState("");
 
   useEffect(() => {
     (async () => {
       try {
         const my = await fetchMydata();
-
+        setProfile(my.profileImageUrl);
         const store = await fetchStoredata();
         const storeList = await fetchStoreList();
 
@@ -90,28 +95,46 @@ function OwnerPage() {
         console.error(error);
       }
     })();
-  }, [mydata, storedata]);
+  }, []);
 
   //내정보수정
   const handleMyDataUpdate = async (updatedData) => {
-    setMydata(updatedData);
-    await updateMydata(
-      updatedData[0].content,
-      updatedData[1].content,
-      updatedData[2].content,
-    );
-    console.log(updatedData);
+    try {
+      setMydata(updatedData);
+      await updateMydata(
+        updatedData[0].content,
+        updatedData[1].content,
+        updatedData[2].content,
+      );
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   //가게정보 수정
   const handleStoreDataUpdate = async (updatedData) => {
-    setStoredata(updatedData);
-    await updateStoredata(
-      updatedData[1].content,
-      updatedData[2].content,
-      updatedData[3].content,
-    );
-    console.log(updatedData);
+    try {
+      setStoredata(updatedData);
+      await updateStoredata(
+        updatedData[1].content,
+        updatedData[2].content,
+        updatedData[3].content,
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  //로그아웃
+  const handleLogout = async () => {
+    try {
+      await logout();
+      alert("로그아웃 되었습니다.");
+      navigate("/");
+    } catch (error) {
+      alert("로그아웃 실패:", error);
+      navigate("/");
+    }
   };
 
   //이메일 체크
@@ -138,9 +161,13 @@ function OwnerPage() {
   return (
     <div className="flex flex-col divide-y-8 divide-[#e7eaf3]">
       <div className="flex items-center justify-center">
-        <div className="flex items-center justify-center size-[130px] bg-[#68e194] border-3 border-[#fdfffe] shadow-[0_4px_8px_0_rgba(0,0,0,0.2)] overflow-hidden rounded-full my-7">
-          <img src={character1} alt="profile" />
-        </div>
+        {profile === "" ? (
+          <img src={character} alt="profile" className="size-[150px] my-5" />
+        ) : (
+          <div className="flex items-center justify-center size-[130px] bg-[#68e194] border-3 border-[#fdfffe] shadow-[0_4px_8px_0_rgba(0,0,0,0.2)] overflow-hidden rounded-full my-7">
+            <img src={profile} alt="profile" />
+          </div>
+        )}
       </div>
       <InfoBox
         head="내 정보"
@@ -148,10 +175,19 @@ function OwnerPage() {
         onDataUpdate={handleMyDataUpdate}
       />
       <InfoBox
+        role="owner"
         head="가게 정보"
         myData={storedata}
         onDataUpdate={handleStoreDataUpdate}
       />
+      <div className="flex items-center justify-center py-5">
+        <p
+          className="text-[12px]/[12px] font-[400] border-b border-black hover:text-[#68e194] hover:border-[#68e194] transition-colors duration-100 cursor-pointer"
+          onClick={handleLogout}
+        >
+          로그아웃
+        </p>
+      </div>
     </div>
   );
 }

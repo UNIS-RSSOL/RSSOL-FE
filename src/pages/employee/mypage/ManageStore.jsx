@@ -40,7 +40,7 @@ function ManageStore() {
         console.error(error);
       }
     })();
-  }, []);
+  }, [addToast, deleteModal]);
 
   const StoreItem = ({ index, store }) => {
     return (
@@ -50,8 +50,8 @@ function ManageStore() {
           <p className="text-[18px] font-[600] text-left">{store.name}</p>
           <DeleteIcon
             onClick={() => {
-              setDeleteModal(true);
               setDeletedStore(store);
+              setDeleteModal(true);
             }}
           />
         </div>
@@ -64,7 +64,7 @@ function ManageStore() {
     try {
       await deleteStore(deletedStore.storeId);
       setDeleteModal(false);
-      setDeletedStore("");
+      setDeletedStore(null);
     } catch (error) {
       console.error(error);
     }
@@ -74,13 +74,10 @@ function ManageStore() {
   const handleAddStore = async () => {
     try {
       console.log(newStore);
-      const response = await addStore(newStore.content);
-      if (response.success) {
-        setAddToast(false);
-        setSuccessModal(true);
-      } else {
-        setFailModal(true);
-      }
+      await addStore(newStore.content);
+      setAddToast(false);
+      setSuccessModal(true);
+
       setNewStore([
         {
           icon: <SaveIcon />,
@@ -90,6 +87,7 @@ function ManageStore() {
       ]);
     } catch (error) {
       console.error(error);
+      setFailModal(true);
     }
   };
 

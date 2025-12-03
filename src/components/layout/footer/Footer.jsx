@@ -6,10 +6,12 @@ import FooterMenu from "./FooterMenu.jsx";
 import { HomeIcon, SelectedHomeIcon } from "../../../assets/icons/HomeIcon.jsx";
 import { CalIcon, SelectedCalIcon } from "../../../assets/icons/CalIcon.jsx";
 import { EditIcon, SelectedEditIcon } from "../../../assets/icons/EditIcon.jsx";
+import { CoinIcon, SelectedCoinIcon } from "../../../assets/icons/CoinIcon.jsx";
 import {
   MypageIcon,
   SelectedMypageIcon,
 } from "../../../assets/icons/MypageIcon.jsx";
+import { fetchActiveStore } from "../../../services/owner/MyPageService.js";
 
 function Footer() {
   const navigate = useNavigate();
@@ -18,22 +20,27 @@ function Footer() {
   const [role, setRole] = useState(null);
 
   useEffect(() => {
-    r = localStorage.getItem(ONBOARDING_ROLE_KEY);
-    setRole(r);
+    (async () => {
+      try {
+        const response = await fetchActiveStore();
+        const r = response.position;
+        if (r === "OWNER") setRole("owner");
+        else setRole("employee");
+      } catch (error) {
+        console.error(error);
+      }
+    })();
   }, []);
 
   useEffect(() => {
     const path = location.pathname;
-    if (path === `/${role}/mypage` || path === `/${role}/mypage/managestore`) {
-      setSelectedMenu("마이페이지");
-    } else if (path.includes(`/${role}/calendar`)) {
+    if (path.includes("calendar")) {
       setSelectedMenu("캘린더");
-    } else if (
-      path.includes("/owner/manage") ||
-      path.includes("/employee/manage")
-    ) {
-      setSelectedMenu("직원관리");
-    } else if (path.includes(`/${role}`)) {
+    } else if (path.includes("mypage")) {
+      setSelectedMenu("마이페이지");
+    } else if (path.includes("manage")) {
+      setSelectedMenu("관리");
+    } else {
       setSelectedMenu("홈");
     }
   }, [location.pathname]);
@@ -82,22 +89,42 @@ function Footer() {
           }}
         />
       )}
-      {selectedMenu === "직원관리" ? (
+      {role === "owner" ? (
+        selectedMenu === "관리" ? (
+          <FooterMenu
+            MenuIcon={<SelectedEditIcon />}
+            title="직원관리"
+            onClick={() => {
+              handleMenuClick("관리");
+              navigate("/owner/manage");
+            }}
+          />
+        ) : (
+          <FooterMenu
+            MenuIcon={<EditIcon />}
+            title="직원관리"
+            onClick={() => {
+              handleMenuClick("관리");
+              navigate("/owner/manage");
+            }}
+          />
+        )
+      ) : selectedMenu === "관리" ? (
         <FooterMenu
-          MenuIcon={<SelectedEditIcon />}
-          title="직원관리"
+          MenuIcon={<SelectedCoinIcon />}
+          title="급여관리"
           onClick={() => {
-            handleMenuClick("직원관리");
-            navigate(`/${role}/manage`);
+            handleMenuClick("관리");
+            navigate("/employee/manage");
           }}
         />
       ) : (
         <FooterMenu
-          MenuIcon={<EditIcon />}
-          title="직원관리"
+          MenuIcon={<CoinIcon />}
+          title="급여관리"
           onClick={() => {
-            handleMenuClick("직원관리");
-            navigate(`/${role}/manage`);
+            handleMenuClick("관리");
+            navigate("/employee/manage");
           }}
         />
       )}

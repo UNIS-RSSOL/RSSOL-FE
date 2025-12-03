@@ -8,13 +8,14 @@ import api from "./api.js";
 export const getDevToken = async (email) => {
   try {
     const response = await api.post("/api/auth/dev-token", { email });
-    
+
     // 디버깅: 응답 전체 구조 확인
     console.log("Dev token 응답 전체:", response.data);
-    
+
     // 다양한 응답 형식 지원
     let normalizedToken = null;
-    
+    let normalizedRefreshToken = null;
+
     // 1. response.data가 직접 토큰 문자열인 경우
     if (typeof response.data === "string") {
       normalizedToken = response.data;
@@ -22,6 +23,7 @@ export const getDevToken = async (email) => {
     // 2. response.data.accessToken인 경우 (카카오 로그인과 동일한 형식)
     else if (response.data?.accessToken) {
       normalizedToken = response.data.accessToken;
+      normalizedRefreshToken = response.data.refreshToken || null;
     }
     // 3. response.data.data가 토큰인 경우
     else if (response.data?.data) {
@@ -30,23 +32,30 @@ export const getDevToken = async (email) => {
         normalizedToken = rawData;
       } else if (rawData?.accessToken) {
         normalizedToken = rawData.accessToken;
+        normalizedRefreshToken = rawData.refreshToken || null;
       } else if (rawData?.token) {
         normalizedToken = rawData.token;
+        normalizedRefreshToken = rawData.refreshToken || null;
       }
     }
     // 4. response.data.token인 경우
     else if (response.data?.token) {
       normalizedToken = response.data.token;
+      normalizedRefreshToken = response.data.refreshToken || null;
     }
 
     if (!normalizedToken) {
       console.error("토큰을 찾을 수 없습니다. 응답 구조:", response.data);
-      throw new Error("발급된 토큰을 확인할 수 없습니다. 응답: " + JSON.stringify(response.data));
+      throw new Error(
+        "발급된 토큰을 확인할 수 없습니다. 응답: " +
+          JSON.stringify(response.data),
+      );
     }
 
     return {
       success: true,
       data: normalizedToken,
+      refreshToken: normalizedRefreshToken,
       message: response.data?.message || "",
     };
   } catch (error) {
@@ -63,6 +72,7 @@ export const getDevToken = async (email) => {
  * @param {string} storeCode
  * @param {number} bankId
  * @param {string} accountNumber
+ * @param {string} hireDate
  * @returns {Promise<{
  *   userId: number;
  *   userStoreId: number;
@@ -79,13 +89,19 @@ export const getDevToken = async (email) => {
  *   accountNumber: string;
  * }>}
  */
-export const onboardingStaff = async (storeCode, bankId, accountNumber) => {
+export const onboardingStaff = async (
+  storeCode,
+  bankId,
+  accountNumber,
+  hireDate,
+) => {
   try {
     const response = await api.post("/api/auth/onboarding", {
       role: "STAFF",
       storeCode,
       bankId,
       accountNumber,
+      hireDate,
     });
     return response.data;
   } catch (error) {
@@ -142,3 +158,59 @@ export const onboardingOwner = async (
     throw error;
   }
 };
+
+//토큰 갱신
+export async function refreshToken() {
+  try {
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    if (!refreshToken) {
+      console.error("refreshToken이 localStorage에 없습니다.");
+      throw new Error("Refresh token not found");
+    }
+
+    const response = await api.post(
+      "/api/auth/refresh-token",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${refreshToken}`,
+          "Content-Type": "application/json",
+        },
+        _skipAuthRefresh: true,
+      },
+    );
+
+    if (!response.data || !response.data.accessToken) {
+      console.error("❌ 유효하지 않은 토큰 응답 형식:", response.data);
+      throw new Error("Invalid token response format");
+    }
+
+    localStorage.setItem("accessToken", response.data.accessToken);
+
+    return response.data;
+  } catch (error) {
+    console.error("❌ 토큰 갱신 실패:", error.response?.data || error.message);
+    throw error;
+
+    if (error.response?.status === 401) {
+      console.log("인증 실패- 로그아웃 처리");
+      await logout();
+      window.location.href = "/";
+    }
+  }
+}
+
+//로그아웃
+export async function logout() {
+  try {
+    const response = await api.post("/api/auth/logout");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    return response.data;
+  } catch (error) {
+    console.log("로그아웃 실패: ", error);
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+  }
+}

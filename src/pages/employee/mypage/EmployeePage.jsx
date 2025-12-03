@@ -2,23 +2,28 @@ import { useState, useEffect } from "react";
 import InfoBox from "../../../components/common/mypage/InfoBox.jsx";
 import { MypageIcon } from "../../../assets/icons/MypageIcon.jsx";
 import MsgIcon from "../../../assets/icons/MsgIcon.jsx";
-import CoinIcon from "../../../assets/icons/CoinIcon.jsx";
+import { CoinIcon } from "../../../assets/icons/CoinIcon.jsx";
 import StoreIcon from "../../../assets/icons/StoreIcon.jsx";
 import NoteIcon from "../../../assets/icons/NoteIcon.jsx";
-import character1 from "../../../assets/images/character1.png";
+import character from "../../../assets/images/EmpBtn.png";
 import {
   fetchMydata,
   fetchStoreList,
   updateMydata,
 } from "../../../services/employee/MyPageService.js";
+import { useNavigate } from "react-router-dom";
+import { logout } from "../../../services/authService.js";
 
 function EmployeePage() {
+  const navigate = useNavigate();
   const [mydata, setMydata] = useState([]);
+  const [profile, setProfile] = useState("");
 
   useEffect(() => {
     (async () => {
       try {
         const my = await fetchMydata();
+        setProfile(my.profileImageUrl);
 
         const storeList = await fetchStoreList();
 
@@ -62,7 +67,7 @@ function EmployeePage() {
         console.error(error);
       }
     })();
-  }, [mydata]);
+  }, []);
 
   //내정보수정
   const handleMyDataUpdate = async (updatedData) => {
@@ -87,18 +92,43 @@ function EmployeePage() {
     return bank.length > 10;
   };
 
+  //로그아웃
+  const handleLogout = async () => {
+    try {
+      await logout();
+      alert("로그아웃 되었습니다.");
+      navigate("/");
+    } catch (error) {
+      alert("로그아웃 실패:", error);
+      navigate("/");
+    }
+  };
+
   return (
     <div className="flex flex-col divide-y-8 divide-[#e7eaf3]">
       <div className="flex items-center justify-center">
-        <div className="flex items-center justify-center size-[130px] bg-[#68e194] border-3 border-[#fdfffe] shadow-[0_4px_8px_0_rgba(0,0,0,0.2)] overflow-hidden rounded-full my-7">
-          <img src={character1} alt="profile" />
-        </div>
+        {profile === "" ? (
+          <img src={character} alt="profile" className="size-[150px] my-5" />
+        ) : (
+          <div className="flex items-center justify-center size-[130px] bg-[#68e194] border-3 border-[#fdfffe] shadow-[0_4px_8px_0_rgba(0,0,0,0.2)] overflow-hidden rounded-full my-7">
+            <img src={profile} alt="profile" />
+          </div>
+        )}
       </div>
       <InfoBox
+        role="employee"
         head="내 정보"
         myData={mydata}
         onDataUpdate={handleMyDataUpdate}
       />
+      <div className="flex items-center justify-center py-5">
+        <p
+          className="text-[12px]/[12px] font-[400] border-b border-black hover:text-[#68e194] hover:border-[#68e194] transition-colors duration-100 cursor-pointer"
+          onClick={handleLogout}
+        >
+          로그아웃
+        </p>
+      </div>
     </div>
   );
 }

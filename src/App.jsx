@@ -1,13 +1,14 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState, useCallback } from "react";
 import "./App.css";
 import "./index.css";
+
 import Header from "./components/layout/header/Header.jsx";
 import Footer from "./components/layout/footer/Footer.jsx";
 
 import Login from "./pages/auth/Login.jsx";
 import Onboarding from "./pages/auth/Onboarding.jsx";
 import KakaoCallback from "./pages/auth/KakaoCallback.jsx";
-
 import OwnerPage from "./pages/owner/mypage/OwnerPage.jsx";
 import OwnerManageStore from "./pages/owner/mypage/ManageStore.jsx";
 import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
@@ -17,53 +18,171 @@ import EmpManageStore from "./pages/employee/mypage/ManageStore.jsx";
 import AlarmHomeEmp from "./pages/employee/alarm/AlarmHomeEmp.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
-
 import CalAddEmp from "./pages/employee/calendarAdd/CalAddEmp.jsx";
+import CalModEmp from "./pages/employee/calendarAdd/CalModEmp.jsx";
 import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
 import CalGen from "./pages/owner/calendarAdd/CalGen.jsx";
 import AutoCal from "./pages/owner/calendarAdd/AutoCal.jsx";
 import AddOwner from "./pages/owner/calendarAdd/AddOwner.jsx";
 import ScheduleList from "./pages/owner/calendarAdd/ScheduleList.jsx";
-
 import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
 import EmpHome from "./pages/employee/EmpHome.jsx";
+import Splash from "./pages/common/Splash.jsx";
+
+import { refreshAccessToken } from "./services/kakaoLogin.js";
+import api from "./services/api.js";
 
 function App() {
   const location = useLocation();
-  console.log("📍 Current Path:", location.pathname);
+  const navigate = useNavigate();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
 
-  // 헤더·푸터 제외할 페이지
-  const hideLayoutPaths = [
-    "/",
-    "/login",
-    "/onboarding",
-    "/auth/kakao/callback",
-    "/calAdd",
-    "/calGen",
-    "/autoCal",
-    "/calAddEmp",
-    "/addOwner",
-    "/scheduleList",
-    "/alarmHomeEmp",
-    "/alarmHome",
-    "/alarmCheck",
+  console.log("📍 PATH:", location.pathname);
+
+  /** -------------------------
+   *  공통 Redirect Helper
+   --------------------------*/
+  const goLogin = () => navigate("/login", { replace: true });
+  const goOnboarding = () => navigate("/onboarding", { replace: true });
+  const goHomeByRole = async () => {
+    try {
+      await api.get("/api/mypage/owner/profile");
+      return navigate("/owner", { replace: true });
+    } catch (_) {
+      // 2) 알바일 가능성 체크
+      try {
+        await api.get("/api/mypage/staff/profile");
+        return navigate("/employee", { replace: true });
+      } catch (err2) {
+        console.log("❌ 역할 판단 실패", err2);
+        return goLogin();
+      }
+    }
+  };
+
+  /** -------------------------
+   *  Access / Refresh 인증 처리
+   --------------------------*/
+  const checkAuthAndRedirect = useCallback(async () => {
+    setIsCheckingAuth(true);
+
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+
+      // 🚫 refreshToken 없음 → 로그인 안한 상태
+      if (!refreshToken) {
+        console.log("❌ refreshToken 없음 → 로그인 필요");
+        if (location.pathname === "/" || location.pathname === "/login") goLogin();
+        return;
+      }
+
+      /** 🔄 AccessToken 갱신 시도 */
+      let hasValidToken = false;
+
+      try {
+        const newAccessToken = await refreshAccessToken();
+        if (newAccessToken) hasValidToken = true;
+      } catch (err) {
+        const status = err.response?.status;
+
+        // refreshToken 만료
+        if (status === 401 || status === 403) {
+          console.log("❌ Refresh 토큰 만료");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          goLogin();
+          return;
+        }
+
+        // 서버 오류 → 기존 accessToken 있으면 사용
+        const existing = localStorage.getItem("accessToken");
+        if (existing) hasValidToken = true;
+      }
+
+      // accessToken 확인
+      if (!localStorage.getItem("accessToken") && !hasValidToken) {
+        console.log("❌ accessToken 없음 → 온보딩");
+        goOnboarding();
+        return;
+      }
+
+      /** -------------------------
+       *  온보딩 완료 여부 → 활성 매장 체크
+       --------------------------*/
+      let activeStore = null;
+      try {
+        const res = await api.get("/api/mypage/active-store");
+        activeStore = res.data;
+      } catch (err) {
+        // 매장 없음 → 역할에 따라 홈으로 이동 (알바는 active-store 없어도 정상)
+        const status = err.response?.status;
+        if (status === 401) return goLogin();
+        // active-store 없는 사용자 = 알바도 포함. goOnboarding 금지
+        if (location.pathname === "/" || location.pathname === "/login") {
+          return goHomeByRole();
+        }
+        return;
+      }
+
+      if (!activeStore?.storeId) {
+        console.log("❕ 활성 매장 없음 → 역할에 따라 홈으로 이동");
+        // active-store 없는 사용자 = 알바도 포함. goOnboarding 금지
+        if (location.pathname === "/" || location.pathname === "/login") {
+          return goHomeByRole();
+        }
+        return;
+      }
+
+      /** -------------------------
+       *  사용자 역할 확인
+       --------------------------*/
+      if (location.pathname === "/" || location.pathname === "/login") {
+        await goHomeByRole();
+      }
+    } catch (err) {
+      const status = err.response?.status;
+      if (status === 401) return goLogin();
+      // active-store 없는 사용자 = 알바도 포함. goOnboarding 금지
+      if (location.pathname === "/" || location.pathname === "/login") {
+        return goHomeByRole();
+      }
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  }, [location.pathname, navigate]);
+
+  /** -------------------------
+   *  루트에서만 인증 체크
+   --------------------------*/
+  useEffect(() => {
+    const checkPages = ["/"];
+    if (checkPages.includes(location.pathname)) {
+      checkAuthAndRedirect();
+    }
+  }, [location.pathname, checkAuthAndRedirect]);
+
+  /** -------------------------
+   *  레이아웃 제외 경로
+   --------------------------*/
+  const hideLayoutPages = [
+    "/", "/login", "/onboarding", "/auth/kakao/callback",
+    "/calAdd", "/calGen", "/autoCal", "/calAddEmp", "/calModEmp",
+    "/addOwner", "/scheduleList", "/alarmHomeEmp",
+    "/alarmHome", "/alarmCheck", "/scheduleList"
   ];
-  const hideLayout = hideLayoutPaths.some((path) => {
-    // 루트 경로 (정확히 "/"만 일치)
-    if (path === "/" && location.pathname === "/") {
-      return true;
-    }
-    // 나머지 경로 (정확히 일치하거나, 해당 경로로 시작하는 하위 경로)
-    if (
-      path !== "/" &&
-      (location.pathname === path || location.pathname.startsWith(path + "/"))
-    ) {
-      return true;
-    }
-    return false;
-  });
+
+  const hideLayout = hideLayoutPages.some((p) =>
+    p === "/" ? location.pathname === "/" : location.pathname.startsWith(p)
+  );
+
+  /** -------------------------
+   *  인증 체크 중 → 스플래시
+   --------------------------*/
+  if (isCheckingAuth && (location.pathname === "/" || location.pathname === "/login")) {
+    return <Splash />;
+  }
 
   return (
     <div className="w-[393px] bg-[#F8FBFE] min-[393px]:w-[393px] mx-auto h-screen flex flex-col font-Pretendard">
@@ -72,34 +191,20 @@ function App() {
       <main className="flex-1 overflow-y-auto">
         <Routes>
           <Route path="/" element={<Login />} />
-          {/* 로그인/온보딩 */}
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
-          {/* 
-            카카오 로그인 콜백 라우트
-            주의: OAuth 인증 코드(code)는 백엔드에서 처리합니다.
-            백엔드가 인증 완료 후 이 경로로 리다이렉트합니다.
-            이 페이지에서 세션 확인 후 적절한 페이지로 이동합니다.
-            - 신규 회원 또는 온보딩 미실행 → /onboarding
-            - 기존 회원(온보딩 실행) → 사장: /owner, 알바: /employee
-          */}
           <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
 
           <Route path="/owner" element={<OwnerHome />} />
           <Route path="/employee" element={<EmpHome />} />
 
           <Route path="/owner/mypage" element={<OwnerPage />} />
-          <Route
-            path="/owner/mypage/managestore"
-            element={<OwnerManageStore />}
-          />
+          <Route path="/owner/mypage/managestore" element={<OwnerManageStore />} />
           <Route path="/employee/mypage" element={<EmployeePage />} />
-          <Route
-            path="/employee/mypage/managestore"
-            element={<EmpManageStore />}
-          />
+          <Route path="/employee/mypage/managestore" element={<EmpManageStore />} />
 
           <Route path="/calAddEmp" element={<CalAddEmp />} />
+          <Route path="/calModEmp" element={<CalModEmp />} />
           <Route path="/calAdd" element={<CalAdd />} />
           <Route path="/calGen" element={<CalGen />} />
           <Route path="/autoCal" element={<AutoCal />} />
@@ -112,7 +217,6 @@ function App() {
 
           <Route path="/owner/manage" element={<ManageEmpPage />} />
           <Route path="/employee/manage" element={<ManageSalary />} />
-
           <Route path="/owner/calendar" element={<OwnerCalendar />} />
           <Route path="/employee/calendar" element={<EmpCalendar />} />
         </Routes>

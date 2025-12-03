@@ -67,7 +67,7 @@ function OwnerCalendar() {
   const [activeStore, setActiveStore] = useState("");
   const [newTime, setNewTime] = useState({
     userStoreId: "",
-    workerName: "",
+    userName: "",
     date: "",
     start: "",
     end: "",
@@ -102,8 +102,8 @@ function OwnerCalendar() {
     console.log(e);
     setEventData({
       id: e.id,
-      workerId: e.workerId,
-      worker: e.worker,
+      userStoreId: e.userStoreId,
+      userName: e.userName,
       start: dayjs(e.start),
       end: dayjs(e.end),
     });
@@ -162,8 +162,8 @@ function OwnerCalendar() {
   };
 
   const WorkersDropDown = () => {
-    const [dropdownOpen, setDropdownOpen] = useState(false);
     const [workers, setWorkers] = useState([]);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     useEffect(() => {
       (async () => {
@@ -178,24 +178,26 @@ function OwnerCalendar() {
           className={`flex w-[70px] h-[30px] items-center justify-center border-[#87888C] py-[2px] bg-white gap-1 cursor-pointer ${dropdownOpen ? "border border-b-[#87888c] rounded-t-[7px]" : "border rounded-[7px]"}`}
           onClick={() => setDropdownOpen(!dropdownOpen)}
         >
-          <span className="text-[12px] font-[400]">{newTime.workerName}</span>
+          <span className="text-[12px] font-[400]">{newTime.userName}</span>
         </div>
         {dropdownOpen && (
           <div className="absolute left-0 mt-0 rounded-b-[12px] border-x-1 border-b-1 overflow-hidden">
             {workers?.map((worker) => (
               <div
-                key={worker.id}
+                key={worker.userStoreId}
                 className="flex items-center justify-center w-[70px] py-[2px] bg-white gap-1 cursor-pointer"
                 onClick={() => {
                   setNewTime((prev) => ({
                     ...prev,
-                    userStoreId: worker.id,
-                    workerName: worker.name,
+                    userStoreId: worker.userStoreId,
+                    userName: worker.username,
                   }));
                   setDropdownOpen(false);
                 }}
               >
-                <span className="text-[12px] font-[400]">{worker.name}</span>
+                <span className="text-[12px] font-[400]">
+                  {worker.username}
+                </span>
               </div>
             ))}
           </div>
@@ -291,7 +293,7 @@ function OwnerCalendar() {
   const handleRequestWork = () => {
     (async () => {
       try {
-        // await requestWork(eventData.id, needWorkers);
+        await requestWork(eventData.id, needWorkers);
 
         setAddShiftToastOpen(false);
         setIsMsgOpen2(true);
@@ -315,7 +317,7 @@ function OwnerCalendar() {
           newTime.end.format("YYYY-MM-DD") + "T" + newTime.end.format("HH:mm"),
       };
       console.log(data);
-      // await addWorkshift(data.userStoreId, data.start, data.end);
+      await addWorkshift(data.userStoreId, data.start, data.end);
       setNewTime({
         userStoreId: "",
         date: "",
@@ -333,7 +335,7 @@ function OwnerCalendar() {
   const handleDeleteWorkshift = async () => {
     try {
       console.log(eventData.id);
-      // await deleteWorkshift(eventData.id);
+      await deleteWorkshift(eventData.id);
       setIsDeleteShift(false);
       setIsMsgOpen3(true);
     } catch (error) {
@@ -392,28 +394,6 @@ function OwnerCalendar() {
                     minuteStep="5"
                     placeholder=""
                     suffixIcon=""
-                    disabledTime={(current) => {
-                      if (!current) {
-                        return false;
-                      }
-                      const now = dayjs();
-                      if (current.isSame(now, "day")) {
-                        return {
-                          disabledHours: () =>
-                            Array.from({ length: now.hour() }, (_, i) => i),
-                          disabledMinutes: (selectedHour) => {
-                            if (selectedHour === now.hour()) {
-                              return Array.from(
-                                { length: now.minute() },
-                                (_, i) => i,
-                              );
-                            }
-                            return [];
-                          },
-                        };
-                      }
-                      return false;
-                    }}
                     needConfirm={false}
                     onChange={(e) =>
                       setNewTime({ ...newTime, start: dayjs(e) })
@@ -427,28 +407,6 @@ function OwnerCalendar() {
                     minuteStep="5"
                     placeholder=""
                     suffixIcon=""
-                    disabledTime={(current) => {
-                      if (!current) {
-                        return false;
-                      }
-                      const now = dayjs();
-                      if (current.isSame(now, "day")) {
-                        return {
-                          disabledHours: () =>
-                            Array.from({ length: now.hour() }, (_, i) => i),
-                          disabledMinutes: (selectedHour) => {
-                            if (selectedHour === now.hour()) {
-                              return Array.from(
-                                { length: now.minute() },
-                                (_, i) => i,
-                              );
-                            }
-                            return [];
-                          },
-                        };
-                      }
-                      return false;
-                    }}
                     needConfirm={false}
                     onChange={(e) => setNewTime({ ...newTime, end: dayjs(e) })}
                   />
@@ -477,7 +435,7 @@ function OwnerCalendar() {
             <div className="flex flex-col gap-2">
               <div className="flex flex-row items-center justify-center">
                 <p className="text-[16px] font-[600] mb-2">
-                  {eventData.start.format("dd")}({eventData.worker}){" "}
+                  {eventData.start.format("dd")}({eventData.userName}){" "}
                   {eventData.start.format("HH:mm")}-
                   {eventData.end.format("HH:mm")}
                 </p>

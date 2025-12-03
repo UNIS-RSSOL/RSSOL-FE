@@ -8,7 +8,6 @@ import character1 from "../../assets/images/character1.png";
 import Note from "../../components/common/Note.jsx";
 import ResourceCalendar from "../../components/common/calendar/ResourceCalendar.jsx";
 import { fetchSchedules } from "../../services/common/ScheduleService.js";
-import { fetchWage } from "../../services/owner/WageService.js";
 import {
   fetchActiveStore,
   fetchStoreList,
@@ -26,7 +25,7 @@ function OwnerHome() {
   const [wage, setWage] = useState(0);
   const [workers, setWorkers] = useState([]);
   const [events, setEvents] = useState([]);
-  const [activeStore, setActiveStore] = useState(null);
+  const [activeStore, setActiveStore] = useState({ storeId: null, name: "" });
   const FormattedDate = (date, day) => {
     const d = dat[today.format("d")];
     return day
@@ -41,6 +40,7 @@ function OwnerHome() {
           today.format("YYYY-MM-DD"),
           today.format("YYYY-MM-DD"),
         );
+
         const formattedEvents = schedules.map((schedule) => ({
           id: schedule.id,
           workerId: schedule.userStoreId,
@@ -64,17 +64,22 @@ function OwnerHome() {
         setWorkers(uniqueWorkers);
         setEvents(formattedEvents);
 
-        const activeStore = await fetchActiveStore();
-        setActiveStore(activeStore);
-        const fetchedWage = await fetchWage(
-          activeStore.storeId,
-          today.format("YYYY-MM"),
-        );
-        const totalWage = fetchedWage.payrolls.reduce((sum, payroll) => {
-          return sum + payroll.total_pay;
-        }, 0);
+        const active = await fetchActiveStore();
 
-        setWage(totalWage);
+        setActiveStore({
+          storeId: active.storeId,
+          name: active.name,
+        });
+        console.log(activeStore);
+        // const fetchedWage = await fetchWage(
+        //   activeStore.storeId,
+        //   today.format("YYYY-MM"),
+        // );
+        // const totalWage = fetchedWage.payrolls.reduce((sum, payroll) => {
+        //   return sum + payroll.total_pay;
+        // }, 0);
+
+        // setWage(totalWage);
       } catch (error) {
         console.error(error);
       }
@@ -100,21 +105,25 @@ function OwnerHome() {
       (async () => {
         try {
           const response = await fetchStoreList();
+
           const stores = response.map((r) => ({
             storeId: r.storeId,
             name: r.name,
           }));
+
           setStoreList(stores);
         } catch (error) {
           console.error(error);
         }
       })();
-    }, []);
+    }, [activeStore]);
 
     const handleChangeActive = async (storeId) => {
       try {
-        const response = changeActiveStore(storeId);
-        setActiveStore(response.storeId);
+        const response = await changeActiveStore(storeId);
+        setActiveStore({ storeId: response.storeId, name: response.name });
+        setIsOpen(false);
+        console.log({ storeId: response.storeId, name: response.name });
       } catch (error) {
         console.error(error);
       }
@@ -136,8 +145,8 @@ function OwnerHome() {
                   key={store.storeId}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className={`flex items-center justify-center size-[48px] rounded-full bg-white border shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] cursor-pointer ${
-                    store.storeId === activeStore
+                  className={`flex items-center justify-center text-[10px] font-[500] size-[48px] rounded-full bg-white border-2 shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] cursor-pointer ${
+                    Number(store.storeId) === Number(activeStore?.storeId)
                       ? "border-[#68e194]"
                       : "border-black"
                   }`}
@@ -193,7 +202,7 @@ function OwnerHome() {
           disabled={true}
         >
           <div className="flex flex-col items-center justify-center">
-            <p className="text-[16px] font-[500]">서브웨이</p>
+            <p className="text-[16px] font-[500]">{activeStore?.name}</p>
             <p className="text-[14px] font-[400] text-[#7a7676]">
               {FormattedDate(today)}
             </p>

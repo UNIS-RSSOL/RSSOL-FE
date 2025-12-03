@@ -9,9 +9,9 @@ import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/alarm/TopBar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import { generateSchedule, confirmSchedule } from "../../../services/scheduleService.js";
-import { fetchActiveStore, fetchStoredata } from "../../../services/owner/MyPageService.js";
+import { fetchActiveStore, fetchStoredata, fetchMydata } from "../../../services/owner/MyPageService.js";
 import { fetchAllWorkers } from "../../../services/owner/ScheduleService.js";
-import { addNotificationToEmployees } from "../../../utils/notificationUtils.js";
+import { createScheduleRequestNotification } from "../../../services/common/NotificationService.js";
 import "./CalAdd.css";
 
 export default function CalAdd() {
@@ -469,19 +469,37 @@ export default function CalAdd() {
               }
             }
 
-            // 4. 같은 매장의 알바생 목록 가져오기
+            // 4. 같은 매장의 직원 목록 가져오기
+            // /api/store/staff는 이미 활성 매장의 직원들만 반환
             const allWorkers = await fetchAllWorkers();
             if (!allWorkers || !Array.isArray(allWorkers)) {
-              alert("알바생 목록을 불러올 수 없습니다.");
+              alert("직원 목록을 불러올 수 없습니다.");
               return;
             }
 
-            // 같은 매장의 알바생들만 필터링 (사장 제외)
+            // 5. 현재 로그인한 사용자의 userStoreId 가져오기
+            // fetchActiveStore에서 userStoreId를 가져오거나, fetchMydata에서 가져오기
+            let currentUserStoreId = null;
+            const activeStore = await fetchActiveStore();
+            if (activeStore?.userStoreId) {
+              currentUserStoreId = activeStore.userStoreId;
+            } else if (activeStore?.id) {
+              currentUserStoreId = activeStore.id;
+            } else {
+              // fetchMydata에서 userStoreId 가져오기 시도
+              const mydata = await fetchMydata();
+              if (mydata?.userStoreId) {
+                currentUserStoreId = mydata.userStoreId;
+              } else if (mydata?.id) {
+                currentUserStoreId = mydata.id;
+              }
+            }
+            
+            // 사장(현재 사용자) 제외하고 알바생만 필터링
             const storeWorkers = allWorkers.filter(worker => {
-              const workerStoreId = worker.storeId || worker.userStore?.storeId || worker.store?.storeId;
-              return workerStoreId === storeData.storeId && 
-                     worker.role !== 'OWNER' && 
-                     worker.userType !== 'OWNER';
+              // 현재 사용자의 userStoreId와 일치하면 사장이므로 제외
+              const workerStoreId = worker.userStoreId;
+              return workerStoreId && workerStoreId !== currentUserStoreId;
             });
 
             if (storeWorkers.length === 0) {
@@ -489,7 +507,15 @@ export default function CalAdd() {
               return;
             }
 
-            // 5. 날짜 범위 문자열 생성
+            // 6. 알바생 ID 추출 (userStoreId 사용)
+            const employeeIds = storeWorkers.map(worker => worker.userStoreId).filter(id => id);
+
+            if (employeeIds.length === 0) {
+              alert("알바생 ID를 가져올 수 없습니다.");
+              return;
+            }
+
+            // 6. 날짜 범위 문자열 생성
             let dateRange;
             if (startDate && endDate) {
               dateRange = `${dayjs(startDate).format("YYYY.MM.DD")} ~ ${dayjs(endDate).format("YYYY.MM.DD")}`;
@@ -498,26 +524,23 @@ export default function CalAdd() {
               dateRange = `${currentMonth}월`;
             }
 
-            // 6. 알림 데이터 준비
-            const notification = {
-              type: 'schedule_request',
-              storeName: storeData.name || '매장',
-              message: `사장님이 ${dateRange} 시간표 추가를 요청했어요! 근무가능 시간표를 작성해주세요`,
-              startDate: startDate || null,
-              endDate: endDate || null,
-              unitSpecified: unitSpecified,
-              timeSlots: unitSpecified ? timeSlots.filter(slot => slot.start && slot.end && slot.count > 0) : null,
-              minWorkTime: !unitSpecified ? minWorkTime : null,
-            };
-
-            // 7. 각 알바생의 알림에 추가 (localStorage)
-            const employeeIds = storeWorkers.map(worker => {
-              return worker.userId || worker.id || worker.employeeId;
-            }).filter(id => id); // 유효한 ID만
-
-            if (employeeIds.length > 0) {
-              addNotificationToEmployees(employeeIds, notification);
+            // 8. 백엔드 API로 알림 생성
+            try {
+              await createScheduleRequestNotification({
+                storeId: storeData.storeId,
+                employeeIds: employeeIds,
+                message: `사장님이 ${dateRange} 시간표 추가를 요청했어요! 근무가능 시간표를 작성해주세요`,
+                startDate: startDate || null,
+                endDate: endDate || null,
+                unitSpecified: unitSpecified,
+                timeSlots: unitSpecified ? timeSlots.filter(slot => slot.start && slot.end && slot.count > 0) : null,
+                minWorkTime: !unitSpecified ? minWorkTime : null,
+              });
               alert("알바생들에게 알림이 전송되었습니다!");
+            } catch (error) {
+              console.error("알림 전송 실패:", error);
+              alert("알림 전송에 실패했습니다. 다시 시도해주세요.");
+              return;
             }
 
             // 8. ScheduleList로 이동하면서 설정한 정보 전달

@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import MessageModal from "../../../components/common/MessageModal.jsx";
 import Toast from "../../../components/common/Toast.jsx";
-import Modal from "../../../components/common/Modal.jsx";
 import GreenBtn from "../../../components/common/GreenBtn.jsx";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import {
@@ -78,6 +77,14 @@ function EmpCalendar() {
             startOfWeek.format("YYYY-MM-DD"),
             startOfWeek.add(6, "day").format("YYYY-MM-DD"),
           );
+
+          const formattedEvents = schedules.map((s) => ({
+            id: s.id,
+            storeId: s.storeId,
+            storeName: s.storeName,
+            start: s.startDatetime,
+            end: s.endDatetime,
+          }));
 
           setEvents(formattedEvents);
         } catch (error) {
@@ -179,7 +186,7 @@ function EmpCalendar() {
                   return event ? (
                     <div
                       key={`${w.format("DD")}-${hour}`}
-                      className={`flex h-[35px] border-l border-t border-[#e7eaf3] cursor-pointer
+                      className={`flex h-[35px] border-l border-t border-[#e7eaf3] cursor-pointer flex items-center justify-center
                         ${isSelected ? "border-x-2 border-x-black" : ""}
                   ${isSelected && firstHour ? "border-t-2 border-t-black" : ""}
                   ${isSelected && lastHour ? "border-b-2 border-b-black" : ""}`}
@@ -201,7 +208,7 @@ function EmpCalendar() {
                       }}
                     >
                       {isMiddleHour ? (
-                        <span className="text-black text-[12px] font-[400]">
+                        <span className="text-black text-[12px] font-[400] flex items-center justify-center">
                           {event.storeName}
                         </span>
                       ) : null}

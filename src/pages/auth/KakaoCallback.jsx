@@ -80,6 +80,14 @@ function KakaoCallback() {
             newUser: isNewUser,
             isNewUser,
           };
+          
+          // refreshToken이 없으면 경고 로그
+          if (!refreshToken) {
+            console.warn("⚠️ URL 파라미터에 refreshToken이 없습니다. 백엔드가 쿠키로 설정했을 수 있습니다.");
+          } else {
+            console.log("✅ accessToken 및 refreshToken을 URL 파라미터에서 받았습니다.");
+          }
+          
           handleKakaoSession(session);
           
           // 신규 회원인 경우 온보딩으로 이동
@@ -96,6 +104,28 @@ function KakaoCallback() {
             const profileRes = await api.get("/api/auth/me");
             const userInfo = profileRes.data;
             
+            // 백엔드가 쿠키로 토큰을 설정한 경우, localStorage에도 저장 필요
+            // 백엔드 API 응답에 토큰이 포함되어 있는지 확인
+            if (userInfo?.accessToken) {
+              const session = {
+                accessToken: userInfo.accessToken,
+                refreshToken: userInfo.refreshToken || null,
+                userId: userInfo.userId || null,
+                newUser: userInfo.newUser || false,
+                isNewUser: userInfo.newUser || false,
+              };
+              
+              if (!session.refreshToken) {
+                console.warn("⚠️ 백엔드 응답에 refreshToken이 없습니다. 쿠키로만 설정되었을 수 있습니다.");
+              } else {
+                console.log("✅ 백엔드 API에서 accessToken 및 refreshToken을 받았습니다.");
+              }
+              
+              handleKakaoSession(session);
+            } else {
+              console.log("⚠️ 백엔드 응답에 토큰이 없습니다. 쿠키로만 인증되었을 수 있습니다.");
+            }
+            
             if (userInfo && userInfo.newUser !== undefined) {
               const isNewUserFromBackend = userInfo.newUser || userInfo.isNewUser;
               
@@ -108,6 +138,7 @@ function KakaoCallback() {
             }
           } catch (profileError) {
             console.log("프로필 조회 실패, 활성 매장 정보로 확인 시도");
+            console.error("프로필 조회 에러:", profileError);
           }
         }
 
@@ -130,6 +161,19 @@ function KakaoCallback() {
               navigate("/owner");
               return;
             } catch (ownerError) {
+              const ownerStatus = ownerError.response?.status;
+              
+              // 500 에러는 서버 에러이므로, 토큰 갱신이 트리거될 수 있음
+              // 하지만 이 경우는 "owner가 아니다"가 아니라 서버 문제일 수 있으므로
+              // staff 체크로 넘어가되, 에러를 로깅
+              if (ownerStatus === 500) {
+                console.warn("⚠️ owner 프로필 조회 시 500 에러 발생 (서버 에러 가능성) -> staff 체크로 진행");
+              } else if (ownerStatus === 403 || ownerStatus === 404) {
+                console.log("owner 프로필 없음 (403/404) -> staff 체크로 진행");
+              } else {
+                console.log("owner 프로필 조회 실패:", ownerStatus, "-> staff 체크로 진행");
+              }
+              
               // owner 프로필이 없으면 staff로 시도
               try {
                 await api.get("/api/mypage/staff/profile");
@@ -138,6 +182,9 @@ function KakaoCallback() {
                 navigate("/employee");
                 return;
               } catch (staffError) {
+                const staffStatus = staffError.response?.status;
+                console.log("staff 프로필 조회 실패:", staffStatus);
+                
                 // 둘 다 실패하면 정보 미등록으로 간주
                 console.log("프로필 확인 실패 -> 온보딩으로 이동");
                 window.history.replaceState({}, document.title, window.location.pathname);
