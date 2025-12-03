@@ -9,7 +9,7 @@ import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/alarm/TopBar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import { generateSchedule, confirmSchedule } from "../../../services/scheduleService.js";
-import { fetchActiveStore, fetchStoredata } from "../../../services/owner/MyPageService.js";
+import { fetchActiveStore, fetchStoredata, fetchMydata } from "../../../services/owner/MyPageService.js";
 import { fetchAllWorkers } from "../../../services/owner/ScheduleService.js";
 import { createScheduleRequestNotification } from "../../../services/common/NotificationService.js";
 import "./CalAdd.css";
@@ -469,19 +469,37 @@ export default function CalAdd() {
               }
             }
 
-            // 4. 같은 매장의 알바생 목록 가져오기
+            // 4. 같은 매장의 직원 목록 가져오기
+            // /api/store/staff는 이미 활성 매장의 직원들만 반환
             const allWorkers = await fetchAllWorkers();
             if (!allWorkers || !Array.isArray(allWorkers)) {
-              alert("알바생 목록을 불러올 수 없습니다.");
+              alert("직원 목록을 불러올 수 없습니다.");
               return;
             }
 
-            // 같은 매장의 알바생들만 필터링 (사장 제외)
+            // 5. 현재 로그인한 사용자의 userStoreId 가져오기
+            // fetchActiveStore에서 userStoreId를 가져오거나, fetchMydata에서 가져오기
+            let currentUserStoreId = null;
+            const activeStore = await fetchActiveStore();
+            if (activeStore?.userStoreId) {
+              currentUserStoreId = activeStore.userStoreId;
+            } else if (activeStore?.id) {
+              currentUserStoreId = activeStore.id;
+            } else {
+              // fetchMydata에서 userStoreId 가져오기 시도
+              const mydata = await fetchMydata();
+              if (mydata?.userStoreId) {
+                currentUserStoreId = mydata.userStoreId;
+              } else if (mydata?.id) {
+                currentUserStoreId = mydata.id;
+              }
+            }
+            
+            // 사장(현재 사용자) 제외하고 알바생만 필터링
             const storeWorkers = allWorkers.filter(worker => {
-              const workerStoreId = worker.storeId || worker.userStore?.storeId || worker.store?.storeId;
-              return workerStoreId === storeData.storeId && 
-                     worker.role !== 'OWNER' && 
-                     worker.userType !== 'OWNER';
+              // 현재 사용자의 userStoreId와 일치하면 사장이므로 제외
+              const workerStoreId = worker.userStoreId;
+              return workerStoreId && workerStoreId !== currentUserStoreId;
             });
 
             if (storeWorkers.length === 0) {
@@ -489,10 +507,8 @@ export default function CalAdd() {
               return;
             }
 
-            // 5. 알바생 ID 추출
-            const employeeIds = storeWorkers.map(worker => {
-              return worker.userId || worker.id || worker.employeeId;
-            }).filter(id => id); // 유효한 ID만
+            // 6. 알바생 ID 추출 (userStoreId 사용)
+            const employeeIds = storeWorkers.map(worker => worker.userStoreId).filter(id => id);
 
             if (employeeIds.length === 0) {
               alert("알바생 ID를 가져올 수 없습니다.");

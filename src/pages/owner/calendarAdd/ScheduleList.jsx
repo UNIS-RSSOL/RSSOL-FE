@@ -8,7 +8,7 @@ import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import Toast from "../../../components/common/Toast.jsx";
 import { fetchAllWorkers, fetchEmployeeAvailabilities } from "../../../services/owner/ScheduleService.js";
 import { generateSchedule } from "../../../services/scheduleService.js";
-import { fetchActiveStore } from "../../../services/owner/MyPageService.js";
+import { fetchActiveStore, fetchMydata } from "../../../services/owner/MyPageService.js";
 
 function ScheduleList() {
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ function ScheduleList() {
         console.log("🔍 직원 리스트 및 스케줄 로드 시작:", { storeId });
         
         // 직원 리스트 가져오기
-        // /api/store/staff는 이미 활성 매장의 직원들만 반환하므로 필터링 불필요
+        // /api/store/staff는 이미 활성 매장의 직원들만 반환
         const workersList = await fetchAllWorkers();
         
         // 디버깅: 직원 리스트 구조 확인
@@ -68,13 +68,29 @@ function ScheduleList() {
           });
         }
         
-        // 사장 제외하고 알바생만 필터링
+        // 현재 로그인한 사용자의 userStoreId 가져오기
+        // fetchActiveStore에서 userStoreId를 가져오거나, fetchMydata에서 가져오기
+        let currentUserStoreId = null;
+        const activeStore = await fetchActiveStore();
+        if (activeStore?.userStoreId) {
+          currentUserStoreId = activeStore.userStoreId;
+        } else if (activeStore?.id) {
+          currentUserStoreId = activeStore.id;
+        } else {
+          // fetchMydata에서 userStoreId 가져오기 시도
+          const mydata = await fetchMydata();
+          if (mydata?.userStoreId) {
+            currentUserStoreId = mydata.userStoreId;
+          } else if (mydata?.id) {
+            currentUserStoreId = mydata.id;
+          }
+        }
+        
+        // 사장(현재 사용자) 제외하고 알바생만 필터링
         const storeWorkers = (workersList || []).filter(worker => {
-          // role이나 userType으로 사장 필터링
-          const isOwner = worker.role === 'OWNER' || 
-                         worker.userType === 'OWNER' ||
-                         worker.position === 'OWNER';
-          return !isOwner;
+          // 현재 사용자의 userStoreId와 일치하면 사장이므로 제외
+          const workerStoreId = worker.userStoreId;
+          return workerStoreId && workerStoreId !== currentUserStoreId;
         });
         
         console.log(`✅ 필터링된 직원 수: ${storeWorkers.length}명`);
@@ -87,9 +103,9 @@ function ScheduleList() {
         
         // 각 직원의 work availability를 병렬로 가져오기
         const availabilityPromises = storeWorkers.map(async (worker) => {
-          // 사장용 API는 staffId를 사용하여 특정 직원의 근무 가능 시간을 조회합니다
-          const staffId = worker.staffId || worker.userStoreId || worker.id || worker.userId;
-          const workerName = worker.name || worker.username || '이름없음';
+          // 사장용 API는 userStoreId를 staffId로 사용하여 특정 직원의 근무 가능 시간을 조회합니다
+          const staffId = worker.userStoreId;
+          const workerName = worker.username || worker.name || '이름없음';
           
           if (!staffId) {
             const errorMsg = "직원 ID를 찾을 수 없습니다";
@@ -173,8 +189,8 @@ function ScheduleList() {
 
   // 근무 가능 시간대 포맷팅
   const formatAvailableTimes = (worker) => {
-    // worker 객체에서 staffId 추출
-    const staffId = worker?.staffId || worker?.userStoreId || worker?.id || worker?.userId;
+    // worker 객체에서 userStoreId 추출 (staffId로 사용)
+    const staffId = worker?.userStoreId;
     const schedules = workerSchedules[staffId] || [];
     const error = workerErrors[staffId];
     
@@ -229,8 +245,8 @@ function ScheduleList() {
 
     const availableWorkers = [];
     workers.forEach((worker) => {
-      // worker.staffId 또는 userStoreId를 사용하여 스케줄 찾기
-      const staffId = worker.staffId || worker.userStoreId || worker.id || worker.userId;
+      // worker.userStoreId를 staffId로 사용하여 스케줄 찾기
+      const staffId = worker.userStoreId;
       const schedules = workerSchedules[staffId] || [];
       const hasSchedule = schedules.some((schedule) => {
         const scheduleDate = dayjs(schedule.startDatetime).locale("ko");
@@ -356,13 +372,13 @@ function ScheduleList() {
 
             <div className="flex flex-col gap-3 mt-3">
             {workers.map((worker) => {
-                const workerId = worker.staffId || worker.userStoreId || worker.id || worker.userId;
+                const workerId = worker.userStoreId;
                 const hasError = workerErrors[workerId];
                 const errorStatus = hasError?.status;
                 
                 return (
                 <div
-                key={worker.id || worker.userStoreId || worker.staffId}
+                key={worker.userStoreId}
                 className={`flex items-center gap-3 p-3 rounded-lg shadow-sm ${
                   hasError 
                     ? "bg-red-50 border border-red-200" 
@@ -379,7 +395,7 @@ function ScheduleList() {
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-base font-semibold truncate">
-                        {worker.name || worker.username || worker.userName || "이름 없음"}
+                        {worker.username || worker.name || worker.userName || "이름 없음"}
                       </p>
                       {hasError && (
                         <span className="text-xs text-red-600 font-medium whitespace-nowrap">
@@ -436,7 +452,7 @@ function ScheduleList() {
                   >
                     <div className="flex-shrink-0 w-10 h-10 bg-[#68E194] rounded-full border-2 border-white shadow-sm" />
                     <p className="text-base font-semibold">
-                      {worker.name || worker.userName || "이름 없음"}
+                      {worker.username || worker.name || worker.userName || "이름 없음"}
                     </p>
                   </div>
                 ))}
