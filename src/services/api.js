@@ -14,71 +14,19 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    // refresh-token 요청은 accessToken을 Authorization 헤더에 추가하지 않음
-    // (refresh-token 요청은 authService.js에서 직접 refreshToken을 Authorization 헤더에 설정함)
-    const isRefreshTokenRequest = config.url === "/api/auth/refresh-token";
-    
-    if (!isRefreshTokenRequest) {
-      const token = getAuthToken(); // 저장소에서 토큰을 가져옵니다.
-
-      if (token) {
-        config.headers = config.headers ?? {};
-        // 이미 Authorization 헤더가 설정되어 있지 않은 경우에만 추가
-        if (!config.headers.Authorization) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-      }
+    // 토큰 갱신 요청은 건너뜀
+    if (config._skipAuthRefresh) {
+      return config;
     }
 
-    // DELETE 요청 시 Content-Type 제거 (일부 서버에서 문제 발생 가능)
-    if (config.method?.toLowerCase() === 'delete') {
-      // DELETE 요청은 일반적으로 body가 없으므로 Content-Type 제거
-      delete config.headers['Content-Type'];
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      config.headers = {
+        ...config.headers,
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
     }
-
-    // availabilities 관련 요청 상세 로깅 (개발 환경뿐만 아니라 항상)
-    if (config.url?.includes('availabilities')) {
-      const token = getAuthToken();
-      console.log(`🔍 [API 요청] availabilities 관련:`, {
-        method: config.method?.toUpperCase(),
-        url: config.url,
-        baseURL: config.baseURL,
-        fullURL: `${config.baseURL}${config.url}`,
-        headers: {
-          Authorization: config.headers.Authorization ? `Bearer ${config.headers.Authorization.split(' ')[1]?.substring(0, 20)}...` : '❌ 토큰 없음',
-          'Content-Type': config.headers['Content-Type'] || '없음',
-        },
-        params: config.params,
-        tokenFromStorage: token ? `존재 (길이: ${token.length})` : '❌ 없음',
-        tokenInHeader: config.headers.Authorization ? '✅ 있음' : '❌ 없음',
-      });
-      
-      // 토큰 확인
-      if (!token) {
-        console.warn("⚠️ [토큰 확인] accessToken이 localStorage에 없습니다!");
-      } else {
-        console.log("✅ [토큰 확인] accessToken이 존재합니다 (길이:", token.length, ")");
-      }
-      
-      // 헤더에 토큰이 제대로 설정되었는지 확인
-      if (!config.headers.Authorization) {
-        console.error("❌ [헤더 확인] Authorization 헤더가 설정되지 않았습니다!");
-      }
-    }
-
-    // 개발 환경에서 요청 정보 로깅
-    if (import.meta.env.DEV && config.method?.toLowerCase() === 'delete') {
-      console.log(`🔍 DELETE 요청:`, {
-        url: config.url,
-        baseURL: config.baseURL,
-        fullURL: `${config.baseURL}${config.url}`,
-        headers: {
-          Authorization: config.headers.Authorization ? 'Bearer ***' : '없음',
-          'Content-Type': config.headers['Content-Type'] || '없음',
-        },
-      });
-    }
-
     return config;
   },
   (error) => {
@@ -100,127 +48,29 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // 401 또는 500 에러 처리 (refresh-token이 500을 반환할 수 있음)
-    const isAuthError = error.response?.status === 401 || error.response?.status === 500;
-    const isRefreshTokenError = originalRequest.url === "/api/auth/refresh-token";
-    
-    // 프로필 확인 요청은 500 에러를 인증 에러로 처리하지 않음
-    // (500은 서버 에러일 수 있고, "역할이 아니다"를 의미할 수도 있음)
-    const isProfileCheckRequest = 
-      originalRequest.url?.includes("/api/mypage/owner/profile") ||
-      originalRequest.url?.includes("/api/mypage/staff/profile");
-    
-    // availabilities 요청의 500 에러는 서버 내부 오류일 가능성이 높으므로 토큰 갱신 시도하지 않음
-    const isAvailabilitiesRequest = originalRequest.url?.includes('/availabilities');
-    
-    // 500 에러이면서 프로필 확인 요청이거나 availabilities 요청인 경우 토큰 갱신 시도하지 않음
-    const shouldSkipTokenRefresh = 
-      (error.response?.status === 500 && isProfileCheckRequest) ||
-      (error.response?.status === 500 && isAvailabilitiesRequest);
-    
-    // availabilities 요청의 500 에러는 별도 처리
-    if (isAvailabilitiesRequest && error.response?.status === 500) {
-      console.error("⚠️ [availabilities 500 에러] 토큰 갱신 없이 에러 반환:", {
-        url: originalRequest.url,
-        status: error.response.status,
-        errorData: error.response.data,
-        message: "이 에러는 서버 내부 오류일 가능성이 높습니다. 백엔드 로그를 확인하세요.",
-      });
+    if (
+      originalRequest._retry ||
+      originalRequest.url === "/api/auth/refresh-token"
+    ) {
       return Promise.reject(error);
     }
-    
-    if (isAuthError && !originalRequest._retry && !shouldSkipTokenRefresh) {
-      // refresh-token 요청 자체가 실패한 경우
-      if (isRefreshTokenError) {
-        console.log("❌ 리프레시 토큰 요청 실패 - 로그인 페이지로 이동");
-        console.error("에러 상세:", {
-          status: error.response?.status,
-          data: error.response?.data,
-        });
-        await logout();
-        window.location.href = "/";
-        return Promise.reject(error);
-      }
-
+    if (error.response?.status === 401) {
       originalRequest._retry = true;
 
       try {
         console.log("🔄 액세스 토큰 만료 - 토큰 갱신 시도");
-        const response = await refreshToken();
+        const tokenData = await refreshToken();
 
-        // 응답 형식: { accessToken: "string" }
-        if (response && response.accessToken) {
-          localStorage.setItem("accessToken", response.accessToken);
-
-          // 원본 요청 헤더 갱신
-          originalRequest.headers = originalRequest.headers || {};
-          originalRequest.headers.Authorization = `Bearer ${response.accessToken}`;
-          
-          // axios 기본 헤더도 갱신 (다음 요청들을 위해)
-          api.defaults.headers.common['Authorization'] = `Bearer ${response.accessToken}`;
-
-          console.log("✅ 토큰 갱신 완료 - 재요청 시도:", {
-            url: originalRequest.url,
-            hasAuthHeader: !!originalRequest.headers.Authorization,
-            tokenLength: response.accessToken.length,
-          });
-
-          return api(originalRequest);
-        } else {
-          throw new Error("토큰 갱신 실패: 유효하지 않은 응답 형식");
-        }
+        // 새 토큰으로 원본 요청 재시도
+        originalRequest.headers.Authorization = `Bearer ${tokenData.accessToken}`;
+        return api(originalRequest);
       } catch (refreshError) {
-        console.error("❌ 토큰 갱신 실패:", refreshError);
+        console.error("❌ 토큰 갱신 실패 - 로그아웃 처리", refreshError);
         await logout();
-        window.location.href = "/";
-        return Promise.reject(error);
+        window.location.href = "/login";
+        return Promise.reject(refreshError);
       }
     }
-    // 에러 상세 로깅
-    if (error.response) {
-      // 서버가 응답했지만 에러 상태 코드
-      const isAvailabilityError = error.config?.url?.includes('availabilities');
-      const errorLog = {
-        status: error.response.status,
-        statusText: error.response.statusText,
-        data: error.response.data,
-        requestURL: error.config?.url,
-        requestMethod: error.config?.method?.toUpperCase(),
-        fullURL: `${error.config?.baseURL}${error.config?.url}`,
-      };
-      
-      if (isAvailabilityError) {
-        console.error(
-          `❌ [API 에러] availabilities 관련 요청 실패:`,
-          errorLog,
-        );
-        
-        // 500 에러인 경우 추가 정보
-        if (error.response.status === 500) {
-          console.error("⚠️ [500 에러 상세] 서버 내부 오류:", {
-            requestHeaders: error.config?.headers,
-            responseHeaders: error.response.headers,
-            responseData: error.response.data,
-          });
-        }
-      } else {
-        console.error(
-          `❌ API 에러 응답: ${error.config?.method?.toUpperCase()} ${error.config?.url}`,
-          {
-            status: error.response.status,
-            statusText: error.response.statusText,
-            data: error.response.data,
-          },
-        );
-      }
-    } else if (error.request) {
-      // 요청은 보냈지만 응답을 받지 못함
-      console.error("❌ [API 에러] 서버 응답 없음:", {
-        url: error.config?.url,
-        message: error.message,
-      });
-    }
-
     return Promise.reject(error);
   },
 );

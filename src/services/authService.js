@@ -162,30 +162,42 @@ export const onboardingOwner = async (
 //토큰 갱신
 export async function refreshToken() {
   try {
-    // localStorage에서 refreshToken 가져오기
     const refreshToken = localStorage.getItem("refreshToken");
-    
-    // refreshToken이 없으면 에러 발생
+
     if (!refreshToken) {
-      console.error("❌ refreshToken이 localStorage에 없습니다.");
+      console.error("refreshToken이 localStorage에 없습니다.");
       throw new Error("Refresh token not found");
     }
 
-    // Authorization 헤더에 Bearer 토큰으로 refreshToken 전송
     const response = await api.post(
       "/api/auth/refresh-token",
-      {}, // body는 비어있음
+      {},
       {
         headers: {
           Authorization: `Bearer ${refreshToken}`,
+          "Content-Type": "application/json",
         },
+        _skipAuthRefresh: true,
       },
     );
-    
+
+    if (!response.data || !response.data.accessToken) {
+      console.error("❌ 유효하지 않은 토큰 응답 형식:", response.data);
+      throw new Error("Invalid token response format");
+    }
+
+    localStorage.setItem("accessToken", response.data.accessToken);
+
     return response.data;
   } catch (error) {
     console.error("❌ 토큰 갱신 실패:", error.response?.data || error.message);
     throw error;
+
+    if (error.response?.status === 401) {
+      console.log("인증 실패- 로그아웃 처리");
+      await logout();
+      window.location.href = "/";
+    }
   }
 }
 
