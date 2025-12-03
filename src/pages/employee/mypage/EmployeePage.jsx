@@ -11,9 +11,11 @@ import {
   fetchStoreList,
   updateMydata,
 } from "../../../services/employee/MyPageService.js";
+import { useNavigate } from "react-router-dom";
 import { logout } from "../../../services/authService.js";
 
 function EmployeePage() {
+  const navigate = useNavigate();
   const [mydata, setMydata] = useState([]);
   const [profile, setProfile] = useState("");
 
