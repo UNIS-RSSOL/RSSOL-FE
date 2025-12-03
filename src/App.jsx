@@ -51,8 +51,14 @@ function App() {
       await api.get("/api/mypage/owner/profile");
       return navigate("/owner", { replace: true });
     } catch (_) {
-      await api.get("/api/mypage/staff/profile");
-      return navigate("/employee", { replace: true });
+      // 2) 알바일 가능성 체크
+      try {
+        await api.get("/api/mypage/staff/profile");
+        return navigate("/employee", { replace: true });
+      } catch (err2) {
+        console.log("❌ 역할 판단 실패", err2);
+        return goLogin();
+      }
     }
   };
 
@@ -110,15 +116,23 @@ function App() {
         const res = await api.get("/api/mypage/active-store");
         activeStore = res.data;
       } catch (err) {
-        // 매장 없음 → 온보딩
+        // 매장 없음 → 역할에 따라 홈으로 이동 (알바는 active-store 없어도 정상)
         const status = err.response?.status;
         if (status === 401) return goLogin();
-        return goOnboarding();
+        // active-store 없는 사용자 = 알바도 포함. goOnboarding 금지
+        if (location.pathname === "/" || location.pathname === "/login") {
+          return goHomeByRole();
+        }
+        return;
       }
 
       if (!activeStore?.storeId) {
-        console.log("❕ 활성 매장 없음 → 온보딩");
-        return goOnboarding();
+        console.log("❕ 활성 매장 없음 → 역할에 따라 홈으로 이동");
+        // active-store 없는 사용자 = 알바도 포함. goOnboarding 금지
+        if (location.pathname === "/" || location.pathname === "/login") {
+          return goHomeByRole();
+        }
+        return;
       }
 
       /** -------------------------
@@ -130,17 +144,20 @@ function App() {
     } catch (err) {
       const status = err.response?.status;
       if (status === 401) return goLogin();
-      goOnboarding();
+      // active-store 없는 사용자 = 알바도 포함. goOnboarding 금지
+      if (location.pathname === "/" || location.pathname === "/login") {
+        return goHomeByRole();
+      }
     } finally {
       setIsCheckingAuth(false);
     }
   }, [location.pathname, navigate]);
 
   /** -------------------------
-   *  루트/로그인에서만 인증 체크
+   *  루트에서만 인증 체크
    --------------------------*/
   useEffect(() => {
-    const checkPages = ["/", "/login"];
+    const checkPages = ["/"];
     if (checkPages.includes(location.pathname)) {
       checkAuthAndRedirect();
     }
