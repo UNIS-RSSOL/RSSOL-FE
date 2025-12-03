@@ -3,7 +3,7 @@ import ColoredCalIcon from "../../assets/icons/ColoredCalIcon.jsx";
 import ColoredDollarIcon from "../../assets/icons/ColoredDollarIcon.jsx";
 import CheckIcon from "../../assets/icons/CheckIcon.jsx";
 import GreenBtn from "../../components/common/GreenBtn.jsx";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import character1 from "../../assets/images/character1.png";
 import Note from "../../components/common/Note.jsx";
 import ResourceCalendar from "../../components/common/calendar/ResourceCalendar.jsx";
@@ -97,7 +97,7 @@ function OwnerHome() {
     return () => clearInterval(intervalId);
   }, [activeStore]);
 
-  const FloatButton = () => {
+  const FloatButton = useMemo(() => {
     const [isOpen, setIsOpen] = useState(false);
     const [storeList, setStoreList] = useState([]);
 
@@ -169,7 +169,7 @@ function OwnerHome() {
         </motion.div>
       </div>
     );
-  };
+  });
 
   return (
     <div className="w-full flex flex-col py-7 px-5">
