@@ -14,7 +14,8 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    // refresh-token 요청은 Authorization 헤더를 추가하지 않음 (body에 refreshToken 포함)
+    // refresh-token 요청은 accessToken을 Authorization 헤더에 추가하지 않음
+    // (refresh-token 요청은 authService.js에서 직접 refreshToken을 Authorization 헤더에 설정함)
     const isRefreshTokenRequest = config.url === "/api/auth/refresh-token";
     
     if (!isRefreshTokenRequest) {
@@ -22,6 +23,7 @@ api.interceptors.request.use(
 
       if (token) {
         config.headers = config.headers ?? {};
+        // 이미 Authorization 헤더가 설정되어 있지 않은 경우에만 추가
         if (!config.headers.Authorization) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -111,17 +113,13 @@ api.interceptors.response.use(
 
       try {
         console.log("🔄 액세스 토큰 만료 - 토큰 갱신 시도");
-        const newTokens = await refreshToken();
+        const response = await refreshToken();
 
-        if (newTokens && newTokens.accessToken) {
-          localStorage.setItem("accessToken", newTokens.accessToken);
-          
-          // refreshToken도 함께 업데이트 (백엔드가 새 refreshToken을 반환하는 경우)
-          if (newTokens.refreshToken) {
-            localStorage.setItem("refreshToken", newTokens.refreshToken);
-          }
+        // 응답 형식: { accessToken: "string" }
+        if (response && response.accessToken) {
+          localStorage.setItem("accessToken", response.accessToken);
 
-          originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
+          originalRequest.headers.Authorization = `Bearer ${response.accessToken}`;
 
           return api(originalRequest);
         } else {

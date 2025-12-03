@@ -165,10 +165,16 @@ export async function refreshToken() {
       throw new Error("Refresh token not found");
     }
 
-    // body에 refreshToken 포함하여 요청
-    const response = await api.post("/api/auth/refresh-token", {
-      refreshToken: refreshToken,
-    });
+    // Authorization 헤더에 Bearer 토큰으로 refreshToken 전송
+    const response = await api.post(
+      "/api/auth/refresh-token",
+      {}, // body는 비어있음
+      {
+        headers: {
+          Authorization: `Bearer ${refreshToken}`,
+        },
+      },
+    );
     
     return response.data;
   } catch (error) {
