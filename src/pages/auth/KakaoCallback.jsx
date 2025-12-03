@@ -161,6 +161,19 @@ function KakaoCallback() {
               navigate("/owner");
               return;
             } catch (ownerError) {
+              const ownerStatus = ownerError.response?.status;
+              
+              // 500 에러는 서버 에러이므로, 토큰 갱신이 트리거될 수 있음
+              // 하지만 이 경우는 "owner가 아니다"가 아니라 서버 문제일 수 있으므로
+              // staff 체크로 넘어가되, 에러를 로깅
+              if (ownerStatus === 500) {
+                console.warn("⚠️ owner 프로필 조회 시 500 에러 발생 (서버 에러 가능성) -> staff 체크로 진행");
+              } else if (ownerStatus === 403 || ownerStatus === 404) {
+                console.log("owner 프로필 없음 (403/404) -> staff 체크로 진행");
+              } else {
+                console.log("owner 프로필 조회 실패:", ownerStatus, "-> staff 체크로 진행");
+              }
+              
               // owner 프로필이 없으면 staff로 시도
               try {
                 await api.get("/api/mypage/staff/profile");
@@ -169,6 +182,9 @@ function KakaoCallback() {
                 navigate("/employee");
                 return;
               } catch (staffError) {
+                const staffStatus = staffError.response?.status;
+                console.log("staff 프로필 조회 실패:", staffStatus);
+                
                 // 둘 다 실패하면 정보 미등록으로 간주
                 console.log("프로필 확인 실패 -> 온보딩으로 이동");
                 window.history.replaceState({}, document.title, window.location.pathname);

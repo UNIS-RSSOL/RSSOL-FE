@@ -96,7 +96,17 @@ api.interceptors.response.use(
     const isAuthError = error.response?.status === 401 || error.response?.status === 500;
     const isRefreshTokenError = originalRequest.url === "/api/auth/refresh-token";
     
-    if (isAuthError && !originalRequest._retry) {
+    // 프로필 확인 요청은 500 에러를 인증 에러로 처리하지 않음
+    // (500은 서버 에러일 수 있고, "역할이 아니다"를 의미할 수도 있음)
+    const isProfileCheckRequest = 
+      originalRequest.url?.includes("/api/mypage/owner/profile") ||
+      originalRequest.url?.includes("/api/mypage/staff/profile");
+    
+    // 500 에러이면서 프로필 확인 요청인 경우 토큰 갱신 시도하지 않음
+    const shouldSkipTokenRefresh = 
+      error.response?.status === 500 && isProfileCheckRequest;
+    
+    if (isAuthError && !originalRequest._retry && !shouldSkipTokenRefresh) {
       // refresh-token 요청 자체가 실패한 경우
       if (isRefreshTokenError) {
         console.log("❌ 리프레시 토큰 요청 실패 - 로그인 페이지로 이동");
