@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import InfoBox from "../../../components/common/mypage/InfoBox.jsx";
 import { MypageIcon } from "../../../assets/icons/MypageIcon.jsx";
 import MsgIcon from "../../../assets/icons/MsgIcon.jsx";
-import CoinIcon from "../../../assets/icons/CoinIcon.jsx";
+import { CoinIcon } from "../../../assets/icons/CoinIcon.jsx";
 import SaveIcon from "../../../assets/icons/SaveIcon.jsx";
 import TypeIcon from "../../../assets/icons/TypeIcon.jsx";
 import MapIcon from "../../../assets/icons/MapIcon.jsx";

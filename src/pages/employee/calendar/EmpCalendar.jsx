@@ -79,6 +79,14 @@ function EmpCalendar() {
             startOfWeek.add(6, "day").format("YYYY-MM-DD"),
           );
 
+          const formattedEvents = schedules.map((s) => ({
+            id: s.id,
+            storeId: s.storeId,
+            storeName: s.storeName,
+            start: s.startDatetime,
+            end: s.endDatetime,
+          }));
+
           setEvents(formattedEvents);
         } catch (error) {
           console.error("Error fetching schedules:", error);

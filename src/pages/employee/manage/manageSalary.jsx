@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import CoinIcon from "../../../assets/icons/CoinIcon.jsx";
+import { CoinIcon } from "../../../assets/icons/CoinIcon.jsx";
 import PhoneIcon from "../../../assets/icons/PhoneIcon.jsx";
 import DollarIcon from "../../../assets/icons/DollarIcon.jsx";
 import CopyIcon from "../../../assets/icons/CopyIcon.jsx";
