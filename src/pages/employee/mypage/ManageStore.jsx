@@ -74,13 +74,10 @@ function ManageStore() {
   const handleAddStore = async () => {
     try {
       console.log(newStore);
-      const response = await addStore(newStore.content);
-      if (response.success) {
-        setAddToast(false);
-        setSuccessModal(true);
-      } else {
-        setFailModal(true);
-      }
+      await addStore(newStore.content);
+      setAddToast(false);
+      setSuccessModal(true);
+
       setNewStore([
         {
           icon: <SaveIcon />,
@@ -90,6 +87,7 @@ function ManageStore() {
       ]);
     } catch (error) {
       console.error(error);
+      setFailModal(true);
     }
   };
 
