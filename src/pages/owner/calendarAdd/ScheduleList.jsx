@@ -207,6 +207,35 @@ function ScheduleList() {
         
         if (errorCount > 0) {
           console.warn(`⚠️ ${errorCount}명의 직원 데이터 로드 실패:`, errorsByWorker);
+          
+          // 저장/조회 API 키 불일치 진단 정보
+          console.error("🔍 [진단] 저장/조회 API 키 불일치 가능성 체크:", {
+            message: "저장 API와 조회 API가 다른 키를 사용할 수 있습니다.",
+            저장API: {
+              endpoint: "POST /api/me/availabilities",
+              사용키: "userStoreId",
+              설명: "알바생이 자신의 근무 가능 시간을 저장할 때 사용",
+            },
+            조회API: {
+              endpoint: "GET /api/store/staff/{staffId}/availabilities",
+              사용키: "staffId (userStoreId와 동일해야 함)",
+              설명: "사장이 직원의 근무 가능 시간을 조회할 때 사용",
+            },
+            실패한직원들: Object.keys(errorsByWorker).map(staffId => {
+              const error = errorsByWorker[staffId];
+              return {
+                staffId,
+                workerName: error.workerName,
+                errorStatus: error.status,
+                errorMessage: error.errorMessage,
+              };
+            }),
+            확인방법: [
+              "1. 저장 시 사용한 userStoreId와 조회 시 사용한 staffId가 일치하는지 확인",
+              "2. Postman으로 GET /api/store/staff/{staffId}/availabilities 직접 호출",
+              "3. 백엔드 로그에서 저장 시 사용된 키와 조회 시 사용된 키 확인",
+            ],
+          });
         }
         
         setWorkerSchedules(schedulesByWorker);

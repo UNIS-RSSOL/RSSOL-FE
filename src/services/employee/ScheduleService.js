@@ -31,11 +31,24 @@ export async function requestSub(shiftId, reason = "") {
 // 내 근무 가능 시간 조회 (work availability)
 export async function fetchMyAvailabilities() {
   try {
-    console.log("🔍 fetchMyAvailabilities: API 요청 시작");
-    const response = await api.get("/api/me/availabilities");
-    console.log("🔍 fetchMyAvailabilities: API 응답:", response.data);
-    console.log("🔍 fetchMyAvailabilities: 응답 타입:", typeof response.data);
-    console.log("🔍 fetchMyAvailabilities: 배열 여부:", Array.isArray(response.data));
+    const endpoint = "/api/me/availabilities";
+    const fullURL = `${api.defaults.baseURL}${endpoint}`;
+    
+    console.log("🔍 [조회 API] 내 근무 가능 시간 조회 요청:", {
+      endpoint,
+      fullURL,
+      method: "GET",
+    });
+    
+    const response = await api.get(endpoint);
+    
+    console.log("✅ [조회 API] 내 근무 가능 시간 조회 성공:", {
+      status: response.status,
+      statusText: response.statusText,
+      responseData: response.data,
+      responseType: typeof response.data,
+      isArray: Array.isArray(response.data),
+    });
     
     // 응답이 배열이 아닌 경우 처리
     let availabilities = response.data;
@@ -52,13 +65,22 @@ export async function fetchMyAvailabilities() {
       }
     }
     
-    console.log("🔍 fetchMyAvailabilities: 최종 반환 데이터:", availabilities);
-    console.log("🔍 fetchMyAvailabilities: 최종 반환 데이터 개수:", availabilities.length);
+    console.log("✅ [조회 API] 최종 반환 데이터:", {
+      count: availabilities.length,
+      data: availabilities,
+    });
     
     return availabilities;
   } catch (error) {
-    console.error("❌ fetchMyAvailabilities: 근무 가능 시간 조회 실패:", error);
-    console.error("❌ fetchMyAvailabilities: 에러 응답:", error.response?.data);
+    console.error("❌ [조회 API] 내 근무 가능 시간 조회 실패:", {
+      endpoint: "/api/me/availabilities",
+      method: "GET",
+      errorStatus: error.response?.status,
+      errorStatusText: error.response?.statusText,
+      errorData: error.response?.data,
+      errorMessage: error.message,
+      requestHeaders: error.config?.headers,
+    });
     throw error;
   }
 }
@@ -67,12 +89,52 @@ export async function fetchMyAvailabilities() {
 // payload: { userStoreId: number, userName: string, availabilities: [{ dayOfWeek: string, startTime: string, endTime: string }] }
 export async function addAvailability(payload) {
   try {
-    console.log("API 요청 payload:", JSON.stringify(payload, null, 2));
-    const response = await api.post("/api/me/availabilities", payload);
+    const endpoint = "/api/me/availabilities";
+    const fullURL = `${api.defaults.baseURL}${endpoint}`;
+    
+    console.log("📤 [저장 API] 근무 가능 시간 추가 요청:", {
+      endpoint,
+      fullURL,
+      method: "POST",
+      payload: {
+        ...payload,
+        availabilitiesCount: payload.availabilities?.length || 0,
+        availabilities: payload.availabilities?.map(av => ({
+          dayOfWeek: av.dayOfWeek,
+          startTime: av.startTime,
+          endTime: av.endTime,
+        })),
+      },
+      userStoreId: payload.userStoreId,
+      userStoreIdType: typeof payload.userStoreId,
+      userName: payload.userName,
+    });
+    
+    const response = await api.post(endpoint, payload);
+    
+    console.log("✅ [저장 API] 근무 가능 시간 추가 성공:", {
+      status: response.status,
+      statusText: response.statusText,
+      responseData: response.data,
+      savedUserStoreId: payload.userStoreId,
+    });
+    
     return response.data;
   } catch (error) {
-    console.error("근무 가능 시간 추가 실패:", error);
-    console.error("에러 응답:", error.response?.data);
+    console.error("❌ [저장 API] 근무 가능 시간 추가 실패:", {
+      endpoint: "/api/me/availabilities",
+      method: "POST",
+      payload: {
+        userStoreId: payload.userStoreId,
+        userName: payload.userName,
+        availabilitiesCount: payload.availabilities?.length || 0,
+      },
+      errorStatus: error.response?.status,
+      errorStatusText: error.response?.statusText,
+      errorData: error.response?.data,
+      errorMessage: error.message,
+      requestHeaders: error.config?.headers,
+    });
     throw error;
   }
 }
@@ -82,12 +144,52 @@ export async function addAvailability(payload) {
 // PUT은 전체 리스트를 갱신하므로, 삭제하려는 항목을 제외하고 보내면 자동으로 삭제됨
 export async function updateAvailability(payload) {
   try {
-    console.log("🔍 PUT 요청 payload:", JSON.stringify(payload, null, 2));
-    const response = await api.put("/api/me/availabilities", payload);
+    const endpoint = "/api/me/availabilities";
+    const fullURL = `${api.defaults.baseURL}${endpoint}`;
+    
+    console.log("📤 [수정 API] 근무 가능 시간 수정 요청:", {
+      endpoint,
+      fullURL,
+      method: "PUT",
+      payload: {
+        ...payload,
+        availabilitiesCount: payload.availabilities?.length || 0,
+        availabilities: payload.availabilities?.map(av => ({
+          dayOfWeek: av.dayOfWeek,
+          startTime: av.startTime,
+          endTime: av.endTime,
+        })),
+      },
+      userStoreId: payload.userStoreId,
+      userStoreIdType: typeof payload.userStoreId,
+      userName: payload.userName,
+    });
+    
+    const response = await api.put(endpoint, payload);
+    
+    console.log("✅ [수정 API] 근무 가능 시간 수정 성공:", {
+      status: response.status,
+      statusText: response.statusText,
+      responseData: response.data,
+      savedUserStoreId: payload.userStoreId,
+    });
+    
     return response.data;
   } catch (error) {
-    console.error("❌ 근무 가능 시간 수정 실패:", error);
-    console.error("❌ 에러 응답:", error.response?.data);
+    console.error("❌ [수정 API] 근무 가능 시간 수정 실패:", {
+      endpoint: "/api/me/availabilities",
+      method: "PUT",
+      payload: {
+        userStoreId: payload.userStoreId,
+        userName: payload.userName,
+        availabilitiesCount: payload.availabilities?.length || 0,
+      },
+      errorStatus: error.response?.status,
+      errorStatusText: error.response?.statusText,
+      errorData: error.response?.data,
+      errorMessage: error.message,
+      requestHeaders: error.config?.headers,
+    });
     throw error;
   }
 }

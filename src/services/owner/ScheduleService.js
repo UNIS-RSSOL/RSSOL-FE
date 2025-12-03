@@ -85,22 +85,38 @@ export async function fetchEmployeeAvailabilities(staffId) {
   try {
     // 토큰 확인
     const token = localStorage.getItem("accessToken");
-    console.log(`🔍 [API 요청] 직원 근무 가능 시간 조회:`, {
-      endpoint: `/api/store/staff/${staffId}/availabilities`,
+    const endpoint = `/api/store/staff/${staffId}/availabilities`;
+    const fullURL = `${api.defaults.baseURL}${endpoint}`;
+    
+    console.log(`🔍 [조회 API] 직원 근무 가능 시간 조회 요청:`, {
+      endpoint,
+      fullURL,
+      method: "GET",
       staffId,
       staffIdType: typeof staffId,
-      fullURL: `${api.defaults.baseURL}/api/store/staff/${staffId}/availabilities`,
       tokenExists: !!token,
       tokenLength: token?.length || 0,
     });
 
-    const response = await api.get(`/api/store/staff/${staffId}/availabilities`);
+    const response = await api.get(endpoint);
     
     // 디버깅: 성공 응답 로깅
-    console.log(`✅ [API 성공] 직원 근무 가능 시간 조회:`, {
+    console.log(`✅ [조회 API] 직원 근무 가능 시간 조회 성공:`, {
+      status: response.status,
+      statusText: response.statusText,
       staffId,
       dataCount: Array.isArray(response.data) ? response.data.length : 0,
       data: response.data,
+      // 저장 API와 비교를 위한 정보
+      comparison: {
+        queryStaffId: staffId,
+        responseDataStructure: response.data && Array.isArray(response.data) && response.data.length > 0
+          ? {
+              firstItemKeys: Object.keys(response.data[0]),
+              firstItem: response.data[0],
+            }
+          : "빈 배열 또는 데이터 없음",
+      },
     });
 
     return response.data || [];
