@@ -400,11 +400,14 @@ function CalModEmp() {
 
     // work availability 수정 (PUT 전체 갱신 방식)
     try {
+      // PUT 요청 시 id를 모두 제거하고 새 항목만 보내기 (백엔드가 id 있으면 UPDATE, 없으면 INSERT로 처리하므로)
+      const availabilitiesWithoutId = availabilitiesList.map(({ id, ...rest }) => rest);
+      
       // PUT 요청을 위한 payload 생성 (백엔드 DTO 구조에 맞게)
       const payload = {
         userStoreId: employeeStoreId,
         userName: employeeUserName,
-        availabilities: availabilitiesList, // 배열 (삭제하려는 항목은 제외하고 보냄)
+        availabilities: availabilitiesWithoutId, // id 없는 순수 배열 (전체 INSERT로 처리)
       };
 
       console.log("🔍 PUT 요청으로 전체 갱신 중...");
