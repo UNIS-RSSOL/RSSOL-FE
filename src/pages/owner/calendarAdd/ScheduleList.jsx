@@ -122,7 +122,15 @@ function ScheduleList() {
             return;
           }
           
-          console.log(`🔍 직원 ${workerName} (ID: ${staffId})의 근무 가능 시간 조회 시작`);
+          console.log(`🔍 직원 ${workerName} (ID: ${staffId})의 근무 가능 시간 조회 시작`, {
+            worker: {
+              userStoreId: worker.userStoreId,
+              username: worker.username,
+              allFields: Object.keys(worker),
+            },
+            staffId,
+            staffIdType: typeof staffId,
+          });
           
           try {
             const availabilities = await fetchEmployeeAvailabilities(staffId);
@@ -154,9 +162,32 @@ function ScheduleList() {
             
             // 500 에러인 경우 추가 경고
             if (error.response?.status === 500) {
-              console.warn(`⚠️ [서버 오류] 직원 ${workerName} (ID: ${staffId})의 데이터를 서버에서 불러올 수 없습니다.`, {
-                serverError: error.response?.data,
+              console.error(`⚠️ [서버 500 오류] 직원 ${workerName} (ID: ${staffId})의 데이터를 서버에서 불러올 수 없습니다.`, {
+                staffId,
+                staffIdType: typeof staffId,
+                workerName,
                 requestURL: error.config?.url,
+                requestMethod: error.config?.method,
+                requestHeaders: {
+                  ...error.config?.headers,
+                  Authorization: error.config?.headers?.Authorization 
+                    ? `Bearer ${error.config.headers.Authorization.split(' ')[1]?.substring(0, 20)}...` 
+                    : '❌ 없음',
+                },
+                responseStatus: error.response?.status,
+                responseData: error.response?.data,
+                responseHeaders: error.response?.headers,
+                errorMessage: error.response?.data?.message || error.response?.data?.error || error.message,
+                // 백엔드 개발자용 요약
+                backendSummary: {
+                  endpoint: `/api/store/staff/${staffId}/availabilities`,
+                  method: "GET",
+                  status: 500,
+                  staffId: staffId,
+                  staffIdType: typeof staffId,
+                  errorMessage: error.response?.data?.message || error.response?.data?.error || "서버 내부 오류",
+                  fullErrorData: error.response?.data,
+                },
               });
             }
           }
