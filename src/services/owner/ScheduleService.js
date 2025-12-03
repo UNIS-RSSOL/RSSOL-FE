@@ -85,50 +85,113 @@ export async function fetchEmployeeAvailabilities(staffId) {
   }
 
   try {
-    // 디버깅: 요청 정보 로깅
-    console.log(`🔍 [API 요청] 직원 근무 가능 시간 조회:`, {
-      endpoint: `/api/store/staff/${staffId}/availabilities`,
+    // 토큰 확인
+    const token = localStorage.getItem("accessToken");
+    const endpoint = `/api/store/staff/${staffId}/availabilities`;
+    const fullURL = `${api.defaults.baseURL}${endpoint}`;
+
+    console.log(`🔍 [조회 API] 직원 근무 가능 시간 조회 요청:`, {
+      endpoint,
+      fullURL,
+      method: "GET",
       staffId,
-      fullURL: `${api.defaults.baseURL}/api/store/staff/${staffId}/availabilities`,
+      staffIdType: typeof staffId,
+      tokenExists: !!token,
+      tokenLength: token?.length || 0,
     });
 
-    const response = await api.get(
-      `/api/store/staff/${staffId}/availabilities`,
-    );
+    const response = await api.get(endpoint);
 
     // 디버깅: 성공 응답 로깅
-    console.log(`✅ [API 성공] 직원 근무 가능 시간 조회:`, {
+    console.log(`✅ [조회 API] 직원 근무 가능 시간 조회 성공:`, {
+      status: response.status,
+      statusText: response.statusText,
       staffId,
       dataCount: Array.isArray(response.data) ? response.data.length : 0,
       data: response.data,
+      // 저장 API와 비교를 위한 정보
+      comparison: {
+        queryStaffId: staffId,
+        responseDataStructure:
+          response.data &&
+          Array.isArray(response.data) &&
+          response.data.length > 0
+            ? {
+                firstItemKeys: Object.keys(response.data[0]),
+                firstItem: response.data[0],
+              }
+            : "빈 배열 또는 데이터 없음",
+      },
     });
 
     return response.data || [];
   } catch (error) {
     // 디버깅: 상세 에러 로깅
-    console.error(`🚨 [API 실패] 직원 ID:${staffId} 근무 가능시간 요청 실패:`, {
+    const errorDetails = {
       staffId,
+      staffIdType: typeof staffId,
       endpoint: `/api/store/staff/${staffId}/availabilities`,
       status: error.response?.status,
       statusText: error.response?.statusText,
       errorData: error.response?.data,
       errorMessage: error.message,
-    });
+      requestConfig: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: {
+          ...error.config?.headers,
+          Authorization: error.config?.headers?.Authorization
+            ? `Bearer ${error.config.headers.Authorization.split(" ")[1]?.substring(0, 20)}...`
+            : "❌ 없음",
+        },
+        baseURL: error.config?.baseURL,
+      },
+    };
+
+    console.error(
+      `🚨 [API 실패] 직원 ID:${staffId} 근무 가능시간 요청 실패:`,
+      errorDetails,
+    );
 
     // 500 에러인 경우 상세 정보 출력
     if (error.response?.status === 500) {
       console.error("⚠️ [서버 500 에러 상세]:", {
         requestURL: error.config?.url,
         requestMethod: error.config?.method,
-        requestHeaders: error.config?.headers,
+        requestHeaders: {
+          ...error.config?.headers,
+          Authorization: error.config?.headers?.Authorization
+            ? `Bearer ${error.config.headers.Authorization.split(" ")[1]?.substring(0, 20)}...`
+            : "❌ 없음",
+        },
         responseData: error.response?.data,
+        responseHeaders: error.response?.headers,
         // 백엔드 개발자에게 전달할 수 있도록 상세 정보
         serverError: {
-          message: error.response?.data?.message || "서버 내부 오류",
+          message:
+            error.response?.data?.message ||
+            error.response?.data?.error ||
+            "서버 내부 오류",
           timestamp: new Date().toISOString(),
           path: error.config?.url,
           method: error.config?.method?.toUpperCase(),
+          staffId: staffId,
+          staffIdType: typeof staffId,
         },
+      });
+
+      // 백엔드 개발자용 요약 정보
+      console.error("📋 [백엔드 개발자용 요약]:", {
+        endpoint: `/api/store/staff/${staffId}/availabilities`,
+        method: "GET",
+        status: 500,
+        staffId: staffId,
+        staffIdType: typeof staffId,
+        errorMessage:
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "서버 내부 오류",
+        fullErrorData: error.response?.data,
       });
     }
 
