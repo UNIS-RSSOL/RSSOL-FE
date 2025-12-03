@@ -1,18 +1,25 @@
-function FloatButton() {
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import StoreIcon from "../../assets/icons/StoreIcon.jsx";
+
+function FloatButton({ stores, active, handleChange }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [storeList, setStoreList] = useState([]);
+  const [storeList, setStoreList] = useState(stores);
+  const [activeStore, setActiveStore] = useState(active);
 
   useEffect(() => {
     (async () => {
       try {
-        const response = await fetchStoreList();
-
-        const stores = response.map((r) => ({
-          storeId: r.storeId,
-          name: r.name,
-        }));
-
+        setActiveStore(active);
         setStoreList(stores);
+        // const response = await fetchStoreList();
+
+        // const stores = response.map((r) => ({
+        //   storeId: r.storeId,
+        //   name: r.name,
+        // }));
+
+        // setStoreList(stores);
       } catch (error) {
         console.error(error);
       }
@@ -21,8 +28,7 @@ function FloatButton() {
 
   const handleChangeActive = async (storeId) => {
     try {
-      const response = await changeActiveStore(storeId);
-      setActiveStore({ storeId: response.storeId, name: response.name });
+      handleChange(storeId);
       setIsOpen(false);
       console.log({ storeId: response.storeId, name: response.name });
     } catch (error) {

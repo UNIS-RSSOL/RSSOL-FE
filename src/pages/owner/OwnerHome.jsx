@@ -14,8 +14,7 @@ import {
   changeActiveStore,
 } from "../../services/owner/MyPageService.js";
 import dayjs from "dayjs";
-import StoreIcon from "../../assets/icons/StoreIcon.jsx";
-import { motion, AnimatePresence } from "framer-motion";
+import FloatButton from "../../components/common/FloatButton.jsx";
 
 function OwnerHome() {
   const [currentTime, setCurrentTime] = useState("");
@@ -25,6 +24,7 @@ function OwnerHome() {
   const [wage, setWage] = useState(0);
   const [workers, setWorkers] = useState([]);
   const [events, setEvents] = useState([]);
+  const [storeList, setStoreList] = useState([]);
   const [activeStore, setActiveStore] = useState({ storeId: null, name: "" });
   const FormattedDate = (date, day) => {
     const d = dat[today.format("d")];
@@ -43,8 +43,8 @@ function OwnerHome() {
 
         const formattedEvents = schedules.map((schedule) => ({
           id: schedule.id,
-          workerId: schedule.userStoreId,
-          worker: schedule.userName,
+          userStoreId: schedule.userStoreId,
+          userName: schedule.userName,
           start: schedule.startDatetime,
           end: schedule.endDatetime,
         }));
@@ -70,6 +70,13 @@ function OwnerHome() {
           storeId: active.storeId,
           name: active.name,
         });
+
+        const stores = await fetchStoreList();
+        const formattedList = stores.map((s) => ({
+          storeId: s.storeId,
+          name: s.name,
+        }));
+        setStoreList(formattedList);
         console.log(activeStore);
         // const fetchedWage = await fetchWage(
         //   activeStore.storeId,
@@ -97,78 +104,14 @@ function OwnerHome() {
     return () => clearInterval(intervalId);
   }, []);
 
-  const FloatButton = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [storeList, setStoreList] = useState([]);
-
-    useEffect(() => {
-      (async () => {
-        try {
-          const response = await fetchStoreList();
-
-          const stores = response.map((r) => ({
-            storeId: r.storeId,
-            name: r.name,
-          }));
-
-          setStoreList(stores);
-        } catch (error) {
-          console.error(error);
-        }
-      })();
-    }, []);
-
-    const handleChangeActive = async (storeId) => {
-      try {
-        const response = await changeActiveStore(storeId);
-        setActiveStore({ storeId: response.storeId, name: response.name });
-        setIsOpen(false);
-        console.log({ storeId: response.storeId, name: response.name });
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    return (
-      <div className="fixed bottom-[80px] right-[calc(50%-196.5px+24px)] flex flex-col items-end gap-3">
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.2 }}
-              className="flex flex-col gap-3"
-            >
-              {storeList.map((store) => (
-                <motion.div
-                  key={store.storeId}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`flex items-center justify-center text-[10px] font-[500] size-[48px] rounded-full bg-white border-2 shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] cursor-pointer ${
-                    Number(store.storeId) === Number(activeStore?.storeId)
-                      ? "border-[#68e194]"
-                      : "border-black"
-                  }`}
-                  onClick={() => handleChangeActive(store.storeId)}
-                >
-                  {store.name}
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <motion.div
-          whileHover={{ scale: 1.05, backgroundColor: "#fff" }}
-          whileTap={{ scale: 0.95 }}
-          className="flex items-center justify-center size-[48px] rounded-full bg-[#68e194] shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] cursor-pointer"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <StoreIcon className={isOpen ? "text-[#68e194]" : "text-white"} />
-        </motion.div>
-      </div>
-    );
+  const handleChangeActiveStore = async (storeId) => {
+    try {
+      const response = await changeActiveStore(storeId);
+      setActiveStore({ storeId: response.storeId, name: response.name });
+      console.log({ storeId: response.storeId, name: response.name });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -232,7 +175,11 @@ function OwnerHome() {
           <img src={character1} alt="character" className="size-[110px] mr-1" />
         </Box>
       </div>
-      <FloatButton />
+      <FloatButton
+        stores={storeList}
+        active={activeStore}
+        handleChane={handleChangeActiveStore}
+      />
     </div>
   );
 }
