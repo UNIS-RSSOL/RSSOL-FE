@@ -80,6 +80,14 @@ function KakaoCallback() {
             newUser: isNewUser,
             isNewUser,
           };
+          
+          // refreshToken이 없으면 경고 로그
+          if (!refreshToken) {
+            console.warn("⚠️ URL 파라미터에 refreshToken이 없습니다. 백엔드가 쿠키로 설정했을 수 있습니다.");
+          } else {
+            console.log("✅ accessToken 및 refreshToken을 URL 파라미터에서 받았습니다.");
+          }
+          
           handleKakaoSession(session);
           
           // 신규 회원인 경우 온보딩으로 이동
@@ -96,6 +104,28 @@ function KakaoCallback() {
             const profileRes = await api.get("/api/auth/me");
             const userInfo = profileRes.data;
             
+            // 백엔드가 쿠키로 토큰을 설정한 경우, localStorage에도 저장 필요
+            // 백엔드 API 응답에 토큰이 포함되어 있는지 확인
+            if (userInfo?.accessToken) {
+              const session = {
+                accessToken: userInfo.accessToken,
+                refreshToken: userInfo.refreshToken || null,
+                userId: userInfo.userId || null,
+                newUser: userInfo.newUser || false,
+                isNewUser: userInfo.newUser || false,
+              };
+              
+              if (!session.refreshToken) {
+                console.warn("⚠️ 백엔드 응답에 refreshToken이 없습니다. 쿠키로만 설정되었을 수 있습니다.");
+              } else {
+                console.log("✅ 백엔드 API에서 accessToken 및 refreshToken을 받았습니다.");
+              }
+              
+              handleKakaoSession(session);
+            } else {
+              console.log("⚠️ 백엔드 응답에 토큰이 없습니다. 쿠키로만 인증되었을 수 있습니다.");
+            }
+            
             if (userInfo && userInfo.newUser !== undefined) {
               const isNewUserFromBackend = userInfo.newUser || userInfo.isNewUser;
               
@@ -108,6 +138,7 @@ function KakaoCallback() {
             }
           } catch (profileError) {
             console.log("프로필 조회 실패, 활성 매장 정보로 확인 시도");
+            console.error("프로필 조회 에러:", profileError);
           }
         }
 

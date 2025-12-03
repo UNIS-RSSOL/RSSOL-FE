@@ -62,6 +62,13 @@ function Login() {
       if (response.success) {
         // 토큰을 localStorage에 저장
         localStorage.setItem("accessToken", response.data);
+        // refreshToken도 함께 저장 (있는 경우)
+        if (response.refreshToken) {
+          localStorage.setItem("refreshToken", response.refreshToken);
+          console.log("✅ accessToken 및 refreshToken 저장 완료");
+        } else {
+          console.log("⚠️ refreshToken이 응답에 없습니다. accessToken만 저장됨");
+        }
         console.log("토큰 발급 완료:", response.data);
 
         // 기존 회원인지 확인하여 온보딩 여부 결정

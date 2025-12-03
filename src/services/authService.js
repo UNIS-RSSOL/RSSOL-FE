@@ -14,6 +14,7 @@ export const getDevToken = async (email) => {
 
     // 다양한 응답 형식 지원
     let normalizedToken = null;
+    let normalizedRefreshToken = null;
 
     // 1. response.data가 직접 토큰 문자열인 경우
     if (typeof response.data === "string") {
@@ -22,6 +23,7 @@ export const getDevToken = async (email) => {
     // 2. response.data.accessToken인 경우 (카카오 로그인과 동일한 형식)
     else if (response.data?.accessToken) {
       normalizedToken = response.data.accessToken;
+      normalizedRefreshToken = response.data.refreshToken || null;
     }
     // 3. response.data.data가 토큰인 경우
     else if (response.data?.data) {
@@ -30,13 +32,16 @@ export const getDevToken = async (email) => {
         normalizedToken = rawData;
       } else if (rawData?.accessToken) {
         normalizedToken = rawData.accessToken;
+        normalizedRefreshToken = rawData.refreshToken || null;
       } else if (rawData?.token) {
         normalizedToken = rawData.token;
+        normalizedRefreshToken = rawData.refreshToken || null;
       }
     }
     // 4. response.data.token인 경우
     else if (response.data?.token) {
       normalizedToken = response.data.token;
+      normalizedRefreshToken = response.data.refreshToken || null;
     }
 
     if (!normalizedToken) {
@@ -50,6 +55,7 @@ export const getDevToken = async (email) => {
     return {
       success: true,
       data: normalizedToken,
+      refreshToken: normalizedRefreshToken,
       message: response.data?.message || "",
     };
   } catch (error) {
