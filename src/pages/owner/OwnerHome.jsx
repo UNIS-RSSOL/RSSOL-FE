@@ -116,7 +116,7 @@ function OwnerHome() {
           console.error(error);
         }
       })();
-    }, [activeStore]);
+    }, []);
 
     const handleChangeActive = async (storeId) => {
       try {
