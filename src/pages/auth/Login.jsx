@@ -8,6 +8,7 @@ import GreenBtn from "../../components/common/GreenBtn.jsx";
 import api from "../../services/api.js";
 import EmpBtn from "../../assets/images/EmpBtn.png";
 import OwnerBtn from "../../assets/images/OwnerBtn.png";
+import Splash from "../common/Splash.jsx";
 
 function Login() {
   const navigate = useNavigate();
