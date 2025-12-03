@@ -1,5 +1,5 @@
 import axios from "axios";
-import { refreshToken } from "./authService";
+import { refreshToken, logout } from "./authService";
 
 const getAuthToken = () => {
   return localStorage.getItem("accessToken");
@@ -14,12 +14,17 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = getAuthToken(); // 저장소에서 토큰을 가져옵니다.
+    // refresh-token 요청은 Authorization 헤더를 추가하지 않음 (body에 refreshToken 포함)
+    const isRefreshTokenRequest = config.url === "/api/auth/refresh-token";
+    
+    if (!isRefreshTokenRequest) {
+      const token = getAuthToken(); // 저장소에서 토큰을 가져옵니다.
 
-    if (token) {
-      config.headers = config.headers ?? {};
-      if (!config.headers.Authorization) {
-        config.headers.Authorization = `Bearer ${token}`;
+      if (token) {
+        config.headers = config.headers ?? {};
+        if (!config.headers.Authorization) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
       }
     }
 
@@ -85,9 +90,18 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      if (originalRequest.url === "/api/auth/refresh-token") {
-        console.log("리프레시 토큰 만료 - 로그인 페이지로 이동");
+    // 401 또는 500 에러 처리 (refresh-token이 500을 반환할 수 있음)
+    const isAuthError = error.response?.status === 401 || error.response?.status === 500;
+    const isRefreshTokenError = originalRequest.url === "/api/auth/refresh-token";
+    
+    if (isAuthError && !originalRequest._retry) {
+      // refresh-token 요청 자체가 실패한 경우
+      if (isRefreshTokenError) {
+        console.log("❌ 리프레시 토큰 요청 실패 - 로그인 페이지로 이동");
+        console.error("에러 상세:", {
+          status: error.response?.status,
+          data: error.response?.data,
+        });
         await logout();
         window.location.href = "/";
         return Promise.reject(error);
@@ -96,20 +110,25 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        console.log("액세스 토큰 만료 - 토큰 갱신 시도");
+        console.log("🔄 액세스 토큰 만료 - 토큰 갱신 시도");
         const newTokens = await refreshToken();
 
         if (newTokens && newTokens.accessToken) {
           localStorage.setItem("accessToken", newTokens.accessToken);
+          
+          // refreshToken도 함께 업데이트 (백엔드가 새 refreshToken을 반환하는 경우)
+          if (newTokens.refreshToken) {
+            localStorage.setItem("refreshToken", newTokens.refreshToken);
+          }
 
           originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
 
           return api(originalRequest);
         } else {
-          throw new Error("토큰 갱신 실패: 유표하지 않은 응답 형식");
+          throw new Error("토큰 갱신 실패: 유효하지 않은 응답 형식");
         }
       } catch (refreshError) {
-        console.error("토큰 갱신 실패:", refreshError);
+        console.error("❌ 토큰 갱신 실패:", refreshError);
         await logout();
         window.location.href = "/";
         return Promise.reject(error);

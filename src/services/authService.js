@@ -156,10 +156,24 @@ export const onboardingOwner = async (
 //토큰 갱신
 export async function refreshToken() {
   try {
-    const response = await api.post("/api/auth/refresh-token");
+    // localStorage에서 refreshToken 가져오기
+    const refreshToken = localStorage.getItem("refreshToken");
+    
+    // refreshToken이 없으면 에러 발생
+    if (!refreshToken) {
+      console.error("❌ refreshToken이 localStorage에 없습니다.");
+      throw new Error("Refresh token not found");
+    }
+
+    // body에 refreshToken 포함하여 요청
+    const response = await api.post("/api/auth/refresh-token", {
+      refreshToken: refreshToken,
+    });
+    
     return response.data;
   } catch (error) {
-    console.error(error);
+    console.error("❌ 토큰 갱신 실패:", error.response?.data || error.message);
+    throw error;
   }
 }
 
