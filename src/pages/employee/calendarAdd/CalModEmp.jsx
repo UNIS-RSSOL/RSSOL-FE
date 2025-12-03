@@ -7,8 +7,7 @@ import EmployeeScheduleCalendar from "../../../components/common/calendar/Employ
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import {
   fetchMyAvailabilities,
-  addAvailability,
-  deleteAvailability,
+  updateAvailability,
 } from "../../../services/employee/ScheduleService.js";
 import {
   fetchActiveStore,
@@ -272,9 +271,6 @@ function CalModEmp() {
 
     const startOfWeek = dayjs(currentDate).locale("ko").startOf("week");
     const days = ["일", "월", "화", "수", "목", "금", "토"];
-    
-    // 기존 availability 삭제
-    const availabilitiesToDelete = availabilities || [];
 
     // 요일을 영어 약자로 변환하는 함수
     const getDayOfWeek = (dayjsDate) => {
@@ -402,146 +398,27 @@ function CalModEmp() {
       return;
     }
 
-    // work availability 수정 (기존 삭제 후 새로 추가)
+    // work availability 수정 (PUT 전체 갱신 방식)
     try {
-      // 삭제 전에 최신 availability 목록을 다시 가져와서 실제 존재하는 ID만 삭제
-      let currentAvailabilities = [];
-      try {
-        currentAvailabilities = await fetchMyAvailabilities();
-      } catch (error) {
-        console.warn("⚠️ 최신 availability 목록 조회 실패, 기존 목록 사용");
-        currentAvailabilities = availabilitiesToDelete;
-      }
+      // PUT 요청 시 id를 모두 제거하고 새 항목만 보내기 (백엔드가 id 있으면 UPDATE, 없으면 INSERT로 처리하므로)
+      const availabilitiesWithoutId = availabilitiesList.map(({ id, ...rest }) => rest);
       
-      // 실제 존재하는 ID만 필터링
-      const validIds = new Set(currentAvailabilities.map(a => a.id).filter(Boolean));
-      const availabilitiesToDeleteFiltered = availabilitiesToDelete.filter(a => a.id && validIds.has(a.id));
-      
-      if (availabilitiesToDeleteFiltered.length === 0 && availabilitiesToDelete.length > 0) {
-        console.warn("⚠️ 삭제할 유효한 availability가 없습니다. 모든 ID가 서버에 존재하지 않을 수 있습니다.");
-      }
-      
-      // 기존 availability 삭제 (에러가 발생해도 계속 진행)
-      // 중복 삭제 방지를 위한 Set 사용
-      const deleteIds = new Set();
-      const deletePromises = [];
-      const deleteResults = [];
-      
-      for (const availability of availabilitiesToDeleteFiltered) {
-        if (availability.id) {
-          // ID 타입 및 유효성 확인
-          const id = availability.id;
-          const idType = typeof id;
-          const idValue = typeof id === 'string' ? parseInt(id, 10) : id;
-          
-          if (isNaN(idValue) || idValue <= 0) {
-            console.warn(`⚠️ 유효하지 않은 ID:`, { id, idType, availability });
-            continue;
-          }
-          
-          // 중복 ID 체크
-          if (deleteIds.has(idValue)) {
-            continue; // 중복 삭제 요청 무시
-          }
-          deleteIds.add(idValue);
-          
-          // ID 정보 로깅 (개발 환경)
-          if (import.meta.env.DEV) {
-            console.log(`🔍 삭제 시도: availability ID ${idValue} (원본: ${id}, 타입: ${idType})`);
-          }
-          
-          deletePromises.push(
-            deleteAvailability(idValue)
-              .then((result) => {
-                if (import.meta.env.DEV) {
-                  console.log(`✅ availability ${idValue} 삭제 성공`);
-                }
-                deleteResults.push({ id: idValue, success: true });
-                return result;
-              })
-              .catch((error) => {
-                const errorMessage = error.response?.data?.message || error.message || '알 수 없는 오류';
-                const errorStatus = error.response?.status || 'N/A';
-                const errorData = error.response?.data;
-                
-                // 상세 에러 정보 로깅
-                console.warn(`⚠️ availability ${idValue} 삭제 실패:`, {
-                  id: idValue,
-                  status: errorStatus,
-                  message: errorMessage,
-                  errorData: errorData,
-                  url: error.config?.url,
-                });
-                
-                deleteResults.push({ 
-                  id: idValue, 
-                  success: false, 
-                  error: errorMessage,
-                  status: errorStatus,
-                });
-                // 삭제 실패해도 계속 진행 (이미 삭제되었거나 존재하지 않는 경우)
-                return null;
-              })
-          );
-        } else {
-          console.warn(`⚠️ ID가 없는 availability 발견:`, availability);
-        }
-      }
-      
-      // 모든 삭제 요청 순차 처리 (서버 부하 감소 및 안정성 향상)
-      if (deletePromises.length > 0) {
-        console.log(`🔍 ${deletePromises.length}개의 availability 삭제 시작...`);
-        // 순차 처리로 변경 (서버 부하 감소)
-        for (let i = 0; i < deletePromises.length; i++) {
-          try {
-            await deletePromises[i];
-            // 각 삭제 사이에 짧은 딜레이 추가 (서버 부하 분산)
-            if (i < deletePromises.length - 1) {
-              await new Promise(resolve => setTimeout(resolve, 100));
-            }
-          } catch (error) {
-            // 이미 catch에서 처리됨
-          }
-        }
-      }
-      
-      const successCount = deleteResults.filter(r => r.success).length;
-      const failCount = deleteResults.filter(r => !r.success).length;
-      
-      if (availabilitiesToDeleteFiltered.length > 0) {
-        console.log(`✅ availability 삭제 완료 (성공: ${successCount}, 실패: ${failCount})`);
-        
-        // 삭제가 모두 실패한 경우 경고
-        if (successCount === 0 && failCount > 0) {
-          console.warn("⚠️ 모든 availability 삭제가 실패했습니다. 백엔드 라우팅 문제일 수 있습니다.");
-        }
-      }
+      // PUT 요청을 위한 payload 생성 (백엔드 DTO 구조에 맞게)
+      const payload = {
+        userStoreId: employeeStoreId,
+        userName: employeeUserName,
+        availabilities: availabilitiesWithoutId, // id 없는 순수 배열 (전체 INSERT로 처리)
+      };
 
-      // 새로운 availability 추가 (백엔드 DTO 구조에 맞게 payload 생성)
-      if (availabilitiesList.length > 0) {
-        const payload = {
-          userStoreId: employeeStoreId,
-          userName: employeeUserName,
-          availabilities: availabilitiesList, // 배열
-        };
-
-        console.log("🔍 새로운 availability 추가 중...");
-        const response = await addAvailability(payload);
-        
-        console.log("✅ 백엔드 저장 성공");
-      } else {
-        console.log("ℹ️ 추가할 availability가 없습니다. (모든 시간대가 삭제됨)");
-      }
+      console.log("🔍 PUT 요청으로 전체 갱신 중...");
+      console.log("🔍 payload:", JSON.stringify(payload, null, 2));
       
-      // 삭제 실패가 있었지만 추가는 성공한 경우
-      const hasDeleteFailures = failCount > 0;
-      if (hasDeleteFailures && availabilitiesList.length > 0) {
-        alert("근무 가능 시간이 수정되었습니다.\n일부 기존 시간대 삭제에 실패했지만, 새로운 시간대는 추가되었습니다.");
-      } else if (hasDeleteFailures) {
-        alert("기존 시간대 삭제에 실패했습니다. 백엔드 문제일 수 있습니다.");
-      } else {
-        alert("근무 가능 시간이 수정되었습니다.");
-      }
+      const response = await updateAvailability(payload);
+      
+      console.log("✅ 백엔드 저장 성공 응답:", JSON.stringify(response, null, 2));
+      console.log("✅ 근무 가능 시간이 성공적으로 수정되었습니다.");
+      
+      alert("근무 가능 시간이 수정되었습니다.");
       
       navigate(-1);
     } catch (error) {

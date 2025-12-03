@@ -77,6 +77,21 @@ export async function addAvailability(payload) {
   }
 }
 
+// 근무 가능 시간 전체 수정 (PUT - 전체 갱신 방식)
+// payload: { userStoreId: number, userName: string, availabilities: [{ dayOfWeek: string, startTime: string, endTime: string }] }
+// PUT은 전체 리스트를 갱신하므로, 삭제하려는 항목을 제외하고 보내면 자동으로 삭제됨
+export async function updateAvailability(payload) {
+  try {
+    console.log("🔍 PUT 요청 payload:", JSON.stringify(payload, null, 2));
+    const response = await api.put("/api/me/availabilities", payload);
+    return response.data;
+  } catch (error) {
+    console.error("❌ 근무 가능 시간 수정 실패:", error);
+    console.error("❌ 에러 응답:", error.response?.data);
+    throw error;
+  }
+}
+
 // 근무 가능 시간 삭제
 export async function deleteAvailability(availabilityId) {
   try {
