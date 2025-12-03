@@ -90,7 +90,7 @@ function OwnerHome() {
     updateTime();
     const intervalId = setInterval(updateTime, 1000);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [activeStore]);
 
   const FloatButton = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -104,9 +104,6 @@ function OwnerHome() {
             storeId: r.storeId,
             name: r.name,
           }));
-          const active = await fetchActiveStore();
-
-          setActiveStore(active.storeId);
           setStoreList(stores);
         } catch (error) {
           console.error(error);
