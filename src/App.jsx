@@ -74,7 +74,8 @@ function App() {
       // 🚫 refreshToken 없음 → 로그인 안한 상태
       if (!refreshToken) {
         console.log("❌ refreshToken 없음 → 로그인 필요");
-        if (location.pathname === "/" || location.pathname === "/login") goLogin();
+        if (location.pathname === "/" || location.pathname === "/login")
+          goLogin();
         return;
       }
 
@@ -158,6 +159,16 @@ function App() {
    --------------------------*/
   useEffect(() => {
     const checkPages = ["/"];
+    //2025-12-04: mypage, calendar 토큰 파싱 문제
+    const AccessToken = localStorage.getItem("accessToken");
+    const RefreshToken = localStorage.getItem("refreshToken");
+    if (!AccessToken && !RefreshToken) {
+      if (!publicPages.includes(location.pathname)) {
+        navigate("/login", { replace: true });
+      }
+      return;
+    }
+
     if (checkPages.includes(location.pathname)) {
       checkAuthAndRedirect();
     }
@@ -167,20 +178,34 @@ function App() {
    *  레이아웃 제외 경로
    --------------------------*/
   const hideLayoutPages = [
-    "/", "/login", "/onboarding", "/auth/kakao/callback",
-    "/calAdd", "/calGen", "/autoCal", "/calAddEmp", "/calModEmp",
-    "/addOwner", "/scheduleList", "/alarmHomeEmp",
-    "/alarmHome", "/alarmCheck", "/scheduleList"
+    "/",
+    "/login",
+    "/onboarding",
+    "/auth/kakao/callback",
+    "/calAdd",
+    "/calGen",
+    "/autoCal",
+    "/calAddEmp",
+    "/calModEmp",
+    "/addOwner",
+    "/scheduleList",
+    "/alarmHomeEmp",
+    "/alarmHome",
+    "/alarmCheck",
+    "/scheduleList",
   ];
 
   const hideLayout = hideLayoutPages.some((p) =>
-    p === "/" ? location.pathname === "/" : location.pathname.startsWith(p)
+    p === "/" ? location.pathname === "/" : location.pathname.startsWith(p),
   );
 
   /** -------------------------
    *  인증 체크 중 → 스플래시
    --------------------------*/
-  if (isCheckingAuth && (location.pathname === "/" || location.pathname === "/login")) {
+  if (
+    isCheckingAuth &&
+    (location.pathname === "/" || location.pathname === "/login")
+  ) {
     return <Splash />;
   }
 
@@ -199,9 +224,15 @@ function App() {
           <Route path="/employee" element={<EmpHome />} />
 
           <Route path="/owner/mypage" element={<OwnerPage />} />
-          <Route path="/owner/mypage/managestore" element={<OwnerManageStore />} />
+          <Route
+            path="/owner/mypage/managestore"
+            element={<OwnerManageStore />}
+          />
           <Route path="/employee/mypage" element={<EmployeePage />} />
-          <Route path="/employee/mypage/managestore" element={<EmpManageStore />} />
+          <Route
+            path="/employee/mypage/managestore"
+            element={<EmpManageStore />}
+          />
 
           <Route path="/calAddEmp" element={<CalAddEmp />} />
           <Route path="/calModEmp" element={<CalModEmp />} />
