@@ -158,10 +158,16 @@ function App() {
    *  루트에서만 인증 체크
    --------------------------*/
   useEffect(() => {
+    // 인증 체크가 필요한 경로
     const checkPages = ["/"];
+    // 인증 체크가 불필요한 경로
+    const publicPages = ["/", "/login", "/onboarding", "/auth/kakao/callback"];
+
     //2025-12-04: mypage, calendar 토큰 파싱 문제
     const AccessToken = localStorage.getItem("accessToken");
     const RefreshToken = localStorage.getItem("refreshToken");
+
+    //토큰 둘 다 없음 → publicPages 외부 접근 차단
     if (!AccessToken && !RefreshToken) {
       if (!publicPages.includes(location.pathname)) {
         navigate("/login", { replace: true });
