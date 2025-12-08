@@ -73,18 +73,25 @@ function Login() {
 
         // 기존 회원인지 확인하여 온보딩 여부 결정
         // 활성 매장 정보를 확인하여 정보 등록 여부 판단
-        
+        try {
           const activeStoreRes = await api.get("/api/mypage/active-store");
           const activeStore = activeStoreRes.data;
           
           console.log("활성 매장 정보:", activeStore);
-          
+          }catch (storeError) {
+          console.log("활성 매장 조회 실패 → 온보딩으로 이동:", storeError.response?.status);
+          navigate("/onboarding");
+          return;
+        }
+
+        
+
           // 활성 매장이 있으면 정보 등록 완료 -> 홈페이지로 이동
           if (!activeStore || !activeStore.storeId) {
             navigate("/onboarding");
             return;
           }
-            // ⭐ position 기반 라우팅 (owner/staff 구분)
+            // position 기반 라우팅 (owner/staff 구분)
             if (activeStore.position === "OWNER") {
               console.log("owner → /owner");
               navigate("/owner");
