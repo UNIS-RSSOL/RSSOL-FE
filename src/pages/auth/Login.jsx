@@ -73,64 +73,32 @@ function Login() {
 
         // 기존 회원인지 확인하여 온보딩 여부 결정
         // 활성 매장 정보를 확인하여 정보 등록 여부 판단
-        try {
+        
           const activeStoreRes = await api.get("/api/mypage/active-store");
           const activeStore = activeStoreRes.data;
           
           console.log("활성 매장 정보:", activeStore);
           
           // 활성 매장이 있으면 정보 등록 완료 -> 홈페이지로 이동
-          if (activeStore && activeStore.storeId) {
-            // 사용자 역할 확인을 위해 프로필 정보 조회 시도
-            // owner 프로필을 먼저 시도
-            try {
-              await api.get("/api/mypage/owner/profile");
-              console.log("사장님 프로필 확인 성공 -> /owner로 이동");
-              navigate("/owner");
-              return;
-            } catch (ownerError) {
-              const ownerStatus = ownerError.response?.status;
-              
-              // 500 에러는 서버 에러이므로, 토큰 갱신이 트리거될 수 있음
-              // 하지만 이 경우는 "owner가 아니다"가 아니라 서버 문제일 수 있으므로
-              // staff 체크로 넘어가되, 에러를 로깅
-              if (ownerStatus === 500) {
-                console.warn("⚠️ owner 프로필 조회 시 500 에러 발생 (서버 에러 가능성) -> staff 체크로 진행");
-              } else if (ownerStatus === 403 || ownerStatus === 404) {
-                console.log("owner 프로필 없음 (403/404) -> staff 체크로 진행");
-              } else {
-                console.log("owner 프로필 조회 실패:", ownerStatus, "-> staff 체크로 진행");
-              }
-              
-              // owner 프로필이 없으면 staff로 시도
-              try {
-                await api.get("/api/mypage/staff/profile");
-                console.log("알바생 프로필 확인 성공 -> /employee로 이동");
-                navigate("/employee");
-                return;
-              } catch (staffError) {
-                const staffStatus = staffError.response?.status;
-                console.log("staff 프로필 조회 실패:", staffStatus);
-                
-                // 둘 다 실패하면 정보 미등록으로 간주
-                console.log("프로필 확인 실패 -> 온보딩으로 이동");
-                navigate("/onboarding");
-                return;
-              }
-            }
-          } else {
-            // 활성 매장이 없으면 정보 미등록 -> 온보딩으로 이동
-            console.log("활성 매장 없음 -> 온보딩으로 이동");
+          if (!activeStore || !activeStore.storeId) {
             navigate("/onboarding");
             return;
           }
-        } catch (storeError) {
-          // 활성 매장 조회 실패 (404 등) -> 정보 미등록으로 간주
-          console.log("활성 매장 조회 실패 (정보 미등록) -> 온보딩으로 이동:", storeError.response?.status);
-          navigate("/onboarding");
-          return;
-        }
-      } else {
+            // ⭐ position 기반 라우팅 (owner/staff 구분)
+            if (activeStore.position === "OWNER") {
+              console.log("owner → /owner");
+              navigate("/owner");
+            } else if (activeStore.position === "STAFF") {
+              console.log("staff → /employee");
+              navigate("/employee");
+            } else {
+            //  예외 처리
+            console.log("등록되지 않은 역할 → 온보딩");
+            navigate("/onboarding");
+            }
+        
+      
+        } else {
         setError(response.message || "토큰 발급에 실패했습니다.");
       }
     } catch (err) {

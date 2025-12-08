@@ -19,6 +19,7 @@ import dayjs from "dayjs";
 import { motion, AnimatePresence } from "framer-motion";
 
 function EmpHome() {
+  const [isAppModalOpen, setIsAppModalOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState("");
   const today = dayjs();
   const firstDay = today.format("YYYY.MM.") + "01";
@@ -145,6 +146,25 @@ function EmpHome() {
     );
   };
 
+// 출근 기능이 RN 앱(WebView) 안인지 판단
+const isInApp = () => {
+  return typeof window !== "undefined" && !!window.ReactNativeWebView;
+};
+
+// 출근하기 버튼 클릭 함수
+const handleGoWork = () => {
+  if (!isInApp()) {
+    // 👉 웹 브라우저 → 모달 띄우기
+    setIsAppModalOpen(true);
+    return;
+  }
+
+  // 👉 RN WebView → 앱으로 메시지 보내기
+  window.ReactNativeWebView.postMessage(
+    JSON.stringify({ action: "goToGPS" })
+  );
+};
+
   return (
     <div className="w-full flex flex-col py-7 px-5 ">
       <div className="w-full flex flex-col items-start">
@@ -204,10 +224,30 @@ function EmpHome() {
             </p>
           </div>
           <p className="text-[24px] font-[400]">{currentTime}</p>
-          <GreenBtn className={"w-[120px] h-[30px] py-0 mt-0"}>
+          <GreenBtn className={"w-[120px] h-[30px] py-0 mt-0"}
+          onClick={handleGoWork} //시은추가
+    >
             출근하기
           </GreenBtn>
         </Box>
+      {/* -------- 앱 전용 안내 모달 -------- */}
+{isAppModalOpen && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="bg-white rounded-xl p-6 w-80 text-center">
+      <p className="text-lg font-semibold mb-3">앱 전용 기능입니다</p>
+      <p className="text-sm text-gray-700 mb-5">
+        출퇴근 기능은 알솔 앱에서만 사용할 수 있어요.
+      </p>
+      <button
+        className="bg-green-600 text-white px-4 py-2 rounded-lg"
+        onClick={() => setIsAppModalOpen(false)} style={{backgroundColor : "#68e194"}}
+      >
+        확인
+      </button>
+    </div>
+  </div>
+)}
+{/* -------------------------------- */}
       </div>
       <div className="flex items-center">
         <ColoredDollarIcon />
