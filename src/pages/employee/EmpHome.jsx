@@ -239,7 +239,7 @@ const handleGoWork = () => {
         출퇴근 기능은 알솔 앱에서만 사용할 수 있어요.
       </p>
       <button
-        className="bg-green-600 text-white px-4 py-2 rounded-lg"
+        className="text-white px-4 py-2 rounded-lg"
         onClick={() => setIsAppModalOpen(false)} style={{backgroundColor : "#68e194"}}
       >
         확인
