@@ -73,9 +73,11 @@ function Login() {
 
         // 기존 회원인지 확인하여 온보딩 여부 결정
         // 활성 매장 정보를 확인하여 정보 등록 여부 판단
+
+        let activeStore = null;
         try {
           const activeStoreRes = await api.get("/api/mypage/active-store");
-          const activeStore = activeStoreRes.data;
+          activeStore = activeStoreRes.data;
           
           console.log("활성 매장 정보:", activeStore);
           }catch (storeError) {
