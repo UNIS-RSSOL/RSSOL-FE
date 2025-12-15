@@ -17,9 +17,7 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isOwnerBtn, setIsOwnerBtn] = useState(true);
-  
-  // URL 파라미터에서 에러 확인
-  useEffect(() => {
+ 
     // 🔥 추가: 페이지 진입 시 토큰 확인 로직
   useEffect(() => {
     const checkAutoLogin = async () => {
@@ -49,8 +47,10 @@ function Login() {
     };
 
     checkAutoLogin();
-  }, []);
-
+  }, [navigate]);
+ 
+  // URL 파라미터에서 에러 확인
+    useEffect(() => {
     const errorParam = searchParams.get("error");
     const errorCode = searchParams.get("code");
     
