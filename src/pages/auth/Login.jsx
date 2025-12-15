@@ -20,6 +20,37 @@ function Login() {
   
   // URL 파라미터에서 에러 확인
   useEffect(() => {
+    // 🔥 추가: 페이지 진입 시 토큰 확인 로직
+  useEffect(() => {
+    const checkAutoLogin = async () => {
+      const savedToken = localStorage.getItem("accessToken");
+      
+      if (savedToken) {
+        console.log("✅ 앱에서 전달된 토큰 발견, 자동 로그인 시도");
+        setIsLoading(true);
+        try {
+          // 토큰이 유효한지 확인하고 역할(OWNER/STAFF)을 가져오기 위해 API 호출
+          const activeStoreRes = await api.get("/api/mypage/active-store");
+          const activeStore = activeStoreRes.data;
+
+          if (activeStore && activeStore.storeId) {
+            if (activeStore.position === "OWNER") navigate("/owner");
+            else if (activeStore.position === "STAFF") navigate("/employee");
+          } else {
+            navigate("/onboarding");
+          }
+        } catch (err) {
+          console.log("자동 로그인 실패 (토큰 만료 등):", err);
+          localStorage.removeItem("accessToken"); // 유효하지 않으면 삭제
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    checkAutoLogin();
+  }, []);
+
     const errorParam = searchParams.get("error");
     const errorCode = searchParams.get("code");
     
