@@ -1,34 +1,24 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import StoreIcon from "../../assets/icons/StoreIcon.jsx";
+import { changeActiveStore } from "../../services/owner/MyPageService.js";
 
-function FloatButton({ stores, active, handleChange }) {
+function FloatButton({ stores, active, onActiveStoreChange }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [storeList, setStoreList] = useState(stores);
-  const [activeStore, setActiveStore] = useState(active);
+  const [storeList, setStoreList] = useState();
+  const [activeStore, setActiveStore] = useState();
 
   useEffect(() => {
-    (async () => {
-      try {
-        setActiveStore(active);
-        setStoreList(stores);
-        // const response = await fetchStoreList();
-
-        // const stores = response.map((r) => ({
-        //   storeId: r.storeId,
-        //   name: r.name,
-        // }));
-
-        // setStoreList(stores);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
-  }, []);
+    setStoreList(stores);
+    setActiveStore(active);
+  }, [stores, active]);
 
   const handleChangeActive = async (storeId) => {
     try {
-      handleChange(storeId);
+      const response = await changeActiveStore(storeId);
+      const newActiveStore = { storeId: response.storeId, name: response.name };
+      setActiveStore(newActiveStore);
+      onActiveStoreChange && onActiveStoreChange(newActiveStore);
       setIsOpen(false);
       console.log({ storeId: response.storeId, name: response.name });
     } catch (error) {
