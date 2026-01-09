@@ -61,10 +61,12 @@ function ScheduleList() {
           console.log("📋 [첫 번째 직원 구조 예시]:", {
             worker: workersList[0],
             availableFields: Object.keys(workersList[0]),
-            userId: workersList[0].userId,
             id: workersList[0].id,
-            userStoreId: workersList[0].userStoreId,
             staffId: workersList[0].staffId,
+            userStoreId: workersList[0].userStoreId,
+            userId: workersList[0].userId,
+            // API 엔드포인트에 사용할 ID 확인: GET /api/store/staff/{staffId}/availabilities
+            사용할ID: workersList[0].id || workersList[0].staffId || workersList[0].userStoreId,
           });
         }
         
@@ -103,18 +105,23 @@ function ScheduleList() {
         
         // 각 직원의 work availability를 병렬로 가져오기
         const availabilityPromises = storeWorkers.map(async (worker) => {
-          // 사장용 API는 userStoreId를 staffId로 사용하여 특정 직원의 근무 가능 시간을 조회합니다
-          const staffId = worker.userStoreId;
+          // Swagger API 문서 기준: GET /api/store/staff/{staffId}/availabilities
+          // 일반적으로 REST API에서는 id 필드를 우선 사용
+          // id > staffId > userStoreId 순서로 확인
+          const staffId = worker.id || worker.staffId || worker.userStoreId;
           const workerName = worker.username || worker.name || '이름없음';
           
           if (!staffId) {
-            const errorMsg = "직원 ID를 찾을 수 없습니다";
+            const errorMsg = "직원 ID를 찾을 수 없습니다 (id, staffId 또는 userStoreId 필요)";
             console.error(`❌ ${workerName}:`, errorMsg, {
               worker,
               availableFields: Object.keys(worker),
+              id: worker.id,
+              staffId: worker.staffId,
+              userStoreId: worker.userStoreId,
             });
-            errorsByWorker[staffId] = {
-              staffId,
+            errorsByWorker[staffId || 'unknown'] = {
+              staffId: staffId || null,
               workerName,
               error: new Error(errorMsg),
               status: null,
@@ -124,26 +131,43 @@ function ScheduleList() {
           
           console.log(`🔍 직원 ${workerName} (ID: ${staffId})의 근무 가능 시간 조회 시작`, {
             worker: {
+              id: worker.id,
+              staffId: worker.staffId,
               userStoreId: worker.userStoreId,
               username: worker.username,
               allFields: Object.keys(worker),
             },
-            staffId,
+            사용된staffId: staffId,
             staffIdType: typeof staffId,
+            staffId출처: worker.id ? 'worker.id' : (worker.staffId ? 'worker.staffId' : 'worker.userStoreId'),
           });
           
           try {
+            // ✅ 정상 응답 또는 500/404 에러 시 빈 배열 반환 처리
             const availabilities = await fetchEmployeeAvailabilities(staffId);
             
-            if (availabilities && Array.isArray(availabilities)) {
+            // 응답 검증: 배열인지 확인
+            if (Array.isArray(availabilities)) {
               schedulesByWorker[staffId] = availabilities;
-              console.log(`✅ 직원 ${workerName} (ID: ${staffId}) 근무 가능 시간: ${availabilities.length}개`);
+              if (availabilities.length > 0) {
+                console.log(`✅ 직원 ${workerName} (ID: ${staffId}) 근무 가능 시간: ${availabilities.length}개`);
+              } else {
+                console.log(`ℹ️ 직원 ${workerName} (ID: ${staffId}) 근무 가능 시간 없음 (빈 배열)`);
+              }
             } else {
+              // 예상치 못한 응답 형태
+              console.warn(`⚠️ 직원 ${workerName} (ID: ${staffId})의 응답이 배열이 아닙니다:`, availabilities);
               schedulesByWorker[staffId] = [];
-              console.log(`⚠️ 직원 ${workerName} (ID: ${staffId})의 근무 가능 시간이 배열이 아닙니다:`, availabilities);
+              errorsByWorker[staffId] = {
+                staffId,
+                workerName,
+                error: new Error("응답이 배열 형태가 아닙니다"),
+                status: null,
+                errorMessage: "데이터 형식 오류",
+              };
             }
           } catch (error) {
-            // ❗ 실패를 명시적으로 기록
+            // 🔴 500/404가 아닌 기타 에러 (401, 403 등)만 catch
             const errorInfo = {
               staffId,
               workerName,
@@ -156,40 +180,9 @@ function ScheduleList() {
             
             console.error(`❌ 직원 ${workerName} (ID: ${staffId}) 근무 가능시간 조회 실패:`, errorInfo);
             
-            // 실패한 직원은 빈 배열로 설정하되, 에러 정보도 저장
+            // 인증/권한 에러 등은 빈 배열로 처리하되 에러 정보 저장
             schedulesByWorker[staffId] = [];
             errorsByWorker[staffId] = errorInfo;
-            
-            // 500 에러인 경우 추가 경고
-            if (error.response?.status === 500) {
-              console.error(`⚠️ [서버 500 오류] 직원 ${workerName} (ID: ${staffId})의 데이터를 서버에서 불러올 수 없습니다.`, {
-                staffId,
-                staffIdType: typeof staffId,
-                workerName,
-                requestURL: error.config?.url,
-                requestMethod: error.config?.method,
-                requestHeaders: {
-                  ...error.config?.headers,
-                  Authorization: error.config?.headers?.Authorization 
-                    ? `Bearer ${error.config.headers.Authorization.split(' ')[1]?.substring(0, 20)}...` 
-                    : '❌ 없음',
-                },
-                responseStatus: error.response?.status,
-                responseData: error.response?.data,
-                responseHeaders: error.response?.headers,
-                errorMessage: error.response?.data?.message || error.response?.data?.error || error.message,
-                // 백엔드 개발자용 요약
-                backendSummary: {
-                  endpoint: `/api/store/staff/${staffId}/availabilities`,
-                  method: "GET",
-                  status: 500,
-                  staffId: staffId,
-                  staffIdType: typeof staffId,
-                  errorMessage: error.response?.data?.message || error.response?.data?.error || "서버 내부 오류",
-                  fullErrorData: error.response?.data,
-                },
-              });
-            }
           }
         });
         
@@ -208,34 +201,42 @@ function ScheduleList() {
         if (errorCount > 0) {
           console.warn(`⚠️ ${errorCount}명의 직원 데이터 로드 실패:`, errorsByWorker);
           
-          // 저장/조회 API 키 불일치 진단 정보
-          console.error("🔍 [진단] 저장/조회 API 키 불일치 가능성 체크:", {
-            message: "저장 API와 조회 API가 다른 키를 사용할 수 있습니다.",
-            저장API: {
-              endpoint: "POST /api/me/availabilities",
-              사용키: "userStoreId",
-              설명: "알바생이 자신의 근무 가능 시간을 저장할 때 사용",
-            },
-            조회API: {
-              endpoint: "GET /api/store/staff/{staffId}/availabilities",
-              사용키: "staffId (userStoreId와 동일해야 함)",
-              설명: "사장이 직원의 근무 가능 시간을 조회할 때 사용",
-            },
-            실패한직원들: Object.keys(errorsByWorker).map(staffId => {
+          // 에러별 요약
+          const errorSummary = {
+            totalErrors: errorCount,
+            byStatus: {},
+            errors: Object.keys(errorsByWorker).map(staffId => {
               const error = errorsByWorker[staffId];
+              const status = error.status || 'unknown';
+              if (!errorSummary.byStatus[status]) {
+                errorSummary.byStatus[status] = 0;
+              }
+              errorSummary.byStatus[status]++;
+              
               return {
                 staffId,
                 workerName: error.workerName,
-                errorStatus: error.status,
+                errorStatus: status,
                 errorMessage: error.errorMessage,
               };
             }),
-            확인방법: [
-              "1. 저장 시 사용한 userStoreId와 조회 시 사용한 staffId가 일치하는지 확인",
-              "2. Postman으로 GET /api/store/staff/{staffId}/availabilities 직접 호출",
-              "3. 백엔드 로그에서 저장 시 사용된 키와 조회 시 사용된 키 확인",
-            ],
-          });
+          };
+          
+          console.warn("📊 에러 요약:", errorSummary);
+          
+          // 500 에러가 많은 경우 백엔드 문제 안내
+          if (errorSummary.byStatus[500] > 0) {
+            console.warn("🔴 [백엔드 수정 필요] 500 에러 발생 직원:", {
+              count: errorSummary.byStatus[500],
+              문제: "백엔드에서 빈 데이터(null/empty) 처리 로직 누락",
+              해결: "백엔드 개발자가 컨트롤러에서 빈 리스트 반환 처리 추가 필요",
+              확인방법: [
+                "1. Swagger에서 GET /api/store/staff/{staffId}/availabilities 직접 호출",
+                "2. DB에서 SELECT * FROM availability WHERE staff_id = ? 확인",
+                "3. 백엔드 코드에서 if (list == null || list.isEmpty()) return ResponseEntity.ok(Collections.emptyList()); 추가",
+              ],
+            });
+          }
         }
         
         setWorkerSchedules(schedulesByWorker);
@@ -249,22 +250,27 @@ function ScheduleList() {
 
   // 근무 가능 시간대 포맷팅
   const formatAvailableTimes = (worker) => {
-    // worker 객체에서 userStoreId 추출 (staffId로 사용)
-    const staffId = worker?.userStoreId;
+    // id > staffId > userStoreId 순서로 확인
+    const staffId = worker?.id || worker?.staffId || worker?.userStoreId;
     const schedules = workerSchedules[staffId] || [];
     const error = workerErrors[staffId];
     
-    // 에러가 있는 경우 에러 메시지 반환
+    // 에러가 있는 경우 사용자 친화적인 메시지 반환
     if (error) {
       if (error.status === 500) {
-        return "⚠️ 서버 오류로 데이터를 불러올 수 없습니다";
+        // 500 에러는 이미 ScheduleService에서 빈 배열로 처리했지만,
+        // 에러 정보가 남아있는 경우에만 표시
+        return "⚠️ 근무 가능 시간 데이터 없음 (서버 오류)";
       } else if (error.status === 404) {
-        return "⚠️ 데이터를 찾을 수 없습니다";
+        return "⚠️ 근무 가능 시간 데이터 없음";
+      } else if (error.status === 401 || error.status === 403) {
+        return "⚠️ 권한 오류";
       } else {
         return "⚠️ 데이터 로드 실패";
       }
     }
     
+    // 정상적으로 빈 배열인 경우
     if (schedules.length === 0) {
       return "근무 가능 시간 없음";
     }
@@ -305,8 +311,8 @@ function ScheduleList() {
 
     const availableWorkers = [];
     workers.forEach((worker) => {
-      // worker.userStoreId를 staffId로 사용하여 스케줄 찾기
-      const staffId = worker.userStoreId;
+      // id > staffId > userStoreId 순서로 확인
+      const staffId = worker.id || worker.staffId || worker.userStoreId;
       const schedules = workerSchedules[staffId] || [];
       const hasSchedule = schedules.some((schedule) => {
         const scheduleDate = dayjs(schedule.startDatetime).locale("ko");
@@ -432,13 +438,13 @@ function ScheduleList() {
 
             <div className="flex flex-col gap-3 mt-3">
             {workers.map((worker) => {
-                const workerId = worker.userStoreId;
+                const workerId = worker.id || worker.staffId || worker.userStoreId;
                 const hasError = workerErrors[workerId];
                 const errorStatus = hasError?.status;
                 
                 return (
                 <div
-                key={worker.userStoreId}
+                key={workerId || worker.id || worker.userStoreId}
                 className={`flex items-center gap-3 p-3 rounded-lg shadow-sm ${
                   hasError 
                     ? "bg-red-50 border border-red-200" 
