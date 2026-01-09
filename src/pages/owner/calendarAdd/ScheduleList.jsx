@@ -66,7 +66,7 @@ function ScheduleList() {
             userStoreId: workersList[0].userStoreId,
             userId: workersList[0].userId,
             // API 엔드포인트에 사용할 ID 확인: GET /api/store/staff/{staffId}/availabilities
-            사용할ID: workersList[0].id || workersList[0].staffId || workersList[0].userStoreId,
+            사용할ID: workersList[0].id || workersList[0].staffId,
           });
         }
         
@@ -107,18 +107,17 @@ function ScheduleList() {
         const availabilityPromises = storeWorkers.map(async (worker) => {
           // Swagger API 문서 기준: GET /api/store/staff/{staffId}/availabilities
           // 일반적으로 REST API에서는 id 필드를 우선 사용
-          // id > staffId > userStoreId 순서로 확인
-          const staffId = worker.id || worker.staffId || worker.userStoreId;
+          // id > staffId 순서로 확인 (userStoreId 제외)
+          const staffId = worker.id || worker.staffId;
           const workerName = worker.username || worker.name || '이름없음';
           
           if (!staffId) {
-            const errorMsg = "직원 ID를 찾을 수 없습니다 (id, staffId 또는 userStoreId 필요)";
+            const errorMsg = "직원 ID를 찾을 수 없습니다 (id 또는 staffId 필요)";
             console.error(`❌ ${workerName}:`, errorMsg, {
               worker,
               availableFields: Object.keys(worker),
               id: worker.id,
               staffId: worker.staffId,
-              userStoreId: worker.userStoreId,
             });
             errorsByWorker[staffId || 'unknown'] = {
               staffId: staffId || null,
@@ -133,13 +132,12 @@ function ScheduleList() {
             worker: {
               id: worker.id,
               staffId: worker.staffId,
-              userStoreId: worker.userStoreId,
               username: worker.username,
               allFields: Object.keys(worker),
             },
             사용된staffId: staffId,
             staffIdType: typeof staffId,
-            staffId출처: worker.id ? 'worker.id' : (worker.staffId ? 'worker.staffId' : 'worker.userStoreId'),
+            staffId출처: worker.id ? 'worker.id' : 'worker.staffId',
           });
           
           try {
@@ -250,8 +248,8 @@ function ScheduleList() {
 
   // 근무 가능 시간대 포맷팅
   const formatAvailableTimes = (worker) => {
-    // id > staffId > userStoreId 순서로 확인
-    const staffId = worker?.id || worker?.staffId || worker?.userStoreId;
+    // id > staffId 순서로 확인 (userStoreId 제외)
+    const staffId = worker?.id || worker?.staffId;
     const schedules = workerSchedules[staffId] || [];
     const error = workerErrors[staffId];
     
@@ -311,8 +309,8 @@ function ScheduleList() {
 
     const availableWorkers = [];
     workers.forEach((worker) => {
-      // id > staffId > userStoreId 순서로 확인
-      const staffId = worker.id || worker.staffId || worker.userStoreId;
+      // id > staffId 순서로 확인 (userStoreId 제외)
+      const staffId = worker.id || worker.staffId;
       const schedules = workerSchedules[staffId] || [];
       const hasSchedule = schedules.some((schedule) => {
         const scheduleDate = dayjs(schedule.startDatetime).locale("ko");
@@ -438,13 +436,13 @@ function ScheduleList() {
 
             <div className="flex flex-col gap-3 mt-3">
             {workers.map((worker) => {
-                const workerId = worker.id || worker.staffId || worker.userStoreId;
+                const workerId = worker.id || worker.staffId;
                 const hasError = workerErrors[workerId];
                 const errorStatus = hasError?.status;
                 
                 return (
                 <div
-                key={workerId || worker.id || worker.userStoreId}
+                key={workerId || worker.id}
                 className={`flex items-center gap-3 p-3 rounded-lg shadow-sm ${
                   hasError 
                     ? "bg-red-50 border border-red-200" 
