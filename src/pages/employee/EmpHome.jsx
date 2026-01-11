@@ -6,17 +6,15 @@ import CheckIcon from "../../assets/icons/CheckIcon.jsx";
 import GreenBtn from "../../components/common/GreenBtn.jsx";
 import { useEffect, useState } from "react";
 import character2 from "../../assets/images/character2.png";
-import StoreIcon from "../../assets/icons/StoreIcon.jsx";
 import character3 from "../../assets/images/character3.png";
 import { fetchSchedules } from "../../services/employee/ScheduleService.js";
 import {
   fetchActiveStore,
   fetchMydata,
   fetchStoreList,
-  changeActiveStore,
 } from "../../services/employee/MyPageService.js";
+import FloatButton from "../../components/common/FloatButton.jsx";
 import dayjs from "dayjs";
-import { motion, AnimatePresence } from "framer-motion";
 
 function EmpHome() {
   const [isAppModalOpen, setIsAppModalOpen] = useState(false);
@@ -25,9 +23,13 @@ function EmpHome() {
   const firstDay = today.format("YYYY.MM.") + "01";
   const [wage, setWage] = useState(0);
   const [activeStore, setActiveStore] = useState({ id: null, name: "" });
+  const [storeList, setStoreList] = useState([]);
   const [username, setUsername] = useState();
-
   const [todo, setTodo] = useState([]);
+
+  const handleActiveStoreChange = (newActiveStore) => {
+    setActiveStore(newActiveStore);
+  };
 
   const FormattedDate = (date, day) => {
     return day ? date.format("YYYY.MM.DD(dd)") : date.format("YYYY.MM.DD");
@@ -51,10 +53,13 @@ function EmpHome() {
         setTodo(td);
 
         const active = await fetchActiveStore();
+        const stores = await fetchStoreList();
+
         setActiveStore({
           storeId: active.storeId,
           name: active.name,
         });
+        setStoreList(stores);
       } catch (error) {
         console.error(error);
       }
@@ -72,98 +77,24 @@ function EmpHome() {
     return () => clearInterval(intervalId);
   }, []);
 
-  const FloatButton = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [storeList, setStoreList] = useState([]);
-
-    useEffect(() => {
-      (async () => {
-        try {
-          const response = await fetchStoreList();
-
-          const stores = response.map((r) => ({
-            storeId: r.storeId,
-            name: r.name,
-          }));
-
-          setStoreList(stores);
-        } catch (error) {
-          console.error(error);
-        }
-      })();
-    }, [activeStore]);
-
-    const handleChangeActive = async (storeId) => {
-      try {
-        const response = await changeActiveStore(storeId);
-        setActiveStore({ storeId: response.storeId, name: response.name });
-        setIsOpen(false);
-        console.log({ storeId: response.storeId, name: response.name });
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    return (
-      <div className="fixed bottom-[80px] right-[calc(50%-196.5px+24px)] flex flex-col items-end gap-3">
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              transition={{ duration: 0.2 }}
-              className="flex flex-col gap-3"
-            >
-              {storeList.map((store) => (
-                <motion.div
-                  key={store.storeId}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`flex items-center justify-center text-[10px] font-[500] size-[48px] rounded-full bg-white border-2 shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] cursor-pointer ${
-                    Number(store.storeId) === Number(activeStore?.storeId)
-                      ? "border-[#68e194]"
-                      : "border-black"
-                  }`}
-                  onClick={() => handleChangeActive(store.storeId)}
-                >
-                  {store.name}
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <motion.div
-          whileHover={{ scale: 1.05, backgroundColor: "#fff" }}
-          whileTap={{ scale: 0.95 }}
-          className="flex items-center justify-center size-[48px] rounded-full bg-[#68e194] shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] cursor-pointer"
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <StoreIcon className={isOpen ? "text-[#68e194]" : "text-white"} />
-        </motion.div>
-      </div>
-    );
+  // 출근 기능이 RN 앱(WebView) 안인지 판단
+  const isInApp = () => {
+    return typeof window !== "undefined" && !!window.ReactNativeWebView;
   };
 
-// 출근 기능이 RN 앱(WebView) 안인지 판단
-const isInApp = () => {
-  return typeof window !== "undefined" && !!window.ReactNativeWebView;
-};
+  // 출근하기 버튼 클릭 함수
+  const handleGoWork = () => {
+    if (!isInApp()) {
+      // 👉 웹 브라우저 → 모달 띄우기
+      setIsAppModalOpen(true);
+      return;
+    }
 
-// 출근하기 버튼 클릭 함수
-const handleGoWork = () => {
-  if (!isInApp()) {
-    // 👉 웹 브라우저 → 모달 띄우기
-    setIsAppModalOpen(true);
-    return;
-  }
-
-  // 👉 RN WebView → 앱으로 메시지 보내기
-  window.ReactNativeWebView.postMessage(
-    JSON.stringify({ action: "goToGPS" })
-  );
-};
+    // 👉 RN WebView → 앱으로 메시지 보내기
+    window.ReactNativeWebView.postMessage(
+      JSON.stringify({ action: "goToGPS" }),
+    );
+  };
 
   return (
     <div className="w-full flex flex-col py-7 px-5 ">
@@ -224,30 +155,32 @@ const handleGoWork = () => {
             </p>
           </div>
           <p className="text-[24px] font-[400]">{currentTime}</p>
-          <GreenBtn className={"w-[120px] h-[30px] py-0 mt-0"}
-          onClick={handleGoWork} //시은추가
-    >
+          <GreenBtn
+            className={"w-[120px] h-[30px] py-0 mt-0"}
+            onClick={handleGoWork} //시은추가
+          >
             출근하기
           </GreenBtn>
         </Box>
-      {/* -------- 앱 전용 안내 모달 -------- */}
-{isAppModalOpen && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-    <div className="bg-white rounded-xl p-6 w-80 text-center">
-      <p className="text-lg font-semibold mb-3">앱 전용 기능입니다</p>
-      <p className="text-sm text-gray-700 mb-5">
-        출퇴근 기능은 알솔 앱에서만 사용할 수 있어요.
-      </p>
-      <button
-        className="text-white px-4 py-2 rounded-lg"
-        onClick={() => setIsAppModalOpen(false)} style={{backgroundColor : "#68e194"}}
-      >
-        확인
-      </button>
-    </div>
-  </div>
-)}
-{/* -------------------------------- */}
+        {/* -------- 앱 전용 안내 모달 -------- */}
+        {isAppModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white rounded-xl p-6 w-80 text-center">
+              <p className="text-lg font-semibold mb-3">앱 전용 기능입니다</p>
+              <p className="text-sm text-gray-700 mb-5">
+                출퇴근 기능은 알솔 앱에서만 사용할 수 있어요.
+              </p>
+              <button
+                className="text-white px-4 py-2 rounded-lg"
+                onClick={() => setIsAppModalOpen(false)}
+                style={{ backgroundColor: "#68e194" }}
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        )}
+        {/* -------------------------------- */}
       </div>
       <div className="flex items-center">
         <ColoredDollarIcon />
@@ -268,7 +201,11 @@ const handleGoWork = () => {
           <img src={character3} alt="character" className="size-[110px] mr-1" />
         </Box>
       </div>
-      <FloatButton />
+      <FloatButton
+        stores={storeList}
+        active={activeStore}
+        onActiveStoreChange={handleActiveStoreChange}
+      />
     </div>
   );
 }

@@ -11,10 +11,9 @@ import { fetchSchedules } from "../../services/common/ScheduleService.js";
 import {
   fetchActiveStore,
   fetchStoreList,
-  changeActiveStore,
 } from "../../services/owner/MyPageService.js";
 import dayjs from "dayjs";
-import StoreIcon from "../../assets/icons/StoreIcon.jsx";
+
 import FloatButton from "../../components/common/FloatButton.jsx";
 
 function OwnerHome() {
@@ -127,11 +126,7 @@ function OwnerHome() {
           className="w-full my-5 max-w-[500px] overflow-x-hidden"
           hole={workers.length}
         >
-          <ResourceCalendar
-            e={events}
-            w={workers}
-            current={currentTime.slice(0, 2)}
-          />
+          <ResourceCalendar e={events} w={workers} />
         </Note>
       </div>
       <div className="flex items-center">
