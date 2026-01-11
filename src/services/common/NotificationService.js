@@ -1,13 +1,13 @@
 import api from "../api.js";
 
 /**
- * 알림 조회 (GET /api/shift-swap/notifications)
+ * 알림 조회 (GET /api/notifications)
  * 대타요청, 인력요청, 근무표 작성 요청 등 모든 알림을 통합 조회
  * @returns {Promise<Array>} 알림 목록 (type 필드로 구분: SCHEDULE_REQUEST, SHIFT_SWAP, STAFFING 등)
  */
 export async function fetchNotifications() {
   try {
-    const response = await api.get("/api/shift-swap/notifications");
+    const response = await api.get("/api/notifications");
     return response.data;
   } catch (error) {
     console.error("알림 조회 실패:", error);
@@ -30,70 +30,16 @@ export async function fetchNotifications() {
  * @param {string} payload.type - 알림 타입 (선택, 백엔드에서 자동 설정될 수 있음)
  * @returns {Promise<Object>} 생성된 알림 정보
  */
+/**
+ * ⚠️ 이 함수는 사용되지 않습니다.
+ * 알림은 /api/schedules/requests API 호출 시 백엔드에서 자동으로 생성됩니다.
+ * 별도로 알림 API를 호출할 필요가 없습니다.
+ * 
+ * 만약 이 함수가 호출된다면, 빌드 캐시를 클리어하고 재배포하세요.
+ */
 export async function createScheduleRequestNotification(payload) {
-  try {
-    // timeSlots 형식 변환 (프론트엔드 형식 -> 백엔드 형식)
-    let formattedTimeSlots = null;
-    if (payload.timeSlots && Array.isArray(payload.timeSlots) && payload.timeSlots.length > 0) {
-      formattedTimeSlots = payload.timeSlots.map((slot) => {
-        // 이미 백엔드 형식인 경우 (startTime, endTime, requiredStaff)
-        if (slot.startTime && slot.endTime !== undefined && slot.requiredStaff !== undefined) {
-          return {
-            startTime: slot.startTime,
-            endTime: slot.endTime,
-            requiredStaff: slot.requiredStaff,
-          };
-        }
-        // 프론트엔드 형식인 경우 (start, end, count) -> 백엔드 형식으로 변환
-        if (slot.start && slot.end && slot.count !== undefined) {
-          return {
-            startTime: slot.start.includes(':') ? `${slot.start}:00` : slot.start,
-            endTime: slot.end.includes(':') ? `${slot.end}:00` : slot.end,
-            requiredStaff: slot.count,
-          };
-        }
-        return slot; // 변환 불가능한 경우 원본 반환
-      });
-    }
-
-    // 백엔드 API 스펙에 맞게 요청 데이터 구성
-    // null 값은 제거하거나 백엔드가 기대하는 형식으로 변환
-    const requestData = {
-      storeId: payload.storeId,
-      employeeIds: payload.employeeIds,
-      message: payload.message,
-      unitSpecified: payload.unitSpecified,
-      type: payload.type || 'SCHEDULE_REQUEST',
-    };
-
-    // 조건부 필드 추가 (null이 아닌 경우만)
-    if (payload.startDate) {
-      requestData.startDate = payload.startDate;
-    }
-    if (payload.endDate) {
-      requestData.endDate = payload.endDate;
-    }
-    if (formattedTimeSlots && formattedTimeSlots.length > 0) {
-      requestData.timeSlots = formattedTimeSlots;
-    }
-    if (payload.minWorkTime !== null && payload.minWorkTime !== undefined) {
-      requestData.minWorkTime = payload.minWorkTime;
-    }
-
-    console.log("📤 알림 생성 요청 데이터:", requestData);
-
-    // POST /api/notifications/schedule-request - 근무표 작성 요청 알림 API
-    // /api/shift-swap/notifications는 POST를 지원하지 않음 (GET만 지원)
-    const response = await api.post("/api/notifications/schedule-request", requestData);
-    return response.data;
-  } catch (error) {
-    console.error("알림 생성 실패:", error);
-    console.error("요청 데이터:", payload);
-    if (error.response) {
-      console.error("응답 상태:", error.response.status);
-      console.error("응답 데이터:", error.response.data);
-    }
-    throw error;
-  }
+  // 함수 호출 자체를 막기 위해 즉시 반환
+  console.warn("⚠️ createScheduleRequestNotification은 더 이상 사용되지 않습니다. 알림은 /api/schedules/requests에서 자동 생성됩니다.");
+  return { success: true, message: "알림은 백엔드에서 자동 생성됩니다." };
 }
 

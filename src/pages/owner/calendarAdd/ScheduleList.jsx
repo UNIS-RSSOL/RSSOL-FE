@@ -6,8 +6,8 @@ import TopBar from "../../../components/layout/alarm/TopBar.jsx";
 import TimeSlotCalendar from "../../../components/common/calendar/TimeSlotCalendar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import Toast from "../../../components/common/Toast.jsx";
-import { fetchAllWorkers, fetchEmployeeAvailabilities } from "../../../services/owner/ScheduleService.js";
-import { generateSchedule } from "../../../services/scheduleService.js";
+import { fetchAllWorkers, fetchStoreAvailabilities } from "../../../services/owner/ScheduleService.js";
+import { generateScheduleWithSetting } from "../../../services/scheduleService.js";
 import { fetchActiveStore, fetchMydata } from "../../../services/owner/MyPageService.js";
 
 function ScheduleList() {
@@ -22,8 +22,9 @@ function ScheduleList() {
   const [storeId, setStoreId] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   
-  // CalAdd에서 전달받은 정보 (시간 구간, 시작일, 종료일 등)
+  // CalAdd에서 전달받은 정보 (settingId, 시간 구간, 시작일, 종료일 등)
   const scheduleConfig = location.state || {};
+  const settingId = scheduleConfig.settingId;
 
   // 매장 ID 가져오기
   useEffect(() => {
@@ -98,53 +99,40 @@ function ScheduleList() {
         console.log(`✅ 필터링된 직원 수: ${storeWorkers.length}명`);
         setWorkers(storeWorkers);
 
-        // 각 직원의 work availability 가져오기
-        // 사장용 API: GET /api/store/staff/{staffId}/availabilities 사용
+        // 매장의 모든 직원 work availability 가져오기
+        // 새로운 API: GET /api/{storeId}/availabilities 사용
         const schedulesByWorker = {};
         const errorsByWorker = {};
         
-        // 각 직원의 work availability를 병렬로 가져오기
-        const availabilityPromises = storeWorkers.map(async (worker) => {
-          // Swagger API 문서 기준: GET /api/store/staff/{staffId}/availabilities
-          // 일반적으로 REST API에서는 id 필드를 우선 사용
-          // id > staffId 순서로 확인 (userStoreId 제외)
-          const staffId = worker.id || worker.staffId;
-          const workerName = worker.username || worker.name || '이름없음';
+        try {
+          // ✅ 새로운 API: 한 번의 호출로 모든 직원의 availabilities 가져오기
+          // 제출안한 직원들은 빈배열 반환
+          const storeAvailabilities = await fetchStoreAvailabilities(storeId);
           
-          if (!staffId) {
-            const errorMsg = "직원 ID를 찾을 수 없습니다 (id 또는 staffId 필요)";
-            console.error(`❌ ${workerName}:`, errorMsg, {
-              worker,
-              availableFields: Object.keys(worker),
-              id: worker.id,
-              staffId: worker.staffId,
-            });
-            errorsByWorker[staffId || 'unknown'] = {
-              staffId: staffId || null,
-              workerName,
-              error: new Error(errorMsg),
-              status: null,
-            };
-            return;
-          }
+          // 응답 형태: 배열 [ { userName: string, availabilities: Array } ]
+          // 각 직원별로 availabilities가 빈 배열일 수 있음
           
-          console.log(`🔍 직원 ${workerName} (ID: ${staffId})의 근무 가능 시간 조회 시작`, {
-            worker: {
-              id: worker.id,
-              staffId: worker.staffId,
-              username: worker.username,
-              allFields: Object.keys(worker),
-            },
-            사용된staffId: staffId,
-            staffIdType: typeof staffId,
-            staffId출처: worker.id ? 'worker.id' : 'worker.staffId',
-          });
-          
-          try {
-            // ✅ 정상 응답 또는 500/404 에러 시 빈 배열 반환 처리
-            const availabilities = await fetchEmployeeAvailabilities(staffId);
+          storeWorkers.forEach((worker) => {
+            const staffId = worker.id || worker.staffId;
+            const workerName = worker.username || worker.name || worker.userName || '이름없음';
             
-            // 응답 검증: 배열인지 확인
+            if (!staffId) {
+              const errorMsg = "직원 ID를 찾을 수 없습니다 (id 또는 staffId 필요)";
+              console.error(`❌ ${workerName}:`, errorMsg);
+              errorsByWorker[staffId || 'unknown'] = {
+                staffId: staffId || null,
+                workerName,
+                error: new Error(errorMsg),
+                status: null,
+              };
+              schedulesByWorker[staffId || 'unknown'] = [];
+              return;
+            }
+            
+            // userName으로 매칭하여 해당 직원의 availabilities 가져오기 (없으면 빈 배열)
+            const workerAvailability = storeAvailabilities.find(item => item.userName === workerName);
+            const availabilities = workerAvailability?.availabilities || [];
+            
             if (Array.isArray(availabilities)) {
               schedulesByWorker[staffId] = availabilities;
               if (availabilities.length > 0) {
@@ -153,88 +141,56 @@ function ScheduleList() {
                 console.log(`ℹ️ 직원 ${workerName} (ID: ${staffId}) 근무 가능 시간 없음 (빈 배열)`);
               }
             } else {
-              // 예상치 못한 응답 형태
               console.warn(`⚠️ 직원 ${workerName} (ID: ${staffId})의 응답이 배열이 아닙니다:`, availabilities);
               schedulesByWorker[staffId] = [];
-              errorsByWorker[staffId] = {
-                staffId,
-                workerName,
-                error: new Error("응답이 배열 형태가 아닙니다"),
-                status: null,
-                errorMessage: "데이터 형식 오류",
-              };
             }
-          } catch (error) {
-            // 🔴 500/404가 아닌 기타 에러 (401, 403 등)만 catch
-            const errorInfo = {
+          });
+        } catch (error) {
+          // 전체 조회 실패 시 모든 직원에 대해 에러 처리
+          const errorInfo = {
+            error,
+            status: error.response?.status || null,
+            statusText: error.response?.statusText || null,
+            errorData: error.response?.data || null,
+            errorMessage: error.message,
+          };
+          
+          console.error(`❌ 매장 근무 가능 시간 조회 실패:`, errorInfo);
+          
+          storeWorkers.forEach((worker) => {
+            const staffId = worker.id || worker.staffId;
+            const workerName = worker.username || worker.name || '이름없음';
+            schedulesByWorker[staffId] = [];
+            errorsByWorker[staffId] = {
               staffId,
               workerName,
-              error,
-              status: error.response?.status || null,
-              statusText: error.response?.statusText || null,
-              errorData: error.response?.data || null,
-              errorMessage: error.message,
+              ...errorInfo,
             };
-            
-            console.error(`❌ 직원 ${workerName} (ID: ${staffId}) 근무 가능시간 조회 실패:`, errorInfo);
-            
-            // 인증/권한 에러 등은 빈 배열로 처리하되 에러 정보 저장
-            schedulesByWorker[staffId] = [];
-            errorsByWorker[staffId] = errorInfo;
-          }
-        });
+          });
+        }
         
-        await Promise.all(availabilityPromises);
-        
-        const successCount = Object.keys(schedulesByWorker).length - Object.keys(errorsByWorker).length;
+        const successCount = Object.keys(schedulesByWorker).filter(
+          (staffId) => !errorsByWorker[staffId] && schedulesByWorker[staffId]?.length > 0
+        ).length;
         const errorCount = Object.keys(errorsByWorker).length;
+        const emptyCount = Object.keys(schedulesByWorker).filter(
+          (staffId) => !errorsByWorker[staffId] && (!schedulesByWorker[staffId] || schedulesByWorker[staffId].length === 0)
+        ).length;
         
         console.log("📊 모든 직원의 스케줄 로드 완료:", {
           totalWorkers: storeWorkers.length,
           successCount,
+          emptyCount,
           errorCount,
           schedulesCount: Object.keys(schedulesByWorker).length,
         });
         
         if (errorCount > 0) {
           console.warn(`⚠️ ${errorCount}명의 직원 데이터 로드 실패:`, errorsByWorker);
-          
-          // 에러별 요약
-          const errorSummary = {
-            totalErrors: errorCount,
-            byStatus: {},
-            errors: Object.keys(errorsByWorker).map(staffId => {
-              const error = errorsByWorker[staffId];
-              const status = error.status || 'unknown';
-              if (!errorSummary.byStatus[status]) {
-                errorSummary.byStatus[status] = 0;
-              }
-              errorSummary.byStatus[status]++;
-              
-              return {
-                staffId,
-                workerName: error.workerName,
-                errorStatus: status,
-                errorMessage: error.errorMessage,
-              };
-            }),
-          };
-          
-          console.warn("📊 에러 요약:", errorSummary);
-          
-          // 500 에러가 많은 경우 백엔드 문제 안내
-          if (errorSummary.byStatus[500] > 0) {
-            console.warn("🔴 [백엔드 수정 필요] 500 에러 발생 직원:", {
-              count: errorSummary.byStatus[500],
-              문제: "백엔드에서 빈 데이터(null/empty) 처리 로직 누락",
-              해결: "백엔드 개발자가 컨트롤러에서 빈 리스트 반환 처리 추가 필요",
-              확인방법: [
-                "1. Swagger에서 GET /api/store/staff/{staffId}/availabilities 직접 호출",
-                "2. DB에서 SELECT * FROM availability WHERE staff_id = ? 확인",
-                "3. 백엔드 코드에서 if (list == null || list.isEmpty()) return ResponseEntity.ok(Collections.emptyList()); 추가",
-              ],
-            });
-          }
+        }
+        
+        if (emptyCount > 0) {
+          console.log(`ℹ️ ${emptyCount}명의 직원은 근무 가능 시간이 없습니다 (제출 안 함)`);
         }
         
         setWorkerSchedules(schedulesByWorker);
@@ -349,28 +305,16 @@ function ScheduleList() {
   const handleGenerateSchedule = async () => {
     if (isGenerating) return;
     
-    if (!storeId) {
-      alert("매장 정보를 불러올 수 없습니다.");
+    if (!settingId) {
+      alert("설정 정보를 불러올 수 없습니다. 먼저 근무표 생성 요청을 해주세요.");
       return;
     }
 
     try {
       setIsGenerating(true);
 
-      // CalAdd에서 전달받은 정보가 있으면 사용, 없으면 기본값 사용
-      const timeSegments = scheduleConfig.timeSegments || [
-        { startTime: "09:00:00", endTime: "18:00:00", requiredStaff: 1 }
-      ];
-      const openTime = scheduleConfig.openTime || "09:00:00";
-      const closeTime = scheduleConfig.closeTime || "18:00:00";
-
-      const result = await generateSchedule(
-        storeId,
-        openTime,
-        closeTime,
-        timeSegments,
-        { candidateCount: 5 }
-      );
+      // /api/schedules/{settingId}/generate API 호출
+      const result = await generateScheduleWithSetting(settingId);
 
       if (result && result.candidateScheduleKey) {
         const startDate = scheduleConfig.startDate || dayjs().locale("ko").startOf("week").format("YYYY-MM-DD");

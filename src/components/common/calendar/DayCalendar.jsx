@@ -28,7 +28,7 @@ function DayCalendar({
               `${schedule.userStoreId}-${schedule.userId}`, // Combine both IDs for uniqueness
               {
                 userStoreId: schedule.userStoreId,
-                userName: schedule.userName,
+                username: schedule.username,
               },
             ]),
           ).values(),
@@ -36,7 +36,7 @@ function DayCalendar({
         const formattedEvents = schedules.map((schedule) => ({
           id: schedule.id,
           userStoreId: schedule.userStoreId,
-          userName: schedule.userName,
+          username: schedule.username,
           start: schedule.startDatetime,
           end: schedule.endDatetime,
         }));
