@@ -391,10 +391,14 @@ function OwnerCalendar() {
                     className="w-[61px] h-[30px]"
                     style={{ borderColor: "#87888C" }}
                     format="HH:mm"
-                    minuteStep="5"
+                    minuteStep={5}
                     placeholder=""
                     suffixIcon=""
                     needConfirm={false}
+                    disabledTime={() => ({
+                      disabledHours: () => [...Array(8).keys()],
+                    })}
+                    hideDisabledOptions
                     onChange={(e) =>
                       setNewTime({ ...newTime, start: dayjs(e) })
                     }
@@ -404,10 +408,14 @@ function OwnerCalendar() {
                     className="w-[61px] h-[30px]"
                     style={{ borderColor: "#87888C" }}
                     format="HH:mm"
-                    minuteStep="5"
+                    minuteStep={5}
                     placeholder=""
                     suffixIcon=""
                     needConfirm={false}
+                    disabledTime={() => ({
+                      disabledHours: () => [...Array(8).keys()],
+                    })}
+                    hideDisabledOptions
                     onChange={(e) => setNewTime({ ...newTime, end: dayjs(e) })}
                   />
                   <p className="w-[40px] flex-shrink-0 text-[14px] font-[500] text-right gap-1">
