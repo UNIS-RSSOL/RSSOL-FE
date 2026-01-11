@@ -43,7 +43,7 @@ function Toast({ children, isOpen, onClose }) {
         {children}
       </div>
 
-      <style jsx global>{`
+      <style>{`
         @keyframes slideUp {
           from {
             transform: translateY(100%) translateX(-50%);

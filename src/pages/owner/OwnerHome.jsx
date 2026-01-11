@@ -86,7 +86,7 @@ function OwnerHome() {
       const formattedEvents = schedules.map((schedule) => ({
         id: schedule.id,
         workerId: schedule.userStoreId,
-        worker: schedule.userName,
+        worker: schedule.username,
         start: schedule.startDatetime,
         end: schedule.endDatetime,
       }));
@@ -96,7 +96,7 @@ function OwnerHome() {
             if (!map.has(schedule.userStoreId)) {
               map.set(schedule.userStoreId, {
                 id: schedule.userStoreId,
-                name: schedule.userName,
+                name: schedule.username,
               });
             }
             return map;

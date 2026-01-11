@@ -1,13 +1,13 @@
 import api from "../api.js";
 
 /**
- * 알림 조회 (GET /api/shift-swap/notifications)
+ * 알림 조회 (GET /api/notifications)
  * 대타요청, 인력요청, 근무표 작성 요청 등 모든 알림을 통합 조회
  * @returns {Promise<Array>} 알림 목록 (type 필드로 구분: SCHEDULE_REQUEST, SHIFT_SWAP, STAFFING 등)
  */
 export async function fetchNotifications() {
   try {
-    const response = await api.get("/api/shift-swap/notifications");
+    const response = await api.get("/api/notifications");
     return response.data;
   } catch (error) {
     console.error("알림 조회 실패:", error);
@@ -30,28 +30,16 @@ export async function fetchNotifications() {
  * @param {string} payload.type - 알림 타입 (선택, 백엔드에서 자동 설정될 수 있음)
  * @returns {Promise<Object>} 생성된 알림 정보
  */
+/**
+ * ⚠️ 이 함수는 사용되지 않습니다.
+ * 알림은 /api/schedules/requests API 호출 시 백엔드에서 자동으로 생성됩니다.
+ * 별도로 알림 API를 호출할 필요가 없습니다.
+ * 
+ * 만약 이 함수가 호출된다면, 빌드 캐시를 클리어하고 재배포하세요.
+ */
 export async function createScheduleRequestNotification(payload) {
-  try {
-    // 백엔드 API 스펙에 맞게 요청 데이터 구성
-    const requestData = {
-      storeId: payload.storeId,
-      employeeIds: payload.employeeIds,
-      message: payload.message,
-      startDate: payload.startDate,
-      endDate: payload.endDate,
-      unitSpecified: payload.unitSpecified,
-      timeSlots: payload.timeSlots,
-      minWorkTime: payload.minWorkTime,
-      // 알림 타입 (백엔드에서 자동 설정할 수도 있음)
-      type: payload.type || 'SCHEDULE_REQUEST',
-    };
-
-    // POST /api/shift-swap/notifications - 통합 알림 API
-    const response = await api.post("/api/shift-swap/notifications", requestData);
-    return response.data;
-  } catch (error) {
-    console.error("알림 생성 실패:", error);
-    throw error;
-  }
+  // 함수 호출 자체를 막기 위해 즉시 반환
+  console.warn("⚠️ createScheduleRequestNotification은 더 이상 사용되지 않습니다. 알림은 /api/schedules/requests에서 자동 생성됩니다.");
+  return { success: true, message: "알림은 백엔드에서 자동 생성됩니다." };
 }
 

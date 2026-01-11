@@ -65,17 +65,154 @@ export async function fetchAllWorkers() {
 }
 
 /**
- * 특정 직원의 근무 가능 시간 조회 (사장용 API)
+ * 매장의 모든 직원 근무 가능 시간 조회 (사장용 API)
+ * 제출안한 직원들은 빈배열 반환
  *
- * @param {number} staffId - 조회할 직원의 staffId
- * @returns {Promise<Array>} - 근무 가능 시간 배열
+ * @param {number} storeId - 매장 ID
+ * @returns {Promise<Array>} - 직원별 근무 가능 시간 배열 [ { userName: string, availabilities: Array } ]
  *
- * API 엔드포인트: GET /api/store/staff/{staffId}/availabilities
+ * API 엔드포인트: GET /api/{storeId}/availabilities
+ *
+ * 응답 형식:
+ * [
+ *   { "userName": "사장B", "availabilities": [] },
+ *   { "userName": "알바4", "availabilities": [] },
+ *   { "userName": "알바5", "availabilities": [ { dayOfWeek, startTime, endTime } ] }
+ * ]
  *
  * 사장(Owner) 권한에서 사용하는 API입니다.
  * 직원 페이지에서는 /api/me/availabilities를 사용합니다.
  */
+export async function fetchStoreAvailabilities(storeId) {
+  if (!storeId) {
+    const error = new Error("storeId가 없습니다.");
+    console.error("❌ fetchStoreAvailabilities:", error.message, {
+      storeId,
+    });
+    throw error;
+  }
+
+  try {
+    // 토큰 확인
+    const token = localStorage.getItem("accessToken");
+    const endpoint = `/api/${storeId}/availabilities`;
+    const fullURL = `${api.defaults.baseURL}${endpoint}`;
+
+    console.log(`🔍 [조회 API] 매장 근무 가능 시간 조회 요청:`, {
+      endpoint,
+      fullURL,
+      method: "GET",
+      storeId,
+      storeIdType: typeof storeId,
+      tokenExists: !!token,
+      tokenLength: token?.length || 0,
+    });
+
+    const response = await api.get(endpoint);
+
+    // ✅ 정상 응답 처리 (200 OK)
+    // 새로운 API 형식: GET /api/{storeId}/availabilities
+    // 응답 형태: 배열 [ { userName: string, availabilities: Array } ]
+    // 예시:
+    // [
+    //   { "userName": "사장B", "availabilities": [] },
+    //   { "userName": "알바4", "availabilities": [] },
+    //   { "userName": "알바5", "availabilities": [ { dayOfWeek, startTime, endTime } ] }
+    // ]
+
+    // 응답 데이터 정규화
+    let availabilitiesData = response.data;
+    
+    // 응답이 객체로 감싸져 있는 경우
+    if (availabilitiesData && typeof availabilitiesData === 'object' && !Array.isArray(availabilitiesData)) {
+      if (availabilitiesData.data && Array.isArray(availabilitiesData.data)) {
+        availabilitiesData = availabilitiesData.data;
+      } else if (availabilitiesData.availabilities && Array.isArray(availabilitiesData.availabilities)) {
+        availabilitiesData = availabilitiesData.availabilities;
+      }
+    }
+
+    // 응답이 배열 형태인 경우
+    if (Array.isArray(availabilitiesData)) {
+      // 각 항목에서 userStoreId 제거하고 userName과 availabilities만 유지
+      const normalizedData = availabilitiesData.map((item) => {
+        // userStoreId가 있으면 제거
+        const { userStoreId, ...rest } = item;
+        return {
+          userName: item.userName,
+          availabilities: Array.isArray(item.availabilities) ? item.availabilities : [],
+        };
+      });
+
+      console.log(`✅ [조회 API] 매장 근무 가능 시간 조회 성공:`, {
+        status: response.status,
+        statusText: response.statusText,
+        storeId,
+        staffCount: normalizedData.length,
+      });
+
+      return normalizedData;
+    }
+
+    // 예상치 못한 응답 형태
+    console.warn(`⚠️ [응답 형식 오류] 매장 ID:${storeId} - 응답 형식을 파싱할 수 없습니다:`, {
+      originalData: response.data,
+      normalizedData: availabilitiesData,
+      dataType: typeof availabilitiesData,
+    });
+    return [];
+  } catch (error) {
+    const status = error.response?.status;
+    const errorDetails = {
+      storeId,
+      storeIdType: typeof storeId,
+      endpoint: `/api/${storeId}/availabilities`,
+      status,
+      statusText: error.response?.statusText,
+      errorData: error.response?.data,
+      errorMessage: error.message,
+    };
+
+    // 🔴 500 에러 (백엔드 내부 서버 오류) - 방어적 처리
+    if (status === 500) {
+      console.warn(
+        `⚠️ [백엔드 500 에러 - 방어 처리] 매장 ID:${storeId} 근무 가능 시간 데이터 조회 실패 (서버 오류)`,
+        {
+          ...errorDetails,
+          처리: "빈 배열 반환",
+        },
+      );
+      return [];
+    }
+
+    // 🔴 404 에러 - 빈 배열 반환
+    if (status === 404) {
+      console.warn(
+        `⚠️ 매장 ID:${storeId}를 찾을 수 없습니다 (404). 빈 배열 반환`,
+        errorDetails,
+      );
+      return [];
+    }
+
+    // 🔴 기타 에러 (401, 403 등) - 에러 throw하여 상위에서 처리
+    console.error(
+      `🚨 [API 실패] 매장 ID:${storeId} 근무 가능시간 요청 실패:`,
+      errorDetails,
+    );
+
+    throw error;
+  }
+}
+
+/**
+ * 특정 직원의 근무 가능 시간 조회 (사장용 API) - 레거시 함수
+ * @deprecated 새로운 API 사용 권장: fetchStoreAvailabilities
+ * @param {number} staffId - 조회할 직원의 staffId
+ * @returns {Promise<Array>} - 근무 가능 시간 배열
+ */
 export async function fetchEmployeeAvailabilities(staffId) {
+  console.warn("⚠️ fetchEmployeeAvailabilities는 deprecated입니다. fetchStoreAvailabilities를 사용하세요.");
+  
   if (!staffId) {
     const error = new Error("staffId가 없습니다.");
     console.error("❌ fetchEmployeeAvailabilities:", error.message, {
@@ -85,117 +222,29 @@ export async function fetchEmployeeAvailabilities(staffId) {
   }
 
   try {
-    // 토큰 확인
-    const token = localStorage.getItem("accessToken");
     const endpoint = `/api/store/staff/${staffId}/availabilities`;
-    const fullURL = `${api.defaults.baseURL}${endpoint}`;
-
-    console.log(`🔍 [조회 API] 직원 근무 가능 시간 조회 요청:`, {
-      endpoint,
-      fullURL,
-      method: "GET",
-      staffId,
-      staffIdType: typeof staffId,
-      tokenExists: !!token,
-      tokenLength: token?.length || 0,
-    });
-
     const response = await api.get(endpoint);
-
-    // 디버깅: 성공 응답 로깅
-    console.log(`✅ [조회 API] 직원 근무 가능 시간 조회 성공:`, {
-      status: response.status,
-      statusText: response.statusText,
-      staffId,
-      dataCount: Array.isArray(response.data) ? response.data.length : 0,
-      data: response.data,
-      // 저장 API와 비교를 위한 정보
-      comparison: {
-        queryStaffId: staffId,
-        responseDataStructure:
-          response.data &&
-          Array.isArray(response.data) &&
-          response.data.length > 0
-            ? {
-                firstItemKeys: Object.keys(response.data[0]),
-                firstItem: response.data[0],
-              }
-            : "빈 배열 또는 데이터 없음",
-      },
-    });
-
-    return response.data || [];
-  } catch (error) {
-    // 디버깅: 상세 에러 로깅
-    const errorDetails = {
-      staffId,
-      staffIdType: typeof staffId,
-      endpoint: `/api/store/staff/${staffId}/availabilities`,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      errorData: error.response?.data,
-      errorMessage: error.message,
-      requestConfig: {
-        url: error.config?.url,
-        method: error.config?.method,
-        headers: {
-          ...error.config?.headers,
-          Authorization: error.config?.headers?.Authorization
-            ? `Bearer ${error.config.headers.Authorization.split(" ")[1]?.substring(0, 20)}...`
-            : "❌ 없음",
-        },
-        baseURL: error.config?.baseURL,
-      },
-    };
-
-    console.error(
-      `🚨 [API 실패] 직원 ID:${staffId} 근무 가능시간 요청 실패:`,
-      errorDetails,
-    );
-
-    // 500 에러인 경우 상세 정보 출력
-    if (error.response?.status === 500) {
-      console.error("⚠️ [서버 500 에러 상세]:", {
-        requestURL: error.config?.url,
-        requestMethod: error.config?.method,
-        requestHeaders: {
-          ...error.config?.headers,
-          Authorization: error.config?.headers?.Authorization
-            ? `Bearer ${error.config.headers.Authorization.split(" ")[1]?.substring(0, 20)}...`
-            : "❌ 없음",
-        },
-        responseData: error.response?.data,
-        responseHeaders: error.response?.headers,
-        // 백엔드 개발자에게 전달할 수 있도록 상세 정보
-        serverError: {
-          message:
-            error.response?.data?.message ||
-            error.response?.data?.error ||
-            "서버 내부 오류",
-          timestamp: new Date().toISOString(),
-          path: error.config?.url,
-          method: error.config?.method?.toUpperCase(),
-          staffId: staffId,
-          staffIdType: typeof staffId,
-        },
-      });
-
-      // 백엔드 개발자용 요약 정보
-      console.error("📋 [백엔드 개발자용 요약]:", {
-        endpoint: `/api/store/staff/${staffId}/availabilities`,
-        method: "GET",
-        status: 500,
-        staffId: staffId,
-        staffIdType: typeof staffId,
-        errorMessage:
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          "서버 내부 오류",
-        fullErrorData: error.response?.data,
-      });
+    
+    let availabilities = response.data;
+    
+    if (availabilities && typeof availabilities === 'object' && !Array.isArray(availabilities)) {
+      if (availabilities.data && Array.isArray(availabilities.data)) {
+        availabilities = availabilities.data;
+      } else if (availabilities.availabilities && Array.isArray(availabilities.availabilities)) {
+        availabilities = availabilities.availabilities;
+      }
     }
 
-    // ❗ 에러를 그대로 throw하여 호출하는 쪽에서 처리할 수 있도록 함
+    if (!Array.isArray(availabilities)) {
+      return [];
+    }
+
+    return availabilities;
+  } catch (error) {
+    const status = error.response?.status;
+    if (status === 500 || status === 404) {
+      return [];
+    }
     throw error;
   }
 }

@@ -11,7 +11,8 @@ import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import { generateSchedule, confirmSchedule } from "../../../services/scheduleService.js";
 import { fetchActiveStore, fetchStoredata, fetchMydata } from "../../../services/owner/MyPageService.js";
 import { fetchAllWorkers } from "../../../services/owner/ScheduleService.js";
-import { createScheduleRequestNotification } from "../../../services/common/NotificationService.js";
+// TODO: 백엔드에 근무표 작성 요청 알림 API가 구현되면 주석 해제
+// import { createScheduleRequestNotification } from "../../../services/common/NotificationService.js";
 import "./CalAdd.css";
 
 export default function CalAdd() {
@@ -524,24 +525,10 @@ export default function CalAdd() {
               dateRange = `${currentMonth}월`;
             }
 
-            // 8. 백엔드 API로 알림 생성
-            try {
-              await createScheduleRequestNotification({
-                storeId: storeData.storeId,
-                employeeIds: employeeIds,
-                message: `사장님이 ${dateRange} 시간표 추가를 요청했어요! 근무가능 시간표를 작성해주세요`,
-                startDate: startDate || null,
-                endDate: endDate || null,
-                unitSpecified: unitSpecified,
-                timeSlots: unitSpecified ? timeSlots.filter(slot => slot.start && slot.end && slot.count > 0) : null,
-                minWorkTime: !unitSpecified ? minWorkTime : null,
-              });
-              alert("알바생들에게 알림이 전송되었습니다!");
-            } catch (error) {
-              console.error("알림 전송 실패:", error);
-              alert("알림 전송에 실패했습니다. 다시 시도해주세요.");
-              return;
-            }
+            // 8. 백엔드 API로 알림 생성 (백엔드 API가 준비되면 활성화)
+            // TODO: 백엔드에 근무표 생성 요청 알림 API가 구현되면 아래 코드 활성화
+            // 현재 백엔드에 해당 API가 없어 주석 처리됨
+            // await createScheduleRequestNotification({ ... });
 
             // 8. ScheduleList로 이동하면서 설정한 정보 전달
             const timeSegments = unitSpecified

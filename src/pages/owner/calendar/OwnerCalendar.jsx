@@ -103,7 +103,7 @@ function OwnerCalendar() {
     setEventData({
       id: e.id,
       userStoreId: e.userStoreId,
-      userName: e.userName,
+      username: e.username,
       start: dayjs(e.start),
       end: dayjs(e.end),
     });
@@ -443,7 +443,7 @@ function OwnerCalendar() {
             <div className="flex flex-col gap-2">
               <div className="flex flex-row items-center justify-center">
                 <p className="text-[16px] font-[600] mb-2">
-                  {eventData.start.format("dd")}({eventData.userName}){" "}
+                  {eventData.start.format("dd")}({eventData.username}){" "}
                   {eventData.start.format("HH:mm")}-
                   {eventData.end.format("HH:mm")}
                 </p>
