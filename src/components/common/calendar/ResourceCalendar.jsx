@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 
-function ResourceCalendar({ e, w, current }) {
-  const startHour = current > 7 ? parseInt(current, 10) : 8;
-  const hours = Array.from({ length: 24 - startHour }, (_, i) => i + startHour);
+function ResourceCalendar({ e, w }) {
+  const hours = Array.from({ length: 16 }, (_, i) => i + 8);
   const [workers, setWorkers] = useState([]);
   const [events, setEvents] = useState([]);
   const colors = ["#68e194", "#32d1aa", "#00c1bd"];
