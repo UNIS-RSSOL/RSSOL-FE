@@ -67,7 +67,7 @@ function OwnerCalendar() {
   const [activeStore, setActiveStore] = useState("");
   const [newTime, setNewTime] = useState({
     userStoreId: "",
-    userName: "",
+    username: "",
     date: "",
     start: "",
     end: "",
@@ -178,7 +178,7 @@ function OwnerCalendar() {
           className={`flex w-[70px] h-[30px] items-center justify-center border-[#87888C] py-[2px] bg-white gap-1 cursor-pointer ${dropdownOpen ? "border border-b-[#87888c] rounded-t-[7px]" : "border rounded-[7px]"}`}
           onClick={() => setDropdownOpen(!dropdownOpen)}
         >
-          <span className="text-[12px] font-[400]">{newTime.userName}</span>
+          <span className="text-[12px] font-[400]">{newTime.username}</span>
         </div>
         {dropdownOpen && (
           <div className="absolute left-0 mt-0 rounded-b-[12px] border-x-1 border-b-1 overflow-hidden">
@@ -190,7 +190,7 @@ function OwnerCalendar() {
                   setNewTime((prev) => ({
                     ...prev,
                     userStoreId: worker.userStoreId,
-                    userName: worker.username,
+                    username: worker.username,
                   }));
                   setDropdownOpen(false);
                 }}
@@ -320,6 +320,7 @@ function OwnerCalendar() {
       await addWorkshift(data.userStoreId, data.start, data.end);
       setNewTime({
         userStoreId: "",
+        username: "",
         date: "",
         start: "",
         end: "",
@@ -448,16 +449,6 @@ function OwnerCalendar() {
                   {eventData.end.format("HH:mm")}
                 </p>
               </div>
-              <GreenBtn
-                className="text-[16px] font-[600] py-6 items-center relative"
-                onClick={() => {
-                  setIsEventToastOpen(false);
-                  setIsSubToastOpen(true);
-                }}
-              >
-                <RequestSubIcon className="absolute left-4" />
-                <span className="w-full text-center">대타 요청하기</span>
-              </GreenBtn>
               <GreenBtn
                 className="text-[16px] font-[600] py-6 items-center relative"
                 onClick={() => {

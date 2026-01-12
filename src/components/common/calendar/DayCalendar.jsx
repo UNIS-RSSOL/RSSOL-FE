@@ -150,7 +150,7 @@ function DayCalendar({
                   const clickedEvent = {
                     id: event.id,
                     userStoreId: event.userStoreId,
-                    userName: event.userName,
+                    username: event.username,
                     start: event.start,
                     end: event.end,
                   };
@@ -160,7 +160,7 @@ function DayCalendar({
               >
                 {isMiddleHour ? (
                   <span className="text-black text-[12px] font-[400]">
-                    {worker.userName}
+                    {worker.username}
                   </span>
                 ) : null}
               </div>
@@ -174,9 +174,9 @@ function DayCalendar({
         </div>
       ))}
       {blank &&
-        blank.map((index) => (
+        blank.map((_, index) => (
           <div
-            key={index}
+            key={`blank-${index}`}
             className={`flex-shrink-0 flex-col w-[42px] border-l border-[#e7eaf3] last:border-r-0 ${index === 0 ? "border-l" : ""}`}
           >
             <div className="h-[30px] " />

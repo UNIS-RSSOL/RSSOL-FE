@@ -103,7 +103,7 @@ function WeekCalendar({
           className="flex flex-shrink-0 flex-row w-full h-[60px] border-t border-[#e7eaf3]"
         >
           <div className="flex flex-shrink-0 w-[52px] h-full items-center justify-center">
-            {worker.userName}
+            {worker.username}
           </div>
           {week.map((w) => {
             const event = getEventForCell(
@@ -132,7 +132,7 @@ function WeekCalendar({
                   const clickedEvent = {
                     id: event.id,
                     userStoreId: event.userStoreId,
-                    userName: event.userName,
+                    username: event.username,
                     start: event.start,
                     end: event.end,
                   };
