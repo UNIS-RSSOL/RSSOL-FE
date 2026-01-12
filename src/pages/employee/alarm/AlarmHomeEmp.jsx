@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import TopBar from "../../../components/layout/alarm/TopBar";
 import AlarmItem from "../../../components/layout/alarm/AlarmItem";
+import ActionButtonsGen from "../../../components/layout/alarm/ActionButtonsGen";
 import { fetchMydata } from "../../../services/employee/MyPageService.js";
 import { fetchNotifications } from "../../../services/common/NotificationService.js";
 import { formatTimeAgo } from "../../../utils/notificationUtils.js";
@@ -178,17 +179,12 @@ function AlarmHomeEmp() {
                     // 근무표 입력 요청 알림: "추가하기" 버튼 하나만 표시
                     if (isScheduleInputRequest) {
                       return (
-                        <button
+                        <ActionButtonsGen
+                          label="추가하기"
                           onClick={() => {
                             navigate("/calModEmp");
                           }}
-                          className="mt-2 px-4 py-[6px] rounded-[8px] text-[13px] font-medium bg-[#68E194] text-black border-none outline-none cursor-pointer"
-                          style={{
-                            WebkitAppearance: "none",
-                          }}
-                        >
-                          추가하기
-                        </button>
+                        />
                       );
                     }
                     
