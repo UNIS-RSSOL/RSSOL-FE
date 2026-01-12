@@ -139,6 +139,11 @@ export default function CalAdd() {
     setTimeSlots(newSlots);
   };
 
+  const handleDeleteTime = (index) => {
+    const newSlots = timeSlots.filter((_, idx) => idx !== index);
+    setTimeSlots(newSlots);
+  };
+
   const goPrev = () => {
     const api = calendarRef.current?.getApi();
     api?.prev();
@@ -378,7 +383,7 @@ export default function CalAdd() {
                   />
 
                   <div className="flex items-center space-x-1">
-                    <span>인원</span>
+                    
                     <button
                       className="personnel-btn personnel-btn-minus"
                       onClick={() =>
@@ -392,6 +397,7 @@ export default function CalAdd() {
                       -
                     </button>
                     <span>{slot.count}</span>
+                    <span>명</span>
                     <button
                       className="personnel-btn personnel-btn-plus"
                       onClick={() =>
@@ -401,6 +407,13 @@ export default function CalAdd() {
                       +
                     </button>
                   </div>
+                  <button
+                    className="personnel-btn personnel-btn-delete"
+                    onClick={() => handleDeleteTime(idx)}
+                    type="button"
+                  >
+                    ×
+                  </button>
                 </div>
               ))}
 
