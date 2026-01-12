@@ -15,15 +15,15 @@ function AlarmHome() {
   const [alarms, setAlarms] = useState([]);
 
   useEffect(() => {
-    async () => {
+    (async () => {
       try {
         const response = await fetchAlarm();
         setAlarms(response);
       } catch (error) {
         console.error(error);
       }
-    };
-  });
+    })();
+  }, []);
 
   return (
     <div className="w-full h-full bg-[#F8FBFE] overflow-y-auto">
