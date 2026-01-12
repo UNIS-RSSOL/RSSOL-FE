@@ -107,7 +107,7 @@ function EmployeePage() {
   return (
     <div className="flex flex-col divide-y-8 divide-[#e7eaf3]">
       <div className="flex items-center justify-center">
-        {profile === "" ? (
+        {!profile || profile === "" || profile === null ? (
           <img src={character} alt="profile" className="size-[150px] my-5" />
         ) : (
           <div className="flex items-center justify-center size-[130px] bg-[#68e194] border-3 border-[#fdfffe] shadow-[0_4px_8px_0_rgba(0,0,0,0.2)] overflow-hidden rounded-full my-7">
