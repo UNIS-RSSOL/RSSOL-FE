@@ -60,6 +60,7 @@ function AlarmHomeEmp() {
         setNotifications(sorted);
       } catch (error) {
         console.error("알림 로드 실패:", error);
+        console.error("알림 로드 실패 상세:", error.response?.data || error.message);
         setNotifications([]); // 에러 시 빈 배열로 설정
       } finally {
         setIsLoading(false);
@@ -125,14 +126,40 @@ function AlarmHomeEmp() {
                   title={notification.storeName || notification.store_name || "매장"}
                   time={formatTimeAgo(notification.createdAt || notification.created_at || notification.createdDate)}
                 >
-                  {notification.message || notification.content}
-                  {/* 근무표 작성 요청 알림인 경우 "추가하기" 버튼 표시 */}
+                  {notification.message || notification.content || notification.text || notification.description}
+                  {/* 알림 타입별 액션 버튼 표시 */}
                   {(() => {
-                    const notificationType = notification.type || notification.notificationType || notification.notification_type;
+                    // 알림 타입 확인 (다양한 필드명 지원)
+                    const notificationType = 
+                      notification.type || 
+                      notification.notificationType || 
+                      notification.notification_type ||
+                      notification.notificationTypeEnum ||
+                      notification.category;
+                    
+                    console.log("🔔 알림 타입:", notificationType, "전체 알림:", notification);
+                    
+                    // 1. 근무표 생성 요청 알림 (SCHEDULE_REQUEST, SCHEDULE_REQUEST_NOTIFICATION 등)
                     const isScheduleRequest = 
-                      notificationType === 'schedule_request' || 
                       notificationType === 'SCHEDULE_REQUEST' ||
-                      notificationType === 'SCHEDULE_REQUEST_NOTIFICATION';
+                      notificationType === 'schedule_request' || 
+                      notificationType === 'SCHEDULE_REQUEST_NOTIFICATION' ||
+                      notificationType === 'ScheduleRequest';
+                    
+                    // 2. 대타 요청 알림 (SHIFT_SWAP, SHIFT_SWAP_REQUEST 등)
+                    const isShiftSwap = 
+                      notificationType === 'SHIFT_SWAP' ||
+                      notificationType === 'shift_swap' ||
+                      notificationType === 'SHIFT_SWAP_REQUEST' ||
+                      notificationType === 'ShiftSwap';
+                    
+                    // 3. 인력 요청 알림 (EXTRA_SHIFT, STAFFING_REQUEST 등)
+                    const isExtraShift = 
+                      notificationType === 'EXTRA_SHIFT' ||
+                      notificationType === 'extra_shift' ||
+                      notificationType === 'STAFFING_REQUEST' ||
+                      notificationType === 'STAFFING' ||
+                      notificationType === 'ExtraShift';
                     
                     if (isScheduleRequest) {
                       return (
@@ -147,6 +174,13 @@ function AlarmHomeEmp() {
                         />
                       );
                     }
+                    
+                    // 대타 요청이나 인력 요청 알림의 경우 수락/거절 버튼 표시 (필요시)
+                    if (isShiftSwap || isExtraShift) {
+                      // 필요시 수락/거절 버튼 추가 가능
+                      return null;
+                    }
+                    
                     return null;
                   })()}
                 </AlarmItem>

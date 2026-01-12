@@ -51,21 +51,22 @@ const parseTimeToLocalTime = (timeStr) => {
  */
 export const createScheduleRequest = async (requestData) => {
   try {
-    // 시간 문자열을 LocalTime 형식으로 변환
-    // 백엔드 파싱 오류를 방지하기 위해 문자열 형식("HH:mm:ss") 사용
-    // 만약 백엔드가 객체 형식을 요구한다면 parseTimeToLocalTime 함수 수정 필요
+    // ⚠️ 백엔드가 LocalTime을 문자열 형식("HH:mm:ss")으로 받아야 함
+    // 객체 형식 {hour, minute, second, nano}은 JSON 파싱 에러 발생
+    // 시간 문자열을 그대로 전송 (이미 "HH:mm:ss" 형식으로 전달됨)
     const formattedData = {
-      openTime: parseTimeToLocalTime(requestData.openTime),
-      closeTime: parseTimeToLocalTime(requestData.closeTime),
+      storeId: requestData.storeId, // ⚠️ 필수: 알림 생성 시 필요 (camelCase로 전송)
+      openTime: requestData.openTime, // "09:00:00" 형식 문자열
+      closeTime: requestData.closeTime, // "18:00:00" 형식 문자열
       startDate: requestData.startDate,
       endDate: requestData.endDate,
     };
 
-    // timeSegments 변환
+    // timeSegments 변환 - 시간도 문자열로 전송
     if (requestData.timeSegments && Array.isArray(requestData.timeSegments) && requestData.timeSegments.length > 0) {
       formattedData.timeSegments = requestData.timeSegments.map(segment => ({
-        startTime: parseTimeToLocalTime(segment.startTime),
-        endTime: parseTimeToLocalTime(segment.endTime),
+        startTime: segment.startTime, // "09:00:00" 형식 문자열
+        endTime: segment.endTime, // "13:00:00" 형식 문자열
         requiredStaff: segment.requiredStaff,
       }));
     }
@@ -73,6 +74,15 @@ export const createScheduleRequest = async (requestData) => {
     console.log("📤 근무표 생성 요청 데이터:", JSON.stringify(formattedData, null, 2));
 
     const response = await api.post("/api/schedules/requests", formattedData);
+    
+    console.log("✅ 근무표 생성 요청 성공:", {
+      status: response.status,
+      data: response.data,
+    });
+    
+    // 백엔드에서 알림이 자동으로 생성되는지 확인
+    console.log("🔔 근무표 생성 요청 완료 - 백엔드에서 직원들에게 알림이 자동 생성됩니다.");
+    
     return response.data;
   } catch (error) {
     console.error("근무표 생성 요청 실패:", error.response?.data || error.message);

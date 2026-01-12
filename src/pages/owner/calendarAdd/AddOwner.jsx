@@ -246,39 +246,55 @@ function AddOwner() {
 
   // 드래그 선택 핸들러
   const handleDragSelect = (startDay, startHour, endDay, endHour) => {
+    console.log("🔍 handleDragSelect 호출:", { startDay, startHour, endDay, endHour });
+    
     const startOfWeek = dayjs(currentDate).locale("ko").startOf("week");
     const days = ["일", "월", "화", "수", "목", "금", "토"];
     
     const startDayIndex = days.indexOf(startDay);
     const endDayIndex = days.indexOf(endDay);
     
-    if (startDayIndex === -1 || endDayIndex === -1) return;
+    if (startDayIndex === -1 || endDayIndex === -1) {
+      console.warn("⚠️ 잘못된 요일 인덱스:", { startDayIndex, endDayIndex });
+      return;
+    }
     
     const minDayIndex = Math.min(startDayIndex, endDayIndex);
     const maxDayIndex = Math.max(startDayIndex, endDayIndex);
     const minHour = Math.min(startHour, endHour);
     const maxHour = Math.max(startHour, endHour);
     
-    const newSelected = new Set(selectedTimeSlots);
+    console.log("🔍 드래그 범위:", { minDayIndex, maxDayIndex, minHour, maxHour });
     
-    // 드래그 범위 내의 모든 칸을 토글
-    for (let dayIndex = minDayIndex; dayIndex <= maxDayIndex; dayIndex++) {
-      const targetDate = startOfWeek.add(dayIndex, "day");
-      const dayName = days[dayIndex];
+    // 함수형 업데이트를 사용하여 최신 상태 보장
+    setSelectedTimeSlots((prevSelected) => {
+      const newSelected = new Set(prevSelected);
+      const changedSlots = [];
       
-      for (let hour = minHour; hour <= maxHour; hour++) {
-        const key = `${targetDate.format("YYYY-MM-DD")}-${dayName}-${hour}`;
+      // 드래그 범위 내의 모든 칸을 토글
+      for (let dayIndex = minDayIndex; dayIndex <= maxDayIndex; dayIndex++) {
+        const targetDate = startOfWeek.add(dayIndex, "day");
+        const dayName = days[dayIndex];
         
-        // 이미 선택된 칸은 해제, 선택되지 않은 칸은 선택
-        if (newSelected.has(key)) {
-          newSelected.delete(key);
-        } else {
-          newSelected.add(key);
+        for (let hour = minHour; hour <= maxHour; hour++) {
+          const key = `${targetDate.format("YYYY-MM-DD")}-${dayName}-${hour}`;
+          
+          // 이미 선택된 칸은 해제, 선택되지 않은 칸은 선택
+          if (newSelected.has(key)) {
+            newSelected.delete(key);
+            changedSlots.push({ key, action: "removed" });
+          } else {
+            newSelected.add(key);
+            changedSlots.push({ key, action: "added" });
+          }
         }
       }
-    }
-    
-    setSelectedTimeSlots(newSelected);
+      
+      console.log("🔍 변경된 슬롯:", changedSlots.length, "개");
+      console.log("🔍 새로운 선택 개수:", newSelected.size);
+      
+      return newSelected;
+    });
   };
 
   // work availability 수정하기

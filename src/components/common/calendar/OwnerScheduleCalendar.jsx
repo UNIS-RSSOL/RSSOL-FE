@@ -69,16 +69,61 @@ function OwnerScheduleCalendar({
     }
   };
 
+  const handleMouseMove = (e) => {
+    if (!isDraggingRef.current || !dragStartRef.current) return;
+    
+    // 마우스 위치에서 어떤 칸 위에 있는지 계산
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // 시간대 계산 (y 좌표 기준)
+    const headerHeight = 35;
+    const hourHeight = (550 - headerHeight) / hours.length;
+    const hourIndex = Math.floor((y - headerHeight) / hourHeight);
+    
+    if (hourIndex >= 0 && hourIndex < hours.length) {
+      const hour = hours[hourIndex];
+      
+      // 요일 계산 (x 좌표 기준)
+      const timeColumnWidth = 52;
+      const dayWidth = 44;
+      const dayIndex = Math.floor((x - timeColumnWidth) / dayWidth);
+      
+      if (dayIndex >= 0 && dayIndex < days.length) {
+        const day = days[dayIndex];
+        setDragEnd({ day, hour });
+        dragEndRef.current = { day, hour };
+      }
+    }
+  };
+
   const handleMouseUp = () => {
+    console.log("🔍 handleMouseUp 호출:", {
+      isDragging: isDraggingRef.current,
+      dragStart: dragStartRef.current,
+      dragEnd: dragEndRef.current
+    });
+    
     if (isDraggingRef.current && dragStartRef.current && dragEndRef.current) {
       const startDay = dragStartRef.current.day;
       const startHour = dragStartRef.current.hour;
       const endDay = dragEndRef.current.day;
       const endHour = dragEndRef.current.hour;
       
+      console.log("🔍 onDragSelect 호출:", { startDay, startHour, endDay, endHour });
+      
       if (onDragSelect) {
         onDragSelect(startDay, startHour, endDay, endHour);
+      } else {
+        console.warn("⚠️ onDragSelect가 전달되지 않았습니다.");
       }
+    } else {
+      console.warn("⚠️ 드래그 조건 불만족:", {
+        isDragging: isDraggingRef.current,
+        hasDragStart: !!dragStartRef.current,
+        hasDragEnd: !!dragEndRef.current
+      });
     }
     
     setIsDragging(false);
@@ -108,6 +153,8 @@ function OwnerScheduleCalendar({
   return (
     <div
       className={`flex flex-col w-[362px] h-[550px] border-[0.5px] border-black rounded-[20px] bg-white items-center overflow-x-hidden overflow-y-hidden`}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
     >
       <div className="flex flex-shrink-0 flex-row w-full h-[35px]">
         <div className="flex-shrink-0 w-[52px] h-full" />
@@ -160,10 +207,6 @@ function OwnerScheduleCalendar({
                   onMouseEnter={(e) => {
                     e.stopPropagation();
                     handleMouseEnter(dayName, hour);
-                  }}
-                  onMouseUp={(e) => {
-                    e.stopPropagation();
-                    handleMouseUp();
                   }}
                 />
               );
