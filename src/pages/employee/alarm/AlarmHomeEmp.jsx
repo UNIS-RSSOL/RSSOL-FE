@@ -121,8 +121,8 @@ function AlarmHomeEmp() {
             <div className="px-4 mt-4 text-[15px] font-semibold">{dateKey}</div>
             <div className="mt-2">
               {dateNotifications.map((notification) => {
-                const profileImageUrl = notification.profileImageUrl || notification.profile_image_url || null;
-                const displayImage = profileImageUrl ? profileImageUrl : defaultProfile;
+                const profileImageUrl = notification.profileImageUrl ?? notification.profile_image_url ?? null;
+                const displayImage = (profileImageUrl && profileImageUrl !== "" && profileImageUrl.trim() !== "") ? profileImageUrl : defaultProfile;
                 
                 return (
                 <AlarmItem
@@ -140,6 +140,7 @@ function AlarmHomeEmp() {
                   time={formatTimeAgo(notification.createdAt || notification.created_at || notification.createdDate)}
                 >
                   {notification.message || notification.content || notification.text || notification.description}
+                  <span className="text-[12px] text-gray-400"> {formatTimeAgo(notification.createdAt || notification.created_at || notification.createdDate)}</span>
                   {/* 알림 타입별 액션 버튼 표시 */}
                   {(() => {
                     // 알림 타입 확인 (다양한 필드명 지원)
@@ -179,12 +180,14 @@ function AlarmHomeEmp() {
                     // 근무표 입력 요청 알림: "추가하기" 버튼 하나만 표시
                     if (isScheduleInputRequest) {
                       return (
-                        <ActionButtonsGen
-                          label="추가하기"
-                          onClick={() => {
-                            navigate("/calModEmp");
-                          }}
-                        />
+                        <div className="flex justify-end mt-2">
+                          <ActionButtonsGen
+                            label="추가하기"
+                            onClick={() => {
+                              navigate("/calModEmp");
+                            }}
+                          />
+                        </div>
                       );
                     }
                     
