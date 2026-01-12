@@ -7,7 +7,7 @@ function ActionButtons({ leftLabel, rightLabel, onLeftClick, onRightClick }) {
     "px-4 py-[6px] rounded-[8px] text-[13px] font-medium appearance-none outline-none border-none";
 
   return (
-    <div className="flex gap-2 mt-2">
+    <div className="flex gap-2 mt-2 justify-end">
       {leftLabel && (
         <button
           onClick={() => {
@@ -19,7 +19,8 @@ function ActionButtons({ leftLabel, rightLabel, onLeftClick, onRightClick }) {
           }`}
           style={{
             WebkitAppearance: "none",
-            backgroundColor: selected === "left" ? "rgba(104,225,148,0.3)" : "#68E194",
+            backgroundColor:
+              selected === "left" ? "rgba(104,225,148,0.3)" : "#68E194",
           }}
         >
           {leftLabel}
@@ -37,7 +38,8 @@ function ActionButtons({ leftLabel, rightLabel, onLeftClick, onRightClick }) {
           }`}
           style={{
             WebkitAppearance: "none",
-            backgroundColor: selected === "right" ? "rgba(104,225,148,0.3)" : "#68E194",
+            backgroundColor:
+              selected === "right" ? "rgba(104,225,148,0.3)" : "#68E194",
           }}
         >
           {rightLabel}
