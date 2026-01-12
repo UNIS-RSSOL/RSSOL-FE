@@ -170,17 +170,13 @@ export async function refreshToken() {
       throw new Error("Refresh token not found");
     }
 
-    const response = await api.post(
-      "/api/auth/refresh-token",
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${refreshToken}`,
-          "Content-Type": "application/json",
-        },
-        _skipAuthRefresh: true,
+    const response = await api.post("/api/auth/refresh-token", {
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+        "Content-Type": "application/json",
       },
-    );
+      _skipAuthRefresh: true,
+    });
 
     if (!response.data || !response.data.accessToken) {
       console.error("❌ 유효하지 않은 토큰 응답 형식:", response.data);
