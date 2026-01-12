@@ -3,9 +3,10 @@ import React, { useState, useEffect } from "react";
 import TopBar from "../../../components/layout/alarm/TopBar";
 import NavBar from "../../../components/layout/alarm/NavBar";
 import AlarmItem from "../../../components/layout/alarm/AlarmItem";
-import ActionButtons from "../../../components/layout/alarm/ActionButtons";
-import { fetchAlarm } from "../../../services/common/AlarmService";
+
+import { fetchAlarm } from "../../../services/common/AlarmService.js";
 import dayjs from "dayjs";
+import { formatTimeAgo } from "../../../utils/timeUtils";
 
 function AlarmHome() {
   const today = dayjs().format("MM.DD(dd)");
@@ -17,6 +18,7 @@ function AlarmHome() {
     async () => {
       try {
         const response = await fetchAlarm();
+        setAlarms(response);
       } catch (error) {
         console.error(error);
       }
@@ -32,12 +34,24 @@ function AlarmHome() {
         {today}
       </div>
       <div className="mt-2">
-        <AlarmItem
-          alarmType={2}
-          storename="맥도날드 신촌점"
-          time="10분 전"
-          children="‘김혜민’님이 15(월) 13:00~16:00 근무를 부탁했어요!"
-        />
+        {alarms.map((alarm) => {
+          const type =
+            alarm.type === "SHIFT_SWAP_NOTIFY_MANAGER"
+              ? 3
+              : alarm.type === "SHIFT_SWAP_REQUEST"
+                ? 2
+                : 1;
+          const time = formatTimeAgo(alarm.createdAt);
+          return (
+            <AlarmItem
+              alarmType={type}
+              storename="맥도날드 신촌점" //어느매장에서 온 알림인지 알려주는게 없어서 백 쪽에 요청해야됨
+              time={time}
+            >
+              {alarm.message}
+            </AlarmItem>
+          );
+        })}
       </div>
     </div>
   );
