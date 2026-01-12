@@ -32,14 +32,31 @@ function Header() {
         const isOwner = activeStore?.position === "OWNER";
 
         if (isOwner) {
-          // 사장: 근무표 생성 요청 상태 확인
-          // localStorage의 알림을 확인하거나, generateSchedule의 unsubmittedEmployeeIds 확인
-          // 간단하게는 localStorage의 알림을 확인
-          const hasScheduleRequest = checkScheduleRequestStatus();
+          // 사장: 근무표 생성 상태 확인
+          // 1. 생성하기를 눌렀는지 확인 (scheduleGenerationCompleted)
+          // 2. 생성하기를 누르지 않고 ScheduleList에서 나간 경우 확인 (hasScheduleRequest)
+          const isGenerationCompleted = localStorage.getItem("scheduleGenerationCompleted") === "true";
+          const hasScheduleRequest = localStorage.getItem("hasScheduleRequest") === "true";
           
-          if (hasScheduleRequest) {
+          console.log("🔍 Header - caladdicon 클릭:", {
+            isGenerationCompleted,
+            hasScheduleRequest,
+            currentPath: location.pathname
+          });
+          
+          if (isGenerationCompleted) {
+            // 생성하기를 눌렀을 경우: CalAdd로 이동하고 플래그 제거
+            console.log("✅ 생성 완료 → CalAdd로 이동");
+            localStorage.removeItem("scheduleGenerationCompleted");
+            localStorage.removeItem("hasScheduleRequest");
+            navigate("/calAdd");
+          } else if (hasScheduleRequest) {
+            // 생성하기를 누르지 않고 ScheduleList에서 나간 경우: ScheduleList로 이동
+            console.log("✅ 생성 요청 있음 → ScheduleList로 이동");
             navigate("/scheduleList");
           } else {
+            // 처음 시작하는 경우: CalAdd로 이동
+            console.log("✅ 처음 시작 → CalAdd로 이동");
             navigate("/calAdd");
           }
         } else {

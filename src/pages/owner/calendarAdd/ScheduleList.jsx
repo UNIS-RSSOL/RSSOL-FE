@@ -41,6 +41,31 @@ function ScheduleList() {
     loadStoreId();
   }, []);
 
+  // ScheduleList 페이지 진입 시: hasScheduleRequest 플래그 확인 및 설정
+  useEffect(() => {
+    // ScheduleList에 진입했을 때 hasScheduleRequest가 없으면 설정
+    // (CalAdd에서 이미 설정했지만, 직접 URL로 접근한 경우를 대비)
+    const hasRequest = localStorage.getItem("hasScheduleRequest");
+    if (!hasRequest) {
+      console.log("📝 ScheduleList 진입: hasScheduleRequest 설정");
+      localStorage.setItem("hasScheduleRequest", "true");
+    }
+    
+    // 컴포넌트 언마운트 시 (다른 페이지로 이동할 때)
+    return () => {
+      // 생성하기를 누르지 않고 나간 경우를 감지
+      const isCompleted = localStorage.getItem("scheduleGenerationCompleted");
+      if (!isCompleted) {
+        // 생성하기를 누르지 않고 나간 경우: hasScheduleRequest 유지
+        console.log("📝 ScheduleList 나감 (생성하기 미완료): hasScheduleRequest 유지");
+        localStorage.setItem("hasScheduleRequest", "true");
+      } else {
+        // 생성하기를 눌렀다면 이미 handleGenerateSchedule에서 처리됨
+        console.log("📝 ScheduleList 나감 (생성하기 완료)");
+      }
+    };
+  }, []);
+
   // 직원 리스트 및 스케줄 가져오기
   useEffect(() => {
     const loadWorkersAndSchedules = async () => {
@@ -347,6 +372,12 @@ function ScheduleList() {
       const result = await generateScheduleWithSetting(settingId);
 
       if (result && result.candidateScheduleKey) {
+        // 근무표 생성 완료 플래그 저장 (다음에 caladdicon 클릭 시 CalAdd로 이동)
+        localStorage.setItem("scheduleGenerationCompleted", "true");
+        localStorage.removeItem("hasScheduleRequest"); // 생성 완료했으므로 요청 플래그 제거
+        
+        console.log("✅ 근무표 생성 완료: scheduleGenerationCompleted 설정, hasScheduleRequest 제거");
+        
         const startDate = scheduleConfig.startDate || dayjs().locale("ko").startOf("week").format("YYYY-MM-DD");
         const endDate = scheduleConfig.endDate || dayjs().locale("ko").startOf("week").add(6, "day").format("YYYY-MM-DD");
         
@@ -371,7 +402,7 @@ function ScheduleList() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f9fd]">
-      <TopBar title="근무표 생성" onBack={() => navigate(-1)} />
+      <TopBar title="근무표 생성" onBack={() => navigate("/owner")} />
 
       <div className="flex-1 px-4 py-3 flex flex-col gap-4 overflow-y-auto">
         <p className="text-center font-bold text-lg">직원 스케줄 목록</p>
