@@ -113,36 +113,66 @@ function ScheduleList() {
           // 각 직원별로 availabilities가 빈 배열일 수 있음
           
           storeWorkers.forEach((worker) => {
-            const staffId = worker.id || worker.staffId;
-            const workerName = worker.username || worker.name || worker.userName || '이름없음';
+            // 직원 ID 찾기 (여러 필드 시도)
+            const staffId = worker.id || worker.staffId || worker.userStoreId || worker.userId;
+            // 직원 이름 찾기 (여러 필드 시도)
+            const workerName = worker.username || worker.name || worker.userName || worker.userName || '이름없음';
             
-            if (!staffId) {
-              const errorMsg = "직원 ID를 찾을 수 없습니다 (id 또는 staffId 필요)";
-              console.error(`❌ ${workerName}:`, errorMsg);
-              errorsByWorker[staffId || 'unknown'] = {
-                staffId: staffId || null,
+            // 고유 식별자 생성 (ID가 없어도 처리 가능하도록)
+            const workerKey = staffId || worker.userStoreId || worker.userId || `worker_${workerName}`;
+            
+            // userName 매칭을 위한 정규화 함수 (공백 제거, 대소문자 무시)
+            const normalizeName = (name) => {
+              if (!name) return '';
+              return String(name).trim().toLowerCase();
+            };
+            
+            // userName으로 매칭하여 해당 직원의 availabilities 가져오기
+            // 정확한 매칭 시도 후, 정규화된 매칭 시도
+            let workerAvailability = storeAvailabilities.find(item => 
+              item.userName === workerName || 
+              normalizeName(item.userName) === normalizeName(workerName)
+            );
+            
+            // 매칭 실패 시 로그 출력
+            if (!workerAvailability) {
+              console.warn(`⚠️ 직원 ${workerName}의 availabilities를 찾을 수 없습니다.`, {
                 workerName,
-                error: new Error(errorMsg),
-                status: null,
-              };
-              schedulesByWorker[staffId || 'unknown'] = [];
-              return;
+                availableUserNames: storeAvailabilities.map(item => item.userName),
+                workerData: {
+                  id: worker.id,
+                  staffId: worker.staffId,
+                  userStoreId: worker.userStoreId,
+                  username: worker.username,
+                  name: worker.name,
+                  userName: worker.userName,
+                }
+              });
             }
             
-            // userName으로 매칭하여 해당 직원의 availabilities 가져오기 (없으면 빈 배열)
-            const workerAvailability = storeAvailabilities.find(item => item.userName === workerName);
             const availabilities = workerAvailability?.availabilities || [];
             
+            // availabilities가 배열인지 확인
             if (Array.isArray(availabilities)) {
-              schedulesByWorker[staffId] = availabilities;
+              schedulesByWorker[workerKey] = availabilities;
               if (availabilities.length > 0) {
-                console.log(`✅ 직원 ${workerName} (ID: ${staffId}) 근무 가능 시간: ${availabilities.length}개`);
+                console.log(`✅ 직원 ${workerName} (Key: ${workerKey}) 근무 가능 시간: ${availabilities.length}개`);
               } else {
-                console.log(`ℹ️ 직원 ${workerName} (ID: ${staffId}) 근무 가능 시간 없음 (빈 배열)`);
+                console.log(`ℹ️ 직원 ${workerName} (Key: ${workerKey}) 근무 가능 시간 없음 (빈 배열)`);
               }
             } else {
-              console.warn(`⚠️ 직원 ${workerName} (ID: ${staffId})의 응답이 배열이 아닙니다:`, availabilities);
-              schedulesByWorker[staffId] = [];
+              console.warn(`⚠️ 직원 ${workerName} (Key: ${workerKey})의 응답이 배열이 아닙니다:`, availabilities);
+              schedulesByWorker[workerKey] = [];
+            }
+            
+            // ID가 없는 경우에만 에러로 표시 (하지만 빈 배열은 허용)
+            if (!staffId && !worker.userStoreId && !worker.userId) {
+              errorsByWorker[workerKey] = {
+                staffId: null,
+                workerName,
+                error: new Error("직원 ID를 찾을 수 없습니다 (id, staffId, userStoreId, userId 모두 없음)"),
+                status: null,
+              };
             }
           });
         } catch (error) {
@@ -204,10 +234,10 @@ function ScheduleList() {
 
   // 근무 가능 시간대 포맷팅
   const formatAvailableTimes = (worker) => {
-    // id > staffId 순서로 확인 (userStoreId 제외)
-    const staffId = worker?.id || worker?.staffId;
-    const schedules = workerSchedules[staffId] || [];
-    const error = workerErrors[staffId];
+    // 직원 고유 키 찾기 (여러 필드 시도)
+    const workerKey = worker?.id || worker?.staffId || worker?.userStoreId || worker?.userId || `worker_${worker.username || worker.name || worker.userName || 'unknown'}`;
+    const schedules = workerSchedules[workerKey] || [];
+    const error = workerErrors[workerKey];
     
     // 에러가 있는 경우 사용자 친화적인 메시지 반환
     if (error) {
@@ -265,9 +295,9 @@ function ScheduleList() {
 
     const availableWorkers = [];
     workers.forEach((worker) => {
-      // id > staffId 순서로 확인 (userStoreId 제외)
-      const staffId = worker.id || worker.staffId;
-      const schedules = workerSchedules[staffId] || [];
+      // 직원 고유 키 찾기 (여러 필드 시도)
+      const workerKey = worker.id || worker.staffId || worker.userStoreId || worker.userId || `worker_${worker.username || worker.name || worker.userName || 'unknown'}`;
+      const schedules = workerSchedules[workerKey] || [];
       const hasSchedule = schedules.some((schedule) => {
         const scheduleDate = dayjs(schedule.startDatetime).locale("ko");
         const scheduleDay = scheduleDate.day();
@@ -379,14 +409,15 @@ function ScheduleList() {
             </div>
 
             <div className="flex flex-col gap-3 mt-3">
-            {workers.map((worker) => {
-                const workerId = worker.id || worker.staffId;
-                const hasError = workerErrors[workerId];
+            {workers.map((worker, index) => {
+                // 직원 고유 키 찾기 (여러 필드 시도)
+                const workerKey = worker.id || worker.staffId || worker.userStoreId || worker.userId || `worker_${index}`;
+                const hasError = workerErrors[workerKey];
                 const errorStatus = hasError?.status;
                 
                 return (
                 <div
-                key={workerId || worker.id}
+                key={workerKey}
                 className={`flex items-center gap-3 p-3 rounded-lg shadow-sm ${
                   hasError 
                     ? "bg-red-50 border border-red-200" 
