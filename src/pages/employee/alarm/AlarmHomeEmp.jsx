@@ -2,12 +2,12 @@ import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import TopBar from "../../../components/layout/alarm/TopBar";
 import AlarmItem from "../../../components/layout/alarm/AlarmItem";
-import ActionButtons from "../../../components/layout/alarm/ActionButtons";
 import { fetchMydata } from "../../../services/employee/MyPageService.js";
 import { fetchNotifications } from "../../../services/common/NotificationService.js";
 import { formatTimeAgo } from "../../../utils/notificationUtils.js";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
+import defaultProfile from "../../../assets/images/EmpBtn.png";
 
 function AlarmHomeEmp() {
   const navigate = useNavigate();
@@ -119,10 +119,22 @@ function AlarmHomeEmp() {
           <div key={dateKey}>
             <div className="px-4 mt-4 text-[15px] font-semibold">{dateKey}</div>
             <div className="mt-2">
-              {dateNotifications.map((notification) => (
+              {dateNotifications.map((notification) => {
+                const profileImageUrl = notification.profileImageUrl || notification.profile_image_url || null;
+                const displayImage = profileImageUrl ? profileImageUrl : defaultProfile;
+                
+                return (
                 <AlarmItem
                   key={notification.id || notification.notificationId || notification.notification_id}
-                  icon={<div className="w-full h-full bg-gray-200 rounded-full"></div>}
+                  icon={
+                    <div className="w-[40px] h-[40px] rounded-full overflow-hidden flex-shrink-0">
+                      <img 
+                        src={displayImage} 
+                        alt="profile" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  }
                   title={notification.storeName || notification.store_name || "매장"}
                   time={formatTimeAgo(notification.createdAt || notification.created_at || notification.createdDate)}
                 >
@@ -139,8 +151,10 @@ function AlarmHomeEmp() {
                     
                     console.log("🔔 알림 타입:", notificationType, "전체 알림:", notification);
                     
-                    // 1. 근무표 생성 요청 알림 (SCHEDULE_REQUEST, SCHEDULE_REQUEST_NOTIFICATION 등)
-                    const isScheduleRequest = 
+                    // 1. 근무표 입력 요청 알림 (SCHEDULE_INPUT_REQUEST 등)
+                    const isScheduleInputRequest = 
+                      notificationType === 'SCHEDULE_INPUT_REQUEST' ||
+                      notificationType === 'schedule_input_request' || 
                       notificationType === 'SCHEDULE_REQUEST' ||
                       notificationType === 'schedule_request' || 
                       notificationType === 'SCHEDULE_REQUEST_NOTIFICATION' ||
@@ -161,17 +175,20 @@ function AlarmHomeEmp() {
                       notificationType === 'STAFFING' ||
                       notificationType === 'ExtraShift';
                     
-                    if (isScheduleRequest) {
+                    // 근무표 입력 요청 알림: "추가하기" 버튼 하나만 표시
+                    if (isScheduleInputRequest) {
                       return (
-                        <ActionButtons 
-                          leftLabel="거절" 
-                          rightLabel="추가하기" 
-                          onLeftClick={() => handleDelete(notification.id || notification.notificationId || notification.notification_id)}
-                          onRightClick={() => {
-                            handleDelete(notification.id || notification.notificationId || notification.notification_id);
-                            navigate("/calAddEmp");
-                          }} 
-                        />
+                        <button
+                          onClick={() => {
+                            navigate("/calModEmp");
+                          }}
+                          className="mt-2 px-4 py-[6px] rounded-[8px] text-[13px] font-medium bg-[#68E194] text-black border-none outline-none cursor-pointer"
+                          style={{
+                            WebkitAppearance: "none",
+                          }}
+                        >
+                          추가하기
+                        </button>
                       );
                     }
                     
@@ -184,7 +201,8 @@ function AlarmHomeEmp() {
                     return null;
                   })()}
                 </AlarmItem>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))
