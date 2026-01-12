@@ -152,18 +152,19 @@ function ScheduleList() {
               return String(name).trim().toLowerCase();
             };
             
-            // userName으로 매칭하여 해당 직원의 availabilities 가져오기
+            // username으로 매칭하여 해당 직원의 availabilities 가져오기 (API는 username 소문자 사용)
             // 정확한 매칭 시도 후, 정규화된 매칭 시도
             let workerAvailability = storeAvailabilities.find(item => 
-              item.userName === workerName || 
-              normalizeName(item.userName) === normalizeName(workerName)
+              item.username === workerName || 
+              item.userName === workerName ||
+              normalizeName(item.username || item.userName) === normalizeName(workerName)
             );
             
             // 매칭 실패 시 로그 출력
             if (!workerAvailability) {
               console.warn(`⚠️ 직원 ${workerName}의 availabilities를 찾을 수 없습니다.`, {
                 workerName,
-                availableUserNames: storeAvailabilities.map(item => item.userName),
+                availableUserNames: storeAvailabilities.map(item => item.username || item.userName),
                 workerData: {
                   id: worker.id,
                   staffId: worker.staffId,
@@ -177,11 +178,38 @@ function ScheduleList() {
             
             const availabilities = workerAvailability?.availabilities || [];
             
-            // availabilities가 배열인지 확인
+            // API 응답 형식: { dayOfWeek: "MON", startTime: "09:00", endTime: "18:00" }
+            // 코드에서 사용하는 형식: { startDatetime, endDatetime }
+            // dayOfWeek/startTime/endTime 형식을 startDatetime/endDatetime으로 변환
+            const convertedAvailabilities = [];
             if (Array.isArray(availabilities)) {
-              schedulesByWorker[workerKey] = availabilities;
-              if (availabilities.length > 0) {
-                console.log(`✅ 직원 ${workerName} (Key: ${workerKey}) 근무 가능 시간: ${availabilities.length}개`);
+              // 현재 주의 시작일 (일요일) 기준으로 변환
+              const startOfWeek = dayjs().locale("ko").startOf("week");
+              const dayMap = { "SUN": 0, "MON": 1, "TUE": 2, "WED": 3, "THU": 4, "FRI": 5, "SAT": 6 };
+              
+              availabilities.forEach((avail) => {
+                if (avail.dayOfWeek && avail.startTime && avail.endTime) {
+                  // dayOfWeek/startTime/endTime 형식
+                  const targetDayIndex = dayMap[avail.dayOfWeek.toUpperCase()];
+                  if (targetDayIndex !== undefined) {
+                    const targetDate = startOfWeek.add(targetDayIndex, "day");
+                    const [startHour, startMinute] = avail.startTime.split(":").map(Number);
+                    const [endHour, endMinute] = avail.endTime.split(":").map(Number);
+                    
+                    convertedAvailabilities.push({
+                      startDatetime: targetDate.hour(startHour || 0).minute(startMinute || 0).second(0).toISOString(),
+                      endDatetime: targetDate.hour(endHour || 0).minute(endMinute || 0).second(0).toISOString(),
+                    });
+                  }
+                } else if (avail.startDatetime && avail.endDatetime) {
+                  // 이미 startDatetime/endDatetime 형식인 경우 그대로 사용
+                  convertedAvailabilities.push(avail);
+                }
+              });
+              
+              schedulesByWorker[workerKey] = convertedAvailabilities;
+              if (convertedAvailabilities.length > 0) {
+                console.log(`✅ 직원 ${workerName} (Key: ${workerKey}) 근무 가능 시간: ${convertedAvailabilities.length}개`);
               } else {
                 console.log(`ℹ️ 직원 ${workerName} (Key: ${workerKey}) 근무 가능 시간 없음 (빈 배열)`);
               }

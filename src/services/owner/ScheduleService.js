@@ -69,15 +69,15 @@ export async function fetchAllWorkers() {
  * 제출안한 직원들은 빈배열 반환
  *
  * @param {number} storeId - 매장 ID
- * @returns {Promise<Array>} - 직원별 근무 가능 시간 배열 [ { userName: string, availabilities: Array } ]
+ * @returns {Promise<Array>} - 직원별 근무 가능 시간 배열 [ { username: string, availabilities: Array } ]
  *
  * API 엔드포인트: GET /api/{storeId}/availabilities
  *
  * 응답 형식:
  * [
- *   { "userName": "사장B", "availabilities": [] },
- *   { "userName": "알바4", "availabilities": [] },
- *   { "userName": "알바5", "availabilities": [ { dayOfWeek, startTime, endTime } ] }
+ *   { "username": "사장B", "availabilities": [] },
+ *   { "username": "알바4", "availabilities": [] },
+ *   { "username": "알바5", "availabilities": [ { dayOfWeek: "MON", startTime: "09:00", endTime: "18:00" } ] }
  * ]
  *
  * 사장(Owner) 권한에서 사용하는 API입니다.
@@ -112,12 +112,12 @@ export async function fetchStoreAvailabilities(storeId) {
 
     // ✅ 정상 응답 처리 (200 OK)
     // 새로운 API 형식: GET /api/{storeId}/availabilities
-    // 응답 형태: 배열 [ { userName: string, availabilities: Array } ]
+    // 응답 형태: 배열 [ { username: string, availabilities: Array } ]
     // 예시:
     // [
-    //   { "userName": "사장B", "availabilities": [] },
-    //   { "userName": "알바4", "availabilities": [] },
-    //   { "userName": "알바5", "availabilities": [ { dayOfWeek, startTime, endTime } ] }
+    //   { "username": "사장B", "availabilities": [] },
+    //   { "username": "알바4", "availabilities": [] },
+    //   { "username": "알바5", "availabilities": [ { dayOfWeek: "MON", startTime: "09:00", endTime: "18:00" } ] }
     // ]
 
     // 응답 데이터 정규화
@@ -134,12 +134,13 @@ export async function fetchStoreAvailabilities(storeId) {
 
     // 응답이 배열 형태인 경우
     if (Array.isArray(availabilitiesData)) {
-      // 각 항목에서 userStoreId 제거하고 userName과 availabilities만 유지
+      // 각 항목에서 userStoreId 제거하고 username과 availabilities만 유지
+      // API 스펙: username (소문자) 사용
       const normalizedData = availabilitiesData.map((item) => {
         // userStoreId가 있으면 제거
         const { userStoreId, ...rest } = item;
         return {
-          userName: item.userName,
+          username: item.username || item.userName, // API는 username, 하위 호환성을 위해 userName도 지원
           availabilities: Array.isArray(item.availabilities) ? item.availabilities : [],
         };
       });
