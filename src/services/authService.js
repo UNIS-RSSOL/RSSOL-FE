@@ -163,6 +163,7 @@ export const onboardingOwner = async (
 export async function refreshToken() {
   try {
     const refreshToken = localStorage.getItem("refreshToken");
+    console.log("저장된 refreshToken:", refreshToken ? "있음" : "없음");
 
     if (!refreshToken) {
       console.error("refreshToken이 localStorage에 없습니다.");
