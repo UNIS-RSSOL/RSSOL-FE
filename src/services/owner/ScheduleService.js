@@ -249,3 +249,120 @@ export async function fetchEmployeeAvailabilities(staffId) {
     throw error;
   }
 }
+
+/**
+ * 내 근무 가능 시간 조회 (work availability) - 사장용
+ * @returns {Promise<Array>} - 근무 가능 시간 배열
+ */
+export async function fetchMyAvailabilities() {
+  try {
+    const endpoint = "/api/me/availabilities";
+    const fullURL = `${api.defaults.baseURL}${endpoint}`;
+    
+    console.log("🔍 [조회 API] 내 근무 가능 시간 조회 요청 (사장):", {
+      endpoint,
+      fullURL,
+      method: "GET",
+    });
+    
+    const response = await api.get(endpoint);
+    
+    console.log("✅ [조회 API] 내 근무 가능 시간 조회 성공 (사장):", {
+      status: response.status,
+      statusText: response.statusText,
+      responseData: response.data,
+      responseType: typeof response.data,
+      isArray: Array.isArray(response.data),
+    });
+    
+    // 응답이 배열이 아닌 경우 처리
+    let availabilities = response.data;
+    if (!Array.isArray(availabilities)) {
+      // 만약 응답이 객체이고 내부에 배열이 있다면
+      if (availabilities && availabilities.availabilities && Array.isArray(availabilities.availabilities)) {
+        availabilities = availabilities.availabilities;
+      } else if (availabilities && availabilities.data && Array.isArray(availabilities.data)) {
+        availabilities = availabilities.data;
+      } else {
+        // 배열이 아니면 빈 배열로 처리
+        console.warn("⚠️ fetchMyAvailabilities: 응답이 배열이 아님, 빈 배열 반환");
+        availabilities = [];
+      }
+    }
+    
+    console.log("✅ [조회 API] 최종 반환 데이터 (사장):", {
+      count: availabilities.length,
+      data: availabilities,
+    });
+    
+    return availabilities;
+  } catch (error) {
+    console.error("❌ [조회 API] 내 근무 가능 시간 조회 실패 (사장):", {
+      endpoint: "/api/me/availabilities",
+      method: "GET",
+      errorStatus: error.response?.status,
+      errorStatusText: error.response?.statusText,
+      errorData: error.response?.data,
+      errorMessage: error.message,
+      requestHeaders: error.config?.headers,
+    });
+    throw error;
+  }
+}
+
+/**
+ * 근무 가능 시간 전체 수정 (PUT - 전체 갱신 방식) - 사장용
+ * @param {Object} payload - { userStoreId: number, userName: string, availabilities: [{ dayOfWeek: string, startTime: string, endTime: string }] }
+ * @returns {Promise<Object>} - 응답 데이터
+ */
+export async function updateAvailability(payload) {
+  try {
+    const endpoint = "/api/me/availabilities";
+    const fullURL = `${api.defaults.baseURL}${endpoint}`;
+    
+    console.log("📤 [수정 API] 근무 가능 시간 수정 요청 (사장):", {
+      endpoint,
+      fullURL,
+      method: "PUT",
+      payload: {
+        ...payload,
+        availabilitiesCount: payload.availabilities?.length || 0,
+        availabilities: payload.availabilities?.map(av => ({
+          dayOfWeek: av.dayOfWeek,
+          startTime: av.startTime,
+          endTime: av.endTime,
+        })),
+      },
+      userStoreId: payload.userStoreId,
+      userStoreIdType: typeof payload.userStoreId,
+      userName: payload.userName,
+    });
+    
+    const response = await api.put(endpoint, payload);
+    
+    console.log("✅ [수정 API] 근무 가능 시간 수정 성공 (사장):", {
+      status: response.status,
+      statusText: response.statusText,
+      responseData: response.data,
+      savedUserStoreId: payload.userStoreId,
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error("❌ [수정 API] 근무 가능 시간 수정 실패 (사장):", {
+      endpoint: "/api/me/availabilities",
+      method: "PUT",
+      payload: {
+        userStoreId: payload.userStoreId,
+        userName: payload.userName,
+        availabilitiesCount: payload.availabilities?.length || 0,
+      },
+      errorStatus: error.response?.status,
+      errorStatusText: error.response?.statusText,
+      errorData: error.response?.data,
+      errorMessage: error.message,
+      requestHeaders: error.config?.headers,
+    });
+    throw error;
+  }
+}

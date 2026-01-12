@@ -8,11 +8,10 @@ import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/alarm/TopBar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
-import { generateSchedule, confirmSchedule } from "../../../services/scheduleService.js";
-import { fetchActiveStore, fetchStoredata, fetchMydata } from "../../../services/owner/MyPageService.js";
-import { fetchAllWorkers } from "../../../services/owner/ScheduleService.js";
-// TODO: 백엔드에 근무표 작성 요청 알림 API가 구현되면 주석 해제
-// import { createScheduleRequestNotification } from "../../../services/common/NotificationService.js";
+import { generateSchedule, confirmSchedule, createScheduleRequest } from "../../../services/scheduleService.js";
+import { fetchActiveStore, fetchStoredata } from "../../../services/owner/MyPageService.js";
+// ✅ 알림 연동: /api/schedules/requests API 호출 시 백엔드에서 매장 내 직원들에게 자동으로 알림이 전송됩니다.
+// 별도의 알림 API 호출이 필요하지 않습니다.
 import "./CalAdd.css";
 
 export default function CalAdd() {
@@ -446,121 +445,107 @@ export default function CalAdd() {
         singleButtonText="근무표 생성 요청하기"
         onSingleClick={async () => {
           try {
+            setIsLoading(true);
+
             // 1. 매장 정보 가져오기
             const storeData = await fetchStoredata();
             if (!storeData || !storeData.storeId) {
               alert("매장 정보를 불러올 수 없습니다.");
+              setIsLoading(false);
               return;
             }
 
             // 2. 날짜 범위 확인 (지정함인 경우 필수)
             if (unitSpecified && (!startDate || !endDate)) {
               alert("시작일자와 마무리일자를 모두 선택해주세요.");
+              setIsLoading(false);
               return;
             }
 
             // 3. 지정함인 경우 시간 슬롯 검증
+            let timeSegments = null;
+            let openTime = "09:00:00";
+            let closeTime = "18:00:00";
+
             if (unitSpecified) {
               const validSlots = timeSlots.filter(
                 (slot) => slot.start && slot.end && slot.count > 0
               );
               if (validSlots.length === 0) {
                 alert("최소 하나의 시간 구간을 설정해주세요.");
+                setIsLoading(false);
                 return;
               }
+
+              timeSegments = validSlots.map((slot) => ({
+                startTime: `${slot.start}:00`,
+                endTime: `${slot.end}:00`,
+                requiredStaff: slot.count,
+              }));
+
+              const allTimes = timeSegments.flatMap((seg) => [seg.startTime, seg.endTime]);
+              const sortedTimes = allTimes.sort();
+              openTime = sortedTimes.length > 0 ? sortedTimes[0] : "09:00:00";
+              closeTime = sortedTimes.length > 0 ? sortedTimes[sortedTimes.length - 1] : "18:00:00";
             }
 
-            // 4. 같은 매장의 직원 목록 가져오기
-            // /api/store/staff는 이미 활성 매장의 직원들만 반환
-            const allWorkers = await fetchAllWorkers();
-            if (!allWorkers || !Array.isArray(allWorkers)) {
-              alert("직원 목록을 불러올 수 없습니다.");
-              return;
+            // 4. /api/schedules/requests API 호출 (요청보내기 & 셋팅저장)
+            // 백엔드 스펙에 맞게 요청 데이터 구성
+            const requestData = {
+              openTime,
+              closeTime,
+              startDate: startDate || dayjs().locale("ko").startOf("week").format("YYYY-MM-DD"),
+              endDate: endDate || dayjs().locale("ko").startOf("week").add(6, "day").format("YYYY-MM-DD"),
+            };
+
+            // timeSegments 변환 (startTime, endTime을 "HH:mm:ss" 형식으로)
+            if (unitSpecified && timeSegments && timeSegments.length > 0) {
+              requestData.timeSegments = timeSegments.map(seg => ({
+                startTime: seg.startTime, // 이미 "HH:mm:ss" 형식
+                endTime: seg.endTime,     // 이미 "HH:mm:ss" 형식
+                requiredStaff: seg.requiredStaff,
+              }));
             }
 
-            // 5. 현재 로그인한 사용자의 userStoreId 가져오기
-            // fetchActiveStore에서 userStoreId를 가져오거나, fetchMydata에서 가져오기
-            let currentUserStoreId = null;
-            const activeStore = await fetchActiveStore();
-            if (activeStore?.userStoreId) {
-              currentUserStoreId = activeStore.userStoreId;
-            } else if (activeStore?.id) {
-              currentUserStoreId = activeStore.id;
-            } else {
-              // fetchMydata에서 userStoreId 가져오기 시도
-              const mydata = await fetchMydata();
-              if (mydata?.userStoreId) {
-                currentUserStoreId = mydata.userStoreId;
-              } else if (mydata?.id) {
-                currentUserStoreId = mydata.id;
-              }
-            }
-            
-            // 사장(현재 사용자) 제외하고 알바생만 필터링
-            const storeWorkers = allWorkers.filter(worker => {
-              // 현재 사용자의 userStoreId와 일치하면 사장이므로 제외
-              const workerStoreId = worker.userStoreId;
-              return workerStoreId && workerStoreId !== currentUserStoreId;
-            });
+            const result = await createScheduleRequest(requestData);
 
-            if (storeWorkers.length === 0) {
-              alert("해당 매장에 알바생이 없습니다.");
-              return;
-            }
+            // API 응답에서 scheduleSettingId 또는 settingId 확인
+            // API 스펙: { "scheduleSettingId": 0, "status": "string" }
+            const settingId = result?.scheduleSettingId || result?.settingId;
 
-            // 6. 알바생 ID 추출 (userStoreId 사용)
-            const employeeIds = storeWorkers.map(worker => worker.userStoreId).filter(id => id);
-
-            if (employeeIds.length === 0) {
-              alert("알바생 ID를 가져올 수 없습니다.");
-              return;
-            }
-
-            // 6. 날짜 범위 문자열 생성
-            let dateRange;
-            if (startDate && endDate) {
-              dateRange = `${dayjs(startDate).format("YYYY.MM.DD")} ~ ${dayjs(endDate).format("YYYY.MM.DD")}`;
-            } else {
-              const currentMonth = new Date().getMonth() + 1;
-              dateRange = `${currentMonth}월`;
-            }
-
-            // 8. 백엔드 API로 알림 생성 (백엔드 API가 준비되면 활성화)
-            // TODO: 백엔드에 근무표 생성 요청 알림 API가 구현되면 아래 코드 활성화
-            // 현재 백엔드에 해당 API가 없어 주석 처리됨
-            // await createScheduleRequestNotification({ ... });
-
-            // 8. ScheduleList로 이동하면서 설정한 정보 전달
-            const timeSegments = unitSpecified
-              ? timeSlots
-                  .filter((slot) => slot.start && slot.end && slot.count > 0)
-                  .map((slot) => ({
-                    startTime: `${slot.start}:00`,
-                    endTime: `${slot.end}:00`,
-                    requiredStaff: slot.count,
-                  }))
-              : null;
-
-            const allTimes = unitSpecified && timeSegments && timeSegments.length > 0
-              ? timeSegments.flatMap((seg) => [seg.startTime, seg.endTime])
-              : [];
-            const sortedTimes = allTimes.sort();
-            const openTime = sortedTimes.length > 0 ? sortedTimes[0] : "09:00:00";
-            const closeTime = sortedTimes.length > 0 ? sortedTimes[sortedTimes.length - 1] : "18:00:00";
-
-            navigate("/scheduleList", {
-              state: {
+            if (result && settingId) {
+              // ScheduleList로 이동할 때 플래그 설정
+              // (생성하기를 누르지 않고 나가면 다음에 caladdicon 클릭 시 ScheduleList로 이동)
+              // ⚠️ 알림: 백엔드에서 /api/schedules/requests 호출 시 매장 내 직원들에게 자동으로 알림이 전송됩니다.
+              localStorage.setItem("hasScheduleRequest", "true");
+              localStorage.removeItem("scheduleGenerationCompleted"); // 이전 플래그 제거
+              
+              // settingId와 설정 정보를 localStorage에 저장 (새로고침 대비)
+              const scheduleConfigData = {
+                settingId: settingId,
                 timeSegments,
                 openTime,
                 closeTime,
                 minWorkTime: !unitSpecified ? minWorkTime : null,
                 startDate: startDate || dayjs().locale("ko").startOf("week").format("YYYY-MM-DD"),
                 endDate: endDate || dayjs().locale("ko").startOf("week").add(6, "day").format("YYYY-MM-DD"),
-              },
-            });
+              };
+              localStorage.setItem("scheduleConfig", JSON.stringify(scheduleConfigData));
+              
+              console.log("📝 CalAdd → ScheduleList 이동: hasScheduleRequest 설정, scheduleConfig 저장");
+              
+              // 5. ScheduleList로 이동하면서 설정 ID 전달
+              navigate("/scheduleList", {
+                state: scheduleConfigData,
+              });
+            } else {
+              alert("근무표 생성 요청에 실패했습니다.");
+            }
           } catch (error) {
             console.error("근무표 생성 요청 실패:", error);
             alert("근무표 생성 요청에 실패했습니다. 다시 시도해주세요.");
+          } finally {
+            setIsLoading(false);
           }
         }}
       />

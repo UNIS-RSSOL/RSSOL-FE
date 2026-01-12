@@ -2,6 +2,7 @@ import api from "./api.js";
 
 /**
  * 시간 문자열을 LocalTime 객체로 변환
+ * API 스펙에 따라 { hour, minute, second, nano } 형식으로 변환
  * @param {string} timeStr - 시간 문자열 (예: "09:00:00" 또는 "09:00")
  * @returns {{hour: number, minute: number, second: number, nano: number}}
  */
@@ -12,6 +13,7 @@ const parseTimeToLocalTime = (timeStr) => {
   const minute = parseInt(parts[1] || '0', 10);
   const second = parseInt(parts[2] || '0', 10);
   
+  // API 스펙에 맞는 객체 형식 반환
   return {
     hour,
     minute,
@@ -49,7 +51,9 @@ const parseTimeToLocalTime = (timeStr) => {
  */
 export const createScheduleRequest = async (requestData) => {
   try {
-    // 시간 문자열을 LocalTime 객체로 변환
+    // 시간 문자열을 LocalTime 형식으로 변환
+    // 백엔드 파싱 오류를 방지하기 위해 문자열 형식("HH:mm:ss") 사용
+    // 만약 백엔드가 객체 형식을 요구한다면 parseTimeToLocalTime 함수 수정 필요
     const formattedData = {
       openTime: parseTimeToLocalTime(requestData.openTime),
       closeTime: parseTimeToLocalTime(requestData.closeTime),
@@ -66,7 +70,7 @@ export const createScheduleRequest = async (requestData) => {
       }));
     }
 
-    console.log("📤 근무표 생성 요청 데이터:", formattedData);
+    console.log("📤 근무표 생성 요청 데이터:", JSON.stringify(formattedData, null, 2));
 
     const response = await api.post("/api/schedules/requests", formattedData);
     return response.data;
@@ -80,15 +84,19 @@ export const createScheduleRequest = async (requestData) => {
  * 설정 ID로 근무표 생성 (POST /api/schedules/{settingId}/generate)
  * ScheduleList에서 "생성하기" 버튼 클릭 시 사용
  * @param {number} settingId - 설정 ID
+ * @param {Object} generationOptions - 생성 옵션
+ * @param {number} generationOptions.candidateCount - 후보 개수 (기본값: 5)
  * @returns {Promise<{
  *   candidateScheduleKey: string,
  *   generatedCount: number,
  *   ...
  * }>} 생성된 근무표 후보 정보
  */
-export const generateScheduleWithSetting = async (settingId) => {
+export const generateScheduleWithSetting = async (settingId, generationOptions = { candidateCount: 5 }) => {
   try {
-    const response = await api.post(`/api/schedules/${settingId}/generate`);
+    const response = await api.post(`/api/schedules/${settingId}/generate`, {
+      generationOptions,
+    });
     return response.data;
   } catch (error) {
     console.error("근무표 생성 실패:", error.response?.data || error.message);
