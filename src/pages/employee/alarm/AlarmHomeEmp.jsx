@@ -32,6 +32,9 @@ function AlarmHomeEmp() {
         // 백엔드 API로 알림 조회
         const notificationList = await fetchNotifications();
         
+        console.log("🔔 알림 API 응답:", notificationList);
+        console.log("🔔 알림 API 응답 타입:", typeof notificationList, Array.isArray(notificationList));
+        
         // 백엔드 응답 형식에 맞게 변환 (응답이 배열이거나 객체일 수 있음)
         let notifications = [];
         if (Array.isArray(notificationList)) {
@@ -40,7 +43,12 @@ function AlarmHomeEmp() {
           notifications = notificationList.data;
         } else if (notificationList && notificationList.content) {
           notifications = notificationList.content;
+        } else if (notificationList && notificationList.notifications) {
+          notifications = notificationList.notifications;
         }
+
+        console.log("🔔 파싱된 알림 목록:", notifications);
+        console.log("🔔 알림 개수:", notifications.length);
 
         // 최신순으로 정렬 (createdAt 또는 createdAt 필드 기준)
         const sorted = notifications.sort((a, b) => {

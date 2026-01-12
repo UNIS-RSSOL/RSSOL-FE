@@ -23,8 +23,54 @@ function ScheduleList() {
   const [isGenerating, setIsGenerating] = useState(false);
   
   // CalAdd에서 전달받은 정보 (settingId, 시간 구간, 시작일, 종료일 등)
-  const scheduleConfig = location.state || {};
+  // location.state가 없으면 localStorage에서 가져오기 (새로고침 대비)
+  const [scheduleConfig, setScheduleConfig] = useState(() => {
+    const stateConfig = location.state || {};
+    if (stateConfig.settingId) {
+      return stateConfig;
+    }
+    // location.state에 없으면 localStorage에서 가져오기
+    const savedConfig = localStorage.getItem("scheduleConfig");
+    if (savedConfig) {
+      try {
+        return JSON.parse(savedConfig);
+      } catch (e) {
+        console.error("scheduleConfig 파싱 실패:", e);
+        return {};
+      }
+    }
+    return {};
+  });
   const settingId = scheduleConfig.settingId;
+
+  // location.state 변경 시 scheduleConfig 업데이트
+  useEffect(() => {
+    // location.state에 settingId가 있으면 그것을 사용
+    if (location.state?.settingId) {
+      setScheduleConfig(location.state);
+      // localStorage에도 저장 (일관성 유지)
+      localStorage.setItem("scheduleConfig", JSON.stringify(location.state));
+    }
+  }, [location.state]);
+
+  // 컴포넌트 마운트 시 또는 settingId가 없을 때 localStorage에서 다시 확인
+  useEffect(() => {
+    // location.state가 없고, 현재 scheduleConfig에 settingId가 없으면 localStorage에서 확인
+    if (!location.state?.settingId && !scheduleConfig.settingId) {
+      const savedConfig = localStorage.getItem("scheduleConfig");
+      if (savedConfig) {
+        try {
+          const parsedConfig = JSON.parse(savedConfig);
+          if (parsedConfig.settingId) {
+            console.log("📝 ScheduleList: localStorage에서 scheduleConfig 로드:", parsedConfig.settingId);
+            setScheduleConfig(parsedConfig);
+          }
+        } catch (e) {
+          console.error("scheduleConfig 파싱 실패:", e);
+        }
+      }
+    }
+  }, []); // 컴포넌트 마운트 시 한 번만 실행
 
   // 매장 ID 가져오기
   useEffect(() => {
@@ -134,15 +180,17 @@ function ScheduleList() {
           // 제출안한 직원들은 빈배열 반환
           const storeAvailabilities = await fetchStoreAvailabilities(storeId);
           
+          console.log("📋 [API 응답] storeAvailabilities:", storeAvailabilities);
+          
           // 응답 형태: 배열 [ { userName: string, availabilities: Array } ]
           // 각 직원별로 availabilities가 빈 배열일 수 있음
           
           storeWorkers.forEach((worker) => {
-            // 직원 ID 찾기 (여러 필드 시도)
-            const staffId = worker.id || worker.staffId || worker.userStoreId || worker.userId;
             // 직원 이름 찾기 (여러 필드 시도)
-            const workerName = worker.username || worker.name || worker.userName || worker.userName || '이름없음';
+            const workerName = worker.username || worker.name || worker.userName || '이름없음';
             
+            // 직원 ID 찾기 (여러 필드 시도) - workerKey 생성용
+            const staffId = worker.id || worker.staffId || worker.userStoreId || worker.userId;
             // 고유 식별자 생성 (ID가 없어도 처리 가능하도록)
             const workerKey = staffId || worker.userStoreId || worker.userId || `worker_${workerName}`;
             
@@ -154,11 +202,14 @@ function ScheduleList() {
             
             // username으로 매칭하여 해당 직원의 availabilities 가져오기 (API는 username 소문자 사용)
             // 정확한 매칭 시도 후, 정규화된 매칭 시도
-            let workerAvailability = storeAvailabilities.find(item => 
-              item.username === workerName || 
-              item.userName === workerName ||
-              normalizeName(item.username || item.userName) === normalizeName(workerName)
-            );
+            let workerAvailability = storeAvailabilities.find(item => {
+              const apiUsername = item.username || item.userName || '';
+              const normalizedApiName = normalizeName(apiUsername);
+              const normalizedWorkerName = normalizeName(workerName);
+              
+              return apiUsername === workerName || 
+                     normalizedApiName === normalizedWorkerName;
+            });
             
             // 매칭 실패 시 로그 출력
             if (!workerAvailability) {
@@ -218,15 +269,8 @@ function ScheduleList() {
               schedulesByWorker[workerKey] = [];
             }
             
-            // ID가 없는 경우에만 에러로 표시 (하지만 빈 배열은 허용)
-            if (!staffId && !worker.userStoreId && !worker.userId) {
-              errorsByWorker[workerKey] = {
-                staffId: null,
-                workerName,
-                error: new Error("직원 ID를 찾을 수 없습니다 (id, staffId, userStoreId, userId 모두 없음)"),
-                status: null,
-              };
-            }
+            // ID가 없어도 스케줄은 저장되므로 에러로 표시하지 않음
+            // (ID가 없어도 workerKey로 식별 가능)
           });
         } catch (error) {
           // 전체 조회 실패 시 모든 직원에 대해 에러 처리
@@ -397,14 +441,18 @@ function ScheduleList() {
       setIsGenerating(true);
 
       // /api/schedules/{settingId}/generate API 호출
-      const result = await generateScheduleWithSetting(settingId);
+      // generationOptions에 candidateCount 포함 (기본값: 5)
+      const result = await generateScheduleWithSetting(settingId, {
+        candidateCount: 5,
+      });
 
       if (result && result.candidateScheduleKey) {
         // 근무표 생성 완료 플래그 저장 (다음에 caladdicon 클릭 시 CalAdd로 이동)
         localStorage.setItem("scheduleGenerationCompleted", "true");
         localStorage.removeItem("hasScheduleRequest"); // 생성 완료했으므로 요청 플래그 제거
+        localStorage.removeItem("scheduleConfig"); // 생성 완료했으므로 설정 정보 제거
         
-        console.log("✅ 근무표 생성 완료: scheduleGenerationCompleted 설정, hasScheduleRequest 제거");
+        console.log("✅ 근무표 생성 완료: scheduleGenerationCompleted 설정, hasScheduleRequest 및 scheduleConfig 제거");
         
         const startDate = scheduleConfig.startDate || dayjs().locale("ko").startOf("week").format("YYYY-MM-DD");
         const endDate = scheduleConfig.endDate || dayjs().locale("ko").startOf("week").add(6, "day").format("YYYY-MM-DD");

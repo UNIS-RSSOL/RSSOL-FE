@@ -38,7 +38,7 @@ const getFrontendBaseUrl = () => {
     return "http://localhost:5173";
   }
   // 배포 환경 (Vercel)
-  return "https://rssol-fe.vercel.app";
+  return "https://rssol.vercel.app";
 };
 
 const TOKEN_REFRESH_PATH = "/api/auth/refresh-token";
