@@ -65,6 +65,7 @@ function OwnerCalendar() {
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
   const [needWorkers, setNeedWorkers] = useState(1);
   const [activeStore, setActiveStore] = useState("");
+  const [activeStoreId, setActiveStoreId] = useState(null);
   const [newTime, setNewTime] = useState({
     userStoreId: "",
     username: "",
@@ -77,9 +78,18 @@ function OwnerCalendar() {
     (async () => {
       try {
         const response = await fetchActiveStore();
+        console.log("🏪 활성 매장 정보:", response);
         setActiveStore(response.name);
+        // 활성 매장 ID 저장 (storeId 또는 id 필드 사용)
+        const storeId = response.storeId || response.id;
+        console.log("🏪 활성 매장 ID:", storeId);
+        if (storeId) {
+          setActiveStoreId(storeId);
+        } else {
+          console.warn("⚠️ 활성 매장 ID를 찾을 수 없습니다:", response);
+        }
       } catch (error) {
-        console.error(error);
+        console.error("❌ 활성 매장 조회 실패:", error);
       }
     })();
   }, []);
@@ -235,6 +245,7 @@ function OwnerCalendar() {
           onEventClick={handleEventClick}
           selectedEventProp={selectedCalendarEvent}
           setSelectedEventProp={setSelectedCalendarEvent}
+          storeId={activeStoreId}
         />
       </div>
     );
@@ -273,6 +284,7 @@ function OwnerCalendar() {
           onEventClick={handleEventClick}
           selectedEventProp={selectedCalendarEvent}
           setSelectedEventProp={setSelectedCalendarEvent}
+          storeId={activeStoreId}
         />
       </div>
     );

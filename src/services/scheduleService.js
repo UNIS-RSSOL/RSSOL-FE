@@ -51,6 +51,16 @@ const parseTimeToLocalTime = (timeStr) => {
  */
 export const createScheduleRequest = async (requestData) => {
   try {
+    console.log("📥 scheduleService - 받은 requestData:", JSON.stringify(requestData, null, 2));
+    console.log("📥 scheduleService - requestData.storeId:", requestData.storeId);
+    
+    // ⚠️ storeId 필수 검증
+    if (!requestData.storeId) {
+      const errorMsg = "storeId는 필수입니다. 매장 정보를 확인해주세요.";
+      console.error("❌ storeId 누락:", errorMsg);
+      throw new Error(errorMsg);
+    }
+
     // ⚠️ 백엔드가 LocalTime을 문자열 형식("HH:mm:ss")으로 받아야 함
     // 객체 형식 {hour, minute, second, nano}은 JSON 파싱 에러 발생
     // 시간 문자열을 그대로 전송 (이미 "HH:mm:ss" 형식으로 전달됨)
@@ -71,7 +81,7 @@ export const createScheduleRequest = async (requestData) => {
       }));
     }
 
-    console.log("📤 근무표 생성 요청 데이터:", JSON.stringify(formattedData, null, 2));
+    console.log("📤 scheduleService - 전송할 formattedData:", JSON.stringify(formattedData, null, 2));
 
     const response = await api.post("/api/schedules/requests", formattedData);
     

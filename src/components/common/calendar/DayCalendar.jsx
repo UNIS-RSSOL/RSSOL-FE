@@ -7,6 +7,7 @@ function DayCalendar({
   onEventClick,
   selectedEventProp,
   setSelectedEventProp,
+  storeId,
 }) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
   const [blank, setBlank] = useState(Array.from({ length: 7 }, () => "."));
@@ -20,6 +21,7 @@ function DayCalendar({
         const schedules = await fetchSchedules(
           date.format("YYYY-MM-DD"),
           date.format("YYYY-MM-DD"),
+          storeId,
         );
 
         const uniqueWorkers = Array.from(
@@ -54,7 +56,7 @@ function DayCalendar({
         console.error("Error fetching schedules:", error);
       }
     })();
-  }, [date]);
+  }, [date, storeId]);
 
   const isFirstHour = (event, hour) => {
     if (!event) return false;
