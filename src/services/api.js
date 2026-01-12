@@ -26,6 +26,8 @@ api.interceptors.request.use(
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       };
+    } else {
+      console.error("accessToken 없음");
     }
     return config;
   },
