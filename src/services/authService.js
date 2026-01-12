@@ -191,13 +191,8 @@ export async function refreshToken() {
     return response.data;
   } catch (error) {
     console.error("❌ 토큰 갱신 실패:", error.response?.data || error.message);
+    // 에러는 상위 호출자(api.js interceptor)에서 처리
     throw error;
-
-    if (error.response?.status === 401) {
-      console.log("인증 실패- 로그아웃 처리");
-      await logout();
-      window.location.href = "/";
-    }
   }
 }
 
