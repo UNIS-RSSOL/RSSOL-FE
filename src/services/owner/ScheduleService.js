@@ -29,27 +29,68 @@ export async function deleteWorkshift(workShiftId) {
 //대타요청하기
 export async function requestSub(shiftId, reason = "") {
   try {
+    console.log("📤 대타 요청 API 호출:", {
+      endpoint: "/api/shift-swap/requests",
+      shiftId,
+      reason,
+    });
+    
     const response = await api.post("/api/shift-swap/requests", {
       shiftId: shiftId,
       reason: reason,
     });
+    
+    console.log("✅ 대타 요청 성공:", {
+      status: response.status,
+      data: response.data,
+    });
+    
+    console.log("🔔 대타 요청 완료 - 백엔드에서 알림이 생성됩니다.");
+    
     return response.data;
   } catch (error) {
-    console.error(error);
+    console.error("❌ 대타 요청 실패:", error);
+    console.error("❌ 대타 요청 실패 상세:", {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+    throw error;
   }
 }
 
 //추가인력요청
 export async function requestWork(shiftId, headCount, note = "") {
   try {
+    console.log("📤 인력 요청 API 호출:", {
+      endpoint: "/api/extra-shift/requests",
+      shiftId,
+      headCount,
+      note,
+    });
+    
     const response = await api.post("/api/extra-shift/requests", {
       shiftId: shiftId,
       headcount: headCount,
       note: note,
     });
-    return response;
+    
+    console.log("✅ 인력 요청 성공:", {
+      status: response.status,
+      data: response.data,
+    });
+    
+    console.log("🔔 인력 요청 완료 - 백엔드에서 알림이 생성됩니다.");
+    
+    return response.data;
   } catch (error) {
-    console.error(error);
+    console.error("❌ 인력 요청 실패:", error);
+    console.error("❌ 인력 요청 실패 상세:", {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
+    throw error;
   }
 }
 

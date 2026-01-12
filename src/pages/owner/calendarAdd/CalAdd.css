@@ -219,7 +219,7 @@
     border-radius: 12px !important;
     padding: 4px 8px !important;
     font-size: 12px !important;
-    width: 70px !important;
+    width: 80px !important;
     height: 28px !important;
     appearance: none !important;
     -webkit-appearance: none !important;
@@ -251,8 +251,8 @@
      11) 인원 버튼 (동그라미, 흰배경)
      ============================ */
   .personnel-btn {
-    width: 28px !important;
-    height: 28px !important;
+    width: 18px !important;
+    height: 18px !important;
     border-radius: 50% !important;
     background: white !important;
     border: 1px solid #E5E5E5 !important;
@@ -300,5 +300,36 @@
   }
 
   .add-time-btn:focus {
+    outline: none !important;
+  }
+
+  /* ============================
+     13) 타임슬롯 삭제 버튼 (x 표시)
+     ============================ */
+  .delete-time-btn {
+    background: transparent !important;
+    border: none !important;
+    color: #999 !important;
+    font-size: 24px !important;
+    font-weight: 300 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    margin-left: 8px !important;
+    cursor: pointer !important;
+    width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    transition: all 0.2s !important;
+  }
+
+  .delete-time-btn:hover {
+    color: #ff4444 !important;
+    transform: scale(1.1) !important;
+  }
+
+  .delete-time-btn:focus {
     outline: none !important;
   }

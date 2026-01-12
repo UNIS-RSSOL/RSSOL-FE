@@ -7,6 +7,7 @@ function DayCalendar({
   onEventClick,
   selectedEventProp,
   setSelectedEventProp,
+  storeId,
 }) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
   const [blank, setBlank] = useState(Array.from({ length: 7 }, () => "."));
@@ -20,6 +21,7 @@ function DayCalendar({
         const schedules = await fetchSchedules(
           date.format("YYYY-MM-DD"),
           date.format("YYYY-MM-DD"),
+          storeId,
         );
 
         const uniqueWorkers = Array.from(
@@ -54,7 +56,7 @@ function DayCalendar({
         console.error("Error fetching schedules:", error);
       }
     })();
-  }, [date]);
+  }, [date, storeId]);
 
   const isFirstHour = (event, hour) => {
     if (!event) return false;
@@ -150,7 +152,7 @@ function DayCalendar({
                   const clickedEvent = {
                     id: event.id,
                     userStoreId: event.userStoreId,
-                    userName: event.userName,
+                    username: event.username,
                     start: event.start,
                     end: event.end,
                   };
@@ -160,7 +162,7 @@ function DayCalendar({
               >
                 {isMiddleHour ? (
                   <span className="text-black text-[12px] font-[400]">
-                    {worker.userName}
+                    {worker.username}
                   </span>
                 ) : null}
               </div>
@@ -174,9 +176,9 @@ function DayCalendar({
         </div>
       ))}
       {blank &&
-        blank.map((index) => (
+        blank.map((_, index) => (
           <div
-            key={index}
+            key={`blank-${index}`}
             className={`flex-shrink-0 flex-col w-[42px] border-l border-[#e7eaf3] last:border-r-0 ${index === 0 ? "border-l" : ""}`}
           >
             <div className="h-[30px] " />

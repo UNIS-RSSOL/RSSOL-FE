@@ -8,6 +8,7 @@ function WeekCalendar({
   onEventClick,
   selectedEventProp,
   setSelectedEventProp,
+  storeId,
 }) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
   const [week, setWeek] = useState([]);
@@ -28,6 +29,7 @@ function WeekCalendar({
       const schedules = await fetchSchedules(
         startOfWeek.format("YYYY-MM-DD"),
         startOfWeek.add(6, "day").format("YYYY-MM-DD"),
+        storeId,
       );
 
       const uniqueWorkers = Array.from(
@@ -52,7 +54,7 @@ function WeekCalendar({
       setWorkers(uniqueWorkers);
       setEvents(formattedEvents);
     })();
-  }, [date]);
+  }, [date, storeId]);
 
   const getEventForCell = (userStoreId, day) => {
     return events.find((event) => {
@@ -103,7 +105,7 @@ function WeekCalendar({
           className="flex flex-shrink-0 flex-row w-full h-[60px] border-t border-[#e7eaf3]"
         >
           <div className="flex flex-shrink-0 w-[52px] h-full items-center justify-center">
-            {worker.userName}
+            {worker.username}
           </div>
           {week.map((w) => {
             const event = getEventForCell(
@@ -132,7 +134,7 @@ function WeekCalendar({
                   const clickedEvent = {
                     id: event.id,
                     userStoreId: event.userStoreId,
-                    userName: event.userName,
+                    username: event.username,
                     start: event.start,
                     end: event.end,
                   };

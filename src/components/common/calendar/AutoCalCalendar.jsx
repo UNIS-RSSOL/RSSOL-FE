@@ -31,7 +31,7 @@ function AutoCalCalendar({ hasSelection, schedules }) {
   const normalized = hasSelection && schedules ? (schedules || []).map((s) => ({
     id: s.id || Math.random(),
     workerId: s.userStoreId || s.workerId || s.id,
-    worker: s.userName || s.worker || s.workerName || s.name || "근무자",
+    worker: s.username || s.userName || s.worker || s.workerName || s.name || "근무자",
     start: s.startDatetime || s.start || s.startTime,
     end: s.endDatetime || s.end || s.endTime,
   })) : [];

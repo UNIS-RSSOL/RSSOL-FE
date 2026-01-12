@@ -139,6 +139,11 @@ export default function CalAdd() {
     setTimeSlots(newSlots);
   };
 
+  const handleDeleteTime = (index) => {
+    const newSlots = timeSlots.filter((_, idx) => idx !== index);
+    setTimeSlots(newSlots);
+  };
+
   const goPrev = () => {
     const api = calendarRef.current?.getApi();
     api?.prev();
@@ -156,8 +161,14 @@ export default function CalAdd() {
     const loadStoreId = async () => {
       try {
         const activeStore = await fetchActiveStore();
-        if (activeStore && activeStore.storeId) {
-          setStoreId(activeStore.storeId);
+        console.log("🏪 CalAdd - 활성 매장 정보:", activeStore);
+        // storeId 또는 id 필드 확인
+        const id = activeStore?.storeId || activeStore?.id;
+        if (id) {
+          setStoreId(id);
+          console.log("✅ CalAdd - storeId 설정:", id);
+        } else {
+          console.warn("⚠️ CalAdd - storeId를 찾을 수 없음:", activeStore);
         }
       } catch (error) {
         console.error("매장 ID 로드 실패:", error);
@@ -378,7 +389,7 @@ export default function CalAdd() {
                   />
 
                   <div className="flex items-center space-x-1">
-                    <span>인원</span>
+                    
                     <button
                       className="personnel-btn personnel-btn-minus"
                       onClick={() =>
@@ -392,6 +403,7 @@ export default function CalAdd() {
                       -
                     </button>
                     <span>{slot.count}</span>
+                    <span>명</span>
                     <button
                       className="personnel-btn personnel-btn-plus"
                       onClick={() =>
@@ -401,6 +413,13 @@ export default function CalAdd() {
                       +
                     </button>
                   </div>
+                  <button
+                    className="personnel-btn personnel-btn-delete"
+                    onClick={() => handleDeleteTime(idx)}
+                    type="button"
+                  >
+                    ×
+                  </button>
                 </div>
               ))}
 
@@ -447,10 +466,55 @@ export default function CalAdd() {
           try {
             setIsLoading(true);
 
-            // 1. 매장 정보 가져오기
-            const storeData = await fetchStoredata();
-            if (!storeData || !storeData.storeId) {
-              alert("매장 정보를 불러올 수 없습니다.");
+            // 1. 매장 ID 가져오기 (활성 매장 정보에서)
+            // ⚠️ storeId 필수: 백엔드에서 알림 생성 시 storeId가 필요함
+            let currentStoreId = storeId; // 먼저 상태에서 가져오기
+            console.log("🔍 CalAdd - 초기 storeId 상태:", { storeId, currentStoreId });
+            
+            // 상태에 storeId가 없으면 활성 매장 정보에서 가져오기
+            if (!currentStoreId) {
+              try {
+                const activeStore = await fetchActiveStore();
+                console.log("🏪 CalAdd - 버튼 클릭 시 활성 매장 정보:", activeStore);
+                console.log("🏪 CalAdd - activeStore 전체 구조:", JSON.stringify(activeStore, null, 2));
+                
+                // storeId 또는 id 필드 확인
+                const id = activeStore?.storeId || activeStore?.id;
+                console.log("🔍 CalAdd - activeStore에서 추출한 id:", id);
+                
+                if (id) {
+                  currentStoreId = id;
+                  setStoreId(id); // 상태에도 저장
+                  console.log("✅ CalAdd - 버튼 클릭 시 storeId 설정:", id);
+                } else {
+                  console.warn("⚠️ CalAdd - activeStore에 storeId/id 없음, fetchStoredata 시도");
+                  // activeStore에 없으면 fetchStoredata에서 가져오기 (AddOwner.jsx와 동일한 로직)
+                  try {
+                    const storedata = await fetchStoredata();
+                    console.log("🏪 CalAdd - fetchStoredata 응답:", storedata);
+                    console.log("🏪 CalAdd - storedata 전체 구조:", JSON.stringify(storedata, null, 2));
+                    
+                    const storeIdFromData = storedata?.storeId || storedata?.id;
+                    if (storeIdFromData) {
+                      currentStoreId = storeIdFromData;
+                      setStoreId(storeIdFromData);
+                      console.log("✅ CalAdd - fetchStoredata에서 storeId 설정:", storeIdFromData);
+                    } else {
+                      console.error("❌ CalAdd - fetchStoredata에도 storeId 없음:", storedata);
+                    }
+                  } catch (storeError) {
+                    console.error("❌ CalAdd - fetchStoredata 실패:", storeError);
+                  }
+                }
+              } catch (error) {
+                console.error("❌ CalAdd - 활성 매장 정보 로드 실패:", error);
+              }
+            }
+            
+            console.log("🔍 CalAdd - 최종 currentStoreId:", currentStoreId);
+            
+            if (!currentStoreId) {
+              alert("매장 정보를 불러올 수 없습니다. 다시 시도해주세요.");
               setIsLoading(false);
               return;
             }
@@ -490,13 +554,62 @@ export default function CalAdd() {
             }
 
             // 4. /api/schedules/requests API 호출 (요청보내기 & 셋팅저장)
+            // ⚠️ currentStoreId 최종 확인 및 검증
+            console.log("🔍 CalAdd - currentStoreId 최종 확인:", {
+              currentStoreId,
+              type: typeof currentStoreId,
+              storeIdState: storeId,
+              isNull: currentStoreId === null,
+              isUndefined: currentStoreId === undefined,
+              isFalsy: !currentStoreId,
+            });
+
+            // ⚠️ storeId 필수 검증 - 없으면 즉시 종료
+            if (!currentStoreId || currentStoreId === null || currentStoreId === undefined) {
+              console.error("❌ CalAdd - currentStoreId가 없습니다!", {
+                currentStoreId,
+                storeIdState: storeId,
+                activeStoreCheck: "fetchActiveStore() 호출 필요",
+              });
+              alert("매장 정보를 불러올 수 없습니다. 다시 시도해주세요.");
+              setIsLoading(false);
+              return;
+            }
+
+            // ⚠️ storeId를 숫자로 변환 (백엔드가 숫자 타입을 기대할 수 있음)
+            const storeIdToSend = Number(currentStoreId);
+            if (isNaN(storeIdToSend)) {
+              console.error("❌ CalAdd - currentStoreId가 유효한 숫자가 아닙니다!", {
+                currentStoreId,
+                storeIdToSend,
+              });
+              alert("매장 정보가 올바르지 않습니다. 다시 시도해주세요.");
+              setIsLoading(false);
+              return;
+            }
+
+            console.log("✅ CalAdd - storeId 검증 통과:", {
+              original: currentStoreId,
+              converted: storeIdToSend,
+            });
+
             // 백엔드 스펙에 맞게 요청 데이터 구성
+            // ⚠️ storeId는 반드시 숫자 값으로 포함
             const requestData = {
+              storeId: storeIdToSend, // ⚠️ 필수: 알림 생성 시 필요 (숫자 타입)
               openTime,
               closeTime,
               startDate: startDate || dayjs().locale("ko").startOf("week").format("YYYY-MM-DD"),
               endDate: endDate || dayjs().locale("ko").startOf("week").add(6, "day").format("YYYY-MM-DD"),
             };
+
+            // ⚠️ requestData 생성 직후 storeId 확인
+            console.log("📦 CalAdd - requestData 생성 직후:", {
+              hasStoreId: !!requestData.storeId,
+              storeId: requestData.storeId,
+              storeIdToSend,
+              requestDataKeys: Object.keys(requestData),
+            });
 
             // timeSegments 변환 (startTime, endTime을 "HH:mm:ss" 형식으로)
             if (unitSpecified && timeSegments && timeSegments.length > 0) {
@@ -507,7 +620,62 @@ export default function CalAdd() {
               }));
             }
 
-            const result = await createScheduleRequest(requestData);
+            // ⚠️ timeSegments 추가 후 storeId 재확인
+            console.log("📦 CalAdd - timeSegments 추가 후:", {
+              hasStoreId: !!requestData.storeId,
+              storeId: requestData.storeId,
+              requestDataKeys: Object.keys(requestData),
+            });
+
+            console.log("📤 CalAdd - requestData 생성 완료:", {
+              hasStoreId: !!requestData.storeId,
+              storeId: requestData.storeId,
+              currentStoreId,
+              storeIdToSend,
+              requestDataKeys: Object.keys(requestData),
+            });
+            console.log("📤 CalAdd - 전체 요청 데이터 (JSON):", JSON.stringify(requestData, null, 2));
+            console.log("📤 CalAdd - 전체 요청 데이터 (객체):", requestData);
+
+            // ⚠️ 최종 검증: storeId가 없으면 에러
+            if (!requestData.storeId || requestData.storeId === undefined || requestData.storeId === null) {
+              console.error("❌ CalAdd - requestData에 storeId가 없습니다!", {
+                requestData,
+                requestDataStoreId: requestData.storeId,
+                currentStoreId,
+                storeIdToSend,
+                storeIdState: storeId,
+                requestDataStringified: JSON.stringify(requestData),
+                requestDataKeys: Object.keys(requestData),
+              });
+              alert("매장 정보를 불러올 수 없습니다. 다시 시도해주세요.");
+              setIsLoading(false);
+              return;
+            }
+
+            console.log("🚀 CalAdd - createScheduleRequest 호출 전 최종 확인:", {
+              requestDataStoreId: requestData.storeId,
+              storeIdToSend,
+              currentStoreId,
+              requestDataFull: requestData,
+              requestDataStringified: JSON.stringify(requestData),
+            });
+
+            // ⚠️ 최종 안전장치: requestData를 새로 만들어서 storeId 확실히 포함
+            const finalRequestData = {
+              storeId: storeIdToSend, // 명시적으로 다시 설정
+              openTime: requestData.openTime,
+              closeTime: requestData.closeTime,
+              startDate: requestData.startDate,
+              endDate: requestData.endDate,
+            };
+            if (requestData.timeSegments) {
+              finalRequestData.timeSegments = requestData.timeSegments;
+            }
+
+            console.log("🚀 CalAdd - finalRequestData (최종 전송 데이터):", JSON.stringify(finalRequestData, null, 2));
+
+            const result = await createScheduleRequest(finalRequestData);
 
             // API 응답에서 scheduleSettingId 또는 settingId 확인
             // API 스펙: { "scheduleSettingId": 0, "status": "string" }

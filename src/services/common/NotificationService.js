@@ -7,10 +7,45 @@ import api from "../api.js";
  */
 export async function fetchNotifications() {
   try {
+    console.log("🔔 알림 조회 API 호출: GET /api/notifications");
     const response = await api.get("/api/notifications");
-    return response.data;
+    
+    console.log("🔔 알림 조회 API 응답:", {
+      status: response.status,
+      data: response.data,
+      dataType: typeof response.data,
+      isArray: Array.isArray(response.data),
+    });
+    
+    // 응답 데이터 정규화
+    let notifications = response.data;
+    
+    // 응답이 배열이 아닌 경우 처리
+    if (!Array.isArray(notifications)) {
+      if (notifications && Array.isArray(notifications.data)) {
+        notifications = notifications.data;
+      } else if (notifications && Array.isArray(notifications.content)) {
+        notifications = notifications.content;
+      } else if (notifications && Array.isArray(notifications.notifications)) {
+        notifications = notifications.notifications;
+      } else if (notifications && Array.isArray(notifications.items)) {
+        notifications = notifications.items;
+      } else {
+        console.warn("⚠️ 알림 응답이 배열 형식이 아닙니다:", notifications);
+        notifications = [];
+      }
+    }
+    
+    console.log("🔔 정규화된 알림 목록:", notifications);
+    return notifications;
   } catch (error) {
-    console.error("알림 조회 실패:", error);
+    console.error("❌ 알림 조회 실패:", error);
+    console.error("❌ 알림 조회 실패 상세:", {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+    });
     throw error;
   }
 }
