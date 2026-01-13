@@ -405,9 +405,11 @@ function CalModEmp() {
     };
 
     // 새로운 availability 추가할 시간대 계산
-    // 날짜별로 그룹화한 후, 각 날짜 내에서 연속된 시간대만 하나로 합침
-    const schedulesByDate = {};
+    // 요일별로 그룹화하여 각 요일의 모든 시간대를 합침
+    const schedulesByDayOfWeek = {};
     const sortedSlots = Array.from(selectedTimeSlots).sort();
+
+    console.log("🔍 선택된 시간 슬롯 개수:", sortedSlots.length);
 
     if (sortedSlots.length > 0) {
       sortedSlots.forEach((slotKey) => {
@@ -421,26 +423,30 @@ function CalModEmp() {
         const hour = parseInt(hourStr);
         const startDatetime = targetDate.hour(hour).minute(0).second(0);
         const endDatetime = startDatetime.add(1, "hour");
+        const dayOfWeek = getDayOfWeek(startDatetime);
 
-        const dateKey = targetDate.format("YYYY-MM-DD");
-        if (!schedulesByDate[dateKey]) {
-          schedulesByDate[dateKey] = [];
+        // 요일별로 그룹화
+        if (!schedulesByDayOfWeek[dayOfWeek]) {
+          schedulesByDayOfWeek[dayOfWeek] = [];
         }
-        schedulesByDate[dateKey].push({
+        schedulesByDayOfWeek[dayOfWeek].push({
           start: startDatetime,
           end: endDatetime,
         });
       });
     }
 
-    // 각 날짜별로 연속된 시간대를 그룹화하여 availabilities 배열 생성
-    const availabilitiesList = [];
-    Object.keys(schedulesByDate).forEach((dateKey) => {
-      const daySchedules = schedulesByDate[dateKey];
-      const firstSchedule = daySchedules[0];
-      const dayOfWeek = getDayOfWeek(firstSchedule.start);
+    console.log("🔍 요일별 그룹화 결과:", Object.keys(schedulesByDayOfWeek));
 
-      // 같은 날짜의 연속된 시간대를 하나로 합침
+    // 각 요일별로 모든 시간대를 합쳐서 하나의 availability 생성
+    const availabilitiesList = [];
+    Object.keys(schedulesByDayOfWeek).forEach((dayOfWeek) => {
+      const daySchedules = schedulesByDayOfWeek[dayOfWeek];
+      
+      // 시간순으로 정렬
+      daySchedules.sort((a, b) => a.start.diff(b.start));
+
+      // 같은 요일의 모든 시간대를 하나로 합침
       let currentGroup = null;
       daySchedules.forEach((schedule) => {
         if (!currentGroup) {
@@ -449,8 +455,8 @@ function CalModEmp() {
             end: schedule.end,
           };
         } else {
-          // 같은 날짜에서 연속된 시간대인지 확인 (끝 시간과 시작 시간이 같음)
-          if (currentGroup.end.isSame(schedule.start)) {
+          // 연속된 시간대인지 확인 (끝 시간과 시작 시간이 같거나 겹침)
+          if (currentGroup.end.isSame(schedule.start) || currentGroup.end.isBefore(schedule.start)) {
             // 연속된 시간대이므로 합침
             currentGroup.end = schedule.end;
           } else {
@@ -477,6 +483,8 @@ function CalModEmp() {
         });
       }
     });
+
+    console.log("🔍 생성된 availabilities:", availabilitiesList);
 
     // 변경 사항이 있는지 확인
     // 기존 availability를 dayOfWeek, startTime, endTime 기준으로 정규화하여 비교
@@ -530,6 +538,12 @@ function CalModEmp() {
 
       console.log("🔍 PUT 요청으로 전체 갱신 중...");
       console.log("🔍 payload:", JSON.stringify(payload, null, 2));
+      console.log("🔍 payload 상세:", {
+        userStoreId: payload.userStoreId,
+        userName: payload.userName,
+        availabilitiesCount: payload.availabilities.length,
+        availabilities: payload.availabilities,
+      });
 
       const response = await updateAvailability(payload);
 
@@ -537,7 +551,23 @@ function CalModEmp() {
         "✅ 백엔드 저장 성공 응답:",
         JSON.stringify(response, null, 2),
       );
+      console.log("✅ 응답 타입:", typeof response);
+      console.log("✅ 응답이 배열인가?", Array.isArray(response));
+      if (Array.isArray(response)) {
+        console.log("✅ 응답 배열 길이:", response.length);
+        console.log("✅ 응답 배열 첫 번째 항목:", response[0]);
+      }
       console.log("✅ 근무 가능 시간이 성공적으로 수정되었습니다.");
+
+      // 저장 후 최신 데이터 다시 불러오기
+      try {
+        const updatedAvailabilityData = await fetchMyAvailabilities();
+        console.log("🔍 저장 후 최신 데이터:", updatedAvailabilityData);
+        setAvailabilities(updatedAvailabilityData || []);
+      } catch (refreshError) {
+        console.warn("⚠️ 저장 후 데이터 새로고침 실패:", refreshError);
+        // 새로고침 실패해도 계속 진행
+      }
 
       alert("근무 가능 시간이 수정되었습니다.");
 
