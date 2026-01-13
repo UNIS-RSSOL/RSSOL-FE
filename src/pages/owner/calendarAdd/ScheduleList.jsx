@@ -565,21 +565,23 @@ function ScheduleList() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f8f9fd]">
+    <div className="w-full h-full bg-[#f8f9fd] flex flex-col">
       <TopBar title="근무표 생성" onBack={() => navigate("/owner")} />
 
-      <div className="flex-1 px-4 py-3 flex flex-col gap-4 overflow-y-auto">
-        <p className="text-center font-bold text-lg">직원 스케줄 목록</p>
+      {/* 상단바를 고정하고, 나머지 영역만 스크롤 되도록 처리 */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="px-4 py-3 flex flex-col gap-4">
+          <p className="text-center font-bold text-lg">직원 스케줄 목록</p>
+          
+          <div className="flex justify-center">
+            <TimeSlotCalendar
+              onTimeSlotClick={handleTimeSlotClick}
+              getAvailabilityCount={getAvailabilityCount}
+            />
+          </div>
 
-        <div className="flex justify-center">
-          <TimeSlotCalendar
-            onTimeSlotClick={handleTimeSlotClick}
-            getAvailabilityCount={getAvailabilityCount}
-          />
-        </div>
-
-        <div className="w-[90%] mx-auto">
-          <div className="flex items-center justify-between">
+          <div className="w-[90%] mx-auto">
+            <div className="flex items-center justify-between">
             <p className="text-base font-medium">전체 직원 가능 근무 시간대</p>
             <button
               onClick={() => navigate("/addOwner")}
@@ -662,6 +664,7 @@ function ScheduleList() {
                 등록된 직원이 없습니다.
               </p>
             )}
+            </div>
           </div>
         </div>
       </div>
