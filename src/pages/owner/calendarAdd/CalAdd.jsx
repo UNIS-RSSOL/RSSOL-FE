@@ -6,10 +6,17 @@ import koLocale from "@fullcalendar/core/locales/ko";
 import interactionPlugin from "@fullcalendar/interaction";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
-import TopBar from "../../../components/layout/alarm/TopBar.jsx";
+import TopBar from "../../../components/common/alarm/TopBar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
-import { generateSchedule, confirmSchedule, createScheduleRequest } from "../../../services/scheduleService.js";
-import { fetchActiveStore, fetchStoredata } from "../../../services/owner/MyPageService.js";
+import {
+  generateSchedule,
+  confirmSchedule,
+  createScheduleRequest,
+} from "../../../services/scheduleService.js";
+import {
+  fetchActiveStore,
+  fetchStoredata,
+} from "../../../services/owner/MyPageService.js";
 // ✅ 알림 연동: /api/schedules/requests API 호출 시 백엔드에서 매장 내 직원들에게 자동으로 알림이 전송됩니다.
 // 별도의 알림 API 호출이 필요하지 않습니다.
 import "./CalAdd.css";
@@ -92,19 +99,19 @@ export default function CalAdd() {
   useEffect(() => {
     const api = calendarRef.current?.getApi();
     if (!api) return;
-  
+
     // 약간의 지연을 두어 DOM이 완전히 렌더링된 후 업데이트
     setTimeout(() => {
       api.render();
-  
+
       const dayCells = document.querySelectorAll(".fc-daygrid-day");
       dayCells.forEach((cell) => {
         const dateStr = cell.getAttribute("data-date");
         if (!dateStr) return;
-  
+
         // 기존 클래스 제거
         cell.classList.remove("range-start", "range-end", "range-between");
-  
+
         if (selectedDates.length === 1) {
           // 시작 날짜만 선택된 경우
           if (selectedDates[0] === dateStr) cell.classList.add("range-start");
@@ -114,12 +121,12 @@ export default function CalAdd() {
           const [start, end] = selectedDates;
           if (dateStr === start) cell.classList.add("range-start");
           else if (dateStr === end) cell.classList.add("range-end");
-          else if (dateStr > start && dateStr < end) cell.classList.add("range-between");
+          else if (dateStr > start && dateStr < end)
+            cell.classList.add("range-between");
         }
       });
     }, 0);
   }, [selectedDates, visibleMonth]);
-  
 
   // -------------------------
   // 시간 슬롯 (원본 유지)
@@ -196,7 +203,7 @@ export default function CalAdd() {
 
         // 시간 슬롯 검증
         const validSlots = timeSlots.filter(
-          (slot) => slot.start && slot.end && slot.count > 0
+          (slot) => slot.start && slot.end && slot.count > 0,
         );
         if (validSlots.length === 0) {
           alert("최소 하나의 시간 구간을 설정해주세요.");
@@ -223,7 +230,7 @@ export default function CalAdd() {
           openTime,
           closeTime,
           timeSegments,
-          { candidateCount: 5 }
+          { candidateCount: 5 },
         );
 
         if (result && result.candidateScheduleKey) {
@@ -269,7 +276,12 @@ export default function CalAdd() {
     }
 
     try {
-      const result = await confirmSchedule(candidateKey, index, startDate, endDate);
+      const result = await confirmSchedule(
+        candidateKey,
+        index,
+        startDate,
+        endDate,
+      );
       if (result && result.status === "success") {
         alert("근무표가 확정되었습니다.");
         navigate(-1);
@@ -281,7 +293,7 @@ export default function CalAdd() {
   };
 
   const formattedTitle = `${visibleMonth.year}.${String(
-    visibleMonth.month
+    visibleMonth.month,
   ).padStart(2, "0")}`;
 
   return (
@@ -319,7 +331,7 @@ export default function CalAdd() {
             </svg>
           </button>
         </div>
-      
+
         {/* ---------- 달력 ---------- */}
         <div className="calendar-wrapper">
           <FullCalendar
@@ -338,10 +350,10 @@ export default function CalAdd() {
           />
         </div>
       </div>
-      
+
       {/* 구분선 */}
       <div className="divider-line"></div>
-      
+
       <div className="flex-1 overflow-auto p-4 space-y-4 schedule-unit-container">
         {/* ---------- 시간 슬롯 ---------- */}
         <div className="space-y-2">
@@ -358,7 +370,10 @@ export default function CalAdd() {
           {unitSpecified && (
             <div className="space-y-2 time-slots-container">
               {timeSlots.map((slot, idx) => (
-                <div key={idx} className="flex items-center justify-center space-x-2 time-slot-row">
+                <div
+                  key={idx}
+                  className="flex items-center justify-center space-x-2 time-slot-row"
+                >
                   <div
                     className="flex items-center justify-center rounded-full bg-gray-200"
                     style={{
@@ -389,14 +404,13 @@ export default function CalAdd() {
                   />
 
                   <div className="flex items-center space-x-1">
-                    
                     <button
                       className="personnel-btn personnel-btn-minus"
                       onClick={() =>
                         handleTimeChange(
                           idx,
                           "count",
-                          Math.max(slot.count - 1, 0)
+                          Math.max(slot.count - 1, 0),
                         )
                       }
                     >
@@ -423,10 +437,7 @@ export default function CalAdd() {
                 </div>
               ))}
 
-              <button
-                onClick={handleAddTime}
-                className="add-time-btn"
-              >
+              <button onClick={handleAddTime} className="add-time-btn">
                 + 타임 추가
               </button>
             </div>
@@ -438,7 +449,9 @@ export default function CalAdd() {
               checked={!unitSpecified}
               onChange={() => setUnitSpecified(false)}
             />
-            <span style={{ fontSize: "18px", fontWeight: "600" }}>지정하지 않음</span>
+            <span style={{ fontSize: "18px", fontWeight: "600" }}>
+              지정하지 않음
+            </span>
           </label>
           {!unitSpecified && (
             <div className="mt-2 space-y-1">
@@ -455,11 +468,10 @@ export default function CalAdd() {
               </div>
             </div>
           )}
-
         </div>
       </div>
 
-      <BottomBar 
+      <BottomBar
         singleButton
         singleButtonText="근무표 생성 요청하기"
         onSingleClick={async () => {
@@ -469,50 +481,73 @@ export default function CalAdd() {
             // 1. 매장 ID 가져오기 (활성 매장 정보에서)
             // ⚠️ storeId 필수: 백엔드에서 알림 생성 시 storeId가 필요함
             let currentStoreId = storeId; // 먼저 상태에서 가져오기
-            console.log("🔍 CalAdd - 초기 storeId 상태:", { storeId, currentStoreId });
-            
+            console.log("🔍 CalAdd - 초기 storeId 상태:", {
+              storeId,
+              currentStoreId,
+            });
+
             // 상태에 storeId가 없으면 활성 매장 정보에서 가져오기
             if (!currentStoreId) {
               try {
                 const activeStore = await fetchActiveStore();
-                console.log("🏪 CalAdd - 버튼 클릭 시 활성 매장 정보:", activeStore);
-                console.log("🏪 CalAdd - activeStore 전체 구조:", JSON.stringify(activeStore, null, 2));
-                
+                console.log(
+                  "🏪 CalAdd - 버튼 클릭 시 활성 매장 정보:",
+                  activeStore,
+                );
+                console.log(
+                  "🏪 CalAdd - activeStore 전체 구조:",
+                  JSON.stringify(activeStore, null, 2),
+                );
+
                 // storeId 또는 id 필드 확인
                 const id = activeStore?.storeId || activeStore?.id;
                 console.log("🔍 CalAdd - activeStore에서 추출한 id:", id);
-                
+
                 if (id) {
                   currentStoreId = id;
                   setStoreId(id); // 상태에도 저장
                   console.log("✅ CalAdd - 버튼 클릭 시 storeId 설정:", id);
                 } else {
-                  console.warn("⚠️ CalAdd - activeStore에 storeId/id 없음, fetchStoredata 시도");
+                  console.warn(
+                    "⚠️ CalAdd - activeStore에 storeId/id 없음, fetchStoredata 시도",
+                  );
                   // activeStore에 없으면 fetchStoredata에서 가져오기 (AddOwner.jsx와 동일한 로직)
                   try {
                     const storedata = await fetchStoredata();
                     console.log("🏪 CalAdd - fetchStoredata 응답:", storedata);
-                    console.log("🏪 CalAdd - storedata 전체 구조:", JSON.stringify(storedata, null, 2));
-                    
+                    console.log(
+                      "🏪 CalAdd - storedata 전체 구조:",
+                      JSON.stringify(storedata, null, 2),
+                    );
+
                     const storeIdFromData = storedata?.storeId || storedata?.id;
                     if (storeIdFromData) {
                       currentStoreId = storeIdFromData;
                       setStoreId(storeIdFromData);
-                      console.log("✅ CalAdd - fetchStoredata에서 storeId 설정:", storeIdFromData);
+                      console.log(
+                        "✅ CalAdd - fetchStoredata에서 storeId 설정:",
+                        storeIdFromData,
+                      );
                     } else {
-                      console.error("❌ CalAdd - fetchStoredata에도 storeId 없음:", storedata);
+                      console.error(
+                        "❌ CalAdd - fetchStoredata에도 storeId 없음:",
+                        storedata,
+                      );
                     }
                   } catch (storeError) {
-                    console.error("❌ CalAdd - fetchStoredata 실패:", storeError);
+                    console.error(
+                      "❌ CalAdd - fetchStoredata 실패:",
+                      storeError,
+                    );
                   }
                 }
               } catch (error) {
                 console.error("❌ CalAdd - 활성 매장 정보 로드 실패:", error);
               }
             }
-            
+
             console.log("🔍 CalAdd - 최종 currentStoreId:", currentStoreId);
-            
+
             if (!currentStoreId) {
               alert("매장 정보를 불러올 수 없습니다. 다시 시도해주세요.");
               setIsLoading(false);
@@ -533,7 +568,7 @@ export default function CalAdd() {
 
             if (unitSpecified) {
               const validSlots = timeSlots.filter(
-                (slot) => slot.start && slot.end && slot.count > 0
+                (slot) => slot.start && slot.end && slot.count > 0,
               );
               if (validSlots.length === 0) {
                 alert("최소 하나의 시간 구간을 설정해주세요.");
@@ -547,10 +582,16 @@ export default function CalAdd() {
                 requiredStaff: slot.count,
               }));
 
-              const allTimes = timeSegments.flatMap((seg) => [seg.startTime, seg.endTime]);
+              const allTimes = timeSegments.flatMap((seg) => [
+                seg.startTime,
+                seg.endTime,
+              ]);
               const sortedTimes = allTimes.sort();
               openTime = sortedTimes.length > 0 ? sortedTimes[0] : "09:00:00";
-              closeTime = sortedTimes.length > 0 ? sortedTimes[sortedTimes.length - 1] : "18:00:00";
+              closeTime =
+                sortedTimes.length > 0
+                  ? sortedTimes[sortedTimes.length - 1]
+                  : "18:00:00";
             }
 
             // 4. /api/schedules/requests API 호출 (요청보내기 & 셋팅저장)
@@ -565,7 +606,11 @@ export default function CalAdd() {
             });
 
             // ⚠️ storeId 필수 검증 - 없으면 즉시 종료
-            if (!currentStoreId || currentStoreId === null || currentStoreId === undefined) {
+            if (
+              !currentStoreId ||
+              currentStoreId === null ||
+              currentStoreId === undefined
+            ) {
               console.error("❌ CalAdd - currentStoreId가 없습니다!", {
                 currentStoreId,
                 storeIdState: storeId,
@@ -579,10 +624,13 @@ export default function CalAdd() {
             // ⚠️ storeId를 숫자로 변환 (백엔드가 숫자 타입을 기대할 수 있음)
             const storeIdToSend = Number(currentStoreId);
             if (isNaN(storeIdToSend)) {
-              console.error("❌ CalAdd - currentStoreId가 유효한 숫자가 아닙니다!", {
-                currentStoreId,
-                storeIdToSend,
-              });
+              console.error(
+                "❌ CalAdd - currentStoreId가 유효한 숫자가 아닙니다!",
+                {
+                  currentStoreId,
+                  storeIdToSend,
+                },
+              );
               alert("매장 정보가 올바르지 않습니다. 다시 시도해주세요.");
               setIsLoading(false);
               return;
@@ -599,8 +647,16 @@ export default function CalAdd() {
               storeId: storeIdToSend, // ⚠️ 필수: 알림 생성 시 필요 (숫자 타입)
               openTime,
               closeTime,
-              startDate: startDate || dayjs().locale("ko").startOf("week").format("YYYY-MM-DD"),
-              endDate: endDate || dayjs().locale("ko").startOf("week").add(6, "day").format("YYYY-MM-DD"),
+              startDate:
+                startDate ||
+                dayjs().locale("ko").startOf("week").format("YYYY-MM-DD"),
+              endDate:
+                endDate ||
+                dayjs()
+                  .locale("ko")
+                  .startOf("week")
+                  .add(6, "day")
+                  .format("YYYY-MM-DD"),
             };
 
             // ⚠️ requestData 생성 직후 storeId 확인
@@ -613,9 +669,9 @@ export default function CalAdd() {
 
             // timeSegments 변환 (startTime, endTime을 "HH:mm:ss" 형식으로)
             if (unitSpecified && timeSegments && timeSegments.length > 0) {
-              requestData.timeSegments = timeSegments.map(seg => ({
+              requestData.timeSegments = timeSegments.map((seg) => ({
                 startTime: seg.startTime, // 이미 "HH:mm:ss" 형식
-                endTime: seg.endTime,     // 이미 "HH:mm:ss" 형식
+                endTime: seg.endTime, // 이미 "HH:mm:ss" 형식
                 requiredStaff: seg.requiredStaff,
               }));
             }
@@ -634,11 +690,18 @@ export default function CalAdd() {
               storeIdToSend,
               requestDataKeys: Object.keys(requestData),
             });
-            console.log("📤 CalAdd - 전체 요청 데이터 (JSON):", JSON.stringify(requestData, null, 2));
+            console.log(
+              "📤 CalAdd - 전체 요청 데이터 (JSON):",
+              JSON.stringify(requestData, null, 2),
+            );
             console.log("📤 CalAdd - 전체 요청 데이터 (객체):", requestData);
 
             // ⚠️ 최종 검증: storeId가 없으면 에러
-            if (!requestData.storeId || requestData.storeId === undefined || requestData.storeId === null) {
+            if (
+              !requestData.storeId ||
+              requestData.storeId === undefined ||
+              requestData.storeId === null
+            ) {
               console.error("❌ CalAdd - requestData에 storeId가 없습니다!", {
                 requestData,
                 requestDataStoreId: requestData.storeId,
@@ -653,13 +716,16 @@ export default function CalAdd() {
               return;
             }
 
-            console.log("🚀 CalAdd - createScheduleRequest 호출 전 최종 확인:", {
-              requestDataStoreId: requestData.storeId,
-              storeIdToSend,
-              currentStoreId,
-              requestDataFull: requestData,
-              requestDataStringified: JSON.stringify(requestData),
-            });
+            console.log(
+              "🚀 CalAdd - createScheduleRequest 호출 전 최종 확인:",
+              {
+                requestDataStoreId: requestData.storeId,
+                storeIdToSend,
+                currentStoreId,
+                requestDataFull: requestData,
+                requestDataStringified: JSON.stringify(requestData),
+              },
+            );
 
             // ⚠️ 최종 안전장치: requestData를 새로 만들어서 storeId 확실히 포함
             const finalRequestData = {
@@ -673,7 +739,10 @@ export default function CalAdd() {
               finalRequestData.timeSegments = requestData.timeSegments;
             }
 
-            console.log("🚀 CalAdd - finalRequestData (최종 전송 데이터):", JSON.stringify(finalRequestData, null, 2));
+            console.log(
+              "🚀 CalAdd - finalRequestData (최종 전송 데이터):",
+              JSON.stringify(finalRequestData, null, 2),
+            );
 
             const result = await createScheduleRequest(finalRequestData);
 
@@ -687,7 +756,7 @@ export default function CalAdd() {
               // ⚠️ 알림: 백엔드에서 /api/schedules/requests 호출 시 매장 내 직원들에게 자동으로 알림이 전송됩니다.
               localStorage.setItem("hasScheduleRequest", "true");
               localStorage.removeItem("scheduleGenerationCompleted"); // 이전 플래그 제거
-              
+
               // settingId와 설정 정보를 localStorage에 저장 (새로고침 대비)
               const scheduleConfigData = {
                 settingId: settingId,
@@ -695,13 +764,26 @@ export default function CalAdd() {
                 openTime,
                 closeTime,
                 minWorkTime: !unitSpecified ? minWorkTime : null,
-                startDate: startDate || dayjs().locale("ko").startOf("week").format("YYYY-MM-DD"),
-                endDate: endDate || dayjs().locale("ko").startOf("week").add(6, "day").format("YYYY-MM-DD"),
+                startDate:
+                  startDate ||
+                  dayjs().locale("ko").startOf("week").format("YYYY-MM-DD"),
+                endDate:
+                  endDate ||
+                  dayjs()
+                    .locale("ko")
+                    .startOf("week")
+                    .add(6, "day")
+                    .format("YYYY-MM-DD"),
               };
-              localStorage.setItem("scheduleConfig", JSON.stringify(scheduleConfigData));
-              
-              console.log("📝 CalAdd → ScheduleList 이동: hasScheduleRequest 설정, scheduleConfig 저장");
-              
+              localStorage.setItem(
+                "scheduleConfig",
+                JSON.stringify(scheduleConfigData),
+              );
+
+              console.log(
+                "📝 CalAdd → ScheduleList 이동: hasScheduleRequest 설정, scheduleConfig 저장",
+              );
+
               // 5. ScheduleList로 이동하면서 설정 ID 전달
               navigate("/scheduleList", {
                 state: scheduleConfigData,

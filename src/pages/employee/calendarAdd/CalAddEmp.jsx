@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
-import TopBar from "../../../components/layout/alarm/TopBar.jsx";
+import TopBar from "../../../components/common/alarm/TopBar.jsx";
 import EmployeeScheduleCalendar from "../../../components/common/calendar/EmployeeScheduleCalendar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import { addAvailability } from "../../../services/employee/ScheduleService.js";
@@ -69,7 +69,11 @@ function CalAddEmp() {
         }
 
         if (userId && storeId && userName) {
-          console.log("userId, storeId, userName 찾음:", { userId, storeId, userName });
+          console.log("userId, storeId, userName 찾음:", {
+            userId,
+            storeId,
+            userName,
+          });
           setEmployeeUserId(userId);
           setEmployeeStoreId(storeId);
           setEmployeeUserName(userName);
@@ -258,7 +262,7 @@ function CalAddEmp() {
         sortedSchedules.forEach((schedule) => {
           const scheduleStart = dayjs(schedule.start);
           const dateKey = scheduleStart.format("YYYY-MM-DD");
-          
+
           if (!schedulesByDate[dateKey]) {
             schedulesByDate[dateKey] = [];
           }
@@ -275,7 +279,7 @@ function CalAddEmp() {
         const daySchedules = schedulesByDate[dateKey];
         const firstSchedule = daySchedules[0];
         const dayOfWeek = getDayOfWeek(firstSchedule.start);
-        
+
         // 같은 날짜의 연속된 시간대를 하나로 합침
         let currentGroup = null;
         daySchedules.forEach((schedule) => {
@@ -303,7 +307,7 @@ function CalAddEmp() {
             }
           }
         });
-        
+
         // 마지막 그룹 추가
         if (currentGroup) {
           availabilities.push({
@@ -325,10 +329,13 @@ function CalAddEmp() {
 
       // work availability 추가 (한 번에 모든 availability 전송)
       const response = await addAvailability(payload);
-      
-      console.log("✅ 백엔드 저장 성공 응답:", JSON.stringify(response, null, 2));
+
+      console.log(
+        "✅ 백엔드 저장 성공 응답:",
+        JSON.stringify(response, null, 2),
+      );
       console.log("✅ 근무 가능 시간이 성공적으로 저장되었습니다.");
-      
+
       alert("근무 가능 시간이 추가되었습니다.");
       navigate(-1);
     } catch (error) {
