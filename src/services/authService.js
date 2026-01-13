@@ -171,7 +171,7 @@ export async function refreshToken() {
       throw new Error("Refresh token not found");
     }
 
-    const response = await axios.post(
+    const response = await api.post(
       "/api/auth/refresh-token",
       {},
       {
@@ -189,6 +189,9 @@ export async function refreshToken() {
     }
 
     localStorage.setItem("accessToken", response.data.accessToken);
+    if (response.data.refreshToken) {
+      localStorage.setItem("refreshToken", response.data.refreshToken);
+    }
 
     return response.data;
   } catch (error) {
@@ -201,13 +204,17 @@ export async function refreshToken() {
 //로그아웃
 export async function logout() {
   try {
-    const response = await axios.post("/api/auth/logout");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    return response.data;
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      await api.post("/api/auth/logout", {}, { _skipAuthRefresh: true });
+    }
   } catch (error) {
     console.log("로그아웃 실패: ", error);
+  } finally {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    if (!window.location.pathname.includes("/login")) {
+      window.location.href = "/login";
+    }
   }
 }
