@@ -9,16 +9,17 @@ import GreenBtn from "../../common/GreenBtn.jsx";
  * 3. 최종 승인 알림(미승인, 승인)
  */
 
-function AlarmItem({ alarmType, storename, time, children }) {
+function AlarmItem({ alarmType, storename, time, children, icon }) {
   return (
     <div className="flex flex-row px-5 my-2 items-center gap-4">
-      <div className="size-[45px] rounded-full shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] flex-shrink-0"></div>
+      <div className="size-[45px] rounded-full shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] flex-shrink-0 overflow-hidden">
+        {icon || <div className="w-full h-full bg-gray-200 rounded-full"></div>}
+      </div>
       <div className="flex-1 flex flex-col items-start gap-1">
         <p className="flex items-center bg-[#fdfffe] border-[#32d1aa] border-[1px] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] font-[400] text-[12px]/[16px] px-3 h-[24px]">
-          {storename}
+          {storename || "매장"}
         </p>
         <p className="text-[14px] font-[500] text-left">{children}</p>
-        <span className="text-[10px] font-[400] text-[#87888c]">{time}</span>
         <div className="w-full flex justify-end items-center gap-2">
           {alarmType === 2 ? (
             <>

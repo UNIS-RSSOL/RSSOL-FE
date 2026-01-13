@@ -120,6 +120,7 @@ export const onboardingStaff = async (
  * @param {string} address
  * @param {string} phoneNumber
  * @param {string} businessRegistrationNumber
+ * @param {string} hireDate
  * @returns {Promise<{
  *   userId: number;
  *   userStoreId: number;
@@ -141,6 +142,7 @@ export const onboardingOwner = async (
   address,
   phoneNumber,
   businessRegistrationNumber,
+  hireDate,
 ) => {
   try {
     const response = await api.post("/api/auth/onboarding", {
@@ -149,6 +151,7 @@ export const onboardingOwner = async (
       address,
       phoneNumber,
       businessRegistrationNumber,
+      hireDate,
     });
     return response.data;
   } catch (error) {
@@ -196,7 +199,8 @@ export async function refreshToken() {
     return response.data;
   } catch (error) {
     console.error("❌ 토큰 갱신 실패:", error.response?.data || error.message);
-    // 에러는 상위 호출자(api.js interceptor)에서 처리
+    // refreshToken이 없는 경우는 특별히 처리하지 않음 (상위에서 처리)
+    // refreshToken이 있는데 갱신 실패한 경우만 에러 throw
     throw error;
   }
 }
@@ -205,12 +209,24 @@ export async function refreshToken() {
 export async function logout() {
   try {
     const token = localStorage.getItem("accessToken");
-    if (token) {
-      await api.post("/api/auth/logout", {}, { _skipAuthRefresh: true });
+    const refreshToken = localStorage.getItem("refreshToken");
+    
+    // accessToken 또는 refreshToken이 있으면 서버에 로그아웃 요청
+    if (token || refreshToken) {
+      try {
+        await api.post("/api/auth/logout", {}, { _skipAuthRefresh: true });
+      } catch (error) {
+        // 로그아웃 API 실패해도 클라이언트에서는 로그아웃 처리 진행
+        // 403 에러는 이미 로그아웃된 상태일 수 있으므로 무시
+        if (error.response?.status !== 403) {
+          console.log("로그아웃 API 호출 실패: ", error);
+        }
+      }
     }
   } catch (error) {
-    console.log("로그아웃 실패: ", error);
+    console.log("로그아웃 처리 중 에러: ", error);
   } finally {
+    // 항상 localStorage 정리
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     if (!window.location.pathname.includes("/login")) {

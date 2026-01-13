@@ -74,6 +74,7 @@ export async function addStore(
   name,
   address,
   phoneNumber,
+  hireDate,
 ) {
   try {
     const response = await api.post("/api/mypage/owner/stores", {
@@ -81,6 +82,7 @@ export async function addStore(
       name: name,
       address: address,
       phoneNumber: phoneNumber,
+      hireDate: hireDate,
     });
     return response.data;
   } catch (error) {

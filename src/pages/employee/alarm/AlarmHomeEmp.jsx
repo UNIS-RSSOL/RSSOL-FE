@@ -9,6 +9,8 @@ import { formatTimeAgo } from "../../../utils/notificationUtils.js";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import defaultProfile from "../../../assets/images/EmpBtn.png";
+import ownerProfile from "../../../assets/images/OwnerBtn.png";
+import checkImage from "../../../assets/images/check.png";
 
 function AlarmHomeEmp() {
   const navigate = useNavigate();
@@ -102,17 +104,19 @@ function AlarmHomeEmp() {
 
   if (isLoading) {
     return (
-      <div className="w-full h-full bg-[#F8FBFE] overflow-y-auto">
+      <div className="w-full h-full bg-[#F8FBFE] flex flex-col">
         <TopBar title="알림" onBack={() => navigate("/employee")} />
-        <div className="px-4 mt-4 text-center">로딩 중...</div>
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-4 mt-4 text-center">로딩 중...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full bg-[#F8FBFE] overflow-y-auto">
+    <div className="w-full h-full bg-[#F8FBFE] flex flex-col">
       <TopBar title="알림" onBack={() => navigate("/employee")} />
-
+      <div className="flex-1 overflow-y-auto">
       {notifications.length === 0 ? (
         <div className="px-4 mt-4 text-center text-gray-400">알림이 없습니다.</div>
       ) : (
@@ -121,70 +125,97 @@ function AlarmHomeEmp() {
             <div className="px-4 mt-4 text-[15px] font-semibold">{dateKey}</div>
             <div className="mt-2">
               {dateNotifications.map((notification) => {
-                const profileImageUrl = notification.profileImageUrl || notification.profile_image_url || null;
-                const displayImage = profileImageUrl ? profileImageUrl : defaultProfile;
+                // 알림 타입 확인 (다양한 필드명 지원)
+                const notificationType = 
+                  notification.type || 
+                  notification.notificationType || 
+                  notification.notification_type ||
+                  notification.notificationTypeEnum ||
+                  notification.category;
+                
+                console.log("🔔 알림 타입:", notificationType, "전체 알림:", notification);
+                
+                // 1. 근무표 입력 요청 알림 (SCHEDULE_INPUT_REQUEST 등)
+                const isScheduleInputRequest = 
+                  notificationType === 'SCHEDULE_INPUT_REQUEST' ||
+                  notificationType === 'schedule_input_request' || 
+                  notificationType === 'SCHEDULE_REQUEST' ||
+                  notificationType === 'schedule_request' || 
+                  notificationType === 'SCHEDULE_REQUEST_NOTIFICATION' ||
+                  notificationType === 'ScheduleRequest';
+                
+                // 2. 대타 요청 알림 (SHIFT_SWAP, SHIFT_SWAP_REQUEST 등)
+                const isShiftSwap = 
+                  notificationType === 'SHIFT_SWAP' ||
+                  notificationType === 'shift_swap' ||
+                  notificationType === 'SHIFT_SWAP_REQUEST' ||
+                  notificationType === 'ShiftSwap';
+                
+                // 3. 인력 요청 알림 (EXTRA_SHIFT, STAFFING_REQUEST 등)
+                const isExtraShift = 
+                  notificationType === 'EXTRA_SHIFT' ||
+                  notificationType === 'extra_shift' ||
+                  notificationType === 'STAFFING_REQUEST' ||
+                  notificationType === 'STAFFING' ||
+                  notificationType === 'ExtraShift';
+                
+                // 최종 승인 알림 확인 (타입 또는 메시지 내용으로 판단)
+                const message = notification.message || notification.content || notification.text || notification.description || "";
+                const isFinalApproval = 
+                  notificationType === 'FINAL_APPROVAL' ||
+                  notificationType === 'final_approval' ||
+                  notificationType === 'APPROVAL' ||
+                  notificationType === 'approval' ||
+                  message.includes('최종 승인') ||
+                  message.includes('최종승인');
+                
+                // 프로필 이미지 결정: 알림 타입에 따라 다른 이미지 사용
+                let displayImage = defaultProfile; // 기본값: EmpBtn.png
+                if (isScheduleInputRequest) {
+                  displayImage = ownerProfile; // 근무표 생성 요청: OwnerBtn.png
+                } else if (isFinalApproval) {
+                  displayImage = checkImage; // 최종 승인: check.png
+                } else if (isExtraShift) {
+                  displayImage = ownerProfile; // 인력 요청: OwnerBtn.png
+                } else if (isShiftSwap) {
+                  displayImage = defaultProfile; // 대타 요청: EmpBtn.png
+                } else {
+                  // 프로필 이미지 URL이 있으면 사용, 없으면 기본값
+                  const profileImageUrl = notification.profileImageUrl ?? notification.profile_image_url ?? null;
+                  if (profileImageUrl && profileImageUrl !== "" && profileImageUrl.trim() !== "") {
+                    displayImage = profileImageUrl;
+                  }
+                }
                 
                 return (
                 <AlarmItem
                   key={notification.id || notification.notificationId || notification.notification_id}
                   icon={
-                    <div className="w-[40px] h-[40px] rounded-full overflow-hidden flex-shrink-0">
-                      <img 
-                        src={displayImage} 
-                        alt="profile" 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                    <img 
+                      src={displayImage} 
+                      alt="profile" 
+                      className="w-full h-full object-cover"
+                    />
                   }
-                  title={notification.storeName || notification.store_name || "매장"}
+                  storename={notification.storeName || notification.store_name || "매장"}
                   time={formatTimeAgo(notification.createdAt || notification.created_at || notification.createdDate)}
+                  alarmType={1}
                 >
                   {notification.message || notification.content || notification.text || notification.description}
+                  <span className="text-[12px] text-gray-400"> {formatTimeAgo(notification.createdAt || notification.created_at || notification.createdDate)}</span>
                   {/* 알림 타입별 액션 버튼 표시 */}
                   {(() => {
-                    // 알림 타입 확인 (다양한 필드명 지원)
-                    const notificationType = 
-                      notification.type || 
-                      notification.notificationType || 
-                      notification.notification_type ||
-                      notification.notificationTypeEnum ||
-                      notification.category;
-                    
-                    console.log("🔔 알림 타입:", notificationType, "전체 알림:", notification);
-                    
-                    // 1. 근무표 입력 요청 알림 (SCHEDULE_INPUT_REQUEST 등)
-                    const isScheduleInputRequest = 
-                      notificationType === 'SCHEDULE_INPUT_REQUEST' ||
-                      notificationType === 'schedule_input_request' || 
-                      notificationType === 'SCHEDULE_REQUEST' ||
-                      notificationType === 'schedule_request' || 
-                      notificationType === 'SCHEDULE_REQUEST_NOTIFICATION' ||
-                      notificationType === 'ScheduleRequest';
-                    
-                    // 2. 대타 요청 알림 (SHIFT_SWAP, SHIFT_SWAP_REQUEST 등)
-                    const isShiftSwap = 
-                      notificationType === 'SHIFT_SWAP' ||
-                      notificationType === 'shift_swap' ||
-                      notificationType === 'SHIFT_SWAP_REQUEST' ||
-                      notificationType === 'ShiftSwap';
-                    
-                    // 3. 인력 요청 알림 (EXTRA_SHIFT, STAFFING_REQUEST 등)
-                    const isExtraShift = 
-                      notificationType === 'EXTRA_SHIFT' ||
-                      notificationType === 'extra_shift' ||
-                      notificationType === 'STAFFING_REQUEST' ||
-                      notificationType === 'STAFFING' ||
-                      notificationType === 'ExtraShift';
-                    
                     // 근무표 입력 요청 알림: "추가하기" 버튼 하나만 표시
                     if (isScheduleInputRequest) {
                       return (
-                        <ActionButtonsGen
-                          label="추가하기"
-                          onClick={() => {
-                            navigate("/calModEmp");
-                          }}
-                        />
+                        <div className="flex justify-end mt-2">
+                          <ActionButtonsGen
+                            label="추가하기"
+                            onClick={() => {
+                              navigate("/calModEmp");
+                            }}
+                          />
+                        </div>
                       );
                     }
                     
@@ -203,6 +234,7 @@ function AlarmHomeEmp() {
           </div>
         ))
       )}
+      </div>
     </div>
   );
 }

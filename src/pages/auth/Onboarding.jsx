@@ -123,9 +123,9 @@ export default function Onboarding() {
 
     if (step === 2) {
       if (role === "owner") {
-        const { storeName, storeAddress, storePhone, businessNumber } =
+        const { storeName, storeAddress, storePhone, businessNumber, hireDate } =
           formData;
-        if (!storeName || !storeAddress || !storePhone || !businessNumber) {
+        if (!storeName || !storeAddress || !storePhone || !businessNumber || !hireDate) {
           alert("모든 정보를 입력해주세요.");
           return;
         }
@@ -139,6 +139,7 @@ export default function Onboarding() {
             storeAddress,
             storePhone,
             businessNumber,
+            hireDate,
           );
           // 성공 시 사장님 홈으로 이동
           navigate("/owner");
@@ -204,7 +205,7 @@ export default function Onboarding() {
       return role !== null;
     } else if (step === 2) {
       if (role === "owner") {
-        const { storeName, storeAddress, storePhone, businessNumber } =
+        const { storeName, storeAddress, storePhone, businessNumber, hireDate } =
           formData;
         return (
           storeName &&
@@ -212,7 +213,8 @@ export default function Onboarding() {
           storePhone &&
           storePhone.length >= 8 &&
           businessNumber &&
-          businessNumber.length === 10
+          businessNumber.length === 10 &&
+          hireDate
         );
       } else if (role === "employee") {
         const { storeCode, bankId, account, hireDate } = formData;
@@ -327,11 +329,18 @@ export default function Onboarding() {
                   name: "businessNumber",
                   placeholder: "사업자 등록 번호를 입력해주세요.",
                 },
+                {
+                  label: "입사날짜",
+                  name: "hireDate",
+                  placeholder: "입사날짜를 선택해주세요.",
+                  type: "date",
+                },
               ].map((item) => (
                 <div key={item.name} className="flex flex-col">
                   <p className="text-sm mb-1 text-left">{item.label}</p>
                   <input
                     name={item.name}
+                    type={item.type || "text"}
                     value={formData[item.name]}
                     onChange={handleChange}
                     placeholder={item.placeholder}

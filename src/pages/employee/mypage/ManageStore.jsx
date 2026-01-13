@@ -25,6 +25,7 @@ function ManageStore() {
     title: "매장 등록 코드",
     content: "",
   });
+  const [hireDate, setHireDate] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -73,18 +74,22 @@ function ManageStore() {
   //매장 추가
   const handleAddStore = async () => {
     try {
+      // 필수 필드 검증
+      if (!newStore.content || !hireDate) {
+        alert("매장 등록 코드와 입사날짜를 모두 입력해주세요.");
+        return;
+      }
       console.log(newStore);
-      await addStore(newStore.content);
+      await addStore(newStore.content, hireDate);
       setAddToast(false);
       setSuccessModal(true);
 
-      setNewStore([
-        {
-          icon: <SaveIcon />,
-          title: "매장 등록 코드",
-          content: "",
-        },
-      ]);
+      setNewStore({
+        icon: <SaveIcon />,
+        title: "매장 등록 코드",
+        content: "",
+      });
+      setHireDate("");
     } catch (error) {
       console.error(error);
       setFailModal(true);
@@ -153,6 +158,30 @@ function ManageStore() {
                         const newValue = e.target.value;
                         const updatedStore = { ...newStore, content: newValue };
                         setNewStore(updatedStore);
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="h-[12px] border-b border-[#87888c] ml-11 text-[10px] font-[400] text-[#f74a7a] text-left"></div>
+            </div>
+            <div>
+              <div className="flex flex-row w-full items-center gap-2">
+                <div className="flex flex-shrink-0 items-center justify-center size-[40px]">
+                  <SaveIcon />
+                </div>
+                <div className="flex flex-col w-full items-start gap-2">
+                  <p className="text-[14px] font-[600] text-[#87888c] text-left">
+                    입사날짜
+                  </p>
+                  <div className="flex flex-row items-center">
+                    <p className="text-[18px] font-[600] mr-2">-</p>
+                    <input
+                      type="date"
+                      className="text-black text-[18px] font-[600]"
+                      value={hireDate}
+                      onChange={(e) => {
+                        setHireDate(e.target.value);
                       }}
                     />
                   </div>

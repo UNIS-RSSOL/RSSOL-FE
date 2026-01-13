@@ -15,6 +15,7 @@ function AddItem({ data, index, onChange }) {
           <div className="flex flex-row items-center">
             <p className="text-[18px] font-[600] mr-2">-</p>
             <input
+              type={data.type || "text"}
               className="text-black text-[18px] font-[600]"
               value={data.content}
               onChange={(e) => {
