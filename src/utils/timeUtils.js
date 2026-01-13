@@ -1,7 +1,10 @@
+import dayjs from "dayjs";
+
 export const formatTimeAgo = (dateString) => {
-  const now = new Date();
-  const date = new Date(dateString);
-  const seconds = Math.floor((now - date) / 1000);
+  const now = dayjs();
+  const date = dayjs(dateString);
+  const seconds = now.diff(date, "second") - 9 * 3600;
+  console.log(seconds);
 
   const intervals = {
     년: 31536000,
@@ -15,6 +18,7 @@ export const formatTimeAgo = (dateString) => {
 
   for (const [unit, secondsInUnit] of Object.entries(intervals)) {
     const interval = Math.floor(seconds / secondsInUnit);
+    console.log("interval:", interval);
     if (interval >= 1) {
       return interval === 1 ? `1${unit} 전` : `${interval}${unit} 전`;
     }

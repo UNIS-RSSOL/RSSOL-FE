@@ -5,7 +5,7 @@ import NavBar from "../../../components/common/alarm/NavBar";
 import AlarmItem from "../../../components/common/alarm/AlarmItem";
 import { fetchAlarm } from "../../../services/common/AlarmService.js";
 import dayjs from "dayjs";
-import { formatTimeAgo } from "../../../utils/timeUtils";
+import { formatTimeAgo } from "../../../utils/timeUtils.js";
 
 function AlarmHome() {
   const today = dayjs().format("MM.DD(dd)");

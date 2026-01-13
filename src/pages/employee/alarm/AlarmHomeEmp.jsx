@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import TopBar from "../../../components/common/alarm/TopBar";
-import { formatTimeAgo } from "../../../utils/notificationUtils.js";
+import { formatTimeAgo } from "../../../utils/timeUtils.js";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { fetchAlarm } from "../../../services/common/AlarmService.js";
