@@ -164,10 +164,8 @@ export const onboardingOwner = async (
 export async function refreshToken() {
   try {
     const refreshToken = localStorage.getItem("refreshToken");
-    console.log("저장된 refreshToken:", refreshToken ? "있음" : "없음");
 
     if (!refreshToken) {
-      console.error("refreshToken이 localStorage에 없습니다.");
       throw new Error("Refresh token not found");
     }
 
@@ -184,7 +182,6 @@ export async function refreshToken() {
     );
 
     if (!response.data || !response.data.accessToken) {
-      console.error("❌ 유효하지 않은 토큰 응답 형식:", response.data);
       throw new Error("Invalid token response format");
     }
 
@@ -195,7 +192,6 @@ export async function refreshToken() {
 
     return response.data;
   } catch (error) {
-    console.error("❌ 토큰 갱신 실패:", error.response?.data || error.message);
     // refreshToken이 없는 경우는 특별히 처리하지 않음 (상위에서 처리)
     // refreshToken이 있는데 갱신 실패한 경우만 에러 throw
     throw error;

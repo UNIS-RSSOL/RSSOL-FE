@@ -9,6 +9,7 @@ function WeekCalendar({
   selectedEventProp,
   setSelectedEventProp,
   storeId,
+  refreshKey,
 }) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
   const [week, setWeek] = useState([]);
@@ -26,11 +27,23 @@ function WeekCalendar({
       );
       setWeek(weekArray);
 
+      console.log("📅 WeekCalendar - 스케줄 조회 시작:", {
+        startDate: startOfWeek.format("YYYY-MM-DD"),
+        endDate: startOfWeek.add(6, "day").format("YYYY-MM-DD"),
+        storeId,
+        refreshKey,
+      });
+
       const schedules = await fetchSchedules(
         startOfWeek.format("YYYY-MM-DD"),
         startOfWeek.add(6, "day").format("YYYY-MM-DD"),
         storeId,
       );
+
+      console.log("📅 WeekCalendar - 스케줄 조회 완료:", {
+        scheduleCount: schedules?.length || 0,
+        schedules,
+      });
 
       const uniqueWorkers = Array.from(
         new Map(
@@ -54,7 +67,7 @@ function WeekCalendar({
       setWorkers(uniqueWorkers);
       setEvents(formattedEvents);
     })();
-  }, [date, storeId]);
+  }, [date, storeId, refreshKey]);
 
   const getEventForCell = (userStoreId, day) => {
     return events.find((event) => {

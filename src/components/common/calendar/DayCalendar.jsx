@@ -8,6 +8,7 @@ function DayCalendar({
   selectedEventProp,
   setSelectedEventProp,
   storeId,
+  refreshKey,
 }) {
   const hours = Array.from({ length: 16 }, (_, i) => i + 8);
   const [blank, setBlank] = useState(Array.from({ length: 7 }, () => "."));
@@ -18,11 +19,22 @@ function DayCalendar({
   useEffect(() => {
     (async () => {
       try {
+        console.log("📅 DayCalendar - 스케줄 조회 시작:", {
+          date: date.format("YYYY-MM-DD"),
+          storeId,
+          refreshKey,
+        });
+
         const schedules = await fetchSchedules(
           date.format("YYYY-MM-DD"),
           date.format("YYYY-MM-DD"),
           storeId,
         );
+
+        console.log("📅 DayCalendar - 스케줄 조회 완료:", {
+          scheduleCount: schedules?.length || 0,
+          schedules,
+        });
 
         const uniqueWorkers = Array.from(
           new Map(
@@ -56,7 +68,7 @@ function DayCalendar({
         console.error("Error fetching schedules:", error);
       }
     })();
-  }, [date, storeId]);
+  }, [date, storeId, refreshKey]);
 
   const isFirstHour = (event, hour) => {
     if (!event) return false;

@@ -55,7 +55,62 @@ export default function AutoCal() {
       for (let i = 0; i < candidates.length; i++) {
         try {
           const data = await fetchCandidateSchedule(candidateKey, i);
-          schedules[i] = data || [];
+          
+          // 백엔드 응답 형식 변환
+          // 응답: [{ storeId: 1, shifts: [{ userStoreId, username, startTime, endTime, day }] }]
+          // 변환: [{ userStoreId, username, startDatetime, endDatetime }]
+          let convertedData = [];
+          
+          if (Array.isArray(data) && data.length > 0) {
+            // 첫 번째 store의 shifts 사용 (보통 하나의 store만 있음)
+            const storeData = data[0];
+            if (storeData && storeData.shifts && Array.isArray(storeData.shifts)) {
+              // 주의 시작일 계산 (일요일 기준)
+              const startOfWeek = dayjs(defaultStartDate).locale("ko").startOf("week");
+              const dayMap = { 
+                "SUN": 0, "MON": 1, "TUE": 2, "WED": 3, 
+                "THU": 4, "FRI": 5, "SAT": 6 
+              };
+              
+              convertedData = storeData.shifts.map((shift) => {
+                const dayIndex = dayMap[shift.day?.toUpperCase()] ?? 0;
+                const targetDate = startOfWeek.add(dayIndex, "day");
+                
+                // startTime, endTime을 파싱 (예: "09:00:00")
+                const [startHour, startMinute, startSecond = 0] = 
+                  (shift.startTime || "00:00:00").split(":").map(Number);
+                const [endHour, endMinute, endSecond = 0] = 
+                  (shift.endTime || "00:00:00").split(":").map(Number);
+                
+                // ISO string 형식으로 변환
+                const startDatetime = targetDate
+                  .hour(startHour || 0)
+                  .minute(startMinute || 0)
+                  .second(startSecond || 0)
+                  .toISOString();
+                
+                const endDatetime = targetDate
+                  .hour(endHour || 0)
+                  .minute(endMinute || 0)
+                  .second(endSecond || 0)
+                  .toISOString();
+                
+                return {
+                  id: Math.random(), // 고유 ID 생성
+                  userStoreId: shift.userStoreId,
+                  username: shift.username,
+                  startDatetime,
+                  endDatetime,
+                  // 원본 데이터도 보존 (필요시)
+                  startTime: shift.startTime,
+                  endTime: shift.endTime,
+                  day: shift.day,
+                };
+              });
+            }
+          }
+          
+          schedules[i] = convertedData;
         } catch (error) {
           console.error(`대안 ${i + 1} 스케줄 로드 실패:`, error);
           schedules[i] = [];
@@ -65,7 +120,7 @@ export default function AutoCal() {
     };
 
     loadCandidateSchedules();
-  }, [candidateKey, generatedCount]);
+  }, [candidateKey, generatedCount, defaultStartDate]);
 
   // 스케줄 데이터를 기반으로 미리보기 그리드 생성
   const generatePreviewGrid = (scheduleData) => {
@@ -78,9 +133,22 @@ export default function AutoCal() {
 
     // 각 스케줄을 그리드에 매핑
     scheduleData.forEach((schedule) => {
-      const startDate = dayjs(schedule.startDatetime);
-      const dayOfWeek = startDate.day(); // 0(일) ~ 6(토)
-      // 간단히 해당 요일에 스케줄이 있다고 표시
+      // startDatetime이 있으면 사용, 없으면 day로 변환
+      let dayOfWeek = 0;
+      
+      if (schedule.startDatetime) {
+        const startDate = dayjs(schedule.startDatetime);
+        dayOfWeek = startDate.day(); // 0(일) ~ 6(토)
+      } else if (schedule.day) {
+        // day 필드가 있으면 직접 변환 (MON, TUE 등)
+        const dayMap = { 
+          "SUN": 0, "MON": 1, "TUE": 2, "WED": 3, 
+          "THU": 4, "FRI": 5, "SAT": 6 
+        };
+        dayOfWeek = dayMap[schedule.day.toUpperCase()] ?? 0;
+      }
+      
+      // 해당 요일에 스케줄이 있다고 표시
       if (dayOfWeek < 7) {
         grid[dayOfWeek] = true;
         if (dayOfWeek + 7 < 14) {
@@ -111,6 +179,16 @@ export default function AutoCal() {
     try {
       setIsSubmitting(true);
 
+      // API 요청 데이터 확인
+      const requestData = {
+        candidateKey,
+        index: selectedIndex,
+        startDate: defaultStartDate,
+        endDate: defaultEndDate,
+      };
+
+      console.log("📤 근무표 확정 요청:", requestData);
+
       const result = await confirmSchedule(
         candidateKey,
         selectedIndex,
@@ -118,33 +196,64 @@ export default function AutoCal() {
         defaultEndDate,
       );
 
-      if (result && result.status === "success") {
+      console.log("✅ 근무표 확정 응답:", result);
+
+      // 응답이 성공인지 확인 (다양한 응답 형식 지원)
+      const isSuccess = result && (
+        result.status === "success" || 
+        result.status === 200 || 
+        result.message || 
+        result.scheduleId !== undefined
+      );
+
+      if (isSuccess) {
+        console.log("✅ 근무표 확정 성공 - 모달 표시");
         setIsModalOpen(true);
       } else {
+        console.error("❌ 근무표 확정 실패 - 응답 형식 확인 필요:", result);
         alert("근무표 확정에 실패했습니다. 다시 시도해주세요.");
       }
     } catch (error) {
-      console.error("근무표 확정 실패:", error);
+      console.error("근무표 확정 실패:", {
+        error: error.response?.data || error.message,
+        status: error.response?.status,
+        requestData: {
+          candidateKey,
+          index: selectedIndex,
+          startDate: defaultStartDate,
+          endDate: defaultEndDate,
+        },
+      });
       alert("근무표 확정에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleModalButton = (action) => {
+  const handleModalButton = async (action) => {
     setIsModalOpen(false);
+    
+    // 백엔드가 데이터를 저장하는 데 시간이 걸릴 수 있으므로 약간의 지연 추가
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     if (action === "view") {
-      navigate("/owner/calendar");
+      // 근무표 확정 후 캘린더로 이동 시 새로고침 플래그 전달
+      navigate("/owner/calendar", { 
+        state: { refresh: true, confirmedSchedule: true } 
+      });
     } else if (action === "edit") {
-      navigate("/owner/calendar");
+      navigate("/owner/calendar", { 
+        state: { refresh: true, confirmedSchedule: true } 
+      });
     }
   };
 
   return (
-    <div className="w-full h-screen flex flex-col bg-[#F8FBFE]">
+    <div className="w-full h-full bg-[#F8FBFE] flex flex-col">
       <TopBar title="근무표 대안 선택" onBack={() => navigate(-1)} />
 
-      <div className="flex-1 flex flex-col px-4 py-4 gap-4 overflow-y-scroll scrollbar-hide">
+      {/* 상단바를 고정하고, 나머지 영역만 스크롤 되도록 처리 */}
+      <div className="flex-1 flex flex-col px-4 py-4 gap-4 overflow-y-auto scrollbar-hide">
         {/* 제목과 소제목 */}
         <div className="flex flex-col gap-1">
           <div className="text-[16px] font-semibold">자동 스케줄 생성</div>

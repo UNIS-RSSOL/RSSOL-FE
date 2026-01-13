@@ -134,15 +134,38 @@ export const generateScheduleWithSetting = async (settingId, generationOptions =
  */
 export const confirmSchedule = async (candidateKey, index, startDate, endDate) => {
   try {
-    const response = await api.post("/api/schedules/confirm", {
+    const requestBody = {
       candidateKey,
       index,
       startDate,
       endDate,
+    };
+
+    console.log("📤 근무표 확정 API 요청:", {
+      url: "/api/schedules/confirm",
+      method: "POST",
+      body: requestBody,
     });
+
+    const response = await api.post("/api/schedules/confirm", requestBody);
+    
+    console.log("✅ 근무표 확정 API 응답:", {
+      status: response.status,
+      data: response.data,
+    });
+
     return response.data;
   } catch (error) {
-    console.error("근무표 확정 실패:", error.response?.data || error.message);
+    console.error("근무표 확정 실패:", {
+      error: error.response?.data || error.message,
+      status: error.response?.status,
+      requestBody: {
+        candidateKey,
+        index,
+        startDate,
+        endDate,
+      },
+    });
     throw error;
   }
 };
@@ -189,21 +212,46 @@ export const generateSchedule = async (
 
 /**
  * 후보 스케줄 조회
- * Swagger 문서: GET /api/schedules/candidates/{key}
- * 실제 API 형식에 맞게 수정 필요
+ * API: GET /api/schedules/candidates?key={candidateKey}&index={index}
+ * 
+ * 백엔드에 전달할 형식:
+ * - key: query parameter로 전달 (Redis key 그대로 사용)
+ * - index: query parameter로 전달 (선택적)
+ * 
  * @param {string} candidateKey - 후보 스케줄 키 (예: "candidate_schedule:store:1:week:2026-W03-2")
- * @param {number} index - 후보 스케줄 인덱스 (0부터 시작)
+ * @param {number} index - 후보 스케줄 인덱스 (0부터 시작, 선택적)
  * @returns {Promise<Array<{id: number, userStoreId: number, userName: string, startDatetime: string, endDatetime: string}>>}
  */
 export const fetchCandidateSchedule = async (candidateKey, index) => {
   try {
-    // Swagger 문서에 따르면 /api/schedules/candidates/{key} 형식
-    // key에 인덱스를 포함시킨 형식으로 시도: "candidate_schedule:store:1:week:2026-W03-2:0"
-    const keyWithIndex = `${candidateKey}:${index}`;
-    const response = await api.get(`/api/schedules/candidates/${keyWithIndex}`);
+    // query parameter 방식으로 전달
+    // 콜론(:)이 포함된 Redis key를 안전하게 전달 가능
+    const params = {
+      key: candidateKey,
+    };
+    
+    // index가 제공된 경우에만 추가
+    if (index !== undefined && index !== null) {
+      params.index = index;
+    }
+    
+    console.log("📤 후보 스케줄 조회 요청:", {
+      candidateKey,
+      index,
+      params,
+    });
+    
+    const response = await api.get("/api/schedules/candidates", { params });
+    
     return response.data;
   } catch (error) {
-    console.error("후보 스케줄 조회 실패:", error.response?.data || error.message);
+    console.error("후보 스케줄 조회 실패:", {
+      candidateKey,
+      index,
+      error: error.response?.data || error.message,
+      status: error.response?.status,
+      url: error.config?.url,
+    });
     throw error;
   }
 };
