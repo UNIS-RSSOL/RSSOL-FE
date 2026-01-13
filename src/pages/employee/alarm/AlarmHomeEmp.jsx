@@ -42,7 +42,8 @@ function AlarmHomeEmp() {
           const isOwner =
             alarm.type.includes("SHIFT_SWAP_MANAGER") ||
             alarm.type.includes("EXTRA_SHIFT_MANAGER") ||
-            alarm.type === "EXTRA_SHIFT_REQUEST_INVITE"
+            alarm.type === "EXTRA_SHIFT_REQUEST_INVITE" ||
+            alarm.type === "SCHEDULE_INPUT_REQUEST"
               ? true
               : false;
           return (
