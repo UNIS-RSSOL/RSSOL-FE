@@ -3,6 +3,8 @@ import api from "../api.js";
 //근무블록 추가
 export async function addWorkshift(userStoreId, start, end) {
   try {
+    console.log("accessToken", localStorage.getItem("accessToken"));
+    console.log("refreshToken", localStorage.getItem("refreshToken"));
     const response = await api.post("/api/schedules/workshifts", {
       userStoreId: userStoreId,
       startDatetime: start,
@@ -34,19 +36,19 @@ export async function requestSub(shiftId, reason = "") {
       shiftId,
       reason,
     });
-    
+
     const response = await api.post("/api/shift-swap/requests", {
       shiftId: shiftId,
       reason: reason,
     });
-    
+
     console.log("✅ 대타 요청 성공:", {
       status: response.status,
       data: response.data,
     });
-    
+
     console.log("🔔 대타 요청 완료 - 백엔드에서 알림이 생성됩니다.");
-    
+
     return response.data;
   } catch (error) {
     console.error("❌ 대타 요청 실패:", error);
@@ -68,20 +70,20 @@ export async function requestWork(shiftId, headCount, note = "") {
       headCount,
       note,
     });
-    
+
     const response = await api.post("/api/extra-shift/requests", {
       shiftId: shiftId,
       headcount: headCount,
       note: note,
     });
-    
+
     console.log("✅ 인력 요청 성공:", {
       status: response.status,
       data: response.data,
     });
-    
+
     console.log("🔔 인력 요청 완료 - 백엔드에서 알림이 생성됩니다.");
-    
+
     return response.data;
   } catch (error) {
     console.error("❌ 인력 요청 실패:", error);
@@ -163,12 +165,19 @@ export async function fetchStoreAvailabilities(storeId) {
 
     // 응답 데이터 정규화
     let availabilitiesData = response.data;
-    
+
     // 응답이 객체로 감싸져 있는 경우
-    if (availabilitiesData && typeof availabilitiesData === 'object' && !Array.isArray(availabilitiesData)) {
+    if (
+      availabilitiesData &&
+      typeof availabilitiesData === "object" &&
+      !Array.isArray(availabilitiesData)
+    ) {
       if (availabilitiesData.data && Array.isArray(availabilitiesData.data)) {
         availabilitiesData = availabilitiesData.data;
-      } else if (availabilitiesData.availabilities && Array.isArray(availabilitiesData.availabilities)) {
+      } else if (
+        availabilitiesData.availabilities &&
+        Array.isArray(availabilitiesData.availabilities)
+      ) {
         availabilitiesData = availabilitiesData.availabilities;
       }
     }
@@ -182,7 +191,9 @@ export async function fetchStoreAvailabilities(storeId) {
         const { userStoreId, ...rest } = item;
         return {
           username: item.username || item.userName, // API는 username, 하위 호환성을 위해 userName도 지원
-          availabilities: Array.isArray(item.availabilities) ? item.availabilities : [],
+          availabilities: Array.isArray(item.availabilities)
+            ? item.availabilities
+            : [],
         };
       });
 
@@ -197,11 +208,14 @@ export async function fetchStoreAvailabilities(storeId) {
     }
 
     // 예상치 못한 응답 형태
-    console.warn(`⚠️ [응답 형식 오류] 매장 ID:${storeId} - 응답 형식을 파싱할 수 없습니다:`, {
-      originalData: response.data,
-      normalizedData: availabilitiesData,
-      dataType: typeof availabilitiesData,
-    });
+    console.warn(
+      `⚠️ [응답 형식 오류] 매장 ID:${storeId} - 응답 형식을 파싱할 수 없습니다:`,
+      {
+        originalData: response.data,
+        normalizedData: availabilitiesData,
+        dataType: typeof availabilitiesData,
+      },
+    );
     return [];
   } catch (error) {
     const status = error.response?.status;
@@ -253,8 +267,10 @@ export async function fetchStoreAvailabilities(storeId) {
  * @returns {Promise<Array>} - 근무 가능 시간 배열
  */
 export async function fetchEmployeeAvailabilities(staffId) {
-  console.warn("⚠️ fetchEmployeeAvailabilities는 deprecated입니다. fetchStoreAvailabilities를 사용하세요.");
-  
+  console.warn(
+    "⚠️ fetchEmployeeAvailabilities는 deprecated입니다. fetchStoreAvailabilities를 사용하세요.",
+  );
+
   if (!staffId) {
     const error = new Error("staffId가 없습니다.");
     console.error("❌ fetchEmployeeAvailabilities:", error.message, {
@@ -266,13 +282,20 @@ export async function fetchEmployeeAvailabilities(staffId) {
   try {
     const endpoint = `/api/store/staff/${staffId}/availabilities`;
     const response = await api.get(endpoint);
-    
+
     let availabilities = response.data;
-    
-    if (availabilities && typeof availabilities === 'object' && !Array.isArray(availabilities)) {
+
+    if (
+      availabilities &&
+      typeof availabilities === "object" &&
+      !Array.isArray(availabilities)
+    ) {
       if (availabilities.data && Array.isArray(availabilities.data)) {
         availabilities = availabilities.data;
-      } else if (availabilities.availabilities && Array.isArray(availabilities.availabilities)) {
+      } else if (
+        availabilities.availabilities &&
+        Array.isArray(availabilities.availabilities)
+      ) {
         availabilities = availabilities.availabilities;
       }
     }
@@ -299,20 +322,20 @@ export async function fetchMyAvailabilities() {
   try {
     const endpoint = "/api/me/availabilities";
     const fullURL = `${api.defaults.baseURL}${endpoint}`;
-    
+
     console.log("🔍 [조회 API] 내 근무 가능 시간 조회 요청 (사장):", {
       endpoint,
       fullURL,
       method: "GET",
     });
-    
+
     // 캐시 방지를 위한 쿼리 파라미터만 사용 (CORS 정책 때문에 헤더는 사용하지 않음)
     const response = await api.get(endpoint, {
       params: {
         _t: Date.now(), // 타임스탬프를 추가하여 캐시 방지
       },
     });
-    
+
     console.log("✅ [조회 API] 내 근무 가능 시간 조회 성공 (사장):", {
       status: response.status,
       statusText: response.statusText,
@@ -320,27 +343,37 @@ export async function fetchMyAvailabilities() {
       responseType: typeof response.data,
       isArray: Array.isArray(response.data),
     });
-    
+
     // 응답이 배열이 아닌 경우 처리
     let availabilities = response.data;
     if (!Array.isArray(availabilities)) {
       // 만약 응답이 객체이고 내부에 배열이 있다면
-      if (availabilities && availabilities.availabilities && Array.isArray(availabilities.availabilities)) {
+      if (
+        availabilities &&
+        availabilities.availabilities &&
+        Array.isArray(availabilities.availabilities)
+      ) {
         availabilities = availabilities.availabilities;
-      } else if (availabilities && availabilities.data && Array.isArray(availabilities.data)) {
+      } else if (
+        availabilities &&
+        availabilities.data &&
+        Array.isArray(availabilities.data)
+      ) {
         availabilities = availabilities.data;
       } else {
         // 배열이 아니면 빈 배열로 처리
-        console.warn("⚠️ fetchMyAvailabilities: 응답이 배열이 아님, 빈 배열 반환");
+        console.warn(
+          "⚠️ fetchMyAvailabilities: 응답이 배열이 아님, 빈 배열 반환",
+        );
         availabilities = [];
       }
     }
-    
+
     console.log("✅ [조회 API] 최종 반환 데이터 (사장):", {
       count: availabilities.length,
       data: availabilities,
     });
-    
+
     return availabilities;
   } catch (error) {
     console.error("❌ [조회 API] 내 근무 가능 시간 조회 실패 (사장):", {
@@ -365,7 +398,7 @@ export async function updateAvailability(payload) {
   try {
     const endpoint = "/api/me/availabilities";
     const fullURL = `${api.defaults.baseURL}${endpoint}`;
-    
+
     console.log("📤 [수정 API] 근무 가능 시간 수정 요청 (사장):", {
       endpoint,
       fullURL,
@@ -373,7 +406,7 @@ export async function updateAvailability(payload) {
       payload: {
         ...payload,
         availabilitiesCount: payload.availabilities?.length || 0,
-        availabilities: payload.availabilities?.map(av => ({
+        availabilities: payload.availabilities?.map((av) => ({
           dayOfWeek: av.dayOfWeek,
           startTime: av.startTime,
           endTime: av.endTime,
@@ -383,16 +416,16 @@ export async function updateAvailability(payload) {
       userStoreIdType: typeof payload.userStoreId,
       userName: payload.userName,
     });
-    
+
     const response = await api.put(endpoint, payload);
-    
+
     console.log("✅ [수정 API] 근무 가능 시간 수정 성공 (사장):", {
       status: response.status,
       statusText: response.statusText,
       responseData: response.data,
       savedUserStoreId: payload.userStoreId,
     });
-    
+
     return response.data;
   } catch (error) {
     console.error("❌ [수정 API] 근무 가능 시간 수정 실패 (사장):", {
