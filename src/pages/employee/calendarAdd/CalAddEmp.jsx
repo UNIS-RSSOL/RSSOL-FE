@@ -248,8 +248,8 @@ function CalAddEmp() {
         return dayMap[day];
       };
 
-      // 날짜별로 그룹화한 후, 각 날짜 내에서 연속된 시간대만 하나로 합침
-      const schedulesByDate = {};
+      // 요일별로 그룹화하여 각 요일의 모든 시간대를 합침
+      const schedulesByDayOfWeek = {};
       if (schedulesToAdd.length > 0) {
         // 날짜와 시간으로 정렬
         const sortedSchedules = [...schedulesToAdd].sort((a, b) => {
@@ -258,29 +258,32 @@ function CalAddEmp() {
           return dateA - dateB;
         });
 
-        // 날짜별로 그룹화
+        // 요일별로 그룹화
         sortedSchedules.forEach((schedule) => {
           const scheduleStart = dayjs(schedule.start);
-          const dateKey = scheduleStart.format("YYYY-MM-DD");
+          const dayOfWeek = getDayOfWeek(scheduleStart);
 
-          if (!schedulesByDate[dateKey]) {
-            schedulesByDate[dateKey] = [];
+          if (!schedulesByDayOfWeek[dayOfWeek]) {
+            schedulesByDayOfWeek[dayOfWeek] = [];
           }
-          schedulesByDate[dateKey].push({
+          schedulesByDayOfWeek[dayOfWeek].push({
             start: scheduleStart,
             end: dayjs(schedule.end),
           });
         });
       }
 
-      // 각 날짜별로 연속된 시간대를 그룹화하여 availabilities 배열 생성
-      const availabilities = [];
-      Object.keys(schedulesByDate).forEach((dateKey) => {
-        const daySchedules = schedulesByDate[dateKey];
-        const firstSchedule = daySchedules[0];
-        const dayOfWeek = getDayOfWeek(firstSchedule.start);
+      console.log("🔍 요일별 그룹화 결과:", Object.keys(schedulesByDayOfWeek));
 
-        // 같은 날짜의 연속된 시간대를 하나로 합침
+      // 각 요일별로 모든 시간대를 합쳐서 하나의 availability 생성
+      const availabilities = [];
+      Object.keys(schedulesByDayOfWeek).forEach((dayOfWeek) => {
+        const daySchedules = schedulesByDayOfWeek[dayOfWeek];
+        
+        // 시간순으로 정렬
+        daySchedules.sort((a, b) => a.start.diff(b.start));
+
+        // 같은 요일의 모든 시간대를 하나로 합침
         let currentGroup = null;
         daySchedules.forEach((schedule) => {
           if (!currentGroup) {
@@ -289,8 +292,8 @@ function CalAddEmp() {
               end: schedule.end,
             };
           } else {
-            // 같은 날짜에서 연속된 시간대인지 확인 (끝 시간과 시작 시간이 같음)
-            if (currentGroup.end.isSame(schedule.start)) {
+            // 연속된 시간대인지 확인 (끝 시간과 시작 시간이 같거나 겹침)
+            if (currentGroup.end.isSame(schedule.start) || currentGroup.end.isBefore(schedule.start)) {
               // 연속된 시간대이므로 합침
               currentGroup.end = schedule.end;
             } else {
@@ -317,6 +320,8 @@ function CalAddEmp() {
           });
         }
       });
+
+      console.log("🔍 생성된 availabilities:", availabilities);
 
       // 백엔드 DTO 구조에 맞게 payload 생성 (단일 객체 안에 availabilities 배열)
       const payload = {

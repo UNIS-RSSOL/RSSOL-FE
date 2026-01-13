@@ -1,5 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import GreenBtn from "../../common/GreenBtn.jsx";
 import character from "../../../assets/images/EmpBtn.png";
 import {
@@ -27,6 +28,7 @@ function AlarmItem({
   status,
   approval,
 }) {
+  const navigate = useNavigate();
   const [isDisabled, setIsDisabled] = useState(false);
   const [isAccepted, setIsAccepted] = useState();
 
