@@ -50,6 +50,7 @@ function AlarmCheck() {
               id={alarm.shiftSwapRequestId || alarm.extraShiftRequestId}
               status={alarm.shiftSwapStatus || alarm.extraShiftStatus}
               approval={alarm.shiftSwapManagerApprovalStatus}
+              owner={false}
             >
               {alarm.message}
             </AlarmItem>
