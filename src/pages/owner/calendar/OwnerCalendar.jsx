@@ -326,7 +326,7 @@ function OwnerCalendar() {
           "T" +
           newTime.start.format("HH:mm"),
         end:
-          newTime.end.format("YYYY-MM-DD") + "T" + newTime.end.format("HH:mm"),
+          newTime.date.format("YYYY-MM-DD") + "T" + newTime.end.format("HH:mm"),
       };
       console.log(data);
       await addWorkshift(data.userStoreId, data.start, data.end);
