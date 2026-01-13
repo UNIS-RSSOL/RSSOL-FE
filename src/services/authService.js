@@ -163,7 +163,7 @@ export const onboardingOwner = async (
 //토큰 갱신
 export async function refreshToken() {
   try {
-    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    const refreshToken = localStorage.getItem("refreshToken");
 
     if (!refreshToken) {
       throw new Error("Refresh token not found");
@@ -185,9 +185,9 @@ export async function refreshToken() {
       throw new Error("Invalid token response format");
     }
 
-    localStorage.setItem(ACCESS_TOKEN_KEY, response.data.accessToken);
+    localStorage.setItem("accessToken", response.data.accessToken);
     if (response.data.refreshToken) {
-      localStorage.setItem(REFRESH_TOKEN_KEY, response.data.refreshToken);
+      localStorage.setItem("refreshToken", response.data.refreshToken);
     }
 
     return response.data;
@@ -210,8 +210,8 @@ export async function logout() {
   isLoggingOut = true;
 
   try {
-    const token = localStorage.getItem(ACCESS_TOKEN_KEY);
-    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    const token = localStorage.getItem("accessToken");
+    const refreshToken = localStorage.getItem("refreshToken");
 
     // accessToken 또는 refreshToken이 있으면 서버에 로그아웃 요청
     if (token || refreshToken) {
@@ -229,8 +229,8 @@ export async function logout() {
     console.log("로그아웃 처리 중 에러: ", error);
   } finally {
     // 항상 localStorage 정리
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     isLoggingOut = false;
 
     if (!window.location.pathname.includes("/login")) {
