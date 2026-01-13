@@ -2,7 +2,8 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import GreenBtn from "../../common/GreenBtn.jsx";
-import character from "../../../assets/images/EmpBtn.png";
+import empCharacter from "../../../assets/images/EmpBtn.png";
+import ownerCharacter from "../../../assets/images/OwnerBtn.png";
 import {
   acceptShiftSwap,
   approveShiftSwap,
@@ -27,10 +28,12 @@ function AlarmItem({
   id,
   status,
   approval,
+  owner,
 }) {
   const navigate = useNavigate();
   const [isDisabled, setIsDisabled] = useState(false);
   const [isAccepted, setIsAccepted] = useState();
+  const defaultImg = owner ? ownerCharacter : empCharacter;
 
   useEffect(() => {
     if (alarmType === 2 && (status === "ACCEPTED" || status === "REJECTED")) {
@@ -95,9 +98,9 @@ function AlarmItem({
   return (
     <div className="flex flex-row px-5 my-2 items-center gap-4">
       {!img || img === "" || img === null ? (
-        <img src={character} alt="profile" className="size-[47px]" />
+        <img src={defaultImg} alt="profile" className="size-[47px]" />
       ) : (
-        <div className="size-[45px] rounded-full shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] flex-shrink-0">
+        <div className="size-[45px] rounded-full shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] flex-shrink-0 overflow-hidden">
           <img src={img} alt="profile" className="w-full h-full object-cover" />
         </div>
       )}

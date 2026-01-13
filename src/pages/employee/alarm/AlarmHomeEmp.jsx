@@ -39,6 +39,12 @@ function AlarmHomeEmp() {
                 ? 2
                 : 1;
           const time = formatTimeAgo(alarm.createdAt);
+          const isOwner =
+            alarm.type.includes("SHIFT_SWAP_MANAGER") ||
+            alarm.type.includes("EXTRA_SHIFT_MANAGER") ||
+            alarm.type === "EXTRA_SHIFT_REQUEST_INVITE"
+              ? true
+              : false;
           return (
             <AlarmItem
               key={index}
@@ -54,6 +60,7 @@ function AlarmHomeEmp() {
                     : null
               }
               status={alarm.shiftSwapStatus || alarm.extraShiftStatus}
+              owner={isOwner}
             >
               {alarm.message}
             </AlarmItem>
