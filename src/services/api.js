@@ -39,7 +39,13 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // 1. 토큰 갱신 요청 자체가 실패한 경우 처리
+    // 1. 로그아웃 요청의 403 에러는 무시 (이미 로그아웃된 상태일 수 있음)
+    if (originalRequest?.url?.includes("/api/auth/logout")) {
+      // 로그아웃 요청의 403 에러는 정상적인 경우일 수 있으므로 무시
+      return Promise.reject(error);
+    }
+
+    // 2. 토큰 갱신 요청 자체가 실패한 경우 처리
     if (originalRequest?.url?.includes("/api/auth/refresh-token")) {
       // refreshToken 요청 실패 시에만 logout 호출
       // 단, refreshToken이 없는 경우는 이미 로그아웃 상태이므로 중복 호출 방지
@@ -56,7 +62,7 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // 2. 401/403 에러 발생 시
+    // 3. 401/403 에러 발생 시
     if (
       (error.response?.status === 401 || error.response?.status === 403) &&
       !originalRequest._retry
