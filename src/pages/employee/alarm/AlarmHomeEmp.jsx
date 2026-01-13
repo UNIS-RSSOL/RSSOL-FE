@@ -29,13 +29,15 @@ function AlarmHomeEmp() {
       <div className="px-4 mt-4 text-[15px] font-semibold text-left">
         {today}
       </div>
-      <div className="mt-2">
+      <div className="mt-2 flex flex-col gap-1">
         {alarms.map((alarm, index) => {
           const type =
-            alarm.type === "SHIFT_SWAP_REQUEST" ||
-            alarm.type === "EXTRA_SHIFT_REQUEST_INVITE"
-              ? 2
-              : 1;
+            alarm.type === "SCHEDULE_INPUT_REQUEST"
+              ? 4
+              : alarm.type === "SHIFT_SWAP_REQUEST" ||
+                  alarm.type === "EXTRA_SHIFT_REQUEST_INVITE"
+                ? 2
+                : 1;
           const time = formatTimeAgo(alarm.createdAt);
           return (
             <AlarmItem
