@@ -233,7 +233,7 @@ export async function logout() {
     localStorage.removeItem("refreshToken");
     isLoggingOut = false;
 
-    if (!window.location.pathname.includes("/login")) {
+    if (!window.location.pathname === "/login") {
       window.location.href = "/login";
     }
   }
