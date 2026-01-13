@@ -13,20 +13,6 @@ function AutoCalCalendar({ hasSelection, schedules }) {
   const days = ["일", "월", "화", "수", "목", "금", "토"];
   const colors = ["#68e194", "#32d1aa", "#00c1bd"];
 
-  // 더미 데이터: 기본 그리드용
-  const dummyWorkers = [
-    { id: 1, name: "지민" },
-    { id: 2, name: "채은" },
-    { id: 3, name: "수진" },
-  ];
-
-  // 더미 이벤트: 테스트용
-  const dummyEvents = [
-    { workerId: 1, worker: "지민", start: dayjs().day(1).hour(9).minute(0).toISOString(), end: dayjs().day(1).hour(13).minute(0).toISOString() },
-    { workerId: 2, worker: "채은", start: dayjs().day(3).hour(14).minute(0).toISOString(), end: dayjs().day(3).hour(18).minute(0).toISOString() },
-    { workerId: 3, worker: "수진", start: dayjs().day(5).hour(12).minute(0).toISOString(), end: dayjs().day(5).hour(16).minute(0).toISOString() },
-  ];
-
   // 실제 스케줄 데이터 처리
   const normalized = hasSelection && schedules ? (schedules || []).map((s) => ({
     id: s.id || Math.random(),
@@ -36,17 +22,19 @@ function AutoCalCalendar({ hasSelection, schedules }) {
     end: s.endDatetime || s.end || s.endTime,
   })) : [];
 
-  // 근무자 목록 (실제 데이터가 있으면 사용, 없으면 더미)
+  // 근무자 목록
+  // - 선택된 스케줄이 있으면 실제 데이터 사용
+  // - 선택 전(hasSelection === false)이거나 데이터가 없으면 빈 캘린더 상태
   const workers = normalized.length > 0
     ? Array.from(
         new Map(
           normalized.map((s) => [s.workerId, { id: s.workerId, name: s.worker }]),
         ).values(),
       )
-    : dummyWorkers;
+    : [];
 
-  // 이벤트 목록 (실제 데이터가 있으면 사용, 없으면 더미)
-  const events = normalized.length > 0 ? normalized : dummyEvents;
+  // 이벤트 목록
+  const events = normalized.length > 0 ? normalized : [];
 
   const getColorIndex = (startHour) => {
     const hours = Array.from({ length: 16 }, (_, i) => i + 8);
