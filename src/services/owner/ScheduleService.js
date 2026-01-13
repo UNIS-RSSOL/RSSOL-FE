@@ -306,7 +306,12 @@ export async function fetchMyAvailabilities() {
       method: "GET",
     });
     
-    const response = await api.get(endpoint);
+    // 캐시 방지를 위한 쿼리 파라미터만 사용 (CORS 정책 때문에 헤더는 사용하지 않음)
+    const response = await api.get(endpoint, {
+      params: {
+        _t: Date.now(), // 타임스탬프를 추가하여 캐시 방지
+      },
+    });
     
     console.log("✅ [조회 API] 내 근무 가능 시간 조회 성공 (사장):", {
       status: response.status,
