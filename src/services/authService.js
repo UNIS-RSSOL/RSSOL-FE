@@ -199,7 +199,16 @@ export async function refreshToken() {
 }
 
 //로그아웃
+let isLoggingOut = false; // 중복 호출 방지 플래그
+
 export async function logout() {
+  // 이미 로그아웃 중이면 중복 호출 방지
+  if (isLoggingOut) {
+    return;
+  }
+
+  isLoggingOut = true;
+
   try {
     const token = localStorage.getItem("accessToken");
     const refreshToken = localStorage.getItem("refreshToken");
@@ -210,7 +219,7 @@ export async function logout() {
         await api.post("/api/auth/logout", {}, { _skipAuthRefresh: true });
       } catch (error) {
         // 로그아웃 API 실패해도 클라이언트에서는 로그아웃 처리 진행
-        // 403 에러는 이미 로그아웃된 상태일 수 있으므로 무시
+        // 403 에러는 이미 로그아웃된 상태일 수 있으므로 무시 (콘솔에도 출력하지 않음)
         if (error.response?.status !== 403) {
           console.log("로그아웃 API 호출 실패: ", error);
         }
@@ -222,6 +231,8 @@ export async function logout() {
     // 항상 localStorage 정리
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    isLoggingOut = false;
+    
     if (!window.location.pathname.includes("/login")) {
       window.location.href = "/login";
     }
