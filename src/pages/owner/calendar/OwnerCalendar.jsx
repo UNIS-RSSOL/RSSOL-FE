@@ -13,6 +13,7 @@ import AddIcon from "../../../assets/icons/AddIcon.jsx";
 import DeleteIcon from "../../../assets/icons/DeleteIcon.jsx";
 import MessageModal from "../../../components/common/MessageModal.jsx";
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import {
@@ -38,15 +39,28 @@ const globalStyles = `
 `;
 
 function OwnerCalendar() {
+  const location = useLocation();
   const [selectedKey, setSelectedKey] = useState("1");
   const today = dayjs();
   const [currentDate, setCurrentDate] = useState(today);
+  const [refreshKey, setRefreshKey] = useState(0); // 강제 새로고침을 위한 key
   const [formattedCurrentDate, setFormattedCurrentDate] = useState(
     today.year() + "." + (today.month() + 1) + " " + today.date(),
   );
   const [formattedCurrentWeek, setFormattedCurrentWeek] = useState(
     `${today.format("YY")}.${today.format("MM")} ${Math.ceil(today.date() / 7)}주차`,
   );
+  
+  // 근무표 확정 후 캘린더로 이동 시 데이터 새로고침
+  useEffect(() => {
+    if (location.state?.refresh || location.state?.confirmedSchedule) {
+      console.log("🔄 근무표 확정 후 캘린더 새로고침");
+      // 강제로 컴포넌트 리렌더링을 위해 key 변경
+      setRefreshKey(prev => prev + 1);
+      // state 초기화 (다음 방문 시 중복 새로고침 방지)
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
   //근무일정추가모달
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMsgOpen, setIsMsgOpen] = useState(false);
@@ -241,11 +255,13 @@ function OwnerCalendar() {
           <DropDown />
         </div>
         <DayCalendar
+          key={`day-${refreshKey}-${currentDate.format("YYYY-MM-DD")}`}
           date={currentDate}
           onEventClick={handleEventClick}
           selectedEventProp={selectedCalendarEvent}
           setSelectedEventProp={setSelectedCalendarEvent}
           storeId={activeStoreId}
+          refreshKey={refreshKey}
         />
       </div>
     );
@@ -280,11 +296,13 @@ function OwnerCalendar() {
           <DropDown />
         </div>
         <WeekCalendar
+          key={`week-${refreshKey}-${currentDate.format("YYYY-MM-DD")}`}
           date={currentDate}
           onEventClick={handleEventClick}
           selectedEventProp={selectedCalendarEvent}
           setSelectedEventProp={setSelectedCalendarEvent}
           storeId={activeStoreId}
+          refreshKey={refreshKey}
         />
       </div>
     );

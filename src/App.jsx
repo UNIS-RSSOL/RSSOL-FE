@@ -39,8 +39,6 @@ function App() {
   const navigate = useNavigate();
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
 
-  console.log("📍 PATH:", location.pathname);
-
   /** -------------------------
    *  공통 Redirect Helper
    --------------------------*/
@@ -56,7 +54,6 @@ function App() {
         await api.get("/api/mypage/staff/profile");
         return navigate("/employee", { replace: true });
       } catch (err2) {
-        console.log("❌ 역할 판단 실패", err2);
         return goLogin();
       }
     }
@@ -73,7 +70,6 @@ function App() {
 
       // 🚫 refreshToken 없음 → 로그인 안한 상태
       if (!refreshToken) {
-        console.log("❌ refreshToken 없음 → 로그인 필요");
         if (location.pathname === "/" || location.pathname === "/login")
           goLogin();
         return;
@@ -90,7 +86,6 @@ function App() {
 
         // refreshToken 만료
         if (status === 401 || status === 403) {
-          console.log("❌ Refresh 토큰 만료");
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
           goLogin();
@@ -104,7 +99,6 @@ function App() {
 
       // accessToken 확인
       if (!localStorage.getItem("accessToken") && !hasValidToken) {
-        console.log("❌ accessToken 없음 → 온보딩");
         goOnboarding();
         return;
       }
@@ -128,7 +122,6 @@ function App() {
       }
 
       if (!activeStore?.storeId) {
-        console.log("❕ 활성 매장 없음 → 역할에 따라 홈으로 이동");
         // active-store 없는 사용자 = 알바도 포함. goOnboarding 금지
         if (location.pathname === "/" || location.pathname === "/login") {
           return goHomeByRole();

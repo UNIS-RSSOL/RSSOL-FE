@@ -147,21 +147,27 @@ export const refreshAccessToken = async () => {
     throw new Error("저장된 Refresh Token이 없습니다.");
   }
 
-  const response = await api.post(
-    TOKEN_REFRESH_PATH,
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${refreshToken}`,
+  try {
+    const response = await api.post(
+      TOKEN_REFRESH_PATH,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${refreshToken}`,
+        },
+        _skipAuthRefresh: true, // 무한 루프 방지
       },
-    },
-  );
+    );
 
-  const { accessToken } = response.data ?? {};
+    const { accessToken } = response.data ?? {};
 
-  if (accessToken) {
-    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    if (accessToken) {
+      localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    }
+
+    return accessToken;
+  } catch (error) {
+    // 에러는 상위에서 처리
+    throw error;
   }
-
-  return accessToken;
 };
