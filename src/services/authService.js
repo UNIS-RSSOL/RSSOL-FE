@@ -10,9 +10,6 @@ export const getDevToken = async (email) => {
   try {
     const response = await api.post("/api/auth/dev-token", { email });
 
-    // 디버깅: 응답 전체 구조 확인
-    console.log("Dev token 응답 전체:", response.data);
-
     // 다양한 응답 형식 지원
     let normalizedToken = null;
     let normalizedRefreshToken = null;

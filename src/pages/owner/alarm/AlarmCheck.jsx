@@ -1,34 +1,61 @@
 import { useNavigate } from "react-router-dom";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import TopBar from "../../../components/layout/alarm/TopBar";
 import NavBar from "../../../components/layout/alarm/NavBar";
 import AlarmItem from "../../../components/layout/alarm/AlarmItem";
-import ActionButtons from "../../../components/layout/alarm/ActionButtons";
-
+import { fetchAlarm } from "../../../services/common/AlarmService.js";
+import dayjs from "dayjs";
+import { formatTimeAgo } from "../../../utils/timeUtils";
 
 function AlarmCheck() {
-    const navigate = useNavigate();
+  const today = dayjs().format("MM.DD(dd)");
+  const navigate = useNavigate();
+  const [tab, setTab] = useState("all");
+  const [alarms, setAlarms] = useState([]);
 
-    return (
-        <div className="w-full h-full bg-[#F8FBFE] overflow-y-auto">
-            <TopBar
-                title="알림"
-                onBack={() => navigate("/owner")} />
-            <NavBar currentTab="final" setCurrentTab={() => {}} />
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await fetchAlarm();
+        const filteredAlarms = response.filter(
+          (alarm) => alarm.type === "SHIFT_SWAP_NOTIFY_MANAGER",
+        );
+        setAlarms(filteredAlarms);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+  }, []);
 
+  return (
+    <div className="w-full h-full bg-[#F8FBFE] overflow-y-auto">
+      <TopBar title="알림" onBack={() => navigate("/owner")} />
+      <NavBar currentTab={tab} setCurrentTab={setTab} />
 
-            <div className="px-4 mt-4 text-[15px] font-semibold">09.15(월)</div>
-
-
+      <div className="px-4 mt-4 text-[15px] font-semibold text-left">
+        {today}
+      </div>
+      <div className="mt-2">
+        {alarms.map((alarm, index) => {
+          const time = formatTimeAgo(alarm.createdAt);
+          return (
             <AlarmItem
-            icon={<div className="w-full h-full bg-gray-200 rounded-full"></div>}
-            title="맥도날드 신촌점"
-            time="4분 전"
+              key={index}
+              alarmType={3}
+              img={alarm.profileImageUrl}
+              storename={alarm.storeName}
+              time={time}
+              id={alarm.shiftSwapRequestId}
+              status={alarm.shiftSwapStatus || alarm.extraShiftStatus}
+              approval={alarm.shiftSwapManagerApprovalStatus}
             >
-            ‘김혜민’님이 신청한 대타를 ‘오시현’님이 수락했어요. 이 변경을 최종 승인하시겠어요?
-            <ActionButtons leftLabel="미승인" rightLabel="승인" />
+              {alarm.message}
             </AlarmItem>
-        </div>
-    );
+          );
+        })}
+      </div>
+    </div>
+  );
 }
+
 export default AlarmCheck;

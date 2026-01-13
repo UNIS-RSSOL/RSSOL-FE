@@ -1,8 +1,8 @@
-function GreenBtn({ children, className, onClick }) {
+function GreenBtn({ children, className, onClick, disabled }) {
   return (
     <div
-      className={`h-[30px] rounded-[10px] bg-[#68e194] flex justify-center items-center text-[14px] font-regular cursor-pointer ${className}`}
-      onClick={onClick}
+      className={`h-[30px] rounded-[10px]  flex justify-center items-center text-[14px] font-regular bg-[#68e194] ${disabled ? "opacity-50 cursor-not-allowed" : " cursor-pointer"} ${className}`}
+      onClick={disabled ? undefined : onClick}
     >
       {children}
     </div>
