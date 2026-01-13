@@ -14,6 +14,7 @@ import {
  * 1. 버튼 없는 일반 알림
  * 2. 거절, 수락 버튼 있는 알림
  * 3. 최종 승인 알림(미승인, 승인)
+ * 4. 근무표 입력(추가하기)
  */
 
 function AlarmItem({
@@ -108,7 +109,7 @@ function AlarmItem({
           {alarmType === 2 ? (
             <>
               <GreenBtn
-                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isAccepted ? "bg-[#EDF0F7] text-[#87888c]" : ""}`}
+                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isAccepted && isDisabled ? "bg-[#EDF0F7] text-[#87888c]" : ""}`}
                 disabled={isDisabled}
                 onClick={() => {
                   if (children.includes("대타")) {
@@ -121,7 +122,7 @@ function AlarmItem({
                 거절
               </GreenBtn>
               <GreenBtn
-                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isAccepted ? "" : "bg-[#EDF0F7] text-[#87888C]"}`}
+                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isAccepted && isDisabled ? "" : "bg-[#EDF0F7] text-[#87888C]"}`}
                 disabled={isDisabled}
                 onClick={() => {
                   if (children.includes("대타")) {
@@ -137,7 +138,7 @@ function AlarmItem({
           ) : alarmType === 3 ? (
             <>
               <GreenBtn
-                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isAccepted ? "bg-[#EDF0F7] text-[#87888C]" : ""}`}
+                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isAccepted && isDisabled ? "bg-[#EDF0F7] text-[#87888C]" : ""}`}
                 disabled={isDisabled}
                 onClick={() => {
                   if (children.includes("대타")) {
@@ -150,7 +151,7 @@ function AlarmItem({
                 미승인
               </GreenBtn>
               <GreenBtn
-                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isAccepted ? "" : "bg-[#EDF0F7] text-black"}`}
+                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isAccepted && isDisabled ? "" : "bg-[#EDF0F7] text-black"}`}
                 disabled={isDisabled}
                 onClick={() => {
                   if (children.includes("대타")) {

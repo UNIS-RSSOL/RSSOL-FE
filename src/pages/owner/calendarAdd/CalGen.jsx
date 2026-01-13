@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { useNavigate } from "react-router-dom";
 
-import TopBar from "../../../components/layout/alarm/TopBar.jsx";
+import TopBar from "../../../components/common/alarm/TopBar.jsx";
 import WeekCalendar from "../../../components/common/calendar/WeekCalendar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 

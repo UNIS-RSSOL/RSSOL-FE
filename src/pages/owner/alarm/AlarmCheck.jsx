@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import TopBar from "../../../components/layout/alarm/TopBar";
-import NavBar from "../../../components/layout/alarm/NavBar";
-import AlarmItem from "../../../components/layout/alarm/AlarmItem";
+import TopBar from "../../../components/common/alarm/TopBar";
+import NavBar from "../../../components/common/alarm/NavBar";
+import AlarmItem from "../../../components/common/alarm/AlarmItem";
 import { fetchAlarm } from "../../../services/common/AlarmService.js";
 import dayjs from "dayjs";
 import { formatTimeAgo } from "../../../utils/timeUtils";
@@ -18,7 +18,9 @@ function AlarmCheck() {
       try {
         const response = await fetchAlarm();
         const filteredAlarms = response.filter(
-          (alarm) => alarm.type === "SHIFT_SWAP_NOTIFY_MANAGER",
+          (alarm) =>
+            alarm.type === "SHIFT_SWAP_NOTIFY_MANAGER" ||
+            alarm.type === "EXTRA_SHIFT_NOTIFY_MANAGER",
         );
         setAlarms(filteredAlarms);
       } catch (error) {
@@ -45,7 +47,7 @@ function AlarmCheck() {
               img={alarm.profileImageUrl}
               storename={alarm.storeName}
               time={time}
-              id={alarm.shiftSwapRequestId}
+              id={alarm.shiftSwapRequestId || alarm.extraShiftRequestId}
               status={alarm.shiftSwapStatus || alarm.extraShiftStatus}
               approval={alarm.shiftSwapManagerApprovalStatus}
             >

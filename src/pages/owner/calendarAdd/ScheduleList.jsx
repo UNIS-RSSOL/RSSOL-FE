@@ -2,13 +2,19 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
-import TopBar from "../../../components/layout/alarm/TopBar.jsx";
+import TopBar from "../../../components/common/alarm/TopBar.jsx";
 import TimeSlotCalendar from "../../../components/common/calendar/TimeSlotCalendar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import Toast from "../../../components/common/Toast.jsx";
-import { fetchAllWorkers, fetchStoreAvailabilities } from "../../../services/owner/ScheduleService.js";
+import {
+  fetchAllWorkers,
+  fetchStoreAvailabilities,
+} from "../../../services/owner/ScheduleService.js";
 import { generateScheduleWithSetting } from "../../../services/scheduleService.js";
-import { fetchActiveStore, fetchMydata } from "../../../services/owner/MyPageService.js";
+import {
+  fetchActiveStore,
+  fetchMydata,
+} from "../../../services/owner/MyPageService.js";
 
 function ScheduleList() {
   const navigate = useNavigate();
@@ -21,7 +27,7 @@ function ScheduleList() {
   const [selectedHour, setSelectedHour] = useState(null);
   const [storeId, setStoreId] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  
+
   // CalAdd에서 전달받은 정보 (settingId, 시간 구간, 시작일, 종료일 등)
   // location.state가 없으면 localStorage에서 가져오기 (새로고침 대비)
   const [scheduleConfig, setScheduleConfig] = useState(() => {
@@ -62,7 +68,10 @@ function ScheduleList() {
         try {
           const parsedConfig = JSON.parse(savedConfig);
           if (parsedConfig.settingId) {
-            console.log("📝 ScheduleList: localStorage에서 scheduleConfig 로드:", parsedConfig.settingId);
+            console.log(
+              "📝 ScheduleList: localStorage에서 scheduleConfig 로드:",
+              parsedConfig.settingId,
+            );
             setScheduleConfig(parsedConfig);
           }
         } catch (e) {
@@ -96,14 +105,16 @@ function ScheduleList() {
       console.log("📝 ScheduleList 진입: hasScheduleRequest 설정");
       localStorage.setItem("hasScheduleRequest", "true");
     }
-    
+
     // 컴포넌트 언마운트 시 (다른 페이지로 이동할 때)
     return () => {
       // 생성하기를 누르지 않고 나간 경우를 감지
       const isCompleted = localStorage.getItem("scheduleGenerationCompleted");
       if (!isCompleted) {
         // 생성하기를 누르지 않고 나간 경우: hasScheduleRequest 유지
-        console.log("📝 ScheduleList 나감 (생성하기 미완료): hasScheduleRequest 유지");
+        console.log(
+          "📝 ScheduleList 나감 (생성하기 미완료): hasScheduleRequest 유지",
+        );
         localStorage.setItem("hasScheduleRequest", "true");
       } else {
         // 생성하기를 눌렀다면 이미 handleGenerateSchedule에서 처리됨
@@ -120,13 +131,13 @@ function ScheduleList() {
           console.log("⏳ storeId 대기 중...");
           return; // storeId가 없으면 로드하지 않음
         }
-        
+
         console.log("🔍 직원 리스트 및 스케줄 로드 시작:", { storeId });
-        
+
         // 직원 리스트 가져오기
         // /api/store/staff는 이미 활성 매장의 직원들만 반환
         const workersList = await fetchAllWorkers();
-        
+
         // 디버깅: 직원 리스트 구조 확인
         console.log("📋 [직원 리스트 원본]:", workersList);
         if (workersList && workersList.length > 0) {
@@ -141,7 +152,7 @@ function ScheduleList() {
             사용할ID: workersList[0].id || workersList[0].staffId,
           });
         }
-        
+
         // 현재 로그인한 사용자의 userStoreId 가져오기
         // fetchActiveStore에서 userStoreId를 가져오거나, fetchMydata에서 가져오기
         let currentUserStoreId = null;
@@ -159,14 +170,14 @@ function ScheduleList() {
             currentUserStoreId = mydata.id;
           }
         }
-        
+
         // 사장(현재 사용자) 제외하고 알바생만 필터링
-        const storeWorkers = (workersList || []).filter(worker => {
+        const storeWorkers = (workersList || []).filter((worker) => {
           // 현재 사용자의 userStoreId와 일치하면 사장이므로 제외
           const workerStoreId = worker.userStoreId;
           return workerStoreId && workerStoreId !== currentUserStoreId;
         });
-        
+
         console.log(`✅ 필터링된 직원 수: ${storeWorkers.length}명`);
         setWorkers(storeWorkers);
 
@@ -174,61 +185,80 @@ function ScheduleList() {
         // 새로운 API: GET /api/{storeId}/availabilities 사용
         const schedulesByWorker = {};
         const errorsByWorker = {};
-        
+
         try {
           // ✅ 새로운 API: 한 번의 호출로 모든 직원의 availabilities 가져오기
           // 제출안한 직원들은 빈배열 반환
           const storeAvailabilities = await fetchStoreAvailabilities(storeId);
-          
-          console.log("📋 [API 응답] storeAvailabilities:", storeAvailabilities);
-          
+
+          console.log(
+            "📋 [API 응답] storeAvailabilities:",
+            storeAvailabilities,
+          );
+
           // 응답 형태: 배열 [ { userName: string, availabilities: Array } ]
           // 각 직원별로 availabilities가 빈 배열일 수 있음
-          
+
           storeWorkers.forEach((worker) => {
             // 직원 이름 찾기 (여러 필드 시도)
-            const workerName = worker.username || worker.name || worker.userName || '이름없음';
-            
+            const workerName =
+              worker.username || worker.name || worker.userName || "이름없음";
+
             // 직원 ID 찾기 (여러 필드 시도) - workerKey 생성용
-            const staffId = worker.id || worker.staffId || worker.userStoreId || worker.userId;
+            const staffId =
+              worker.id ||
+              worker.staffId ||
+              worker.userStoreId ||
+              worker.userId;
             // 고유 식별자 생성 (ID가 없어도 처리 가능하도록)
-            const workerKey = staffId || worker.userStoreId || worker.userId || `worker_${workerName}`;
-            
+            const workerKey =
+              staffId ||
+              worker.userStoreId ||
+              worker.userId ||
+              `worker_${workerName}`;
+
             // userName 매칭을 위한 정규화 함수 (공백 제거, 대소문자 무시)
             const normalizeName = (name) => {
-              if (!name) return '';
+              if (!name) return "";
               return String(name).trim().toLowerCase();
             };
-            
+
             // username으로 매칭하여 해당 직원의 availabilities 가져오기 (API는 username 소문자 사용)
             // 정확한 매칭 시도 후, 정규화된 매칭 시도
-            let workerAvailability = storeAvailabilities.find(item => {
-              const apiUsername = item.username || item.userName || '';
+            let workerAvailability = storeAvailabilities.find((item) => {
+              const apiUsername = item.username || item.userName || "";
               const normalizedApiName = normalizeName(apiUsername);
               const normalizedWorkerName = normalizeName(workerName);
-              
-              return apiUsername === workerName || 
-                     normalizedApiName === normalizedWorkerName;
+
+              return (
+                apiUsername === workerName ||
+                normalizedApiName === normalizedWorkerName
+              );
             });
-            
+
             // 매칭 실패 시 로그 출력
             if (!workerAvailability) {
-              console.warn(`⚠️ 직원 ${workerName}의 availabilities를 찾을 수 없습니다.`, {
-                workerName,
-                availableUserNames: storeAvailabilities.map(item => item.username || item.userName),
-                workerData: {
-                  id: worker.id,
-                  staffId: worker.staffId,
-                  userStoreId: worker.userStoreId,
-                  username: worker.username,
-                  name: worker.name,
-                  userName: worker.userName,
-                }
-              });
+              console.warn(
+                `⚠️ 직원 ${workerName}의 availabilities를 찾을 수 없습니다.`,
+                {
+                  workerName,
+                  availableUserNames: storeAvailabilities.map(
+                    (item) => item.username || item.userName,
+                  ),
+                  workerData: {
+                    id: worker.id,
+                    staffId: worker.staffId,
+                    userStoreId: worker.userStoreId,
+                    username: worker.username,
+                    name: worker.name,
+                    userName: worker.userName,
+                  },
+                },
+              );
             }
-            
+
             const availabilities = workerAvailability?.availabilities || [];
-            
+
             // API 응답 형식: { dayOfWeek: "MON", startTime: "09:00", endTime: "18:00" }
             // 코드에서 사용하는 형식: { startDatetime, endDatetime }
             // dayOfWeek/startTime/endTime 형식을 startDatetime/endDatetime으로 변환
@@ -236,20 +266,40 @@ function ScheduleList() {
             if (Array.isArray(availabilities)) {
               // 현재 주의 시작일 (일요일) 기준으로 변환
               const startOfWeek = dayjs().locale("ko").startOf("week");
-              const dayMap = { "SUN": 0, "MON": 1, "TUE": 2, "WED": 3, "THU": 4, "FRI": 5, "SAT": 6 };
-              
+              const dayMap = {
+                SUN: 0,
+                MON: 1,
+                TUE: 2,
+                WED: 3,
+                THU: 4,
+                FRI: 5,
+                SAT: 6,
+              };
+
               availabilities.forEach((avail) => {
                 if (avail.dayOfWeek && avail.startTime && avail.endTime) {
                   // dayOfWeek/startTime/endTime 형식
                   const targetDayIndex = dayMap[avail.dayOfWeek.toUpperCase()];
                   if (targetDayIndex !== undefined) {
                     const targetDate = startOfWeek.add(targetDayIndex, "day");
-                    const [startHour, startMinute] = avail.startTime.split(":").map(Number);
-                    const [endHour, endMinute] = avail.endTime.split(":").map(Number);
-                    
+                    const [startHour, startMinute] = avail.startTime
+                      .split(":")
+                      .map(Number);
+                    const [endHour, endMinute] = avail.endTime
+                      .split(":")
+                      .map(Number);
+
                     convertedAvailabilities.push({
-                      startDatetime: targetDate.hour(startHour || 0).minute(startMinute || 0).second(0).toISOString(),
-                      endDatetime: targetDate.hour(endHour || 0).minute(endMinute || 0).second(0).toISOString(),
+                      startDatetime: targetDate
+                        .hour(startHour || 0)
+                        .minute(startMinute || 0)
+                        .second(0)
+                        .toISOString(),
+                      endDatetime: targetDate
+                        .hour(endHour || 0)
+                        .minute(endMinute || 0)
+                        .second(0)
+                        .toISOString(),
                     });
                   }
                 } else if (avail.startDatetime && avail.endDatetime) {
@@ -257,18 +307,25 @@ function ScheduleList() {
                   convertedAvailabilities.push(avail);
                 }
               });
-              
+
               schedulesByWorker[workerKey] = convertedAvailabilities;
               if (convertedAvailabilities.length > 0) {
-                console.log(`✅ 직원 ${workerName} (Key: ${workerKey}) 근무 가능 시간: ${convertedAvailabilities.length}개`);
+                console.log(
+                  `✅ 직원 ${workerName} (Key: ${workerKey}) 근무 가능 시간: ${convertedAvailabilities.length}개`,
+                );
               } else {
-                console.log(`ℹ️ 직원 ${workerName} (Key: ${workerKey}) 근무 가능 시간 없음 (빈 배열)`);
+                console.log(
+                  `ℹ️ 직원 ${workerName} (Key: ${workerKey}) 근무 가능 시간 없음 (빈 배열)`,
+                );
               }
             } else {
-              console.warn(`⚠️ 직원 ${workerName} (Key: ${workerKey})의 응답이 배열이 아닙니다:`, availabilities);
+              console.warn(
+                `⚠️ 직원 ${workerName} (Key: ${workerKey})의 응답이 배열이 아닙니다:`,
+                availabilities,
+              );
               schedulesByWorker[workerKey] = [];
             }
-            
+
             // ID가 없어도 스케줄은 저장되므로 에러로 표시하지 않음
             // (ID가 없어도 workerKey로 식별 가능)
           });
@@ -281,12 +338,12 @@ function ScheduleList() {
             errorData: error.response?.data || null,
             errorMessage: error.message,
           };
-          
+
           console.error(`❌ 매장 근무 가능 시간 조회 실패:`, errorInfo);
-          
+
           storeWorkers.forEach((worker) => {
             const staffId = worker.id || worker.staffId;
-            const workerName = worker.username || worker.name || '이름없음';
+            const workerName = worker.username || worker.name || "이름없음";
             schedulesByWorker[staffId] = [];
             errorsByWorker[staffId] = {
               staffId,
@@ -295,15 +352,19 @@ function ScheduleList() {
             };
           });
         }
-        
+
         const successCount = Object.keys(schedulesByWorker).filter(
-          (staffId) => !errorsByWorker[staffId] && schedulesByWorker[staffId]?.length > 0
+          (staffId) =>
+            !errorsByWorker[staffId] && schedulesByWorker[staffId]?.length > 0,
         ).length;
         const errorCount = Object.keys(errorsByWorker).length;
         const emptyCount = Object.keys(schedulesByWorker).filter(
-          (staffId) => !errorsByWorker[staffId] && (!schedulesByWorker[staffId] || schedulesByWorker[staffId].length === 0)
+          (staffId) =>
+            !errorsByWorker[staffId] &&
+            (!schedulesByWorker[staffId] ||
+              schedulesByWorker[staffId].length === 0),
         ).length;
-        
+
         console.log("📊 모든 직원의 스케줄 로드 완료:", {
           totalWorkers: storeWorkers.length,
           successCount,
@@ -311,15 +372,20 @@ function ScheduleList() {
           errorCount,
           schedulesCount: Object.keys(schedulesByWorker).length,
         });
-        
+
         if (errorCount > 0) {
-          console.warn(`⚠️ ${errorCount}명의 직원 데이터 로드 실패:`, errorsByWorker);
+          console.warn(
+            `⚠️ ${errorCount}명의 직원 데이터 로드 실패:`,
+            errorsByWorker,
+          );
         }
-        
+
         if (emptyCount > 0) {
-          console.log(`ℹ️ ${emptyCount}명의 직원은 근무 가능 시간이 없습니다 (제출 안 함)`);
+          console.log(
+            `ℹ️ ${emptyCount}명의 직원은 근무 가능 시간이 없습니다 (제출 안 함)`,
+          );
         }
-        
+
         setWorkerSchedules(schedulesByWorker);
         setWorkerErrors(errorsByWorker);
       } catch (error) {
@@ -332,10 +398,15 @@ function ScheduleList() {
   // 근무 가능 시간대 포맷팅
   const formatAvailableTimes = (worker) => {
     // 직원 고유 키 찾기 (여러 필드 시도)
-    const workerKey = worker?.id || worker?.staffId || worker?.userStoreId || worker?.userId || `worker_${worker.username || worker.name || worker.userName || 'unknown'}`;
+    const workerKey =
+      worker?.id ||
+      worker?.staffId ||
+      worker?.userStoreId ||
+      worker?.userId ||
+      `worker_${worker.username || worker.name || worker.userName || "unknown"}`;
     const schedules = workerSchedules[workerKey] || [];
     const error = workerErrors[workerKey];
-    
+
     // 에러가 있는 경우 사용자 친화적인 메시지 반환
     if (error) {
       if (error.status === 500) {
@@ -350,7 +421,7 @@ function ScheduleList() {
         return "⚠️ 데이터 로드 실패";
       }
     }
-    
+
     // 정상적으로 빈 배열인 경우
     if (schedules.length === 0) {
       return "근무 가능 시간 없음";
@@ -364,7 +435,7 @@ function ScheduleList() {
       const dayIndex = date.day();
       const dayName = dayNames[dayIndex];
       const timeRange = `${date.format("HH:mm")}-${dayjs(schedule.endDatetime).format("HH:mm")}`;
-      
+
       if (!byDay[dayName]) {
         byDay[dayName] = [];
       }
@@ -393,21 +464,26 @@ function ScheduleList() {
     const availableWorkers = [];
     workers.forEach((worker) => {
       // 직원 고유 키 찾기 (여러 필드 시도)
-      const workerKey = worker.id || worker.staffId || worker.userStoreId || worker.userId || `worker_${worker.username || worker.name || worker.userName || 'unknown'}`;
+      const workerKey =
+        worker.id ||
+        worker.staffId ||
+        worker.userStoreId ||
+        worker.userId ||
+        `worker_${worker.username || worker.name || worker.userName || "unknown"}`;
       const schedules = workerSchedules[workerKey] || [];
       const hasSchedule = schedules.some((schedule) => {
         const scheduleDate = dayjs(schedule.startDatetime).locale("ko");
         const scheduleDay = scheduleDate.day();
         const scheduleStartHour = scheduleDate.hour();
         const scheduleEndHour = dayjs(schedule.endDatetime).hour();
-        
+
         return (
           scheduleDay === dayIndex &&
           hour >= scheduleStartHour &&
           hour < scheduleEndHour
         );
       });
-      
+
       if (hasSchedule) {
         availableWorkers.push(worker);
       }
@@ -431,9 +507,11 @@ function ScheduleList() {
   // 근무표 생성하기
   const handleGenerateSchedule = async () => {
     if (isGenerating) return;
-    
+
     if (!settingId) {
-      alert("설정 정보를 불러올 수 없습니다. 먼저 근무표 생성 요청을 해주세요.");
+      alert(
+        "설정 정보를 불러올 수 없습니다. 먼저 근무표 생성 요청을 해주세요.",
+      );
       return;
     }
 
@@ -451,12 +529,22 @@ function ScheduleList() {
         localStorage.setItem("scheduleGenerationCompleted", "true");
         localStorage.removeItem("hasScheduleRequest"); // 생성 완료했으므로 요청 플래그 제거
         localStorage.removeItem("scheduleConfig"); // 생성 완료했으므로 설정 정보 제거
-        
-        console.log("✅ 근무표 생성 완료: scheduleGenerationCompleted 설정, hasScheduleRequest 및 scheduleConfig 제거");
-        
-        const startDate = scheduleConfig.startDate || dayjs().locale("ko").startOf("week").format("YYYY-MM-DD");
-        const endDate = scheduleConfig.endDate || dayjs().locale("ko").startOf("week").add(6, "day").format("YYYY-MM-DD");
-        
+
+        console.log(
+          "✅ 근무표 생성 완료: scheduleGenerationCompleted 설정, hasScheduleRequest 및 scheduleConfig 제거",
+        );
+
+        const startDate =
+          scheduleConfig.startDate ||
+          dayjs().locale("ko").startOf("week").format("YYYY-MM-DD");
+        const endDate =
+          scheduleConfig.endDate ||
+          dayjs()
+            .locale("ko")
+            .startOf("week")
+            .add(6, "day")
+            .format("YYYY-MM-DD");
+
         navigate("/autoCal", {
           state: {
             candidateKey: result.candidateScheduleKey,
@@ -482,7 +570,7 @@ function ScheduleList() {
 
       <div className="flex-1 px-4 py-3 flex flex-col gap-4 overflow-y-auto">
         <p className="text-center font-bold text-lg">직원 스케줄 목록</p>
-        
+
         <div className="flex justify-center">
           <TimeSlotCalendar
             onTimeSlotClick={handleTimeSlotClick}
@@ -491,57 +579,61 @@ function ScheduleList() {
         </div>
 
         <div className="w-[90%] mx-auto">
-            <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <p className="text-base font-medium">전체 직원 가능 근무 시간대</p>
             <button
-                onClick={() => navigate("/addOwner")}
-                className="font-medium rounded-full flex items-center justify-center"
-                style={{
-                    width: "100px",
-                    height: "25px",
-                    fontSize: "14px",
-                    backgroundColor: "#68E194",
-                    color: "#000000",
-                    WebkitAppearance: "none",
-                    appearance: "none",
-                    border: "none",
-                    borderRadius: "20px",
-                    outline: "none",
-                    padding: "0",
-                    margin: "0",
-                }}
-                >
-                내 스케줄 추가
+              onClick={() => navigate("/addOwner")}
+              className="font-medium rounded-full flex items-center justify-center"
+              style={{
+                width: "100px",
+                height: "25px",
+                fontSize: "14px",
+                backgroundColor: "#68E194",
+                color: "#000000",
+                WebkitAppearance: "none",
+                appearance: "none",
+                border: "none",
+                borderRadius: "20px",
+                outline: "none",
+                padding: "0",
+                margin: "0",
+              }}
+            >
+              내 스케줄 추가
             </button>
-            </div>
+          </div>
 
-            <div className="flex flex-col gap-3 mt-3">
+          <div className="flex flex-col gap-3 mt-3">
             {workers.map((worker, index) => {
-                // 직원 고유 키 찾기 (여러 필드 시도)
-                const workerKey = worker.id || worker.staffId || worker.userStoreId || worker.userId || `worker_${index}`;
-                const hasError = workerErrors[workerKey];
-                const errorStatus = hasError?.status;
-                
-                return (
+              // 직원 고유 키 찾기 (여러 필드 시도)
+              const workerKey =
+                worker.id ||
+                worker.staffId ||
+                worker.userStoreId ||
+                worker.userId ||
+                `worker_${index}`;
+              const hasError = workerErrors[workerKey];
+              const errorStatus = hasError?.status;
+
+              return (
                 <div
-                key={workerKey}
-                className={`flex items-center gap-3 p-3 rounded-lg shadow-sm ${
-                  hasError 
-                    ? "bg-red-50 border border-red-200" 
-                    : "bg-white"
-                }`}
+                  key={workerKey}
+                  className={`flex items-center gap-3 p-3 rounded-lg shadow-sm ${
+                    hasError ? "bg-red-50 border border-red-200" : "bg-white"
+                  }`}
                 >
-                <div 
-                  className={`flex-shrink-0 w-12 h-12 rounded-full border-2 border-white shadow-sm ${
-                    hasError 
-                      ? "bg-red-300" 
-                      : "bg-[#68E194]"
-                  }`} 
-                />
-                <div className="flex-1 min-w-0">
+                  <div
+                    className={`flex-shrink-0 w-12 h-12 rounded-full border-2 border-white shadow-sm ${
+                      hasError ? "bg-red-300" : "bg-[#68E194]"
+                    }`}
+                  />
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="text-base font-semibold truncate">
-                        {worker.username || worker.name || worker.userName || "이름 없음"}
+                        {worker.username ||
+                          worker.name ||
+                          worker.userName ||
+                          "이름 없음"}
                       </p>
                       {hasError && (
                         <span className="text-xs text-red-600 font-medium whitespace-nowrap">
@@ -549,11 +641,11 @@ function ScheduleList() {
                         </span>
                       )}
                     </div>
-                    <p className={`text-sm mt-1 ${
-                      hasError 
-                        ? "text-red-600 font-medium" 
-                        : "text-gray-600"
-                    }`}>
+                    <p
+                      className={`text-sm mt-1 ${
+                        hasError ? "text-red-600 font-medium" : "text-gray-600"
+                      }`}
+                    >
                       {formatAvailableTimes(worker)}
                     </p>
                     {hasError && errorStatus === 500 && (
@@ -561,19 +653,19 @@ function ScheduleList() {
                         서버 오류 (500) - 백엔드 개발자에게 문의 필요
                       </p>
                     )}
+                  </div>
                 </div>
-                </div>
-                );
+              );
             })}
             {workers.length === 0 && (
-                <p className="text-center text-gray-500 py-4">
+              <p className="text-center text-gray-500 py-4">
                 등록된 직원이 없습니다.
-                </p>
+              </p>
             )}
-            </div>
+          </div>
         </div>
       </div>
-      
+
       <BottomBar
         singleButton
         singleButtonText={isGenerating ? "생성 중..." : "생성하기"}
@@ -588,17 +680,20 @@ function ScheduleList() {
         </p>
         {selectedDay && selectedHour !== null ? (
           (() => {
-            const availableWorkers = getAvailableWorkers(selectedDay, selectedHour);
+            const availableWorkers = getAvailableWorkers(
+              selectedDay,
+              selectedHour,
+            );
             return availableWorkers.length > 0 ? (
               <div className="flex flex-col gap-3">
                 {availableWorkers.map((worker) => (
-                  <div
-                    key={worker.id}
-                    className="flex items-center gap-3"
-                  >
+                  <div key={worker.id} className="flex items-center gap-3">
                     <div className="flex-shrink-0 w-10 h-10 bg-[#68E194] rounded-full border-2 border-white shadow-sm" />
                     <p className="text-base font-semibold">
-                      {worker.username || worker.name || worker.userName || "이름 없음"}
+                      {worker.username ||
+                        worker.name ||
+                        worker.userName ||
+                        "이름 없음"}
                     </p>
                   </div>
                 ))}
@@ -616,4 +711,3 @@ function ScheduleList() {
 }
 
 export default ScheduleList;
-

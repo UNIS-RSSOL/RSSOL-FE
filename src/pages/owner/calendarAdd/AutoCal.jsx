@@ -3,13 +3,16 @@ import { useLocation, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 
-import TopBar from "../../../components/layout/alarm/TopBar.jsx";
+import TopBar from "../../../components/common/alarm/TopBar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import AutoCalCalendar from "../../../components/common/calendar/AutoCalCalendar.jsx";
 import Modal from "../../../components/common/Modal.jsx";
 import WhiteBtn from "../../../components/common/WhiteBtn.jsx";
 import GreenBtn from "../../../components/common/GreenBtn.jsx";
-import { confirmSchedule, fetchCandidateSchedule } from "../../../services/scheduleService.js";
+import {
+  confirmSchedule,
+  fetchCandidateSchedule,
+} from "../../../services/scheduleService.js";
 
 dayjs.locale("ko");
 
@@ -72,7 +75,7 @@ export default function AutoCal() {
 
     // 주간 그리드 (7일 x 2행 = 14칸)
     const grid = Array.from({ length: 14 }, () => false);
-    
+
     // 각 스케줄을 그리드에 매핑
     scheduleData.forEach((schedule) => {
       const startDate = dayjs(schedule.startDatetime);
@@ -156,26 +159,30 @@ export default function AutoCal() {
             const isActive = idx === selectedIndex;
             const scheduleData = candidateSchedules[idx] || [];
             const previewGrid = generatePreviewGrid(scheduleData);
-            
+
             return (
               <button
                 key={idx}
                 type="button"
                 onClick={() => setSelectedIndex(idx)}
-                style={{ backgroundColor: 'white', WebkitAppearance: 'none', appearance: 'none' }}
+                style={{
+                  backgroundColor: "white",
+                  WebkitAppearance: "none",
+                  appearance: "none",
+                }}
                 className={`relative flex-shrink-0 w-20 h-20 rounded-lg border border-black flex items-center justify-center overflow-hidden ${
-                  isActive
-                    ? "border-[#32D1AA] border-2"
-                    : ""
+                  isActive ? "border-[#32D1AA] border-2" : ""
                 }`}
               >
                 {/* 숫자 - 왼쪽 상단 */}
-                <span className={`absolute top-0.5 left-0.5 text-[10px] font-semibold z-10 ${
-                  isActive ? "text-[#32D1AA]" : "text-[#666]"
-                }`}>
+                <span
+                  className={`absolute top-0.5 left-0.5 text-[10px] font-semibold z-10 ${
+                    isActive ? "text-[#32D1AA]" : "text-[#666]"
+                  }`}
+                >
                   {idx + 1}
                 </span>
-                
+
                 {/* 작은 캘린더 미리보기 - 배경 꽉차게 */}
                 <div className="w-full h-full flex items-center justify-center">
                   <div className="w-full h-full bg-[#F8FBFE] flex flex-col">
@@ -203,7 +210,9 @@ export default function AutoCal() {
         <div className="flex justify-center mt-2">
           <AutoCalCalendar
             hasSelection={selectedIndex !== null}
-            schedules={selectedIndex !== null ? candidateSchedules[selectedIndex] : []}
+            schedules={
+              selectedIndex !== null ? candidateSchedules[selectedIndex] : []
+            }
           />
         </div>
       </div>
@@ -243,5 +252,3 @@ export default function AutoCal() {
     </div>
   );
 }
-
-
