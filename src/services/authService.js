@@ -1,4 +1,5 @@
 import api from "./api.js";
+import axios from "axios";
 
 /**
  * 체크용 로그인 - 개발 토큰 발급
@@ -170,13 +171,17 @@ export async function refreshToken() {
       throw new Error("Refresh token not found");
     }
 
-    const response = await api.post("/api/auth/refresh-token", {
-      headers: {
-        Authorization: `Bearer ${refreshToken}`,
-        "Content-Type": "application/json",
+    const response = await axios.post(
+      "/api/auth/refresh-token",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${refreshToken}`,
+          "Content-Type": "application/json",
+        },
+        _skipAuthRefresh: true,
       },
-      _skipAuthRefresh: true,
-    });
+    );
 
     if (!response.data || !response.data.accessToken) {
       console.error("❌ 유효하지 않은 토큰 응답 형식:", response.data);
@@ -196,7 +201,7 @@ export async function refreshToken() {
 //로그아웃
 export async function logout() {
   try {
-    const response = await api.post("/api/auth/logout");
+    const response = await axios.post("/api/auth/logout");
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     return response.data;
