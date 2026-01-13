@@ -34,19 +34,31 @@ function AlarmHome() {
         {today}
       </div>
       <div className="mt-2">
-        {alarms.map((alarm) => {
+        {alarms.map((alarm, index) => {
           const type =
             alarm.type === "SHIFT_SWAP_NOTIFY_MANAGER"
               ? 3
-              : alarm.type === "SHIFT_SWAP_REQUEST"
+              : alarm.type === "SHIFT_SWAP_REQUEST" ||
+                  alarm.type === "EXTRA_SHIFT_REQUEST_INVITE"
                 ? 2
                 : 1;
           const time = formatTimeAgo(alarm.createdAt);
           return (
             <AlarmItem
+              key={index}
               alarmType={type}
-              storename="맥도날드 신촌점" //어느매장에서 온 알림인지 알려주는게 없어서 백 쪽에 요청해야됨
+              img={alarm.profileImageUrl}
+              storename={alarm.storeName}
               time={time}
+              id={
+                alarm.type === "SHIFT_SWAP_REQUEST"
+                  ? alarm.shiftSwapRequestId
+                  : alarm.type === "EXTRA_SHIFT_REQUEST_INVITE"
+                    ? alarm.extraShiftRequestId
+                    : null
+              }
+              status={alarm.shiftSwapStatus || alarm.extraShiftStatus}
+              approval={alarm.shiftSwapManagerApprovalStatus}
             >
               {alarm.message}
             </AlarmItem>
