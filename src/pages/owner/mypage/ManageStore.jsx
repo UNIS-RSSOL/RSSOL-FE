@@ -42,6 +42,12 @@ function ManageStore() {
       title: "사업자 등록 번호",
       content: "",
     },
+    {
+      icon: <SaveIcon />,
+      title: "입사날짜",
+      content: "",
+      type: "date",
+    },
   ]);
 
   useEffect(() => {
@@ -91,12 +97,18 @@ function ManageStore() {
   //매장 추가
   const handleAddStore = async () => {
     try {
+      // 필수 필드 검증
+      if (!newStore[0].content || !newStore[1].content || !newStore[2].content || !newStore[3].content || !newStore[4].content) {
+        alert("모든 정보를 입력해주세요.");
+        return;
+      }
       console.log(newStore);
       await addStore(
         newStore[3].content,
         newStore[0].content,
         newStore[1].content,
         newStore[2].content,
+        newStore[4].content,
       );
       setAddToast(false);
       setNewStore([
@@ -119,6 +131,12 @@ function ManageStore() {
           icon: <SaveIcon />,
           title: "사업자 등록 번호",
           content: "",
+        },
+        {
+          icon: <SaveIcon />,
+          title: "입사날짜",
+          content: "",
+          type: "date",
         },
       ]);
     } catch (error) {

@@ -101,10 +101,9 @@ function AlarmItem({
 
       <div className="flex-1 flex flex-col items-start gap-1">
         <p className="flex items-center bg-[#fdfffe] border-[#32d1aa] border-[1px] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] font-[400] text-[12px]/[16px] px-3 h-[24px]">
-          {storename}
+          {storename || "매장"}
         </p>
         <p className="text-[14px] font-[500] text-left">{children}</p>
-        <span className="text-[10px] font-[400] text-[#87888c]">{time}</span>
         <div className="w-full flex justify-end items-center gap-2">
           {alarmType === 2 ? (
             <>

@@ -36,10 +36,11 @@ export async function fetchStoreList() {
 }
 
 //매장 추가 등록
-export async function addStore(storeCode) {
+export async function addStore(storeCode, hireDate) {
   try {
     const response = await api.post("/api/mypage/staff/stores", {
       storeCode: storeCode,
+      hireDate: hireDate,
     });
     return response.data;
   } catch (error) {

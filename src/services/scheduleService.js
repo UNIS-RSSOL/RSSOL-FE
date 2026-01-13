@@ -189,13 +189,18 @@ export const generateSchedule = async (
 
 /**
  * 후보 스케줄 조회
- * @param {string} candidateKey - 후보 스케줄 키
- * @param {number} index - 후보 스케줄 인덱스
+ * Swagger 문서: GET /api/schedules/candidates/{key}
+ * 실제 API 형식에 맞게 수정 필요
+ * @param {string} candidateKey - 후보 스케줄 키 (예: "candidate_schedule:store:1:week:2026-W03-2")
+ * @param {number} index - 후보 스케줄 인덱스 (0부터 시작)
  * @returns {Promise<Array<{id: number, userStoreId: number, userName: string, startDatetime: string, endDatetime: string}>>}
  */
 export const fetchCandidateSchedule = async (candidateKey, index) => {
   try {
-    const response = await api.get(`/api/schedules/candidate/${candidateKey}/${index}`);
+    // Swagger 문서에 따르면 /api/schedules/candidates/{key} 형식
+    // key에 인덱스를 포함시킨 형식으로 시도: "candidate_schedule:store:1:week:2026-W03-2:0"
+    const keyWithIndex = `${candidateKey}:${index}`;
+    const response = await api.get(`/api/schedules/candidates/${keyWithIndex}`);
     return response.data;
   } catch (error) {
     console.error("후보 스케줄 조회 실패:", error.response?.data || error.message);
