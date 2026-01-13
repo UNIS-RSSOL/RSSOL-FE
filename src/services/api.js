@@ -44,7 +44,6 @@ api.interceptors.response.use(
     // 1. 토큰 갱신 요청 자체가 실패한 경우 처리
     if (originalRequest.url.includes("/api/auth/refresh-token")) {
       await logout();
-      window.location.href = "/login";
       return Promise.reject(error);
     }
 
