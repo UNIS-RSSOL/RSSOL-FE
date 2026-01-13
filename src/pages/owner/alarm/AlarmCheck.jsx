@@ -37,7 +37,7 @@ function AlarmCheck() {
       <div className="px-4 mt-4 text-[15px] font-semibold text-left">
         {today}
       </div>
-      <div className="mt-2">
+      <div className="mt-2 flex flex-col gap-1">
         {alarms.map((alarm, index) => {
           const time = formatTimeAgo(alarm.createdAt);
           return (

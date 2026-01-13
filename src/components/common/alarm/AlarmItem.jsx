@@ -105,11 +105,12 @@ function AlarmItem({
           {storename || "매장"}
         </p>
         <p className="text-[14px] font-[500] text-left">{children}</p>
+        <span className="text-[10px] font-[400] text-[#87888c]">{time}</span>
         <div className="w-full flex justify-end items-center gap-2">
           {alarmType === 2 ? (
             <>
               <GreenBtn
-                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isAccepted && isDisabled ? "bg-[#EDF0F7] text-[#87888c]" : ""}`}
+                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isDisabled && isAccepted ? "bg-[#EDF0F7] text-[#87888c]" : ""}`}
                 disabled={isDisabled}
                 onClick={() => {
                   if (children.includes("대타")) {
@@ -122,7 +123,7 @@ function AlarmItem({
                 거절
               </GreenBtn>
               <GreenBtn
-                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isAccepted && isDisabled ? "" : "bg-[#EDF0F7] text-[#87888C]"}`}
+                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isDisabled && !isAccepted ? "bg-[#EDF0F7] text-[#87888c]" : ""}`}
                 disabled={isDisabled}
                 onClick={() => {
                   if (children.includes("대타")) {
@@ -138,7 +139,7 @@ function AlarmItem({
           ) : alarmType === 3 ? (
             <>
               <GreenBtn
-                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isAccepted && isDisabled ? "bg-[#EDF0F7] text-[#87888C]" : ""}`}
+                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isDisabled && isAccepted ? "bg-[#EDF0F7] text-[#87888c]" : ""}`}
                 disabled={isDisabled}
                 onClick={() => {
                   if (children.includes("대타")) {
@@ -151,7 +152,7 @@ function AlarmItem({
                 미승인
               </GreenBtn>
               <GreenBtn
-                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isAccepted && isDisabled ? "" : "bg-[#EDF0F7] text-black"}`}
+                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isDisabled && !isAccepted ? "bg-[#EDF0F7] text-[#87888c]" : ""}`}
                 disabled={isDisabled}
                 onClick={() => {
                   if (children.includes("대타")) {
@@ -162,6 +163,17 @@ function AlarmItem({
                 }}
               >
                 승인
+              </GreenBtn>
+            </>
+          ) : alarmType === 4 ? (
+            <>
+              <GreenBtn
+                className={`w-[132px] h-[32px] font-[500] text-[14px]`}
+                onClick={() => {
+                  navigate("/calModEmp");
+                }}
+              >
+                추가하기
               </GreenBtn>
             </>
           ) : (
