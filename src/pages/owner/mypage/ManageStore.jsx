@@ -15,6 +15,7 @@ import TypeIcon from "../../../assets/icons/TypeIcon.jsx";
 import MapIcon from "../../../assets/icons/MapIcon.jsx";
 import PhoneIcon from "../../../assets/icons/PhoneIcon.jsx";
 import SaveIcon from "../../../assets/icons/SaveIcon.jsx";
+import { CalIcon } from "../../../assets/icons/CalIcon.jsx";
 
 function ManageStore() {
   const [storeList, setStoreList] = useState([]);
@@ -43,7 +44,7 @@ function ManageStore() {
       content: "",
     },
     {
-      icon: <SaveIcon />,
+      icon: <CalIcon />,
       title: "입사날짜",
       content: "",
       type: "date",
@@ -98,7 +99,13 @@ function ManageStore() {
   const handleAddStore = async () => {
     try {
       // 필수 필드 검증
-      if (!newStore[0].content || !newStore[1].content || !newStore[2].content || !newStore[3].content || !newStore[4].content) {
+      if (
+        !newStore[0].content ||
+        !newStore[1].content ||
+        !newStore[2].content ||
+        !newStore[3].content ||
+        !newStore[4].content
+      ) {
         alert("모든 정보를 입력해주세요.");
         return;
       }
@@ -147,7 +154,7 @@ function ManageStore() {
   return (
     <div className="flex flex-col w-full py-20 px-5 gap-5">
       {storeList.map((store, index) => (
-        <StoreItem index={index + 1} store={store} />
+        <StoreItem key={index + 1} index={index + 1} store={store} />
       ))}
       <div
         className="flex flex-row items-center justify-center my-2 gap-3 cursor-pointer"
