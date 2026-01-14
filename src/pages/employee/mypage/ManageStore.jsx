@@ -4,6 +4,8 @@ import {
   deleteStore,
   addStore,
 } from "../../../services/employee/MyPageService.js";
+import { useNavigate } from "react-router-dom";
+import TopBar from "../../../components/common/alarm/TopBar.jsx";
 import MessageModal from "../../../components/common/MessageModal.jsx";
 import DeleteIcon from "../../../assets/icons/DeleteIcon.jsx";
 import AddIcon from "../../../assets/icons/AddIcon.jsx";
@@ -16,6 +18,7 @@ import { CalIcon } from "../../../assets/icons/CalIcon.jsx";
 import AddItem from "../../../components/common/mypage/AddItem.jsx";
 
 function ManageStore() {
+  const navigate = useNavigate();
   const [storeList, setStoreList] = useState([]);
   const [deleteModal, setDeleteModal] = useState(false);
   const [deletedStore, setDeletedStore] = useState();
@@ -113,85 +116,91 @@ function ManageStore() {
   };
 
   return (
-    <div className="flex flex-col w-full py-20 px-5 gap-5">
-      {storeList.map((store, index) => (
-        <StoreItem key={index + 1} index={index + 1} store={store} />
-      ))}
-      <div
-        className="flex flex-row items-center justify-center my-2 gap-3 cursor-pointer"
-        onClick={() => setAddToast(true)}
-      >
-        <AddIcon />
-        <p className="text-[16px] font-[500]">매장 추가 등록</p>
-      </div>
-      {deleteModal && (
-        <Modal
-          onClose={() => {
-            setDeleteModal(false);
-          }}
-        >
-          <div className="flex flex-col justify-center w-full py-3 px-1 gap-5">
-            <div className="text-[14px] font-[500] text-center">
-              <p>'{deletedStore.name}'을 내 매장에서</p>
-              <p>삭제할까요?</p>
-            </div>
-            <div className="flex flex-row w-full items-center gap-2">
-              <WhiteBtn
-                className="flex flex-1/2"
-                onClick={() => {
-                  setDeleteModal(false);
-                  setDeletedStore("");
-                }}
-              >
-                아니오
-              </WhiteBtn>
-              <GreenBtn className="flex flex-1/2" onClick={handleDeleteStore}>
-                예
-              </GreenBtn>
-            </div>
-          </div>
-        </Modal>
-      )}
-      {addToast && (
-        <Toast isOpen={addToast} onClose={() => setAddToast(false)}>
-          <p className="text-[16px] font-[600]">매장 추가 등록</p>
-          <div className="flex flex-col w-full gap-3 my-5">
-            {newStore.map((store, index) => (
-              <AddItem
-                key={index}
-                data={store}
-                index={index}
-                onChange={(index, value) => {
-                  const updatedStore = [...newStore];
-                  updatedStore[index] = {
-                    ...updatedStore[index],
-                    content: value,
-                  };
-                  setNewStore(updatedStore);
-                }}
-              />
-            ))}
-          </div>
-          <GreenBtn
-            className="py-6 text-[16px] font-[600]"
-            onClick={handleAddStore}
-          >
-            추가하기
-          </GreenBtn>
-        </Toast>
-      )}
-      {failModal && (
-        <Modal onClose={() => setFailModal(false)}>
-          <p className="text-[14px] font-[500] my-4">
-            입력하신 매장 등록 코드가 존재하지 않습니다
-          </p>
-        </Modal>
-      )}
-      <MessageModal
-        isOpen={successModal}
-        message="추가 완료되었어요!"
-        onClose={() => setSuccessModal(false)}
+    <div className="flex flex-col w-full h-full">
+      <TopBar
+        title="등록 매장 관리"
+        onBack={() => navigate("/employee/mypage")}
       />
+      <div className="flex flex-col w-full my-10 px-5 gap-5">
+        {storeList.map((store, index) => (
+          <StoreItem key={index + 1} index={index + 1} store={store} />
+        ))}
+        <div
+          className="flex flex-row items-center justify-center my-2 gap-3 cursor-pointer"
+          onClick={() => setAddToast(true)}
+        >
+          <AddIcon />
+          <p className="text-[16px] font-[500]">매장 추가 등록</p>
+        </div>
+        {deleteModal && (
+          <Modal
+            onClose={() => {
+              setDeleteModal(false);
+            }}
+          >
+            <div className="flex flex-col justify-center w-full py-3 px-1 gap-5">
+              <div className="text-[14px] font-[500] text-center">
+                <p>'{deletedStore.name}'을 내 매장에서</p>
+                <p>삭제할까요?</p>
+              </div>
+              <div className="flex flex-row w-full items-center gap-2">
+                <WhiteBtn
+                  className="flex flex-1/2"
+                  onClick={() => {
+                    setDeleteModal(false);
+                    setDeletedStore("");
+                  }}
+                >
+                  아니오
+                </WhiteBtn>
+                <GreenBtn className="flex flex-1/2" onClick={handleDeleteStore}>
+                  예
+                </GreenBtn>
+              </div>
+            </div>
+          </Modal>
+        )}
+        {addToast && (
+          <Toast isOpen={addToast} onClose={() => setAddToast(false)}>
+            <p className="text-[16px] font-[600]">매장 추가 등록</p>
+            <div className="flex flex-col w-full gap-3 my-5">
+              {newStore.map((store, index) => (
+                <AddItem
+                  key={index}
+                  data={store}
+                  index={index}
+                  onChange={(index, value) => {
+                    const updatedStore = [...newStore];
+                    updatedStore[index] = {
+                      ...updatedStore[index],
+                      content: value,
+                    };
+                    setNewStore(updatedStore);
+                  }}
+                />
+              ))}
+            </div>
+            <GreenBtn
+              className="py-6 text-[16px] font-[600]"
+              onClick={handleAddStore}
+            >
+              추가하기
+            </GreenBtn>
+          </Toast>
+        )}
+        {failModal && (
+          <Modal onClose={() => setFailModal(false)}>
+            <p className="text-[14px] font-[500] my-4">
+              입력하신 매장 등록 코드가 존재하지 않습니다
+            </p>
+          </Modal>
+        )}
+        <MessageModal
+          isOpen={successModal}
+          message="추가 완료되었어요!"
+          onClose={() => setSuccessModal(false)}
+        />
+      </div>
     </div>
   );
 }

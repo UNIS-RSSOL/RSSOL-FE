@@ -3,10 +3,10 @@ import { ChevronLeft } from "lucide-react";
 
 function TopBar({ title, onBack }) {
   return (
-    <div className="absolute top-0 left-0 z-50 flex items-center w-full h-[60px] px-4 bg-white shadow-[0_4px_8px_0_rgba(0,0,0,0.08)]">
+    <div className="flex items-center z-50 w-full h-[60px] px-4 bg-white shadow-[0_4px_8px_0_rgba(0,0,0,0.08)]">
       <button
         onClick={onBack}
-        className="z-10 p-0 w-fit h-fit bg-transparent flex items-center justify-center"
+        className="bg-transparent flex items-center justify-center"
         style={{
           WebkitAppearance: "none",
           backgroundColor: "transparent",
