@@ -60,20 +60,14 @@ function Header() {
             navigate("/calAdd");
           }
         } else {
-          // 알바: work availability가 있는지 확인
-          const hasAvailability = await checkExistingAvailability();
-          
-          if (hasAvailability) {
-            navigate("/calModEmp");
-          } else {
-            navigate("/calAddEmp");
-          }
+          // 알바: CalModEmp로 이동 (최초 입력과 수정 모두 처리)
+          navigate("/calModEmp");
         }
       } catch (error) {
         console.error("캘린더 생성 페이지 이동 실패:", error);
         // 기본값으로 이동
         const fromEmployeeSection = location.pathname.startsWith("/employee");
-        navigate(fromEmployeeSection ? "/calAddEmp" : "/calAdd");
+        navigate(fromEmployeeSection ? "/calModEmp" : "/calAdd");
       }
     }
     if (menu === "알림") {
