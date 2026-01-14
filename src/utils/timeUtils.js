@@ -1,7 +1,9 @@
+import dayjs from "dayjs";
+
 export const formatTimeAgo = (dateString) => {
-  const now = new Date();
-  const date = new Date(dateString);
-  const seconds = Math.floor((now - date) / 1000);
+  const now = dayjs();
+  const date = dayjs(dateString);
+  const seconds = now.diff(date, "second") - 9 * 3600;
 
   const intervals = {
     년: 31536000,

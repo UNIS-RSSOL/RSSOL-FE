@@ -3,8 +3,6 @@ import api from "../api.js";
 //근무블록 추가
 export async function addWorkshift(userStoreId, start, end) {
   try {
-    console.log("accessToken", localStorage.getItem("accessToken"));
-    console.log("refreshToken", localStorage.getItem("refreshToken"));
     const response = await api.post("/api/schedules/workshifts", {
       userStoreId: userStoreId,
       startDatetime: start,
