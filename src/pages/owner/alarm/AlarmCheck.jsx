@@ -10,7 +10,7 @@ import { formatTimeAgo } from "../../../utils/timeUtils.js";
 function AlarmCheck() {
   const today = dayjs().format("MM.DD(dd)");
   const navigate = useNavigate();
-  const [tab, setTab] = useState("all");
+  const [tab, setTab] = useState("final");
   const [alarms, setAlarms] = useState([]);
 
   useEffect(() => {

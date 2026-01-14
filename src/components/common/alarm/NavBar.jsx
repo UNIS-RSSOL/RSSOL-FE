@@ -1,14 +1,17 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 function NavBar({ currentTab, setCurrentTab }) {
   const navigate = useNavigate();
 
+  useEffect(() => {}, [currentTab]);
+
   const handleTabClick = (tab) => {
     setCurrentTab(tab);
 
-    if (tab === "all") navigate("/alarmHome");     // AlarmHome.jsx
-    if (tab === "final") navigate("/alarmCheck");  // AlarmCheck.jsx
+    if (tab === "all") navigate("/alarmHome"); // AlarmHome.jsx
+    if (tab === "final") navigate("/alarmCheck"); // AlarmCheck.jsx
   };
 
   return (

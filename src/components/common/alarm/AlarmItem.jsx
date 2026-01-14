@@ -32,7 +32,7 @@ function AlarmItem({
 }) {
   const navigate = useNavigate();
   const [isDisabled, setIsDisabled] = useState(false);
-  const [isAccepted, setIsAccepted] = useState();
+  const [isAccepted, setIsAccepted] = useState(false);
   const defaultImg = owner ? ownerCharacter : empCharacter;
 
   useEffect(() => {
@@ -49,13 +49,15 @@ function AlarmItem({
       if (approval === "APPROVED") setIsAccepted(true);
       else setIsAccepted(false);
     }
-  }, [status, isDisabled, approval]);
+  }, [status, approval, isDisabled]);
 
   //대타1차(ACCEPT/REJECT)
   const handleAcceptShiftSwap = async (requestId, action) => {
     try {
       const response = await acceptShiftSwap(requestId, action);
       setIsDisabled(true);
+      if (action === "ACCEPT") setIsAccepted(true);
+      else setIsAccepted(false);
       return response;
     } catch (error) {
       console.error("대타 요청 수락 실패:", error);
@@ -67,6 +69,8 @@ function AlarmItem({
     try {
       const response = await approveShiftSwap(requestId, action);
       setIsDisabled(true);
+      if (action === "APPROVE") setIsAccepted(true);
+      else setIsAccepted(false);
       return response;
     } catch (error) {
       console.error("대타 요청 최종 승인 실패:", error);
@@ -78,6 +82,8 @@ function AlarmItem({
     try {
       const response = await respondStaffRequest(requestId, action);
       setIsDisabled(true);
+      if (action === "ACCEPT") setIsAccepted(true);
+      else setIsAccepted(false);
       return response;
     } catch (error) {
       console.error("알바생 인력 요청 수락/거절 실패:", error);
@@ -89,6 +95,8 @@ function AlarmItem({
     try {
       const response = await approveStaffRequest(requestId, action);
       setIsDisabled(true);
+      if (action === "APPROVE") setIsAccepted(true);
+      else setIsAccepted(false);
       return response;
     } catch (error) {
       console.error("알바생 인력 요청 최종 승인/미승인 실패:", error);
