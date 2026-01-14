@@ -190,6 +190,8 @@ function App() {
     "/alarmHome",
     "/alarmCheck",
     "/scheduleList",
+    "/employee/mypage/managestore",
+    "/owner/mypage/managestore",
   ];
 
   const hideLayout = hideLayoutPages.some((p) =>
