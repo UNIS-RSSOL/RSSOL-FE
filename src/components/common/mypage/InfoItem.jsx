@@ -135,14 +135,17 @@ function InfoItem({ data, isEdit = false, onUpdate }) {
             {data.title}
           </p>
           {(() => {
-            if (data.title === "매장 등록 코드" && data.title === "등록 매장") {
+            if (data.title === "매장 등록 코드" || data.title === "등록 매장") {
               return (
                 <div className="flex flex-row items-center">
                   <p className="text-black text-[18px] font-[600]">
                     {data.content}
                   </p>
                   {data.title === "매장 등록 코드" && (
-                    <CopyIcon className="mx-2" onClick={handleCopy} />
+                    <CopyIcon
+                      className="mx-2 cursor-pointer"
+                      onClick={handleCopy}
+                    />
                   )}
                 </div>
               );
