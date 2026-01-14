@@ -12,6 +12,8 @@ import GreenBtn from "../../../components/common/GreenBtn.jsx";
 import WhiteBtn from "../../../components/common/WhiteBtn.jsx";
 import Toast from "../../../components/common/Toast.jsx";
 import SaveIcon from "../../../assets/icons/SaveIcon.jsx";
+import { CalIcon } from "../../../assets/icons/CalIcon.jsx";
+import AddItem from "../../../components/common/mypage/AddItem.jsx";
 
 function ManageStore() {
   const [storeList, setStoreList] = useState([]);
@@ -20,12 +22,19 @@ function ManageStore() {
   const [addToast, setAddToast] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
   const [failModal, setFailModal] = useState(false);
-  const [newStore, setNewStore] = useState({
-    icon: <SaveIcon />,
-    title: "매장 등록 코드",
-    content: "",
-  });
-  const [hireDate, setHireDate] = useState("");
+  const [newStore, setNewStore] = useState([
+    {
+      icon: <SaveIcon />,
+      title: "매장 등록 코드",
+      content: "",
+    },
+    {
+      icon: <CalIcon />,
+      title: "입사 날짜",
+      content: "",
+      type: "date",
+    },
+  ]);
 
   useEffect(() => {
     (async () => {
@@ -75,21 +84,28 @@ function ManageStore() {
   const handleAddStore = async () => {
     try {
       // 필수 필드 검증
-      if (!newStore.content || !hireDate) {
+      if (!newStore[0].content || !newStore[1].content) {
         alert("매장 등록 코드와 입사날짜를 모두 입력해주세요.");
         return;
       }
       console.log(newStore);
-      await addStore(newStore.content, hireDate);
+      await addStore(newStore[0].content, newStore[1].content);
       setAddToast(false);
       setSuccessModal(true);
 
-      setNewStore({
-        icon: <SaveIcon />,
-        title: "매장 등록 코드",
-        content: "",
-      });
-      setHireDate("");
+      setNewStore(
+        {
+          icon: <SaveIcon />,
+          title: "매장 등록 코드",
+          content: "",
+        },
+        {
+          icon: <CalIcon />,
+          title: "입사 날짜",
+          content: "",
+          type: "date",
+        },
+      );
     } catch (error) {
       console.error(error);
       setFailModal(true);
@@ -140,55 +156,21 @@ function ManageStore() {
         <Toast isOpen={addToast} onClose={() => setAddToast(false)}>
           <p className="text-[16px] font-[600]">매장 추가 등록</p>
           <div className="flex flex-col w-full gap-3 my-5">
-            <div>
-              <div className="flex flex-row w-full items-center gap-2">
-                <div className="flex flex-shrink-0 items-center justify-center size-[40px]">
-                  {newStore.icon}
-                </div>
-                <div className="flex flex-col w-full items-start gap-2">
-                  <p className="text-[14px] font-[600] text-[#87888c] text-left">
-                    {newStore.title}
-                  </p>
-                  <div className="flex flex-row items-center">
-                    <p className="text-[18px] font-[600] mr-2">-</p>
-                    <input
-                      className="text-black text-[18px] font-[600]"
-                      value={newStore.content}
-                      onChange={(e) => {
-                        const newValue = e.target.value;
-                        const updatedStore = { ...newStore, content: newValue };
-                        setNewStore(updatedStore);
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="h-[12px] border-b border-[#87888c] ml-11 text-[10px] font-[400] text-[#f74a7a] text-left"></div>
-            </div>
-            <div>
-              <div className="flex flex-row w-full items-center gap-2">
-                <div className="flex flex-shrink-0 items-center justify-center size-[40px]">
-                  <SaveIcon />
-                </div>
-                <div className="flex flex-col w-full items-start gap-2">
-                  <p className="text-[14px] font-[600] text-[#87888c] text-left">
-                    입사날짜
-                  </p>
-                  <div className="flex flex-row items-center">
-                    <p className="text-[18px] font-[600] mr-2">-</p>
-                    <input
-                      type="date"
-                      className="text-black text-[18px] font-[600]"
-                      value={hireDate}
-                      onChange={(e) => {
-                        setHireDate(e.target.value);
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="h-[12px] border-b border-[#87888c] ml-11 text-[10px] font-[400] text-[#f74a7a] text-left"></div>
-            </div>
+            {newStore.map((store, index) => (
+              <AddItem
+                key={index}
+                data={store}
+                index={index}
+                onChange={(index, value) => {
+                  const updatedStore = [...newStore];
+                  updatedStore[index] = {
+                    ...updatedStore[index],
+                    content: value,
+                  };
+                  setNewStore(updatedStore);
+                }}
+              />
+            ))}
           </div>
           <GreenBtn
             className="py-6 text-[16px] font-[600]"
