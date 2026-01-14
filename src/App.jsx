@@ -18,7 +18,6 @@ import EmpManageStore from "./pages/employee/mypage/ManageStore.jsx";
 import AlarmHomeEmp from "./pages/employee/alarm/AlarmHomeEmp.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
-import CalAddEmp from "./pages/employee/calendarAdd/CalAddEmp.jsx";
 import CalModEmp from "./pages/employee/calendarAdd/CalModEmp.jsx";
 import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
 import CalGen from "./pages/owner/calendarAdd/CalGen.jsx";
@@ -184,7 +183,6 @@ function App() {
     "/calAdd",
     "/calGen",
     "/autoCal",
-    "/calAddEmp",
     "/calModEmp",
     "/addOwner",
     "/scheduleList",
@@ -233,7 +231,6 @@ function App() {
             element={<EmpManageStore />}
           />
 
-          <Route path="/calAddEmp" element={<CalAddEmp />} />
           <Route path="/calModEmp" element={<CalModEmp />} />
           <Route path="/calAdd" element={<CalAdd />} />
           <Route path="/calGen" element={<CalGen />} />
