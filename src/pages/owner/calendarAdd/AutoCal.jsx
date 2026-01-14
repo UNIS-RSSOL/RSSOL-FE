@@ -250,10 +250,11 @@ export default function AutoCal() {
 
   return (
     <div className="w-full h-full bg-[#F8FBFE] flex flex-col">
+      {/* 상단바 - 고정 */}
       <TopBar title="근무표 대안 선택" onBack={() => navigate(-1)} />
 
-      {/* 상단바를 고정하고, 나머지 영역만 스크롤 되도록 처리 */}
-      <div className="flex-1 flex flex-col px-4 py-4 gap-4 overflow-y-auto scrollbar-hide">
+      {/* 고정 영역: 제목, 소제목, 대안 번호 버튼들 */}
+      <div className="flex-shrink-0 px-4 pt-4 pb-2 flex flex-col gap-4">
         {/* 제목과 소제목 */}
         <div className="flex flex-col gap-1">
           <div className="text-[16px] font-semibold">자동 스케줄 생성</div>
@@ -262,7 +263,7 @@ export default function AutoCal() {
           </div>
         </div>
 
-        {/* 대안 번호 버튼들 (수평 나열) */}
+        {/* 대안 번호 버튼들 (수평 나열) - 항상 보이도록 고정 */}
         <div className="flex flex-row gap-2 overflow-x-scroll scrollbar-hide">
           {candidates.map((idx) => {
             const isActive = idx === selectedIndex;
@@ -314,9 +315,11 @@ export default function AutoCal() {
             );
           })}
         </div>
+      </div>
 
-        {/* AutoCal 전용 캘린더 */}
-        <div className="flex justify-center mt-2">
+      {/* 캘린더 영역 - 스크롤 가능 */}
+      <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-2">
+        <div className="flex justify-center">
           <AutoCalCalendar
             hasSelection={selectedIndex !== null}
             schedules={
@@ -326,6 +329,7 @@ export default function AutoCal() {
         </div>
       </div>
 
+      {/* 하단 버튼 - 고정 */}
       <BottomBar
         singleButton
         singleButtonText={isSubmitting ? "저장 중..." : "근무표 저장하기"}
