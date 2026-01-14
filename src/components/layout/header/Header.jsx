@@ -35,15 +35,17 @@ function Header() {
           // 사장: 근무표 생성 상태 확인
           // 1. 생성하기를 눌렀는지 확인 (scheduleGenerationCompleted)
           // 2. 생성하기를 누르지 않고 ScheduleList에서 나간 경우 확인 (hasScheduleRequest)
-          const isGenerationCompleted = localStorage.getItem("scheduleGenerationCompleted") === "true";
-          const hasScheduleRequest = localStorage.getItem("hasScheduleRequest") === "true";
-          
+          const isGenerationCompleted =
+            localStorage.getItem("scheduleGenerationCompleted") === "true";
+          const hasScheduleRequest =
+            localStorage.getItem("hasScheduleRequest") === "true";
+
           console.log("🔍 Header - caladdicon 클릭:", {
             isGenerationCompleted,
             hasScheduleRequest,
-            currentPath: location.pathname
+            currentPath: location.pathname,
           });
-          
+
           if (isGenerationCompleted) {
             // 생성하기를 눌렀을 경우: CalAdd로 이동하고 플래그 제거
             console.log("✅ 생성 완료 → CalAdd로 이동");
@@ -62,7 +64,7 @@ function Header() {
         } else {
           // 알바: work availability가 있는지 확인
           const hasAvailability = await checkExistingAvailability();
-          
+
           if (hasAvailability) {
             navigate("/calModEmp");
           } else {
@@ -91,7 +93,7 @@ function Header() {
         if (key.startsWith("employee_notifications_")) {
           const notifications = JSON.parse(localStorage.getItem(key) || "[]");
           const hasRequest = notifications.some(
-            (notif) => notif.type === "schedule_request" && !notif.read
+            (notif) => notif.type === "schedule_request" && !notif.read,
           );
           if (hasRequest) return true;
         }
@@ -109,15 +111,26 @@ function Header() {
       console.log("🔍 Header: work availability 확인 시작");
       const availabilities = await fetchMyAvailabilities();
       console.log("🔍 Header: fetchMyAvailabilities 응답:", availabilities);
-      
+
       // availabilities가 배열이고 길이가 0보다 크면 true
-      const hasAvailability = availabilities && Array.isArray(availabilities) && availabilities.length > 0;
-      console.log("🔍 Header: availability 존재 여부:", hasAvailability, "개수:", availabilities?.length || 0);
-      
+      const hasAvailability =
+        availabilities &&
+        Array.isArray(availabilities) &&
+        availabilities.length > 0;
+      console.log(
+        "🔍 Header: availability 존재 여부:",
+        hasAvailability,
+        "개수:",
+        availabilities?.length || 0,
+      );
+
       return hasAvailability;
     } catch (error) {
       console.error("❌ Header: work availability 확인 실패:", error);
-      console.error("❌ Header: 에러 상세:", error.response?.data || error.message);
+      console.error(
+        "❌ Header: 에러 상세:",
+        error.response?.data || error.message,
+      );
       return false;
     }
   };
@@ -125,7 +138,12 @@ function Header() {
   return (
     <div className="w-full h-[60px] bg-white flex flex-row justify-between items-center p-5 shadow-[0_2px_7px_0_rgba(0,0,0,0.1)]">
       <div className="flex items-center">
-        <LogoImage />
+        <LogoImage
+          onClick={() => {
+            if (location.pathname.includes("owner")) navigate("/owner");
+            else navigate("/employee");
+          }}
+        />
       </div>
       <div className="flex flex-row items-center gap-4">
         <HeaderMenu
