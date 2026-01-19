@@ -3,7 +3,7 @@ import { CoinIcon } from "../../../assets/icons/CoinIcon.jsx";
 import PhoneIcon from "../../../assets/icons/PhoneIcon";
 import DollarIcon from "../../../assets/icons/DollarIcon.jsx";
 import CopyIcon from "../../../assets/icons/CopyIcon.jsx";
-import Box from "../../../components/common/Box.jsx";
+import Box from "../../../components/Box.jsx";
 import Toast from "../../../components/common/Toast";
 import GreenBtn from "../../../components/common/GreenBtn.jsx";
 import LeftOutlined from "@ant-design/icons/es/icons/LeftOutlined";

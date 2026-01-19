@@ -1,19 +1,20 @@
-import Box from "../../components/common/Box.jsx";
-import ColoredCalIcon from "../../assets/icons/ColoredCalIcon.jsx";
-import ColoredDollarIcon from "../../assets/icons/ColoredDollarIcon.jsx";
-import CheckIcon from "../../assets/icons/CheckIcon.jsx";
-import GreenBtn from "../../components/common/GreenBtn.jsx";
+import Box from "../../components/Box.jsx";
+import RoundTag from "../../components/RoundTag.jsx";
+import ColoredCalIcon from "../../assets/newicons/ColoredCalIcon.jsx";
+import ColoredDollarIcon from "../../assets/newicons/ColoredDollarIcon.jsx";
+import ColoredCheckIcon from "../../assets/newicons/ColoredCheckIcon.jsx";
+import Button from "../../components/Button.jsx";
 import { useEffect, useState } from "react";
 import character1 from "../../assets/images/character1.png";
-import Note from "../../components/common/Note.jsx";
+import Note from "../../components/Note.jsx";
 import ResourceCalendar from "../../components/common/calendar/ResourceCalendar.jsx";
-import { fetchSchedules } from "../../services/common/ScheduleService.js";
+import { getScheduleByPeriod } from "../../services/new/WorkShiftService.js";
 import {
-  fetchActiveStore,
-  fetchStoreList,
-} from "../../services/owner/MyPageService.js";
+  getActiveStore,
+  getOwnerStoreList,
+} from "../../services/new/MypageService.js";
 import dayjs from "dayjs";
-import FloatButton from "../../components/common/FloatButton.jsx";
+import FloatButton from "../../components/mypage/FloatButton.jsx";
 
 function OwnerHome() {
   const [currentTime, setCurrentTime] = useState("");
@@ -40,8 +41,8 @@ function OwnerHome() {
   useEffect(() => {
     (async () => {
       try {
-        const stores = await fetchStoreList();
-        const active = await fetchActiveStore();
+        const stores = await getOwnerStoreList();
+        const active = await getActiveStore();
 
         setStoreList(stores);
         setActiveStore({
@@ -49,15 +50,6 @@ function OwnerHome() {
           name: active.name,
         });
         console.log(activeStore);
-        // const fetchedWage = await fetchWage(
-        //   activeStore.storeId,
-        //   today.format("YYYY-MM"),
-        // );
-        // const totalWage = fetchedWage.payrolls.reduce((sum, payroll) => {
-        //   return sum + payroll.total_pay;
-        // }, 0);
-
-        // setWage(totalWage);
       } catch (error) {
         console.error(error);
       }
@@ -77,7 +69,7 @@ function OwnerHome() {
 
   useEffect(() => {
     (async () => {
-      const schedules = await fetchSchedules(
+      const schedules = await getScheduleByPeriod(
         today.format("YYYY-MM-DD"),
         today.format("YYYY-MM-DD"),
       );
@@ -110,33 +102,25 @@ function OwnerHome() {
   return (
     <div className="w-full flex flex-col py-7 px-5">
       <div className="w-full flex flex-col items-start">
-        <div className="rounded-[30px] border py-[4px] px-[20px] bg-white border-[#32d1aa] shadow-[0_2px_4px_0_rbga(0,0,0,0.15)] text-[16px] font-[600] inline-block">
-          {FormattedDate(today, true)}
-        </div>
+        <RoundTag>{FormattedDate(today, true)}</RoundTag>
         <div className="flex items-center mt-2">
-          <p className="text-[24px] font-[600] my-1">
+          <p className="text-[24px] font-[600]">
             {activeStore?.name} 오늘의 일정은?
           </p>
           <ColoredCalIcon />
         </div>
       </div>
       <div className="flex justify-center w-full">
-        <Note
-          className="w-full my-5 max-w-[500px] overflow-x-hidden"
-          hole={workers.length}
-        >
+        <Note className="w-full my-5 overflow-x-hidden" hole={workers.length}>
           <ResourceCalendar e={events} w={workers} />
         </Note>
       </div>
-      <div className="flex items-center">
-        <CheckIcon />
-        <p className="text-[18px] font-[500] ml-1 my-2">출퇴근 체크!</p>
+      <div className="flex items-center my-2">
+        <ColoredCheckIcon />
+        <p className="text-[18px] font-[500] ml-1">출퇴근 체크!</p>
       </div>
       <div className="flex justify-center w-full">
-        <Box
-          className="flex flex-row items-center justify-between mb-5 w-full max-w-[500px]"
-          disabled={true}
-        >
+        <Box className="flex items-center justify-between mb-5" disabled={true}>
           <div className="flex flex-col items-center justify-center">
             <p className="text-[16px] font-[500]">{activeStore?.name}</p>
             <p className="text-[14px] font-[400] text-[#7a7676]">
@@ -144,28 +128,26 @@ function OwnerHome() {
             </p>
           </div>
           <p className="text-[24px] font-[400]">{currentTime}</p>
-          <GreenBtn className={"w-[120px] h-[30px] py-0 mt-0"}>
-            출근하기
-          </GreenBtn>
+          <Button className={"w-[136px] h-[32px]"}>출근하기</Button>
         </Box>
       </div>
-      <div className="flex items-center">
+      <div className="flex items-center my-2">
         <ColoredDollarIcon />
-        <p className="text-[18px] font-[500] ml-1 my-2">급여관리</p>
+        <p className="text-[18px] font-[500] ml-1">급여관리</p>
       </div>
       <div className="flex justify-center w-full">
         <Box
-          className="flex flex-row items-center justify-between px-8 w-full max-w-[500px]"
+          className="items-center justify-between px-7 py-2 w-full"
           disabled={true}
         >
-          <div className="flex flex-col items-start ">
+          <div className="flex flex-col items-start justify-center">
             <p className="text-[16px] font-[500]">이번 달 누적 지출은?</p>
             <p className="text-[12px] font-[400] mb-5">
               {firstDay}-{FormattedDate(today)}
             </p>
             <p className="text-[24px] font-[400]">{wage}원</p>
           </div>
-          <img src={character1} alt="character" className="size-[110px] mr-1" />
+          <img src={character1} alt="character" className="size-[115px] mr-1" />
         </Box>
       </div>
       <FloatButton

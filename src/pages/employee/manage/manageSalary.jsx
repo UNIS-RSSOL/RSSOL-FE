@@ -5,7 +5,7 @@ import DollarIcon from "../../../assets/icons/DollarIcon.jsx";
 import CopyIcon from "../../../assets/icons/CopyIcon.jsx";
 import Toast from "../../../components/common/Toast.jsx";
 import GreenBtn from "../../../components/common/GreenBtn.jsx";
-import Box from "../../../components/common/Box.jsx";
+import Box from "../../../components/Box.jsx";
 import LeftOutlined from "@ant-design/icons/es/icons/LeftOutlined";
 import RightOutlined from "@ant-design/icons/es/icons/RightOutlined";
 import { Divider } from "antd";

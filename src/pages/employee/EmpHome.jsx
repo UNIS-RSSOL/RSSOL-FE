@@ -1,7 +1,7 @@
-import Box from "../../components/common/Box.jsx";
-import Note from "../../components/common/Note.jsx";
-import ColoredCalIcon from "../../assets/icons/ColoredCalIcon.jsx";
-import ColoredDollarIcon from "../../assets/icons/ColoredDollarIcon.jsx";
+import Box from "../../components/Box.jsx";
+import Note from "../../components/Note.jsx";
+import ColoredCalIcon from "../../assets/newicons/ColoredCalIcon.jsx";
+import ColoredDollarIcon from "../../assets/newicons/ColoredDollarIcon.jsx";
 import CheckIcon from "../../assets/icons/CheckIcon.jsx";
 import GreenBtn from "../../components/common/GreenBtn.jsx";
 import { useEffect, useState } from "react";
@@ -13,7 +13,7 @@ import {
   fetchMydata,
   fetchStoreList,
 } from "../../services/employee/MyPageService.js";
-import FloatButton from "../../components/common/FloatButton.jsx";
+import FloatButton from "../../components/mypage/FloatButton.jsx";
 import dayjs from "dayjs";
 
 function EmpHome() {

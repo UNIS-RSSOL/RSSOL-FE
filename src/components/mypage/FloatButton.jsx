@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import StoreIcon from "../../assets/icons/StoreIcon.jsx";
-import { changeActiveStore } from "../../services/owner/MyPageService.js";
+import StoreIcon from "../../assets/newicons/StoreIcon.jsx";
+import { changeActiveStore } from "../../services/new/MypageService.js";
 
 function FloatButton({ stores, active, onActiveStoreChange }) {
   const [isOpen, setIsOpen] = useState(false);
