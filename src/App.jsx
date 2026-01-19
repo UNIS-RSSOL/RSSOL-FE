@@ -29,6 +29,7 @@ import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
 import EmpHome from "./pages/employee/EmpHome.jsx";
 import Splash from "./pages/common/Splash.jsx";
+import Test from "./Test.jsx";
 
 import { refreshAccessToken } from "./services/kakaoLogin.js";
 import api from "./services/api.js";
@@ -214,6 +215,7 @@ function App() {
 
       <main className="flex-1 overflow-y-auto">
         <Routes>
+          <Route path="/test" element={<Test />} />
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
