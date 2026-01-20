@@ -6,7 +6,7 @@ function Note({ children, className, hole = 0 }) {
       className={`rounded-none rounded-r-[20px] !py-0 !pr-0 !px-2 ${className}`}
       disabled={true}
     >
-      <div className="flex flex-col gap-[18px] mr-1 ">
+      <div className="flex flex-col gap-[18px] mr-1 my-2 ">
         {[...Array(hole + 2)].map((_, index) => (
           <div
             key={index}

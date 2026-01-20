@@ -1,18 +1,19 @@
 import Box from "../../components/Box.jsx";
 import Note from "../../components/Note.jsx";
+import Button from "../../components/Button.jsx";
+import RoundTag from "../../components/RoundTag.jsx";
 import ColoredCalIcon from "../../assets/newicons/ColoredCalIcon.jsx";
 import ColoredDollarIcon from "../../assets/newicons/ColoredDollarIcon.jsx";
-import CheckIcon from "../../assets/icons/CheckIcon.jsx";
-import GreenBtn from "../../components/common/GreenBtn.jsx";
+import ColoredCheckIcon from "../../assets/newicons/ColoredCheckIcon.jsx";
 import { useEffect, useState } from "react";
 import character2 from "../../assets/images/character2.png";
 import character3 from "../../assets/images/character3.png";
-import { fetchSchedules } from "../../services/employee/ScheduleService.js";
+import { getMyScheduleByPeriod } from "../../services/new/WorkShiftService.js";
 import {
-  fetchActiveStore,
-  fetchMydata,
-  fetchStoreList,
-} from "../../services/employee/MyPageService.js";
+  getActiveStore,
+  getStaffProfile,
+  getStaffStoreList,
+} from "../../services/new/MypageService.js";
 import FloatButton from "../../components/mypage/FloatButton.jsx";
 import dayjs from "dayjs";
 
@@ -38,7 +39,7 @@ function EmpHome() {
   useEffect(() => {
     (async () => {
       try {
-        const schedules = await fetchSchedules(
+        const schedules = await getMyScheduleByPeriod(
           today.format("YYYY-MM-DD"),
           today.format("YYYY-MM-DD"),
         );
@@ -48,12 +49,12 @@ function EmpHome() {
           start: dayjs(s.startDatetime).format("HH:mm"),
           end: dayjs(s.endDatetime).format("HH:mm"),
         }));
-        const my = await fetchMydata();
+        const my = await getStaffProfile();
         setUsername(my.username);
         setTodo(td);
 
-        const active = await fetchActiveStore();
-        const stores = await fetchStoreList();
+        const active = await getActiveStore();
+        const stores = await getStaffStoreList();
 
         setActiveStore({
           storeId: active.storeId,
@@ -99,13 +100,9 @@ function EmpHome() {
   return (
     <div className="w-full flex flex-col py-7 px-5 ">
       <div className="w-full flex flex-col items-start">
-        <div className="rounded-[30px] border py-[4px] px-[20px] bg-white border-[#32d1aa] shadow-[0_2px_4px_0_rbga(0,0,0,0.15)] text-[16px] font-[600] inline-block">
-          {FormattedDate(today, true)}
-        </div>
+        <RoundTag>{FormattedDate(today, true)}</RoundTag>
         <div className="flex items-center mt-2">
-          <p className="text-[24px] font-[600] my-1">
-            {username}님 오늘의 일정은?
-          </p>
+          <p className="text-[24px] font-[600]">{username}님 오늘의 일정은?</p>
           <ColoredCalIcon />
         </div>
         <p className="text-[16px] font-[400] mt-2">
@@ -114,24 +111,24 @@ function EmpHome() {
       </div>
       <div className="flex justify-center w-full">
         <Note
-          className="w-full mt-1 mb-5 max-w-[500px] flex-row flex items-center"
-          hole={todo.length - 1}
+          className="relative mt-1 mb-5 flex-row "
+          hole={todo.length - 1 < 2 ? 2 : todo.length - 1}
         >
-          <div className="flex h-full flex-1/3 items-end">
+          <div className="flex flex-1/3">
             <img
               src={character2}
               alt="character"
-              className="size-[90px] mb-1"
+              className="absolute bottom-1 left-6 size-[90px]"
             />
           </div>
-          <div className="flex flex-2/3 flex-col w-full gap-3 my-2 mr-3">
+          <div className="flex flex-2/3 flex-col gap-3 my-2 mr-3">
             {todo.map((td) => (
               <div
                 key={td.id}
-                className="flex flex-row w-full border-b border-[#87888c] pb-1 justify-between"
+                className="flex flex-row w-full border-b border-[#87888c] justify-between"
               >
-                <p className="text-[14px] font-[500]">{td.storeName}</p>
-                <p className="text-[14px] font-[400]">
+                <p className="text-[16px] font-[500]">{td.storeName}</p>
+                <p className="text-[16px] font-[400]">
                   {td.start}-{td.end}
                 </p>
               </div>
@@ -139,15 +136,12 @@ function EmpHome() {
           </div>
         </Note>
       </div>
-      <div className="flex items-center">
-        <CheckIcon />
-        <p className="text-[18px] font-[500] ml-1 my-2">출퇴근 체크!</p>
+      <div className="flex items-center my-2">
+        <ColoredCheckIcon />
+        <p className="text-[18px] font-[500] ml-1">출퇴근 체크!</p>
       </div>
       <div className="flex justify-center w-full">
-        <Box
-          className="flex flex-row items-center justify-between mb-5 w-full max-w-[500px]"
-          disabled={true}
-        >
+        <Box className="flex items-center justify-between mb-5" disabled={true}>
           <div className="flex flex-col items-center justify-center">
             <p className="text-[16px] font-[500]">{activeStore?.name}</p>
             <p className="text-[14px] font-[400] text-[#7a7676]">
@@ -155,12 +149,12 @@ function EmpHome() {
             </p>
           </div>
           <p className="text-[24px] font-[400]">{currentTime}</p>
-          <GreenBtn
-            className={"w-[120px] h-[30px] py-0 mt-0"}
+          <Button
+            className={"w-[136px] h-[32px]"}
             onClick={handleGoWork} //시은추가
           >
             출근하기
-          </GreenBtn>
+          </Button>
         </Box>
         {/* -------- 앱 전용 안내 모달 -------- */}
         {isAppModalOpen && (
@@ -188,17 +182,17 @@ function EmpHome() {
       </div>
       <div className="flex justify-center w-full">
         <Box
-          className="flex flex-row items-center justify-between px-8 w-full max-w-[500px]"
+          className="items-center justify-between px-7 py-2 w-full"
           disabled={true}
         >
-          <div className="flex flex-col items-start ">
+          <div className="flex flex-col items-start justify-center">
             <p className="text-[16px] font-[500]">이번 달 누적 월급은?</p>
             <p className="text-[12px] font-[400] mb-5">
               {firstDay}-{FormattedDate(today)}
             </p>
             <p className="text-[24px] font-[400]">{wage}원</p>
           </div>
-          <img src={character3} alt="character" className="size-[110px] mr-1" />
+          <img src={character3} alt="character" className="size-[115px] mr-1" />
         </Box>
       </div>
       <FloatButton
