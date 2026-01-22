@@ -5,7 +5,7 @@ import {
   deleteOwnerStore,
   addOwnerStore,
 } from "../../../services/new/MypageService.js";
-import TopBar from "../../../components/common/alarm/TopBar.jsx";
+import TopBar from "../../../components/layout/header/TopBar.jsx";
 import AddItem from "../../../components/common/mypage/AddItem.jsx";
 import StoreItem from "../../../components/mypage/StoreItem.jsx";
 import DeleteIcon from "../../../assets/newicons/DeleteIcon.jsx";

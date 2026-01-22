@@ -1,5 +1,4 @@
-import React from "react";
-import { ChevronLeft } from "lucide-react";
+import LeftArrowIcon from "../../../assets/newicons/LeftArrowIcon";
 
 function TopBar({ title, onBack }) {
   return (
@@ -14,7 +13,7 @@ function TopBar({ title, onBack }) {
           outline: "none",
         }}
       >
-        <ChevronLeft size={24} />
+        <LeftArrowIcon />
       </button>
 
       <p className="absolute left-1/2 -translate-x-1/2 text-[18px] font-semibold">

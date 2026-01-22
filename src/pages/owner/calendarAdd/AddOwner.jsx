@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
-import TopBar from "../../../components/common/alarm/TopBar.jsx";
+import TopBar from "../../../components/layout/header/TopBar.jsx";
 import OwnerScheduleCalendar from "../../../components/common/calendar/OwnerScheduleCalendar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import Toast from "../../../components/Toast.jsx";

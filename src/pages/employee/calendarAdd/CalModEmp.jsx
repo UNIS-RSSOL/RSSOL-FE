@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
-import TopBar from "../../../components/common/alarm/TopBar.jsx";
+import TopBar from "../../../components/layout/header/TopBar.jsx";
 import EmployeeScheduleCalendar from "../../../components/common/calendar/EmployeeScheduleCalendar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import {
@@ -442,7 +442,7 @@ function CalModEmp() {
     const availabilitiesList = [];
     Object.keys(schedulesByDayOfWeek).forEach((dayOfWeek) => {
       const daySchedules = schedulesByDayOfWeek[dayOfWeek];
-      
+
       // 시간순으로 정렬
       daySchedules.sort((a, b) => a.start.diff(b.start));
 
@@ -456,7 +456,10 @@ function CalModEmp() {
           };
         } else {
           // 연속된 시간대인지 확인 (끝 시간과 시작 시간이 같거나 겹침)
-          if (currentGroup.end.isSame(schedule.start) || currentGroup.end.isBefore(schedule.start)) {
+          if (
+            currentGroup.end.isSame(schedule.start) ||
+            currentGroup.end.isBefore(schedule.start)
+          ) {
             // 연속된 시간대이므로 합침
             currentGroup.end = schedule.end;
           } else {

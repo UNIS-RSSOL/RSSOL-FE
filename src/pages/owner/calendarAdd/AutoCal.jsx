@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 
-import TopBar from "../../../components/common/alarm/TopBar.jsx";
+import TopBar from "../../../components/layout/header/TopBar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import AutoCalCalendar from "../../../components/common/calendar/AutoCalCalendar.jsx";
 import Modal from "../../../components/Modal.jsx";

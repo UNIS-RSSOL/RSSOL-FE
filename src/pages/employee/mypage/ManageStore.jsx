@@ -5,7 +5,7 @@ import {
   addStore,
 } from "../../../services/employee/MyPageService.js";
 import { useNavigate } from "react-router-dom";
-import TopBar from "../../../components/common/alarm/TopBar.jsx";
+import TopBar from "../../../components/layout/header/TopBar.jsx";
 import MessageModal from "../../../components/common/MessageModal.jsx";
 import DeleteIcon from "../../../assets/newicons/DeleteIcon.jsx";
 import AddIcon from "../../../assets/newicons/AddIcon.jsx";
