@@ -5,7 +5,7 @@ import "dayjs/locale/ko";
 import TopBar from "../../../components/common/alarm/TopBar.jsx";
 import TimeSlotCalendar from "../../../components/common/calendar/TimeSlotCalendar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
-import Toast from "../../../components/common/Toast.jsx";
+import Toast from "../../../components/Toast.jsx";
 import {
   fetchAllWorkers,
   fetchStoreAvailabilities,
@@ -572,7 +572,7 @@ function ScheduleList() {
       <div className="flex-1 overflow-y-auto">
         <div className="px-4 py-3 flex flex-col gap-4">
           <p className="text-center font-bold text-lg">직원 스케줄 목록</p>
-          
+
           <div className="flex justify-center">
             <TimeSlotCalendar
               onTimeSlotClick={handleTimeSlotClick}
@@ -582,88 +582,92 @@ function ScheduleList() {
 
           <div className="w-[90%] mx-auto">
             <div className="flex items-center justify-between">
-            <p className="text-base font-medium">전체 직원 가능 근무 시간대</p>
-            <button
-              onClick={() => navigate("/addOwner")}
-              className="font-medium rounded-full flex items-center justify-center"
-              style={{
-                width: "100px",
-                height: "25px",
-                fontSize: "14px",
-                backgroundColor: "#68E194",
-                color: "#000000",
-                WebkitAppearance: "none",
-                appearance: "none",
-                border: "none",
-                borderRadius: "20px",
-                outline: "none",
-                padding: "0",
-                margin: "0",
-              }}
-            >
-              내 스케줄 추가
-            </button>
-          </div>
+              <p className="text-base font-medium">
+                전체 직원 가능 근무 시간대
+              </p>
+              <button
+                onClick={() => navigate("/addOwner")}
+                className="font-medium rounded-full flex items-center justify-center"
+                style={{
+                  width: "100px",
+                  height: "25px",
+                  fontSize: "14px",
+                  backgroundColor: "#68E194",
+                  color: "#000000",
+                  WebkitAppearance: "none",
+                  appearance: "none",
+                  border: "none",
+                  borderRadius: "20px",
+                  outline: "none",
+                  padding: "0",
+                  margin: "0",
+                }}
+              >
+                내 스케줄 추가
+              </button>
+            </div>
 
-          <div className="flex flex-col gap-3 mt-3">
-            {workers.map((worker, index) => {
-              // 직원 고유 키 찾기 (여러 필드 시도)
-              const workerKey =
-                worker.id ||
-                worker.staffId ||
-                worker.userStoreId ||
-                worker.userId ||
-                `worker_${index}`;
-              const hasError = workerErrors[workerKey];
-              const errorStatus = hasError?.status;
+            <div className="flex flex-col gap-3 mt-3">
+              {workers.map((worker, index) => {
+                // 직원 고유 키 찾기 (여러 필드 시도)
+                const workerKey =
+                  worker.id ||
+                  worker.staffId ||
+                  worker.userStoreId ||
+                  worker.userId ||
+                  `worker_${index}`;
+                const hasError = workerErrors[workerKey];
+                const errorStatus = hasError?.status;
 
-              return (
-                <div
-                  key={workerKey}
-                  className={`flex items-center gap-3 p-3 rounded-lg shadow-sm ${
-                    hasError ? "bg-red-50 border border-red-200" : "bg-white"
-                  }`}
-                >
+                return (
                   <div
-                    className={`flex-shrink-0 w-12 h-12 rounded-full border-2 border-white shadow-sm ${
-                      hasError ? "bg-red-300" : "bg-[#68E194]"
+                    key={workerKey}
+                    className={`flex items-center gap-3 p-3 rounded-lg shadow-sm ${
+                      hasError ? "bg-red-50 border border-red-200" : "bg-white"
                     }`}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-base font-semibold truncate">
-                        {worker.username ||
-                          worker.name ||
-                          worker.userName ||
-                          "이름 없음"}
+                  >
+                    <div
+                      className={`flex-shrink-0 w-12 h-12 rounded-full border-2 border-white shadow-sm ${
+                        hasError ? "bg-red-300" : "bg-[#68E194]"
+                      }`}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-base font-semibold truncate">
+                          {worker.username ||
+                            worker.name ||
+                            worker.userName ||
+                            "이름 없음"}
+                        </p>
+                        {hasError && (
+                          <span className="text-xs text-red-600 font-medium whitespace-nowrap">
+                            ⚠️ 오류
+                          </span>
+                        )}
+                      </div>
+                      <p
+                        className={`text-sm mt-1 ${
+                          hasError
+                            ? "text-red-600 font-medium"
+                            : "text-gray-600"
+                        }`}
+                      >
+                        {formatAvailableTimes(worker)}
                       </p>
-                      {hasError && (
-                        <span className="text-xs text-red-600 font-medium whitespace-nowrap">
-                          ⚠️ 오류
-                        </span>
+                      {hasError && errorStatus === 500 && (
+                        <p className="text-xs text-red-500 mt-1">
+                          서버 오류 (500) - 백엔드 개발자에게 문의 필요
+                        </p>
                       )}
                     </div>
-                    <p
-                      className={`text-sm mt-1 ${
-                        hasError ? "text-red-600 font-medium" : "text-gray-600"
-                      }`}
-                    >
-                      {formatAvailableTimes(worker)}
-                    </p>
-                    {hasError && errorStatus === 500 && (
-                      <p className="text-xs text-red-500 mt-1">
-                        서버 오류 (500) - 백엔드 개발자에게 문의 필요
-                      </p>
-                    )}
                   </div>
-                </div>
-              );
-            })}
-            {workers.length === 0 && (
-              <p className="text-center text-gray-500 py-4">
-                등록된 직원이 없습니다.
-              </p>
-            )}
+                );
+              })}
+              {workers.length === 0 && (
+                <p className="text-center text-gray-500 py-4">
+                  등록된 직원이 없습니다.
+                </p>
+              )}
             </div>
           </div>
         </div>

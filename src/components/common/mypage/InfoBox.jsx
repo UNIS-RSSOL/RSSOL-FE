@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import PencilIcon from "../../../assets/icons/PencilIcon.jsx";
+import PencilIcon from "../../../assets/newicons/PencilIcon.jsx";
 import InfoItem from "./InfoItem.jsx";
-import ArrowIcon from "../../../assets/icons/ArrowIcon.jsx";
+import RightArrowIcon from "../../../assets/newicons/RightArrowIcon.jsx";
 
 function InfoBox({ head, myData, onDataUpdate, role }) {
   const [isEdit, setIsEdit] = useState(false);
@@ -45,7 +45,11 @@ function InfoBox({ head, myData, onDataUpdate, role }) {
             수정완료
           </p>
         ) : (
-          <PencilIcon isFilled={true} onClick={() => setIsEdit(true)} />
+          <PencilIcon
+            className="cursor-pointer"
+            filled={true}
+            onClick={() => setIsEdit(true)}
+          />
         )}
       </div>
       <div className="flex flex-col w-full gap-3">
@@ -66,9 +70,12 @@ function InfoBox({ head, myData, onDataUpdate, role }) {
                   {d.content}
                 </p>
               </div>
-              <ArrowIcon
+              <div
+                className="flex items-center justify-center cursor-pointer p-2"
                 onClick={() => navigate(`/${role}/mypage/managestore`)}
-              />
+              >
+                <RightArrowIcon />
+              </div>
             </div>
           ) : (
             <InfoItem

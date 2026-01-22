@@ -5,7 +5,7 @@ import "dayjs/locale/ko";
 import TopBar from "../../../components/common/alarm/TopBar.jsx";
 import OwnerScheduleCalendar from "../../../components/common/calendar/OwnerScheduleCalendar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
-import Toast from "../../../components/common/Toast.jsx";
+import Toast from "../../../components/Toast.jsx";
 import {
   addWorkshift,
   fetchAllWorkers,
@@ -269,8 +269,7 @@ function AddOwner() {
                 // 예: "22:00"이면 22시까지 포함해야 함
                 // 예: "10:00"이면 10시는 포함하지 않음 (9시까지만)
                 const shouldIncludeEndHour =
-                  endMinute > 0 || 
-                  (endMinute === 0 && endHour === 22); // 22:00은 포함
+                  endMinute > 0 || (endMinute === 0 && endHour === 22); // 22:00은 포함
 
                 const finalEndHour = shouldIncludeEndHour
                   ? endHour
@@ -491,7 +490,7 @@ function AddOwner() {
     const availabilitiesList = [];
     Object.keys(schedulesByDayOfWeek).forEach((dayOfWeek) => {
       const daySchedules = schedulesByDayOfWeek[dayOfWeek];
-      
+
       // 시간순으로 정렬
       daySchedules.sort((a, b) => a.start.diff(b.start));
 
@@ -505,7 +504,10 @@ function AddOwner() {
           };
         } else {
           // 연속된 시간대인지 확인 (끝 시간과 시작 시간이 같거나 겹침)
-          if (currentGroup.end.isSame(schedule.start) || currentGroup.end.isBefore(schedule.start)) {
+          if (
+            currentGroup.end.isSame(schedule.start) ||
+            currentGroup.end.isBefore(schedule.start)
+          ) {
             // 연속된 시간대이므로 합침
             currentGroup.end = schedule.end;
           } else {

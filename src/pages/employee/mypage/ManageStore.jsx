@@ -7,13 +7,13 @@ import {
 import { useNavigate } from "react-router-dom";
 import TopBar from "../../../components/common/alarm/TopBar.jsx";
 import MessageModal from "../../../components/common/MessageModal.jsx";
-import DeleteIcon from "../../../assets/icons/DeleteIcon.jsx";
-import AddIcon from "../../../assets/icons/AddIcon.jsx";
-import Modal from "../../../components/common/Modal.jsx";
+import DeleteIcon from "../../../assets/newicons/DeleteIcon.jsx";
+import AddIcon from "../../../assets/newicons/AddIcon.jsx";
+import Modal from "../../../components/Modal.jsx";
 import GreenBtn from "../../../components/common/GreenBtn.jsx";
 import WhiteBtn from "../../../components/common/WhiteBtn.jsx";
-import Toast from "../../../components/common/Toast.jsx";
-import SaveIcon from "../../../assets/icons/SaveIcon.jsx";
+import Toast from "../../../components/Toast.jsx";
+import SaveIcon from "../../../assets/newicons/SaveIcon.jsx";
 import { CalIcon } from "../../../assets/icons/CalIcon.jsx";
 import AddItem from "../../../components/common/mypage/AddItem.jsx";
 

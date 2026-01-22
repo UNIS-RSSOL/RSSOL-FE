@@ -6,7 +6,7 @@ import "dayjs/locale/ko";
 import TopBar from "../../../components/common/alarm/TopBar.jsx";
 import BottomBar from "../../../components/layout/common/BottomBar.jsx";
 import AutoCalCalendar from "../../../components/common/calendar/AutoCalCalendar.jsx";
-import Modal from "../../../components/common/Modal.jsx";
+import Modal from "../../../components/Modal.jsx";
 import WhiteBtn from "../../../components/common/WhiteBtn.jsx";
 import GreenBtn from "../../../components/common/GreenBtn.jsx";
 import {
@@ -55,46 +55,63 @@ export default function AutoCal() {
       for (let i = 0; i < candidates.length; i++) {
         try {
           const data = await fetchCandidateSchedule(candidateKey, i);
-          
+
           // 백엔드 응답 형식 변환
           // 응답: [{ storeId: 1, shifts: [{ userStoreId, username, startTime, endTime, day }] }]
           // 변환: [{ userStoreId, username, startDatetime, endDatetime }]
           let convertedData = [];
-          
+
           if (Array.isArray(data) && data.length > 0) {
             // 첫 번째 store의 shifts 사용 (보통 하나의 store만 있음)
             const storeData = data[0];
-            if (storeData && storeData.shifts && Array.isArray(storeData.shifts)) {
+            if (
+              storeData &&
+              storeData.shifts &&
+              Array.isArray(storeData.shifts)
+            ) {
               // 주의 시작일 계산 (일요일 기준)
-              const startOfWeek = dayjs(defaultStartDate).locale("ko").startOf("week");
-              const dayMap = { 
-                "SUN": 0, "MON": 1, "TUE": 2, "WED": 3, 
-                "THU": 4, "FRI": 5, "SAT": 6 
+              const startOfWeek = dayjs(defaultStartDate)
+                .locale("ko")
+                .startOf("week");
+              const dayMap = {
+                SUN: 0,
+                MON: 1,
+                TUE: 2,
+                WED: 3,
+                THU: 4,
+                FRI: 5,
+                SAT: 6,
               };
-              
+
               convertedData = storeData.shifts.map((shift) => {
                 const dayIndex = dayMap[shift.day?.toUpperCase()] ?? 0;
                 const targetDate = startOfWeek.add(dayIndex, "day");
-                
+
                 // startTime, endTime을 파싱 (예: "09:00:00")
-                const [startHour, startMinute, startSecond = 0] = 
-                  (shift.startTime || "00:00:00").split(":").map(Number);
-                const [endHour, endMinute, endSecond = 0] = 
-                  (shift.endTime || "00:00:00").split(":").map(Number);
-                
+                const [startHour, startMinute, startSecond = 0] = (
+                  shift.startTime || "00:00:00"
+                )
+                  .split(":")
+                  .map(Number);
+                const [endHour, endMinute, endSecond = 0] = (
+                  shift.endTime || "00:00:00"
+                )
+                  .split(":")
+                  .map(Number);
+
                 // ISO string 형식으로 변환
                 const startDatetime = targetDate
                   .hour(startHour || 0)
                   .minute(startMinute || 0)
                   .second(startSecond || 0)
                   .toISOString();
-                
+
                 const endDatetime = targetDate
                   .hour(endHour || 0)
                   .minute(endMinute || 0)
                   .second(endSecond || 0)
                   .toISOString();
-                
+
                 return {
                   id: Math.random(), // 고유 ID 생성
                   userStoreId: shift.userStoreId,
@@ -109,7 +126,7 @@ export default function AutoCal() {
               });
             }
           }
-          
+
           schedules[i] = convertedData;
         } catch (error) {
           console.error(`대안 ${i + 1} 스케줄 로드 실패:`, error);
@@ -135,19 +152,24 @@ export default function AutoCal() {
     scheduleData.forEach((schedule) => {
       // startDatetime이 있으면 사용, 없으면 day로 변환
       let dayOfWeek = 0;
-      
+
       if (schedule.startDatetime) {
         const startDate = dayjs(schedule.startDatetime);
         dayOfWeek = startDate.day(); // 0(일) ~ 6(토)
       } else if (schedule.day) {
         // day 필드가 있으면 직접 변환 (MON, TUE 등)
-        const dayMap = { 
-          "SUN": 0, "MON": 1, "TUE": 2, "WED": 3, 
-          "THU": 4, "FRI": 5, "SAT": 6 
+        const dayMap = {
+          SUN: 0,
+          MON: 1,
+          TUE: 2,
+          WED: 3,
+          THU: 4,
+          FRI: 5,
+          SAT: 6,
         };
         dayOfWeek = dayMap[schedule.day.toUpperCase()] ?? 0;
       }
-      
+
       // 해당 요일에 스케줄이 있다고 표시
       if (dayOfWeek < 7) {
         grid[dayOfWeek] = true;
@@ -199,12 +221,12 @@ export default function AutoCal() {
       console.log("✅ 근무표 확정 응답:", result);
 
       // 응답이 성공인지 확인 (다양한 응답 형식 지원)
-      const isSuccess = result && (
-        result.status === "success" || 
-        result.status === 200 || 
-        result.message || 
-        result.scheduleId !== undefined
-      );
+      const isSuccess =
+        result &&
+        (result.status === "success" ||
+          result.status === 200 ||
+          result.message ||
+          result.scheduleId !== undefined);
 
       if (isSuccess) {
         console.log("✅ 근무표 확정 성공 - 모달 표시");
@@ -232,18 +254,18 @@ export default function AutoCal() {
 
   const handleModalButton = async (action) => {
     setIsModalOpen(false);
-    
+
     // 백엔드가 데이터를 저장하는 데 시간이 걸릴 수 있으므로 약간의 지연 추가
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     if (action === "view") {
       // 근무표 확정 후 캘린더로 이동 시 새로고침 플래그 전달
-      navigate("/owner/calendar", { 
-        state: { refresh: true, confirmedSchedule: true } 
+      navigate("/owner/calendar", {
+        state: { refresh: true, confirmedSchedule: true },
       });
     } else if (action === "edit") {
-      navigate("/owner/calendar", { 
-        state: { refresh: true, confirmedSchedule: true } 
+      navigate("/owner/calendar", {
+        state: { refresh: true, confirmedSchedule: true },
       });
     }
   };

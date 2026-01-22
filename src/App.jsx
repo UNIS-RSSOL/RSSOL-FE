@@ -221,9 +221,11 @@ function App() {
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
 
+          {/* 홈화면 */}
           <Route path="/owner" element={<OwnerHome />} />
           <Route path="/employee" element={<EmpHome />} />
 
+          {/* 마이페이지 */}
           <Route path="/owner/mypage" element={<OwnerPage />} />
           <Route
             path="/owner/mypage/managestore"

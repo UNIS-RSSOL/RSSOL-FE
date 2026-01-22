@@ -1,16 +1,16 @@
 import DayCalendar from "../../../components/common/calendar/DayCalendar.jsx";
 import WeekCalendar from "../../../components/common/calendar/WeekCalendar.jsx";
-import PencilIcon from "../../../assets/icons/PencilIcon.jsx";
+import PencilIcon from "../../../assets/newicons/PencilIcon.jsx";
 import WhiteBtn from "../../../components/common/WhiteBtn.jsx";
 import GreenBtn from "../../../components/common/GreenBtn.jsx";
-import Modal from "../../../components/common/Modal.jsx";
-import Toast from "../../../components/common/Toast.jsx";
+import Modal from "../../../components/Modal.jsx";
+import Toast from "../../../components/Toast.jsx";
 import { CalIcon } from "../../../assets/icons/CalIcon.jsx";
 import RequestSubIcon from "../../../assets/icons/RequestSubIcon.jsx";
 import RequestWorkIcon from "../../../assets/icons/RequestWorkIcon.jsx";
 import TrashIcon from "../../../assets/icons/TrashIcon.jsx";
-import AddIcon from "../../../assets/icons/AddIcon.jsx";
-import DeleteIcon from "../../../assets/icons/DeleteIcon.jsx";
+import AddIcon from "../../../assets/newicons/AddIcon.jsx";
+import DeleteIcon from "../../../assets/newicons/DeleteIcon.jsx";
 import MessageModal from "../../../components/common/MessageModal.jsx";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
@@ -50,13 +50,13 @@ function OwnerCalendar() {
   const [formattedCurrentWeek, setFormattedCurrentWeek] = useState(
     `${today.format("YY")}.${today.format("MM")} ${Math.ceil(today.date() / 7)}주차`,
   );
-  
+
   // 근무표 확정 후 캘린더로 이동 시 데이터 새로고침
   useEffect(() => {
     if (location.state?.refresh || location.state?.confirmedSchedule) {
       console.log("🔄 근무표 확정 후 캘린더 새로고침");
       // 강제로 컴포넌트 리렌더링을 위해 key 변경
-      setRefreshKey(prev => prev + 1);
+      setRefreshKey((prev) => prev + 1);
       // state 초기화 (다음 방문 시 중복 새로고침 방지)
       window.history.replaceState({}, document.title);
     }

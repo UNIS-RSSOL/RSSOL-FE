@@ -33,7 +33,7 @@ function Toast({ children, isOpen, onClose }) {
     <div className="fixed inset-0 z-40 " onClick={handleBackdropClick}>
       <div
         ref={toastRef}
-        className={`fixed bottom-0 left-1/2 w-full max-w-[393px] bg-[#fdfffe] flex flex-col p-5 rounded-t-2xl shadow-[0px_-1px_20px_0px_rgba(0,0,0,0.25)] ${
+        className={`fixed bottom-0 left-1/2 w-full max-w-[393px] bg-[#fdfffe] flex flex-col p-5 rounded-t-[20px] shadow-[0px_-1px_20px_0px_rgba(0,0,0,0.25)] ${
           isClosing ? "animate-slideDown" : "animate-slideUp"
         }`}
         style={{

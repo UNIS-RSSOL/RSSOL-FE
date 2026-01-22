@@ -1,4 +1,5 @@
 import axios from "axios";
+import { refreshToken } from "./AuthService";
 
 //axios 인스턴스. 이후 주소 쓸 때는 api/ 이후 부터 쓰면 됨
 const api = axios.create({
@@ -14,6 +15,12 @@ api.interceptors.request.use(
     const accessToken = localStorage.getItem("accessToken");
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
+    } else {
+      const refreshToken = localStorage.getItem("refreshToken");
+      if (refreshToken) {
+        const newAccessToken = refreshToken(refreshToken);
+        config.headers.Authorization = `Bearer ${newAccessToken.accessToken}`;
+      }
     }
     return config;
   },

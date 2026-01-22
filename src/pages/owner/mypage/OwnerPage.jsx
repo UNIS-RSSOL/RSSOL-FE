@@ -1,24 +1,24 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import InfoBox from "../../../components/common/mypage/InfoBox.jsx";
-import { MypageIcon } from "../../../assets/icons/MypageIcon.jsx";
-import MsgIcon from "../../../assets/icons/MsgIcon.jsx";
-import { CoinIcon } from "../../../assets/icons/CoinIcon.jsx";
-import SaveIcon from "../../../assets/icons/SaveIcon.jsx";
-import TypeIcon from "../../../assets/icons/TypeIcon.jsx";
-import MapIcon from "../../../assets/icons/MapIcon.jsx";
-import PhoneIcon from "../../../assets/icons/PhoneIcon.jsx";
-import NoteIcon from "../../../assets/icons/NoteIcon.jsx";
-import character from "../../../assets/images/OwnerBtn.png";
-
+import UserIcon from "../../../assets/newicons/UserIcon.jsx";
+import MailIcon from "../../../assets/newicons/MailIcon.jsx";
+import CoinIcon from "../../../assets/newicons/CoinIcon.jsx";
+import SaveIcon from "../../../assets/newicons/SaveIcon.jsx";
+import TypeIcon from "../../../assets/newicons/TypeIcon.jsx";
+import MarkerIcon from "../../../assets/newicons/MarkerIcon.jsx";
+import PhoneIcon from "../../../assets/newicons/PhoneIcon.jsx";
+import FileEditIcon from "../../../assets/newicons/FileEditIcon.jsx";
+import OwnerBtn from "../../../assets/images/OwnerBtn.png";
 import {
-  fetchMydata,
-  fetchStoredata,
-  updateMydata,
-  updateStoredata,
-  fetchStoreList,
-} from "../../../services/owner/MyPageService.js";
-import { logout } from "../../../services/authService.js";
+  getOwnerProfile,
+  getOwnerStore,
+  updateOwnerProfile,
+  updateOwnerStore,
+  getOwnerStoreList,
+} from "../../../services/new/MypageService.js";
+
+import { logout } from "../../../services/new/AuthService.js";
 
 function OwnerPage() {
   const navigate = useNavigate();
@@ -29,21 +29,21 @@ function OwnerPage() {
   useEffect(() => {
     (async () => {
       try {
-        const my = await fetchMydata();
+        const my = await getOwnerProfile();
         setProfile(my.profileImageUrl);
-        const store = await fetchStoredata();
-        const storeList = await fetchStoreList();
+        const store = await getOwnerStore();
+        const storeList = await getOwnerStoreList();
 
         let storeStr = storeList.map((store) => store.name).join(", ");
         if (storeStr.length > 10) storeStr = storeStr.slice(0, 10) + "...";
         const initialMydata = [
           {
-            icon: <MypageIcon className="size-[20px]" />,
+            icon: <UserIcon className="size-[20px]" />,
             title: "내 이름",
             content: my.username,
           },
           {
-            icon: <MsgIcon className="size-[20px]" />,
+            icon: <MailIcon className="size-[20px]" />,
             title: "내 이메일",
             content: my.email,
             msg: "올바른 형식으로 입력해 주세요.",
@@ -71,7 +71,7 @@ function OwnerPage() {
             check: checkStoreName,
           },
           {
-            icon: <MapIcon className="size-[20px]" />,
+            icon: <MarkerIcon className="size-[20px]" />,
             title: "매장 주소",
             content: store.address,
           },
@@ -83,7 +83,7 @@ function OwnerPage() {
             check: checkStorePhone,
           },
           {
-            icon: <NoteIcon className="size-[20px]" />,
+            icon: <FileEditIcon className="size-[20px]" />,
             title: "내 매장 관리",
             content: storeStr,
           },
@@ -101,7 +101,7 @@ function OwnerPage() {
   const handleMyDataUpdate = async (updatedData) => {
     try {
       setMydata(updatedData);
-      await updateMydata(
+      await updateOwnerProfile(
         updatedData[0].content,
         updatedData[1].content,
         updatedData[2].content,
@@ -115,7 +115,7 @@ function OwnerPage() {
   const handleStoreDataUpdate = async (updatedData) => {
     try {
       setStoredata(updatedData);
-      await updateStoredata(
+      await updateOwnerStore(
         updatedData[1].content,
         updatedData[2].content,
         updatedData[3].content,
@@ -162,7 +162,7 @@ function OwnerPage() {
     <div className="flex flex-col divide-y-8 divide-[#e7eaf3]">
       <div className="flex items-center justify-center">
         {!profile || profile === "" || profile === null ? (
-          <img src={character} alt="profile" className="size-[150px] my-5" />
+          <img src={OwnerBtn} alt="profile" className="size-[150px] my-5" />
         ) : (
           <div className="flex items-center justify-center size-[130px] bg-[#68e194] border-3 border-[#fdfffe] shadow-[0_4px_8px_0_rgba(0,0,0,0.2)] overflow-hidden rounded-full my-7">
             <img src={profile} alt="profile" />

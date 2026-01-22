@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import InfoBox from "../../../components/common/mypage/InfoBox.jsx";
 import { MypageIcon } from "../../../assets/icons/MypageIcon.jsx";
 import MsgIcon from "../../../assets/icons/MsgIcon.jsx";
-import { CoinIcon } from "../../../assets/icons/CoinIcon.jsx";
+import { CoinIcon } from "../../../assets/newicons/CoinIcon.jsx";
 import StoreIcon from "../../../assets/newicons/StoreIcon.jsx";
 import NoteIcon from "../../../assets/icons/NoteIcon.jsx";
 import character from "../../../assets/images/EmpBtn.png";

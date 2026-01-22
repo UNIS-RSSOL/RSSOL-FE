@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import MessageModal from "../../../components/common/MessageModal.jsx";
-import Toast from "../../../components/common/Toast.jsx";
+import Toast from "../../../components/Toast.jsx";
 import GreenBtn from "../../../components/common/GreenBtn.jsx";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import {

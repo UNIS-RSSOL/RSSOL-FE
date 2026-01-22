@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import CopyIcon from "../../../assets/icons/CopyIcon.jsx";
-import { CaretDownFilled } from "@ant-design/icons";
-import Modal from "../Modal.jsx";
+import CopyIcon from "../../../assets/newicons/CopyIcon.jsx";
+import RightArrowIcon from "../../../assets/newicons/RightArrowIcon.jsx";
+import Modal from "../../Modal.jsx";
 
 function InfoItem({ data, isEdit = false, onUpdate }) {
   const [value, setValue] = useState(data.content);
@@ -65,14 +65,14 @@ function InfoItem({ data, isEdit = false, onUpdate }) {
           <span className="text-[12px] font-[400]">
             {items.find((item) => item.key === selectedKey)?.label}
           </span>
-          <CaretDownFilled
+          {/* <CaretDownFilled
             style={{
               fontSize: "12px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}
-          />
+          /> */}
         </div>
         {dropdownOpen && (
           <div className="absolute left-0 top-full mt-0 w-[70px] border border-t-0 rounded-b-[12px] overflow-hidden z-10">
@@ -190,7 +190,7 @@ function InfoItem({ data, isEdit = false, onUpdate }) {
         <div className="h-[12px]  ml-11"></div>
       )}
       {copied && (
-        <Modal onClose={setCopied} xx={false}>
+        <Modal className="w-auto px-10" onClose={setCopied} xx={false}>
           <p className="text-[16px] font-[400]">복사 완료되었습니다.</p>
         </Modal>
       )}

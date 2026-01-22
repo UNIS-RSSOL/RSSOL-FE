@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import Modal from "./Modal";
+import Modal from "../Modal";
 
 function MessageModal({ isOpen, message, onClose, duration = 1000 }) {
   useEffect(() => {

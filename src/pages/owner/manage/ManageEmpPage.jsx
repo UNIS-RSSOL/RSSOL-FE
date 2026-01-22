@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { CoinIcon } from "../../../assets/icons/CoinIcon.jsx";
-import PhoneIcon from "../../../assets/icons/PhoneIcon";
+import { CoinIcon } from "../../../assets/newicons/CoinIcon.jsx";
+import PhoneIcon from "../../../assets/newicons/PhoneIcon.jsx";
 import DollarIcon from "../../../assets/icons/DollarIcon.jsx";
-import CopyIcon from "../../../assets/icons/CopyIcon.jsx";
+import CopyIcon from "../../../assets/newicons/CopyIcon.jsx";
 import Box from "../../../components/Box.jsx";
-import Toast from "../../../components/common/Toast";
+import Toast from "../../../components/Toast.jsx";
 import GreenBtn from "../../../components/common/GreenBtn.jsx";
 import LeftOutlined from "@ant-design/icons/es/icons/LeftOutlined";
 import RightOutlined from "@ant-design/icons/es/icons/RightOutlined";
