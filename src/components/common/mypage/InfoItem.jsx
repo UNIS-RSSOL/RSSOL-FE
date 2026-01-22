@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import CopyIcon from "../../../assets/newicons/CopyIcon.jsx";
-import RightArrowIcon from "../../../assets/newicons/RightArrowIcon.jsx";
-import Modal from "../../Modal.jsx";
+import MessageModal from "../../MessageModal.jsx";
 
 function InfoItem({ data, isEdit = false, onUpdate }) {
   const [value, setValue] = useState(data.content);
@@ -190,9 +189,9 @@ function InfoItem({ data, isEdit = false, onUpdate }) {
         <div className="h-[12px]  ml-11"></div>
       )}
       {copied && (
-        <Modal className="w-auto px-10" onClose={setCopied} xx={false}>
+        <MessageModal isOpen={copied} onClose={() => setCopied(false)}>
           <p className="text-[16px] font-[400]">복사 완료되었습니다.</p>
-        </Modal>
+        </MessageModal>
       )}
     </div>
   );

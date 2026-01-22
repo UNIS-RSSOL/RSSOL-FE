@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import InfoBox from "../../../components/common/mypage/InfoBox.jsx";
-import { MypageIcon } from "../../../assets/icons/MypageIcon.jsx";
-import MsgIcon from "../../../assets/icons/MsgIcon.jsx";
-import { CoinIcon } from "../../../assets/newicons/CoinIcon.jsx";
+import UserIcon from "../../../assets/newicons/UserIcon.jsx";
+import MailIcon from "../../../assets/newicons/MailIcon.jsx";
+import FileEditIcon from "../../../assets/newicons/FileEditIcon.jsx";
+import CoinIcon from "../../../assets/newicons/CoinIcon.jsx";
 import StoreIcon from "../../../assets/newicons/StoreIcon.jsx";
-import NoteIcon from "../../../assets/icons/NoteIcon.jsx";
-import character from "../../../assets/images/EmpBtn.png";
+import EmpBtn from "../../../assets/images/EmpBtn.png";
 import {
-  fetchMydata,
-  fetchStoreList,
-  updateMydata,
-} from "../../../services/employee/MyPageService.js";
+  getStaffProfile,
+  getStaffStoreList,
+  updateStaffProfile,
+} from "../../../services/new/MypageService.js";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../../../services/authService.js";
+import { logout } from "../../../services/new/AuthService.js";
 
 function EmployeePage() {
   const navigate = useNavigate();
@@ -22,16 +22,16 @@ function EmployeePage() {
   useEffect(() => {
     (async () => {
       try {
-        const my = await fetchMydata();
+        const my = await getStaffProfile();
         setProfile(my.profileImageUrl);
 
-        const storeList = await fetchStoreList();
+        const storeList = await getStaffStoreList();
 
         let storeStr = storeList.map((store) => store.name).join(", ");
         if (storeStr.length > 10) storeStr = storeStr.slice(0, 10) + "...";
         const initialMydata = [
           {
-            icon: <MypageIcon className="size-[20px]" />,
+            icon: <UserIcon className="size-[20px]" />,
             title: "내 이름",
             content: my.username,
           },
@@ -49,14 +49,14 @@ function EmployeePage() {
             check: checkBank,
           },
           {
-            icon: <MsgIcon classNAme="size-[20px]" />,
+            icon: <MailIcon classNAme="size-[20px]" />,
             title: "내 이메일",
             content: my.email,
             msg: "최소 10자리부터 입력 가능합니다.",
             check: checkEmail,
           },
           {
-            icon: <NoteIcon className="size-[20px]" />,
+            icon: <FileEditIcon className="size-[20px]" />,
             title: "내 매장 관리",
             content: storeStr,
           },
@@ -72,7 +72,7 @@ function EmployeePage() {
   //내정보수정
   const handleMyDataUpdate = async (updatedData) => {
     setMydata(updatedData);
-    await updateMydata(
+    await updateStaffProfile(
       updatedData[0].content,
       updatedData[3].content,
       updatedData[2].id,
@@ -108,7 +108,7 @@ function EmployeePage() {
     <div className="flex flex-col divide-y-8 divide-[#e7eaf3]">
       <div className="flex items-center justify-center">
         {!profile || profile === "" || profile === null ? (
-          <img src={character} alt="profile" className="size-[150px] my-5" />
+          <img src={EmpBtn} alt="profile" className="size-[150px] my-5" />
         ) : (
           <div className="flex items-center justify-center size-[130px] bg-[#68e194] border-3 border-[#fdfffe] shadow-[0_4px_8px_0_rgba(0,0,0,0.2)] overflow-hidden rounded-full my-7">
             <img src={profile} alt="profile" />

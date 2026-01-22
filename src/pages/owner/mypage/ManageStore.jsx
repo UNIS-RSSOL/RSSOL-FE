@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   getOwnerStoreList,
   deleteOwnerStore,
@@ -8,23 +7,17 @@ import {
 import TopBar from "../../../components/layout/header/TopBar.jsx";
 import AddItem from "../../../components/common/mypage/AddItem.jsx";
 import StoreItem from "../../../components/mypage/StoreItem.jsx";
-import DeleteIcon from "../../../assets/newicons/DeleteIcon.jsx";
 import AddIcon from "../../../assets/newicons/AddIcon.jsx";
 import Modal from "../../../components/Modal.jsx";
 import Button from "../../../components/Button.jsx";
-import GreenBtn from "../../../components/common/GreenBtn.jsx";
-import WhiteBtn from "../../../components/common/WhiteBtn.jsx";
 import Toast from "../../../components/Toast.jsx";
 import TypeIcon from "../../../assets/newicons/TypeIcon.jsx";
 import MarkerIcon from "../../../assets/newicons/MarkerIcon.jsx";
-import MapIcon from "../../../assets/icons/MapIcon.jsx";
 import PhoneIcon from "../../../assets/newicons/PhoneIcon.jsx";
 import SaveIcon from "../../../assets/newicons/SaveIcon.jsx";
 import CalendarIcon from "../../../assets/newicons/CalendarIcon.jsx";
-import { CalIcon } from "../../../assets/icons/CalIcon.jsx";
 
 function ManageStore() {
-  const navigate = useNavigate();
   const [storeList, setStoreList] = useState([]);
   const [deleteModal, setDeleteModal] = useState(false);
   const [deletedStore, setDeletedStore] = useState({
@@ -79,7 +72,6 @@ function ManageStore() {
 
   const handleDeleteStore = async () => {
     try {
-      console.log(deletedStore);
       await deleteOwnerStore(deletedStore.storeId);
       setDeleteModal(false);
       setDeletedStore("");
@@ -118,7 +110,7 @@ function ManageStore() {
           content: "",
         },
         {
-          icon: <MapIcon />,
+          icon: <MarkerIcon />,
           title: "매장 주소",
           content: "",
         },
@@ -133,7 +125,7 @@ function ManageStore() {
           content: "",
         },
         {
-          icon: <SaveIcon />,
+          icon: <CalendarIcon />,
           title: "입사날짜",
           content: "",
           type: "date",
@@ -146,7 +138,7 @@ function ManageStore() {
 
   return (
     <div className="w-full h-full flex flex-col overflow-y-auto">
-      <TopBar title="내 매장 관리" onBack={() => navigate("/owner/mypage")} />
+      <TopBar title="내 매장 관리" />
       <div className="flex flex-col w-full my-10 px-5 gap-5">
         {storeList.map((store, index) => (
           <StoreItem
@@ -218,12 +210,12 @@ function ManageStore() {
                 />
               ))}
             </div>
-            <GreenBtn
-              className="py-6 text-[16px] font-[600]"
+            <Button
+              className="w-[361px] h-[48px] text-[16px] font-[600]"
               onClick={handleAddStore}
             >
               추가하기
-            </GreenBtn>
+            </Button>
           </Toast>
         )}
       </div>

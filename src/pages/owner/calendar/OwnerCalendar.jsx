@@ -11,7 +11,7 @@ import RequestWorkIcon from "../../../assets/icons/RequestWorkIcon.jsx";
 import TrashIcon from "../../../assets/icons/TrashIcon.jsx";
 import AddIcon from "../../../assets/newicons/AddIcon.jsx";
 import DeleteIcon from "../../../assets/newicons/DeleteIcon.jsx";
-import MessageModal from "../../../components/common/MessageModal.jsx";
+import MessageModal from "../../../components/MessageModal.jsx";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import dayjs from "dayjs";

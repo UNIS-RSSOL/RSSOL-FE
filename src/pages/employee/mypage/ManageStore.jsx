@@ -1,27 +1,27 @@
 import { useState, useEffect } from "react";
-import {
-  fetchStoreList,
-  deleteStore,
-  addStore,
-} from "../../../services/employee/MyPageService.js";
-import { useNavigate } from "react-router-dom";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
-import MessageModal from "../../../components/common/MessageModal.jsx";
-import DeleteIcon from "../../../assets/newicons/DeleteIcon.jsx";
+import MessageModal from "../../../components/MessageModal.jsx";
+import StoreItem from "../../../components/mypage/StoreItem.jsx";
 import AddIcon from "../../../assets/newicons/AddIcon.jsx";
 import Modal from "../../../components/Modal.jsx";
-import GreenBtn from "../../../components/common/GreenBtn.jsx";
-import WhiteBtn from "../../../components/common/WhiteBtn.jsx";
+import Button from "../../../components/Button.jsx";
 import Toast from "../../../components/Toast.jsx";
 import SaveIcon from "../../../assets/newicons/SaveIcon.jsx";
-import { CalIcon } from "../../../assets/icons/CalIcon.jsx";
+import CalendarIcon from "../../../assets/newicons/CalendarIcon.jsx";
 import AddItem from "../../../components/common/mypage/AddItem.jsx";
+import {
+  getStaffStoreList,
+  deleteStaffStore,
+  addStaffStore,
+} from "../../../services/new/MypageService.js";
 
 function ManageStore() {
-  const navigate = useNavigate();
   const [storeList, setStoreList] = useState([]);
   const [deleteModal, setDeleteModal] = useState(false);
-  const [deletedStore, setDeletedStore] = useState();
+  const [deletedStore, setDeletedStore] = useState({
+    storeId: "",
+    name: "",
+  });
   const [addToast, setAddToast] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
   const [failModal, setFailModal] = useState(false);
@@ -32,7 +32,7 @@ function ManageStore() {
       content: "",
     },
     {
-      icon: <CalIcon />,
+      icon: <CalendarIcon />,
       title: "입사 날짜",
       content: "",
       type: "date",
@@ -42,7 +42,7 @@ function ManageStore() {
   useEffect(() => {
     (async () => {
       try {
-        const response = await fetchStoreList();
+        const response = await getStaffStoreList();
 
         const formattedList = response.map((store) => ({
           storeId: store.storeId,
@@ -55,29 +55,12 @@ function ManageStore() {
     })();
   }, [addToast, deleteModal]);
 
-  const StoreItem = ({ index, store }) => {
-    return (
-      <div className="flex flex-col w-full items-start justify-center">
-        <p className="text-[14px] font-[600] text-left">등록 매장 {index}</p>
-        <div className="flex flex-row w-full justify-between items-center border-b border-[#87888c] py-2">
-          <p className="text-[18px] font-[600] text-left">{store.name}</p>
-          <DeleteIcon
-            onClick={() => {
-              setDeletedStore(store);
-              setDeleteModal(true);
-            }}
-          />
-        </div>
-      </div>
-    );
-  };
-
   //매장 삭제
   const handleDeleteStore = async () => {
     try {
-      await deleteStore(deletedStore.storeId);
+      await deleteStaffStore(deletedStore.storeId);
       setDeleteModal(false);
-      setDeletedStore(null);
+      setDeletedStore("");
     } catch (error) {
       console.error(error);
     }
@@ -92,7 +75,7 @@ function ManageStore() {
         return;
       }
       console.log(newStore);
-      await addStore(newStore[0].content, newStore[1].content);
+      await addStaffStore(newStore[0].content, newStore[1].content);
       setAddToast(false);
       setSuccessModal(true);
 
@@ -103,7 +86,7 @@ function ManageStore() {
           content: "",
         },
         {
-          icon: <CalIcon />,
+          icon: <CalendarIcon />,
           title: "입사 날짜",
           content: "",
           type: "date",
@@ -117,13 +100,18 @@ function ManageStore() {
 
   return (
     <div className="flex flex-col w-full h-full">
-      <TopBar
-        title="등록 매장 관리"
-        onBack={() => navigate("/employee/mypage")}
-      />
+      <TopBar title="등록 매장 관리" />
       <div className="flex flex-col w-full my-10 px-5 gap-5">
         {storeList.map((store, index) => (
-          <StoreItem key={index + 1} index={index + 1} store={store} />
+          <StoreItem
+            key={index + 1}
+            index={index + 1}
+            store={store}
+            onClick={() => {
+              setDeleteModal(true);
+              setDeletedStore(store);
+            }}
+          />
         ))}
         <div
           className="flex flex-row items-center justify-center my-2 gap-3 cursor-pointer"
@@ -134,6 +122,7 @@ function ManageStore() {
         </div>
         {deleteModal && (
           <Modal
+            xx={true}
             onClose={() => {
               setDeleteModal(false);
             }}
@@ -144,18 +133,22 @@ function ManageStore() {
                 <p>삭제할까요?</p>
               </div>
               <div className="flex flex-row w-full items-center gap-2">
-                <WhiteBtn
-                  className="flex flex-1/2"
+                <Button
+                  className="flex flex-1/2 w-[136px] h-[33px] bg-[#fdfffe] border-[1px] border-black"
                   onClick={() => {
                     setDeleteModal(false);
                     setDeletedStore("");
                   }}
                 >
                   아니오
-                </WhiteBtn>
-                <GreenBtn className="flex flex-1/2" onClick={handleDeleteStore}>
+                </Button>
+                <Button
+                  className="flex flex-1/2 w-[136px] h-[33px]"
+                  onClick={handleDeleteStore}
+                >
+                  {" "}
                   예
-                </GreenBtn>
+                </Button>
               </div>
             </div>
           </Modal>
@@ -180,26 +173,27 @@ function ManageStore() {
                 />
               ))}
             </div>
-            <GreenBtn
-              className="py-6 text-[16px] font-[600]"
+            <Button
+              className="w-[361px] h-[48px] text-[16px] font-[600]"
               onClick={handleAddStore}
             >
               추가하기
-            </GreenBtn>
+            </Button>
           </Toast>
         )}
         {failModal && (
-          <Modal onClose={() => setFailModal(false)}>
-            <p className="text-[14px] font-[500] my-4">
+          <Modal xx={true} onClose={() => setFailModal(false)}>
+            <p className="text-[14px] font-[500] my-3 mx-5">
               입력하신 매장 등록 코드가 존재하지 않습니다
             </p>
           </Modal>
         )}
         <MessageModal
           isOpen={successModal}
-          message="추가 완료되었어요!"
           onClose={() => setSuccessModal(false)}
-        />
+        >
+          추가 완료되었어요!
+        </MessageModal>
       </div>
     </div>
   );
