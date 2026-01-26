@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { fetchSchedules } from "../../../services/common/ScheduleService.js";
+import { getScheduleByPeriod } from "../../../services/new/WorkShiftService.js";
 
 function DayCalendar({
   date,
@@ -25,7 +25,7 @@ function DayCalendar({
           refreshKey,
         });
 
-        const schedules = await fetchSchedules(
+        const schedules = await getScheduleByPeriod(
           date.format("YYYY-MM-DD"),
           date.format("YYYY-MM-DD"),
           storeId,

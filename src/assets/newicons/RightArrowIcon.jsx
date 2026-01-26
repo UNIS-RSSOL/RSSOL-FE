@@ -1,4 +1,4 @@
-function RightArrowIcon({ className }) {
+function RightArrowIcon({ className, onClick }) {
   return (
     <svg
       width="7"
@@ -7,6 +7,7 @@ function RightArrowIcon({ className }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
+      onClick={onClick}
     >
       <path
         d="M1 11L6 6L0.999999 1"

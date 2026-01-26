@@ -237,6 +237,10 @@ function App() {
             element={<EmpManageStore />}
           />
 
+          {/* 캘린더 */}
+          <Route path="/employee/calendar" element={<EmpCalendar />} />
+          <Route path="/owner/calendar" element={<OwnerCalendar />} />
+
           {/* 근무표생성 */}
           <Route
             path="/employee/schedule/modifying"
@@ -254,8 +258,6 @@ function App() {
 
           <Route path="/owner/manage" element={<ManageEmpPage />} />
           <Route path="/employee/manage" element={<ManageSalary />} />
-          <Route path="/owner/calendar" element={<OwnerCalendar />} />
-          <Route path="/employee/calendar" element={<EmpCalendar />} />
         </Routes>
       </main>
 

@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import "dayjs/locale/ko";
-import { fetchSchedules } from "../../../services/common/ScheduleService.js";
+import { getScheduleByPeriod } from "../../../services/new/WorkShiftService.js";
 
 function WeekCalendar({
   date,
@@ -34,7 +34,7 @@ function WeekCalendar({
         refreshKey,
       });
 
-      const schedules = await fetchSchedules(
+      const schedules = await getScheduleByPeriod(
         startOfWeek.format("YYYY-MM-DD"),
         startOfWeek.add(6, "day").format("YYYY-MM-DD"),
         storeId,

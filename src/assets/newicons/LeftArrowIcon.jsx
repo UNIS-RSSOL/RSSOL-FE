@@ -1,4 +1,4 @@
-function LeftArrowIcon({ color = "black", className }) {
+function LeftArrowIcon({ color = "black", className, onClick }) {
   return (
     <svg
       width="7"
@@ -7,6 +7,7 @@ function LeftArrowIcon({ color = "black", className }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
+      onClick={onClick}
     >
       <path
         d="M6 11L1 6L6 1"
