@@ -7,7 +7,7 @@ import Button from "../../components/Button.jsx";
 import { useEffect, useState } from "react";
 import character1 from "../../assets/images/character1.png";
 import Note from "../../components/Note.jsx";
-import ResourceCalendar from "../../components/common/calendar/ResourceCalendar.jsx";
+import OwnerHomeCalendar from "../../components/common/calendar/OwnerHomeCalendar.jsx";
 import { getScheduleByPeriod } from "../../services/new/WorkShiftService.js";
 import {
   getActiveStore,
@@ -112,7 +112,7 @@ function OwnerHome() {
       </div>
       <div className="flex justify-center w-full">
         <Note className="w-full my-5 overflow-x-hidden" hole={workers.length}>
-          <ResourceCalendar e={events} w={workers} />
+          <OwnerHomeCalendar e={events} w={workers} />
         </Note>
       </div>
       <div className="flex items-center my-2">

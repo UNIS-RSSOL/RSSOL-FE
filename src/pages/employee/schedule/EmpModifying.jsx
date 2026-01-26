@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
@@ -14,7 +14,7 @@ import {
   fetchMydata,
 } from "../../../services/employee/MyPageService.js";
 
-function CalModEmp() {
+function EmpModifying() {
   const navigate = useNavigate();
   const [currentDate] = useState(dayjs().locale("ko"));
   const [selectedTimeSlots, setSelectedTimeSlots] = useState(new Set());
@@ -609,4 +609,4 @@ function CalModEmp() {
   );
 }
 
-export default CalModEmp;
+export default EmpModifying;

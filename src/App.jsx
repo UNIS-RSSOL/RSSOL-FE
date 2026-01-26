@@ -18,7 +18,7 @@ import EmpManageStore from "./pages/employee/mypage/ManageStore.jsx";
 import AlarmHomeEmp from "./pages/employee/alarm/AlarmHomeEmp.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
-import CalModEmp from "./pages/employee/calendarAdd/CalModEmp.jsx";
+import EmpModifying from "./pages/employee/schedule/EmpModifying.jsx";
 import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
 import CalGen from "./pages/owner/calendarAdd/CalGen.jsx";
 import AutoCal from "./pages/owner/calendarAdd/AutoCal.jsx";
@@ -150,28 +150,28 @@ function App() {
   /** -------------------------
    *  루트에서만 인증 체크
    --------------------------*/
-  useEffect(() => {
-    // 인증 체크가 필요한 경로
-    const checkPages = ["/"];
-    // 인증 체크가 불필요한 경로
-    const publicPages = ["/", "/login", "/onboarding", "/auth/kakao/callback"];
+  // useEffect(() => {
+  //   // 인증 체크가 필요한 경로
+  //   const checkPages = ["/"];
+  //   // 인증 체크가 불필요한 경로
+  //   const publicPages = ["/", "/login", "/onboarding", "/auth/kakao/callback"];
 
-    //2025-12-04: mypage, calendar 토큰 파싱 문제
-    const AccessToken = localStorage.getItem("accessToken");
-    const RefreshToken = localStorage.getItem("refreshToken");
+  //   //2025-12-04: mypage, calendar 토큰 파싱 문제
+  //   const AccessToken = localStorage.getItem("accessToken");
+  //   const RefreshToken = localStorage.getItem("refreshToken");
 
-    //토큰 둘 다 없음 → publicPages 외부 접근 차단
-    if (!AccessToken && !RefreshToken) {
-      if (!publicPages.includes(location.pathname)) {
-        navigate("/login", { replace: true });
-      }
-      return;
-    }
+  //   //토큰 둘 다 없음 → publicPages 외부 접근 차단
+  //   if (!AccessToken && !RefreshToken) {
+  //     if (!publicPages.includes(location.pathname)) {
+  //       navigate("/login", { replace: true });
+  //     }
+  //     return;
+  //   }
 
-    if (checkPages.includes(location.pathname)) {
-      checkAuthAndRedirect();
-    }
-  }, [location.pathname, checkAuthAndRedirect]);
+  //   if (checkPages.includes(location.pathname)) {
+  //     checkAuthAndRedirect();
+  //   }
+  // }, [location.pathname, checkAuthAndRedirect]);
 
   /** -------------------------
    *  레이아웃 제외 경로
@@ -184,7 +184,7 @@ function App() {
     "/calAdd",
     "/calGen",
     "/autoCal",
-    "/calModEmp",
+    "/employee/schedule/modifying",
     "/addOwner",
     "/scheduleList",
     "/alarmHomeEmp",
@@ -237,7 +237,11 @@ function App() {
             element={<EmpManageStore />}
           />
 
-          <Route path="/calModEmp" element={<CalModEmp />} />
+          {/* 근무표생성 */}
+          <Route
+            path="/employee/schedule/modifying"
+            element={<EmpModifying />}
+          />
           <Route path="/calAdd" element={<CalAdd />} />
           <Route path="/calGen" element={<CalGen />} />
           <Route path="/autoCal" element={<AutoCal />} />
