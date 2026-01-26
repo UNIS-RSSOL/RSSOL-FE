@@ -87,32 +87,7 @@ function EmpCalendar() {
         onEventClick={handleEventClick}
         selectedEventProp={selectedCalendarEvent}
         setSelectedEventProp={setSelectedCalendarEvent}
-        schedule={[
-          {
-            id: 1,
-            storeId: 1,
-            storeName: "투썸플레이스 신촌점",
-            startDatetime: "2026-01-23T10:00:00",
-            endDatetime: "2026-01-23T13:00:00",
-            shiftStatus: "SCHEDULED",
-          },
-          {
-            id: 5,
-            storeId: 1,
-            storeName: "투썸플레이스 신촌점",
-            startDatetime: "2026-01-23T10:00:00",
-            endDatetime: "2026-01-23T13:00:00",
-            shiftStatus: "SCHEDULED",
-          },
-          {
-            id: 8,
-            storeId: 1,
-            storeName: "투썸플레이스 신촌점",
-            startDatetime: "2026-01-24T09:00:00",
-            endDatetime: "2026-01-24T13:00:00",
-            shiftStatus: "SCHEDULED",
-          },
-        ]}
+        schedule={schedules}
       />
       {isEventToastOpen && (
         <Toast
