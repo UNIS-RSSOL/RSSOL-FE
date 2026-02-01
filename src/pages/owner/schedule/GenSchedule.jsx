@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom";
 
 import TopBar from "../../../components/layout/header/TopBar.jsx";
 import WeekCalendar from "../../../components/common/calendar/WeekCalendar.jsx";
-import BottomBar from "../../../components/layout/common/BottomBar.jsx";
+import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
 
-function CalGen() {
+function GenSchedule() {
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(dayjs().locale("ko"));
 
@@ -51,4 +51,4 @@ function CalGen() {
   );
 }
 
-export default CalGen;
+export default GenSchedule;

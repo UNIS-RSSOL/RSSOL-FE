@@ -7,21 +7,26 @@ import interactionPlugin from "@fullcalendar/interaction";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
-import BottomBar from "../../../components/layout/common/BottomBar.jsx";
+import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
+import {
+  getActiveStore,
+  getOwnerStore,
+} from "../../../services/new/MypageService.js";
+// import {
+//   requestScheduleInput,
+//   confirmSchedule,
+//   generateScheduleByTime,
+// } from "../../../services/new/ScheduleGenerationService.js";
 import {
   generateSchedule,
   confirmSchedule,
   createScheduleRequest,
 } from "../../../services/scheduleService.js";
-import {
-  fetchActiveStore,
-  fetchStoredata,
-} from "../../../services/owner/MyPageService.js";
 // ✅ 알림 연동: /api/schedules/requests API 호출 시 백엔드에서 매장 내 직원들에게 자동으로 알림이 전송됩니다.
 // 별도의 알림 API 호출이 필요하지 않습니다.
-import "./CalAdd.css";
+import "./AddSchedule.css";
 
-export default function CalAdd() {
+export default function AddSchedule() {
   const navigate = useNavigate();
   const calendarRef = useRef(null);
 
@@ -167,7 +172,7 @@ export default function CalAdd() {
   useEffect(() => {
     const loadStoreId = async () => {
       try {
-        const activeStore = await fetchActiveStore();
+        const activeStore = await getActiveStore();
         console.log("🏪 CalAdd - 활성 매장 정보:", activeStore);
         // storeId 또는 id 필드 확인
         const id = activeStore?.storeId || activeStore?.id;
@@ -489,7 +494,7 @@ export default function CalAdd() {
             // 상태에 storeId가 없으면 활성 매장 정보에서 가져오기
             if (!currentStoreId) {
               try {
-                const activeStore = await fetchActiveStore();
+                const activeStore = await getActiveStore();
                 console.log(
                   "🏪 CalAdd - 버튼 클릭 시 활성 매장 정보:",
                   activeStore,
@@ -509,12 +514,12 @@ export default function CalAdd() {
                   console.log("✅ CalAdd - 버튼 클릭 시 storeId 설정:", id);
                 } else {
                   console.warn(
-                    "⚠️ CalAdd - activeStore에 storeId/id 없음, fetchStoredata 시도",
+                    "⚠️ CalAdd - activeStore에 storeId/id 없음, getOwnerStore 시도",
                   );
-                  // activeStore에 없으면 fetchStoredata에서 가져오기 (AddOwner.jsx와 동일한 로직)
+                  // activeStore에 없으면 getOwnerStore에서 가져오기 (AddOwner.jsx와 동일한 로직)
                   try {
-                    const storedata = await fetchStoredata();
-                    console.log("🏪 CalAdd - fetchStoredata 응답:", storedata);
+                    const storedata = await getOwnerStore();
+                    console.log("🏪 CalAdd - getOwnerStore 응답:", storedata);
                     console.log(
                       "🏪 CalAdd - storedata 전체 구조:",
                       JSON.stringify(storedata, null, 2),
@@ -525,18 +530,18 @@ export default function CalAdd() {
                       currentStoreId = storeIdFromData;
                       setStoreId(storeIdFromData);
                       console.log(
-                        "✅ CalAdd - fetchStoredata에서 storeId 설정:",
+                        "✅ CalAdd - getOwnerStorefetchStoredata에서 storeId 설정:",
                         storeIdFromData,
                       );
                     } else {
                       console.error(
-                        "❌ CalAdd - fetchStoredata에도 storeId 없음:",
+                        "❌ CalAdd - getOwnerStore에도 storeId 없음:",
                         storedata,
                       );
                     }
                   } catch (storeError) {
                     console.error(
-                      "❌ CalAdd - fetchStoredata 실패:",
+                      "❌ CalAdd - getOwnerStore 실패:",
                       storeError,
                     );
                   }
@@ -614,7 +619,7 @@ export default function CalAdd() {
               console.error("❌ CalAdd - currentStoreId가 없습니다!", {
                 currentStoreId,
                 storeIdState: storeId,
-                activeStoreCheck: "fetchActiveStore() 호출 필요",
+                activeStoreCheck: "getActiveStore() 호출 필요",
               });
               alert("매장 정보를 불러올 수 없습니다. 다시 시도해주세요.");
               setIsLoading(false);

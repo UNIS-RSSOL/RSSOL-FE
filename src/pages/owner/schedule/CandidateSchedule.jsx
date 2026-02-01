@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/ko";
 
 import TopBar from "../../../components/layout/header/TopBar.jsx";
-import BottomBar from "../../../components/layout/common/BottomBar.jsx";
+import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
 import AutoCalCalendar from "../../../components/common/calendar/AutoCalCalendar.jsx";
 import Modal from "../../../components/Modal.jsx";
 import WhiteBtn from "../../../components/common/WhiteBtn.jsx";
@@ -21,7 +21,7 @@ dayjs.locale("ko");
  * - CalAdd에서 근무표 생성 후 넘어옴
  * - 번호 버튼으로 후보 인덱스를 선택하고, 선택한 후보를 확정
  */
-export default function AutoCal() {
+export default function CandidateSchedule() {
   const navigate = useNavigate();
   const location = useLocation();
 

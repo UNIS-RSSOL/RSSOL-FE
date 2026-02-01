@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
 import TimeSlotCalendar from "../../../components/common/calendar/TimeSlotCalendar.jsx";
-import BottomBar from "../../../components/layout/common/BottomBar.jsx";
+import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
 import Toast from "../../../components/Toast.jsx";
 import {
   fetchAllWorkers,

@@ -2,7 +2,7 @@
 import api from "./Api.js";
 
 //본인 가능한 근무 시간 조회
-export const getWorkAvailability = async () => {
+export const getMyWorkAvailability = async () => {
   try {
     const response = await api.get("me/availabilities");
     return response.data;
@@ -13,7 +13,7 @@ export const getWorkAvailability = async () => {
 };
 
 //본인 가능한 근무 시간 입력
-export const setWorkAvailability = async (availabilities) => {
+export const setMyWorkAvailability = async (availabilities) => {
   try {
     const response = await api.post("me/availabilities", { availabilities });
     return response.data;
@@ -24,7 +24,7 @@ export const setWorkAvailability = async (availabilities) => {
 };
 
 //본인 가능한 근무 시간 수정
-export const updateWorkAvailability = async (availabilities) => {
+export const updateMyWorkAvailability = async (availabilities) => {
   try {
     const response = await api.put("me/availabilities", { availabilities });
     return response.data;

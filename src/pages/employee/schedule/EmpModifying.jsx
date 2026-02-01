@@ -4,15 +4,15 @@ import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
 import EmployeeScheduleCalendar from "../../../components/common/calendar/EmployeeScheduleCalendar.jsx";
-import BottomBar from "../../../components/layout/common/BottomBar.jsx";
+import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
 import {
-  fetchMyAvailabilities,
-  updateAvailability,
-} from "../../../services/employee/ScheduleService.js";
+  getMyWorkAvailability,
+  updateMyWorkAvailability,
+} from "../../../services/new/WorkAvailabilityService.js";
 import {
-  fetchActiveStore,
-  fetchMydata,
-} from "../../../services/employee/MyPageService.js";
+  getActiveStore,
+  getStaffProfile,
+} from "../../../services/new/MypageService.js";
 
 function EmpModifying() {
   const navigate = useNavigate();
@@ -32,8 +32,8 @@ function EmpModifying() {
       setIsLoadingEmployeeInfo(true);
       try {
         // 먼저 activeStore에서 storeId 확인
-        const activeStore = await fetchActiveStore();
-        console.log("fetchActiveStore 응답:", activeStore);
+        const activeStore = await getActiveStore();
+        console.log("getActiveStore 응답:", activeStore);
 
         // activeStore에서 storeId 가져오기
         let storeId = null;
@@ -44,8 +44,8 @@ function EmpModifying() {
         }
 
         // mydata에서 userId와 userName 가져오기
-        const mydata = await fetchMydata();
-        console.log("fetchMydata 응답:", mydata);
+        const mydata = await getStaffProfile();
+        console.log("getStaffProfile 응답:", mydata);
 
         let userId = null;
         if (mydata && mydata.userId) {
@@ -111,9 +111,9 @@ function EmpModifying() {
       setIsLoadingAvailabilities(true);
       try {
         console.log("🔍 CalModEmp: work availability 불러오기 시작");
-        const availabilityData = await fetchMyAvailabilities();
+        const availabilityData = await getMyWorkAvailability();
         console.log(
-          "🔍 CalModEmp: fetchMyAvailabilities 응답:",
+          "🔍 CalModEmp: getMyWorkAvailability 응답:",
           availabilityData,
         );
         console.log(
@@ -548,7 +548,7 @@ function EmpModifying() {
         availabilities: payload.availabilities,
       });
 
-      const response = await updateAvailability(payload);
+      const response = await updateMyWorkAvailability(payload);
 
       console.log(
         "✅ 백엔드 저장 성공 응답:",
@@ -564,7 +564,7 @@ function EmpModifying() {
 
       // 저장 후 최신 데이터 다시 불러오기
       try {
-        const updatedAvailabilityData = await fetchMyAvailabilities();
+        const updatedAvailabilityData = await getMyWorkAvailability();
         console.log("🔍 저장 후 최신 데이터:", updatedAvailabilityData);
         setAvailabilities(updatedAvailabilityData || []);
       } catch (refreshError) {

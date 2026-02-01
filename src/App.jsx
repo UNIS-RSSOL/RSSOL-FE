@@ -19,11 +19,11 @@ import AlarmHomeEmp from "./pages/employee/alarm/AlarmHomeEmp.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
 import EmpModifying from "./pages/employee/schedule/EmpModifying.jsx";
-import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
-import CalGen from "./pages/owner/calendarAdd/CalGen.jsx";
-import AutoCal from "./pages/owner/calendarAdd/AutoCal.jsx";
-import AddOwner from "./pages/owner/calendarAdd/AddOwner.jsx";
-import ScheduleList from "./pages/owner/calendarAdd/ScheduleList.jsx";
+import AddSchedule from "./pages/owner/schedule/AddSchedule.jsx";
+import GenSchedule from "./pages/owner/schedule/GenSchedule.jsx";
+import CandidateSchedule from "./pages/owner/schedule/CandidateSchedule.jsx";
+import OwnerSchedule from "./pages/owner/calendarAdd/OwnerSchedule.jsx";
+import ScheduleList from "./pages/owner/schedule/ScheduleList.jsx";
 import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
@@ -181,16 +181,15 @@ function App() {
     "/login",
     "/onboarding",
     "/auth/kakao/callback",
-    "/calAdd",
-    "/calGen",
-    "/autoCal",
+    "/owner/schedule/add",
+    "/owner/schedule/gen",
+    "/owner/schedule/candidate",
     "/employee/schedule/modifying",
-    "/addOwner",
-    "/scheduleList",
+    "/owner/schedule/my",
+    "/owner/scheduleList",
     "/alarmHomeEmp",
     "/alarmHome",
     "/alarmCheck",
-    "/scheduleList",
     "/employee/mypage/managestore",
     "/owner/mypage/managestore",
   ];
@@ -246,12 +245,16 @@ function App() {
             path="/employee/schedule/modifying"
             element={<EmpModifying />}
           />
-          <Route path="/calAdd" element={<CalAdd />} />
-          <Route path="/calGen" element={<CalGen />} />
-          <Route path="/autoCal" element={<AutoCal />} />
-          <Route path="/addOwner" element={<AddOwner />} />
-          <Route path="/scheduleList" element={<ScheduleList />} />
+          <Route path="/owner/schedule/add" element={<AddSchedule />} />
+          <Route path="/owner/schedule/gen" element={<GenSchedule />} />
+          <Route
+            path="/owner/schedule/candidate"
+            element={<CandidateSchedule />}
+          />
+          <Route path="/owner/schedule/my" element={<OwnerSchedule />} />
+          <Route path="/owner/scheduleList" element={<ScheduleList />} />
 
+          {/* 알림 */}
           <Route path="/alarmHomeEmp" element={<AlarmHomeEmp />} />
           <Route path="/alarmHome" element={<AlarmHome />} />
           <Route path="/alarmCheck" element={<AlarmCheck />} />

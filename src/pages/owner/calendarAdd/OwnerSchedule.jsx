@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
 import OwnerScheduleCalendar from "../../../components/common/calendar/OwnerScheduleCalendar.jsx";
-import BottomBar from "../../../components/layout/common/BottomBar.jsx";
+import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
 import Toast from "../../../components/Toast.jsx";
 import {
   addWorkshift,
@@ -19,7 +19,7 @@ import {
   fetchActiveStore,
 } from "../../../services/owner/MyPageService.js";
 
-function AddOwner() {
+function OwnerSchedule() {
   const navigate = useNavigate();
   const [currentDate] = useState(dayjs().locale("ko"));
   const [selectedTimeSlots, setSelectedTimeSlots] = useState(new Set());
@@ -663,4 +663,4 @@ function AddOwner() {
   );
 }
 
-export default AddOwner;
+export default OwnerSchedule;
