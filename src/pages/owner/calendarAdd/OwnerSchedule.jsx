@@ -9,7 +9,7 @@ import Toast from "../../../components/Toast.jsx";
 import {
   getMyWorkAvailability,
   updateMyWorkAvailability,
-} from "../../../services/new/WorkShiftService.js";
+} from "../../../services/new/WorkAvailabilityService.js";
 import { getScheduleByPeriod } from "../../../services/new/WorkShiftService.js";
 import {
   getOwnerProfile,

@@ -6,15 +6,13 @@ import TopBar from "../../../components/layout/header/TopBar.jsx";
 import TimeSlotCalendar from "../../../components/common/calendar/TimeSlotCalendar.jsx";
 import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
 import Toast from "../../../components/Toast.jsx";
+import { getAllWorker } from "../../../services/new/StoreService.js";
+import { getStaffWorkAvailability } from "../../../services/new/WorkAvailabilityService.js";
+import { generateScheduleByTime } from "../../../services/new/ScheduleGenerationService.js";
 import {
-  fetchAllWorkers,
-  fetchStoreAvailabilities,
-} from "../../../services/owner/ScheduleService.js";
-import { generateScheduleWithSetting } from "../../../services/scheduleService.js";
-import {
-  fetchActiveStore,
-  fetchMydata,
-} from "../../../services/owner/MyPageService.js";
+  getActiveStore,
+  getOwnerProfile,
+} from "../../../services/new/MypageService.js";
 
 function ScheduleList() {
   const navigate = useNavigate();
@@ -85,7 +83,7 @@ function ScheduleList() {
   useEffect(() => {
     const loadStoreId = async () => {
       try {
-        const activeStore = await fetchActiveStore();
+        const activeStore = await getActiveStore();
         if (activeStore && activeStore.storeId) {
           setStoreId(activeStore.storeId);
         }
@@ -136,7 +134,7 @@ function ScheduleList() {
 
         // 직원 리스트 가져오기
         // /api/store/staff는 이미 활성 매장의 직원들만 반환
-        const workersList = await fetchAllWorkers();
+        const workersList = await getAllWorker();
 
         // 디버깅: 직원 리스트 구조 확인
         console.log("📋 [직원 리스트 원본]:", workersList);
@@ -154,16 +152,16 @@ function ScheduleList() {
         }
 
         // 현재 로그인한 사용자의 userStoreId 가져오기
-        // fetchActiveStore에서 userStoreId를 가져오거나, fetchMydata에서 가져오기
+        // getActiveStore에서 userStoreId를 가져오거나, getOwnerProfile에서 가져오기
         let currentUserStoreId = null;
-        const activeStore = await fetchActiveStore();
+        const activeStore = await getActiveStore();
         if (activeStore?.userStoreId) {
           currentUserStoreId = activeStore.userStoreId;
         } else if (activeStore?.id) {
           currentUserStoreId = activeStore.id;
         } else {
-          // fetchMydata에서 userStoreId 가져오기 시도
-          const mydata = await fetchMydata();
+          // getOwnerProfile에서 userStoreId 가져오기 시도
+          const mydata = await getOwnerProfile();
           if (mydata?.userStoreId) {
             currentUserStoreId = mydata.userStoreId;
           } else if (mydata?.id) {
@@ -189,7 +187,7 @@ function ScheduleList() {
         try {
           // ✅ 새로운 API: 한 번의 호출로 모든 직원의 availabilities 가져오기
           // 제출안한 직원들은 빈배열 반환
-          const storeAvailabilities = await fetchStoreAvailabilities(storeId);
+          const storeAvailabilities = await getStaffWorkAvailability(storeId);
 
           console.log(
             "📋 [API 응답] storeAvailabilities:",
@@ -520,9 +518,7 @@ function ScheduleList() {
 
       // /api/schedules/{settingId}/generate API 호출
       // generationOptions에 candidateCount 포함 (기본값: 5)
-      const result = await generateScheduleWithSetting(settingId, {
-        candidateCount: 5,
-      });
+      const result = await generateScheduleByTime(settingId, 5);
 
       if (result && result.candidateScheduleKey) {
         // 근무표 생성 완료 플래그 저장 (다음에 caladdicon 클릭 시 CalAdd로 이동)
