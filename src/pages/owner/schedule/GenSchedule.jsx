@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { useNavigate } from "react-router-dom";
-
+import LeftArrowIcon from "../../../assets/newicons/LeftArrowIcon.jsx";
+import RightArrowIcon from "../../../assets/newicons/RightArrowIcon.jsx";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
 import WeekCalendar from "../../../components/common/calendar/WeekCalendar.jsx";
 import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
@@ -21,20 +22,12 @@ function GenSchedule() {
       <TopBar title="근무표 생성" onBack={() => navigate(-1)} />
 
       <div className="flex-1 px-4 py-3 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={goPrevWeek}
-            className="p-2 rounded-full bg-white border border-[#e7eaf3]"
-          >
-            <span className="text-lg font-semibold">{"<"}</span>
-          </button>
-          <div className="text-lg font-semibold">{formattedMonth}</div>
-          <button
-            onClick={goNextWeek}
-            className="p-2 rounded-full bg-white border border-[#e7eaf3]"
-          >
-            <span className="text-lg font-semibold">{">"}</span>
-          </button>
+        <div className="flex items-center justify-center">
+          <LeftArrowIcon className="cursor-pointer" onClick={goPrevWeek} />
+          <div className="w-[130px] text-lg font-semibold">
+            {formattedMonth}
+          </div>
+          <RightArrowIcon className="cursor-pointer" onClick={goNextWeek} />
         </div>
 
         <div className="flex justify-center">
