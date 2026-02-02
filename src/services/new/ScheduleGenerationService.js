@@ -1,6 +1,29 @@
 //https://connecti.store/swagger-ui/index.html#/
 import api from "./Api.js";
 
+//근무표 생성(날짜 지정X)
+export const generateSchedule = async (
+  storeId,
+  openTime,
+  closeTime,
+  timeSegments,
+  generationOptions = { candidateCount: 5 },
+) => {
+  try {
+    const response = await api.post("schedules/generate", {
+      storeId,
+      openTime,
+      closeTime,
+      timeSegments,
+      generationOptions,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("근무표 생성 실패:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
 //근무표 생성(타임으로 나눔)
 export const generateScheduleByTime = async (settingId, candidateCount) => {
   try {

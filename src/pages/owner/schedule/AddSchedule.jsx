@@ -12,16 +12,11 @@ import {
   getActiveStore,
   getOwnerStore,
 } from "../../../services/new/MypageService.js";
-// import {
-//   requestScheduleInput,
-//   confirmSchedule,
-//   generateScheduleByTime,
-// } from "../../../services/new/ScheduleGenerationService.js";
 import {
   generateSchedule,
   confirmSchedule,
-  createScheduleRequest,
-} from "../../../services/scheduleService.js";
+  requestScheduleInput,
+} from "../../../services/new/ScheduleGenerationService.js";
 // ✅ 알림 연동: /api/schedules/requests API 호출 시 백엔드에서 매장 내 직원들에게 자동으로 알림이 전송됩니다.
 // 별도의 알림 API 호출이 필요하지 않습니다.
 import "./AddSchedule.css";
@@ -721,16 +716,13 @@ export default function AddSchedule() {
               return;
             }
 
-            console.log(
-              "🚀 CalAdd - createScheduleRequest 호출 전 최종 확인:",
-              {
-                requestDataStoreId: requestData.storeId,
-                storeIdToSend,
-                currentStoreId,
-                requestDataFull: requestData,
-                requestDataStringified: JSON.stringify(requestData),
-              },
-            );
+            console.log("🚀 CalAdd - requestScheduleInput 호출 전 최종 확인:", {
+              requestDataStoreId: requestData.storeId,
+              storeIdToSend,
+              currentStoreId,
+              requestDataFull: requestData,
+              requestDataStringified: JSON.stringify(requestData),
+            });
 
             // ⚠️ 최종 안전장치: requestData를 새로 만들어서 storeId 확실히 포함
             const finalRequestData = {
@@ -749,7 +741,13 @@ export default function AddSchedule() {
               JSON.stringify(finalRequestData, null, 2),
             );
 
-            const result = await createScheduleRequest(finalRequestData);
+            const result = await requestScheduleInput(
+              finalRequestData.openTime,
+              finalRequestData.closeTime,
+              finalRequestData.startDate,
+              finalRequestData.endDate,
+              finalRequestData.timeSegments,
+            );
 
             // API 응답에서 scheduleSettingId 또는 settingId 확인
             // API 스펙: { "scheduleSettingId": 0, "status": "string" }
