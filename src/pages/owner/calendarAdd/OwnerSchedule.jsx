@@ -7,17 +7,15 @@ import OwnerScheduleCalendar from "../../../components/common/calendar/OwnerSche
 import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
 import Toast from "../../../components/Toast.jsx";
 import {
-  addWorkshift,
-  fetchAllWorkers,
-  fetchMyAvailabilities,
-  updateAvailability,
-} from "../../../services/owner/ScheduleService.js";
-import { fetchSchedules } from "../../../services/common/ScheduleService.js";
+  getMyWorkAvailability,
+  updateMyWorkAvailability,
+} from "../../../services/new/WorkShiftService.js";
+import { getScheduleByPeriod } from "../../../services/new/WorkShiftService.js";
 import {
-  fetchMydata,
-  fetchStoredata,
-  fetchActiveStore,
-} from "../../../services/owner/MyPageService.js";
+  getOwnerProfile,
+  getOwnerStore,
+  getActiveStore,
+} from "../../../services/new/MypageService.js";
 
 function OwnerSchedule() {
   const navigate = useNavigate();
@@ -39,8 +37,8 @@ function OwnerSchedule() {
       setIsLoadingOwnerInfo(true);
       try {
         // 사장 정보 가져오기
-        const mydata = await fetchMydata();
-        console.log("owner fetchMydata 응답:", mydata);
+        const mydata = await getOwnerProfile();
+        console.log("owner getOwnerProfile 응답:", mydata);
 
         let userId = null;
         if (mydata && mydata.userId) {
@@ -59,8 +57,8 @@ function OwnerSchedule() {
         }
 
         // 매장 정보 가져오기 (activeStore 우선)
-        const activeStore = await fetchActiveStore();
-        console.log("owner fetchActiveStore 응답:", activeStore);
+        const activeStore = await getActiveStore();
+        console.log("owner getActiveStore 응답:", activeStore);
 
         let storeId = null;
         if (activeStore && activeStore.storeId) {
@@ -69,10 +67,10 @@ function OwnerSchedule() {
           storeId = activeStore.id;
         }
 
-        // activeStore에 없으면 fetchStoredata에서 가져오기
+        // activeStore에 없으면 getOwnerStore에서 가져오기
         if (!storeId) {
-          const storedata = await fetchStoredata();
-          console.log("owner fetchStoredata 응답:", storedata);
+          const storedata = await getOwnerStore();
+          console.log("owner getOwnerStore 응답:", storedata);
 
           if (storedata && storedata.storeId) {
             storeId = storedata.storeId;
@@ -116,9 +114,9 @@ function OwnerSchedule() {
       setIsLoadingAvailabilities(true);
       try {
         console.log("🔍 AddOwner: work availability 불러오기 시작");
-        const availabilityData = await fetchMyAvailabilities();
+        const availabilityData = await getMyWorkAvailability();
         console.log(
-          "🔍 AddOwner: fetchMyAvailabilities 응답:",
+          "🔍 AddOwner: getMyWorkAvailability 응답:",
           availabilityData,
         );
         console.log(
@@ -331,7 +329,7 @@ function OwnerSchedule() {
       try {
         const startOfWeek = dayjs(currentDate).locale("ko").startOf("week");
         const endOfWeek = startOfWeek.add(6, "day");
-        const schedules = await fetchSchedules(
+        const schedules = await getScheduleByPeriod(
           startOfWeek.format("YYYY-MM-DD"),
           endOfWeek.format("YYYY-MM-DD"),
         );
@@ -596,7 +594,7 @@ function OwnerSchedule() {
         availabilities: payload.availabilities,
       });
 
-      const response = await updateAvailability(payload);
+      const response = await updateMyWorkAvailability(payload.availabilities);
 
       console.log(
         "✅ 백엔드 저장 성공 응답:",
@@ -612,7 +610,7 @@ function OwnerSchedule() {
 
       // 저장 후 최신 데이터 다시 불러오기
       try {
-        const updatedAvailabilityData = await fetchMyAvailabilities();
+        const updatedAvailabilityData = await getMyWorkAvailability();
         console.log("🔍 저장 후 최신 데이터:", updatedAvailabilityData);
         setAvailabilities(updatedAvailabilityData || []);
       } catch (refreshError) {
