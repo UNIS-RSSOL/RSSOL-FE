@@ -61,7 +61,7 @@ export const requestScheduleInput = async (
 };
 
 //생성된 근무표들(임시) 조회
-export const getScheduleCandidate = async (key) => {
+export const getScheduleCandidate = async (key, index) => {
   try {
     const response = await api.get("schedules/candidates", {
       params: {

@@ -7,13 +7,11 @@ import TopBar from "../../../components/layout/header/TopBar.jsx";
 import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
 import AutoCalCalendar from "../../../components/common/calendar/AutoCalCalendar.jsx";
 import Modal from "../../../components/Modal.jsx";
-import WhiteBtn from "../../../components/common/WhiteBtn.jsx";
-import GreenBtn from "../../../components/common/GreenBtn.jsx";
+import Button from "../../../components/Button.jsx";
 import {
   confirmSchedule,
-  fetchCandidateSchedule,
-} from "../../../services/scheduleService.js";
-
+  getScheduleCandidate,
+} from "../../../services/new/ScheduleGenerationService.js";
 dayjs.locale("ko");
 
 /**
@@ -54,7 +52,7 @@ export default function CandidateSchedule() {
       const schedules = {};
       for (let i = 0; i < candidates.length; i++) {
         try {
-          const data = await fetchCandidateSchedule(candidateKey, i);
+          const data = await getScheduleCandidate(candidateKey, i);
 
           // 백엔드 응답 형식 변환
           // 응답: [{ storeId: 1, shifts: [{ userStoreId, username, startTime, endTime, day }] }]
@@ -368,18 +366,18 @@ export default function CandidateSchedule() {
               </p>
             </div>
             <div className="flex flex-row w-full gap-2">
-              <WhiteBtn
-                className="flex-1 h-[35px] text-[14px] font-[500]"
+              <Button
+                className="flex-1 h-[35px] text-[14px] font-[500] bg-[#fdfffe] border-[1px]"
                 onClick={() => handleModalButton("edit")}
               >
                 근무표 수정하기
-              </WhiteBtn>
-              <GreenBtn
+              </Button>
+              <Button
                 className="flex-1 h-[35px] text-[14px] font-[500]"
                 onClick={() => handleModalButton("view")}
               >
                 근무표 보러가기
-              </GreenBtn>
+              </Button>
             </div>
           </div>
         </Modal>
