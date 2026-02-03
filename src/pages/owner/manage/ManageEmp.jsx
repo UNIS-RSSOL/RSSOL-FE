@@ -11,7 +11,7 @@ import RightArrowIcon from "../../../assets/newicons/RightArrowIcon.jsx";
 import { Divider } from "antd";
 import CheckOutlined from "@ant-design/icons/es/icons/CheckOutlined";
 
-const ManageEmpPage = () => {
+const ManageEmp = () => {
   const [openToast, setOpenToast] = useState(false);
   const [tab, setTab] = useState(0);
 
@@ -209,4 +209,4 @@ const ManageEmpPage = () => {
   );
 };
 
-export default ManageEmpPage;
+export default ManageEmp;

@@ -24,7 +24,7 @@ import GenSchedule from "./pages/owner/schedule/GenSchedule.jsx";
 import CandidateSchedule from "./pages/owner/schedule/CandidateSchedule.jsx";
 import OwnerSchedule from "./pages/owner/calendarAdd/OwnerSchedule.jsx";
 import ScheduleList from "./pages/owner/schedule/ScheduleList.jsx";
-import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
+import ManageEmp from "./pages/owner/manage/ManageEmp.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
 import EmpHome from "./pages/employee/EmpHome.jsx";
@@ -266,7 +266,7 @@ function App() {
           />
 
           {/*관리 페이지 */}
-          <Route path="/owner/manage" element={<ManageEmpPage />} />
+          <Route path="/owner/manage" element={<ManageEmp />} />
           <Route path="/employee/manage" element={<ManageSalary />} />
         </Routes>
       </main>
