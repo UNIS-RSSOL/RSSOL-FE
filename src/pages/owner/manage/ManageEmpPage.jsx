@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
-import { CoinIcon } from "../../../assets/newicons/CoinIcon.jsx";
+import { useState } from "react";
+import CoinIcon from "../../../assets/newicons/CoinIcon.jsx";
 import PhoneIcon from "../../../assets/newicons/PhoneIcon.jsx";
-import DollarIcon from "../../../assets/icons/DollarIcon.jsx";
-import CopyIcon from "../../../assets/newicons/CopyIcon.jsx";
+import RoundTag from "../../../components/RoundTag.jsx";
+import DollarIcon from "../../../assets/newicons/DollarIcon.jsx";
 import Box from "../../../components/Box.jsx";
 import Toast from "../../../components/Toast.jsx";
-import GreenBtn from "../../../components/common/GreenBtn.jsx";
-import LeftOutlined from "@ant-design/icons/es/icons/LeftOutlined";
-import RightOutlined from "@ant-design/icons/es/icons/RightOutlined";
+import Button from "../../../components/Button.jsx";
+import LeftArrowIcon from "../../../assets/newicons/LeftArrowIcon.jsx";
+import RightArrowIcon from "../../../assets/newicons/RightArrowIcon.jsx";
 import { Divider } from "antd";
 import CheckOutlined from "@ant-design/icons/es/icons/CheckOutlined";
 
@@ -27,11 +27,7 @@ const ManageEmpPage = () => {
           >
             <div className="flex flex-row items-center min-w-0">
               <p className="text-[16px] font-[600] truncate">김민솔</p>
-              {tab === 0 && (
-                <p className="flex-shrink-0 w-[50px] h-[20px] rounded-[20px] bg-[#fdfffe] border-[1px] border-[#32D1AA] shadow-[2px_2px_4px_0_RGBA(0,0,0,0.15)] text-[12px]/[20px] font-[400] mx-2 text-center">
-                  매니저
-                </p>
-              )}
+              {tab === 0 && <RoundTag>매니저</RoundTag>}
             </div>
             {tab === 0 && (
               <div className="flex-shrink-0 flex flex-row items-center gap-2">
@@ -88,9 +84,7 @@ const ManageEmpPage = () => {
         </div>
         <p className="mr-3">알쏠 1호점</p>
         <p className="mr-3">김민솔</p>
-        <p className="flex-shrink-0 w-[50px] h-[20px] rounded-[20px] bg-[#fdfffe] border-[1px] border-[#32D1AA] shadow-[2px_2px_4px_0_rgba(0,0,0,0.15)] text-[12px]/[20px] font-[400] mx-2 text-center">
-          매니저
-        </p>
+        <RoundTag>매니저</RoundTag>
       </div>
     );
   };
@@ -108,9 +102,12 @@ const ManageEmpPage = () => {
               선택한 직원을 리스트에서 삭제할까요?
             </p>
             <EmployeeList />
-            <GreenBtn onClick={() => setOpenToast(false)}>
+            <Button
+              className="w-[360px] h-[48px] text-[16px] font-[600]"
+              onClick={() => setOpenToast(false)}
+            >
               직원 삭제하기
-            </GreenBtn>
+            </Button>
           </Toast>
         )}
       </div>
@@ -133,11 +130,11 @@ const ManageEmpPage = () => {
       <div className="flex flex-col w-full items-center mt-5">
         <Box disabled={true}>
           <div className="flex items-center justify-center">
-            <LeftOutlined className="cursor-pointer" />
+            <LeftArrowIcon className="cursor-pointer" />
             <p className="text-[16px] font-[500] px-5">
               {today.getFullYear()}년 {month}월
             </p>
-            <RightOutlined className="cursor-pointer" />
+            <RightArrowIcon className="cursor-pointer" />
           </div>
           <p className="text-[10px] font-[400] text-[#87888c]">
             {start}-{end}

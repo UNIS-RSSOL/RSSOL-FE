@@ -265,6 +265,7 @@ function App() {
             element={<NotificationCheck />}
           />
 
+          {/*관리 페이지 */}
           <Route path="/owner/manage" element={<ManageEmpPage />} />
           <Route path="/employee/manage" element={<ManageSalary />} />
         </Routes>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { CoinIcon } from "../../../assets/newicons/CoinIcon.jsx";
 import PhoneIcon from "../../../assets/newicons/PhoneIcon.jsx";
-import DollarIcon from "../../../assets/icons/DollarIcon.jsx";
+import DollarIcon from "../../../assets/newicons/DollarIcon.jsx";
 import CopyIcon from "../../../assets/newicons/CopyIcon.jsx";
 import Toast from "../../../components/Toast.jsx";
 import GreenBtn from "../../../components/common/GreenBtn.jsx";
