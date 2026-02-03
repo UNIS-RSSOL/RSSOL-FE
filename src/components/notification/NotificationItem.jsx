@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Button from "../../Button.jsx";
-import RoundTag from "../../RoundTag.jsx";
+import Button from "../common/Button.jsx";
+import RoundTag from "../common/RoundTag.jsx";
 import EmpBtn from "../../../assets/images/EmpBtn.png";
 import OwnerBtn from "../../../assets/images/OwnerBtn.png";
 import {

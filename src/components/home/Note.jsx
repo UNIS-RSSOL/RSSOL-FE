@@ -1,4 +1,4 @@
-import Box from "./Box";
+import Box from "../common/Box";
 
 function Note({ children, className, hole = 0 }) {
   return (
