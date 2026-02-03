@@ -1,13 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
-import NavBar from "../../../components/common/alarm/NavBar";
-import AlarmItem from "../../../components/common/notification/NotificationItem.jsx";
-import { fetchAlarm } from "../../../services/common/AlarmService.js";
+import NavBar from "../../../components/common/notification/NavBar.jsx";
+import NotificationItem from "../../../components/common/notification/NotificationItem.jsx";
+import { getNotification } from "../../../services/new/NotificationService.js";
 import dayjs from "dayjs";
 import { formatTimeAgo } from "../../../utils/timeUtils.js";
 
-function AlarmHome() {
+function NotificationHome() {
   const today = dayjs().format("MM.DD(dd)");
   const navigate = useNavigate();
   const [tab, setTab] = useState("all");
@@ -16,7 +16,7 @@ function AlarmHome() {
   useEffect(() => {
     (async () => {
       try {
-        const response = await fetchAlarm();
+        const response = await getNotification();
         setAlarms(response);
       } catch (error) {
         console.error(error);
@@ -33,7 +33,7 @@ function AlarmHome() {
           {today}
         </div>
         <div className="mt-2 flex flex-col gap-1">
-          {alarms.map((alarm, index) => {
+          {alarms?.map((alarm, index) => {
             const type =
               alarm.type === "SHIFT_SWAP_NOTIFY_MANAGER" ||
               alarm.type === "EXTRA_SHIFT_NOTIFY_MANAGER"
@@ -44,7 +44,7 @@ function AlarmHome() {
                   : 1;
             const time = formatTimeAgo(alarm.createdAt);
             return (
-              <AlarmItem
+              <NotificationItem
                 key={index}
                 alarmType={type}
                 img={alarm.profileImageUrl}
@@ -56,7 +56,7 @@ function AlarmHome() {
                 owner={false}
               >
                 {alarm.message}
-              </AlarmItem>
+              </NotificationItem>
             );
           })}
         </div>
@@ -64,4 +64,4 @@ function AlarmHome() {
     </div>
   );
 }
-export default AlarmHome;
+export default NotificationHome;

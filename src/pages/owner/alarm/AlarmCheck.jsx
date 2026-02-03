@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
-import NavBar from "../../../components/common/alarm/NavBar";
+import NavBar from "../../../components/common/notification/NavBar.jsx";
 import AlarmItem from "../../../components/common/notification/NotificationItem.jsx";
 import { fetchAlarm } from "../../../services/common/AlarmService.js";
 import dayjs from "dayjs";

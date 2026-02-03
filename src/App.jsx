@@ -16,7 +16,7 @@ import EmpCalendar from "./pages/employee/calendar/EmpCalendar.jsx";
 import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 import EmpManageStore from "./pages/employee/mypage/ManageStore.jsx";
 import EmpNotification from "./pages/employee/alarm/EmpNotification.jsx";
-import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
+import NotificationHome from "./pages/owner/alarm/NotificationHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
 import EmpModifying from "./pages/employee/schedule/EmpModifying.jsx";
 import AddSchedule from "./pages/owner/schedule/AddSchedule.jsx";
@@ -188,8 +188,8 @@ function App() {
     "/owner/schedule/my",
     "/owner/scheduleList",
     "/employee/notification",
-    "/alarmHome",
-    "/alarmCheck",
+    "/owner/notification/home",
+    "/owner/notification/check",
     "/employee/mypage/managestore",
     "/owner/mypage/managestore",
   ];
@@ -256,8 +256,11 @@ function App() {
 
           {/* 알림 */}
           <Route path="/employee/notification" element={<EmpNotification />} />
-          <Route path="/alarmHome" element={<AlarmHome />} />
-          <Route path="/alarmCheck" element={<AlarmCheck />} />
+          <Route
+            path="/owner/notification/home"
+            element={<NotificationHome />}
+          />
+          <Route path="/owner/notification/check" element={<AlarmCheck />} />
 
           <Route path="/owner/manage" element={<ManageEmpPage />} />
           <Route path="/employee/manage" element={<ManageSalary />} />
