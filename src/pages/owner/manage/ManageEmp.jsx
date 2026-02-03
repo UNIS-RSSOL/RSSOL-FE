@@ -26,8 +26,12 @@ const ManageEmp = () => {
             className={`flex-1 flex flex-row items-center justify-between ${tab === 0 && "mb-2"}`}
           >
             <div className="flex flex-row items-center min-w-0">
-              <p className="text-[16px] font-[600] truncate">김민솔</p>
-              {tab === 0 && <RoundTag>매니저</RoundTag>}
+              <p className="text-[16px] font-[600] truncate mr-2">김민솔</p>
+              {tab === 0 && (
+                <RoundTag className="!px-3 !py-[1px] !text-[12px] !font-[400]">
+                  매니저
+                </RoundTag>
+              )}
             </div>
             {tab === 0 && (
               <div className="flex-shrink-0 flex flex-row items-center gap-2">
@@ -128,7 +132,7 @@ const ManageEmp = () => {
 
     return (
       <div className="flex flex-col w-full items-center mt-5">
-        <Box disabled={true}>
+        <Box className="flex flex-col" disabled={true}>
           <div className="flex items-center justify-center">
             <LeftArrowIcon className="cursor-pointer" />
             <p className="text-[16px] font-[500] px-5">
@@ -163,7 +167,7 @@ const ManageEmp = () => {
           </div>
         </Box>
         <div className="w-full h-[8px] bg-[#e7eaf3] my-5" />
-        <Box disabled={true}>
+        <Box className="flex flex-col" disabled={true}>
           <p className="text-[16px] font-[500] mb-5">
             {month}월 급여 지급 리스트
           </p>
