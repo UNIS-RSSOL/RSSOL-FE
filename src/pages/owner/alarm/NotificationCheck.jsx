@@ -1,13 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
 import NavBar from "../../../components/common/notification/NavBar.jsx";
-import AlarmItem from "../../../components/common/notification/NotificationItem.jsx";
-import { fetchAlarm } from "../../../services/common/AlarmService.js";
+import NotificationItem from "../../../components/common/notification/NotificationItem.jsx";
+import { getNotification } from "../../../services/new/NotificationService.js";
 import dayjs from "dayjs";
 import { formatTimeAgo } from "../../../utils/timeUtils.js";
 
-function AlarmCheck() {
+function NotificationCheck() {
   const today = dayjs().format("MM.DD(dd)");
   const navigate = useNavigate();
   const [tab, setTab] = useState("final");
@@ -16,7 +16,7 @@ function AlarmCheck() {
   useEffect(() => {
     (async () => {
       try {
-        const response = await fetchAlarm();
+        const response = await getNotification();
         const filteredAlarms = response.filter(
           (alarm) =>
             alarm.type === "SHIFT_SWAP_NOTIFY_MANAGER" ||
@@ -41,7 +41,7 @@ function AlarmCheck() {
           {alarms.map((alarm, index) => {
             const time = formatTimeAgo(alarm.createdAt);
             return (
-              <AlarmItem
+              <NotificationItem
                 key={index}
                 alarmType={3}
                 img={alarm.profileImageUrl}
@@ -53,7 +53,7 @@ function AlarmCheck() {
                 owner={false}
               >
                 {alarm.message}
-              </AlarmItem>
+              </NotificationItem>
             );
           })}
         </div>
@@ -62,4 +62,4 @@ function AlarmCheck() {
   );
 }
 
-export default AlarmCheck;
+export default NotificationCheck;

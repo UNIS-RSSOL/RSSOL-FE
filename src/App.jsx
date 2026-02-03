@@ -17,7 +17,7 @@ import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 import EmpManageStore from "./pages/employee/mypage/ManageStore.jsx";
 import EmpNotification from "./pages/employee/alarm/EmpNotification.jsx";
 import NotificationHome from "./pages/owner/alarm/NotificationHome.jsx";
-import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
+import NotificationCheck from "./pages/owner/alarm/NotificationCheck.jsx";
 import EmpModifying from "./pages/employee/schedule/EmpModifying.jsx";
 import AddSchedule from "./pages/owner/schedule/AddSchedule.jsx";
 import GenSchedule from "./pages/owner/schedule/GenSchedule.jsx";
@@ -260,7 +260,10 @@ function App() {
             path="/owner/notification/home"
             element={<NotificationHome />}
           />
-          <Route path="/owner/notification/check" element={<AlarmCheck />} />
+          <Route
+            path="/owner/notification/check"
+            element={<NotificationCheck />}
+          />
 
           <Route path="/owner/manage" element={<ManageEmpPage />} />
           <Route path="/employee/manage" element={<ManageSalary />} />
