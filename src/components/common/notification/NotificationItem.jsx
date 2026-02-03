@@ -1,15 +1,17 @@
-import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import GreenBtn from "../../common/GreenBtn.jsx";
-import empCharacter from "../../../assets/images/EmpBtn.png";
-import ownerCharacter from "../../../assets/images/OwnerBtn.png";
+import Button from "../../Button.jsx";
+import RoundTag from "../../RoundTag.jsx";
+import EmpBtn from "../../../assets/images/EmpBtn.png";
+import OwnerBtn from "../../../assets/images/OwnerBtn.png";
 import {
-  acceptShiftSwap,
-  approveShiftSwap,
-  respondStaffRequest,
-  approveStaffRequest,
-} from "../../../services/common/AlarmService.js";
+  respondShiftSwapRequest,
+  approveShiftSwapRequest,
+} from "../../../services/new/ShiftSwapService.js";
+import {
+  respondExtraShiftRequest,
+  approveExtraShiftRequest,
+} from "../../../services/new/ExtraShiftService.js";
 
 /**
  * 알람 번호
@@ -19,7 +21,7 @@ import {
  * 4. 근무표 입력(추가하기)
  */
 
-function AlarmItem({
+function NotificationItem({
   alarmType,
   img,
   storename,
@@ -33,7 +35,7 @@ function AlarmItem({
   const navigate = useNavigate();
   const [isDisabled, setIsDisabled] = useState(false);
   const [isAccepted, setIsAccepted] = useState(false);
-  const defaultImg = owner ? ownerCharacter : empCharacter;
+  const defaultImg = owner ? OwnerBtn : EmpBtn;
 
   useEffect(() => {
     if (alarmType === 2 && (status === "ACCEPTED" || status === "REJECTED")) {
@@ -54,7 +56,7 @@ function AlarmItem({
   //대타1차(ACCEPT/REJECT)
   const handleAcceptShiftSwap = async (requestId, action) => {
     try {
-      const response = await acceptShiftSwap(requestId, action);
+      const response = await respondShiftSwapRequest(requestId, action);
       setIsDisabled(true);
       if (action === "ACCEPT") setIsAccepted(true);
       else setIsAccepted(false);
@@ -67,7 +69,7 @@ function AlarmItem({
   //대타최종승인(APPROVE or REJECT)
   const handleApproveShiftSwap = async (requestId, action) => {
     try {
-      const response = await approveShiftSwap(requestId, action);
+      const response = await approveShiftSwapRequest(requestId, action);
       setIsDisabled(true);
       if (action === "APPROVE") setIsAccepted(true);
       else setIsAccepted(false);
@@ -80,7 +82,7 @@ function AlarmItem({
   //알바생 인력요청 수락/거절
   const handleAcceptStaffRequest = async (requestId, action) => {
     try {
-      const response = await respondStaffRequest(requestId, action);
+      const response = await respondExtraShiftRequest(requestId, action);
       setIsDisabled(true);
       if (action === "ACCEPT") setIsAccepted(true);
       else setIsAccepted(false);
@@ -93,7 +95,7 @@ function AlarmItem({
   //알바생 인력요청 최종 승인/미승인
   const handleApproveStaffRequest = async (requestId, action) => {
     try {
-      const response = await approveStaffRequest(requestId, action);
+      const response = await approveExtraShiftRequest(requestId, action);
       setIsDisabled(true);
       if (action === "APPROVE") setIsAccepted(true);
       else setIsAccepted(false);
@@ -114,15 +116,15 @@ function AlarmItem({
       )}
 
       <div className="flex-1 flex flex-col items-start gap-1">
-        <p className="flex items-center bg-[#fdfffe] border-[#32d1aa] border-[1px] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] font-[400] text-[12px]/[16px] px-3 h-[24px]">
+        <RoundTag className="flex items-center bg-[#fdfffe] border-[#32d1aa] border-[1px] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] font-[400] text-[12px]/[16px] px-3 h-[24px]">
           {storename || "매장"}
-        </p>
+        </RoundTag>
         <p className="text-[14px] font-[500] text-left">{children}</p>
         <span className="text-[10px] font-[400] text-[#87888c]">{time}</span>
         <div className="w-full flex justify-end items-center gap-2">
           {alarmType === 2 ? (
             <>
-              <GreenBtn
+              <Button
                 className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isDisabled && isAccepted ? "bg-[#EDF0F7] text-[#87888c]" : ""}`}
                 disabled={isDisabled}
                 onClick={() => {
@@ -134,8 +136,8 @@ function AlarmItem({
                 }}
               >
                 거절
-              </GreenBtn>
-              <GreenBtn
+              </Button>
+              <Button
                 className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isDisabled && !isAccepted ? "bg-[#EDF0F7] text-[#87888c]" : ""}`}
                 disabled={isDisabled}
                 onClick={() => {
@@ -147,11 +149,11 @@ function AlarmItem({
                 }}
               >
                 수락
-              </GreenBtn>
+              </Button>
             </>
           ) : alarmType === 3 ? (
             <>
-              <GreenBtn
+              <Button
                 className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isDisabled && isAccepted ? "bg-[#EDF0F7] text-[#87888c]" : ""}`}
                 disabled={isDisabled}
                 onClick={() => {
@@ -163,8 +165,8 @@ function AlarmItem({
                 }}
               >
                 미승인
-              </GreenBtn>
-              <GreenBtn
+              </Button>
+              <Button
                 className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isDisabled && !isAccepted ? "bg-[#EDF0F7] text-[#87888c]" : ""}`}
                 disabled={isDisabled}
                 onClick={() => {
@@ -176,18 +178,18 @@ function AlarmItem({
                 }}
               >
                 승인
-              </GreenBtn>
+              </Button>
             </>
           ) : alarmType === 4 ? (
             <>
-              <GreenBtn
+              <Button
                 className={`w-[132px] h-[32px] font-[500] text-[14px]`}
                 onClick={() => {
                   navigate("/calModEmp");
                 }}
               >
                 추가하기
-              </GreenBtn>
+              </Button>
             </>
           ) : (
             <></>
@@ -198,4 +200,4 @@ function AlarmItem({
   );
 }
 
-export default AlarmItem;
+export default NotificationItem;

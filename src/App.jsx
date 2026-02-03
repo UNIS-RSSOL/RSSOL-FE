@@ -15,7 +15,7 @@ import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
 import EmpCalendar from "./pages/employee/calendar/EmpCalendar.jsx";
 import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 import EmpManageStore from "./pages/employee/mypage/ManageStore.jsx";
-import AlarmHomeEmp from "./pages/employee/alarm/AlarmHomeEmp.jsx";
+import EmpNotification from "./pages/employee/alarm/EmpNotification.jsx";
 import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
 import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
 import EmpModifying from "./pages/employee/schedule/EmpModifying.jsx";
@@ -187,7 +187,7 @@ function App() {
     "/employee/schedule/modifying",
     "/owner/schedule/my",
     "/owner/scheduleList",
-    "/alarmHomeEmp",
+    "/employee/notification",
     "/alarmHome",
     "/alarmCheck",
     "/employee/mypage/managestore",
@@ -255,7 +255,7 @@ function App() {
           <Route path="/owner/scheduleList" element={<ScheduleList />} />
 
           {/* 알림 */}
-          <Route path="/alarmHomeEmp" element={<AlarmHomeEmp />} />
+          <Route path="/employee/notification" element={<EmpNotification />} />
           <Route path="/alarmHome" element={<AlarmHome />} />
           <Route path="/alarmCheck" element={<AlarmCheck />} />
 
