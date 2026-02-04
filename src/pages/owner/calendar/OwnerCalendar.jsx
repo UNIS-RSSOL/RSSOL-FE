@@ -1,35 +1,34 @@
-import DayCalendar from "../../../components/common/calendar/DayCalendar.jsx";
-import WeekCalendar from "../../../components/common/calendar/WeekCalendar.jsx";
-import PencilIcon from "../../../assets/icons/PencilIcon.jsx";
-import WhiteBtn from "../../../components/common/WhiteBtn.jsx";
-import GreenBtn from "../../../components/common/GreenBtn.jsx";
-import Modal from "../../../components/common/Modal.jsx";
-import Toast from "../../../components/common/Toast.jsx";
-import { CalIcon } from "../../../assets/icons/CalIcon.jsx";
-import RequestSubIcon from "../../../assets/icons/RequestSubIcon.jsx";
-import RequestWorkIcon from "../../../assets/icons/RequestWorkIcon.jsx";
-import TrashIcon from "../../../assets/icons/TrashIcon.jsx";
-import AddIcon from "../../../assets/icons/AddIcon.jsx";
-import DeleteIcon from "../../../assets/icons/DeleteIcon.jsx";
-import MessageModal from "../../../components/common/MessageModal.jsx";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
-import {
-  LeftOutlined,
-  RightOutlined,
-  CaretDownFilled,
-} from "@ant-design/icons";
 import { TimePicker, ConfigProvider, DatePicker } from "antd";
+import DayCalendar from "../../../components/calendar/DayCalendar.jsx";
+import WeekCalendar from "../../../components/calendar/WeekCalendar.jsx";
+import PencilIcon from "../../../assets/icons/PencilIcon.jsx";
+import CalendarIcon from "../../../assets/icons/CalendarIcon.jsx";
+import UserAddIcon from "../../../assets/icons/UserAddIcon.jsx";
+import UserRightIcon from "../../../assets/icons/UserRightIcon.jsx";
+import TrashIcon from "../../../assets/icons/TrashIcon.jsx";
+import AddIcon from "../../../assets/icons/AddIcon.jsx";
+import DeleteIcon from "../../../assets/icons/DeleteIcon.jsx";
+import LeftArrowIcon from "../../../assets/icons/LeftArrowIcon.jsx";
+import RightArrowIcon from "../../../assets/icons/RightArrowIcon.jsx";
+import RoundTag from "../../../components/common/RoundTag.jsx";
+import MessageModal from "../../../components/common/MessageModal.jsx";
+import Button from "../../../components/common/Button.jsx";
+import Modal from "../../../components/common/Modal.jsx";
+import Toast from "../../../components/common/Toast.jsx";
+import { getActiveStore } from "../../../services/MypageService.js";
 import {
-  addWorkshift,
-  requestWork,
-  deleteWorkshift,
-  fetchAllWorkers,
-  requestSub,
-} from "../../../services/owner/ScheduleService.js";
-import { fetchActiveStore } from "../../../services/owner/MyPageService.js";
+  addWorkShift,
+  deleteWorkShift,
+} from "../../../services/WorkShiftService.js";
+import { createShiftSwapRequest } from "../../../services/ShiftSwapService.js";
+import { createExtraShiftRequest } from "../../../services/ExtraShiftService.js";
+import { getAllWorker } from "../../../services/StoreService.js";
+import { CaretDownFilled } from "@ant-design/icons";
+
 dayjs.locale("ko");
 
 const globalStyles = `
@@ -50,13 +49,13 @@ function OwnerCalendar() {
   const [formattedCurrentWeek, setFormattedCurrentWeek] = useState(
     `${today.format("YY")}.${today.format("MM")} ${Math.ceil(today.date() / 7)}주차`,
   );
-  
+
   // 근무표 확정 후 캘린더로 이동 시 데이터 새로고침
   useEffect(() => {
     if (location.state?.refresh || location.state?.confirmedSchedule) {
       console.log("🔄 근무표 확정 후 캘린더 새로고침");
       // 강제로 컴포넌트 리렌더링을 위해 key 변경
-      setRefreshKey(prev => prev + 1);
+      setRefreshKey((prev) => prev + 1);
       // state 초기화 (다음 방문 시 중복 새로고침 방지)
       window.history.replaceState({}, document.title);
     }
@@ -91,7 +90,7 @@ function OwnerCalendar() {
   useEffect(() => {
     (async () => {
       try {
-        const response = await fetchActiveStore();
+        const response = await getActiveStore();
         console.log("🏪 활성 매장 정보:", response);
         setActiveStore(response.name);
         // 활성 매장 ID 저장 (storeId 또는 id 필드 사용)
@@ -191,7 +190,7 @@ function OwnerCalendar() {
 
     useEffect(() => {
       (async () => {
-        const response = await fetchAllWorkers();
+        const response = await getAllWorker();
         setWorkers(response);
       })();
     }, []);
@@ -233,7 +232,7 @@ function OwnerCalendar() {
   const Day = () => {
     return (
       <div className="w-full flex flex-col items-center py-5">
-        <div className="flex flex-row w-full justify-between items-center px-4 mb-2">
+        <div className="relative flex flex-row w-full justify-between items-center px-4 mb-2">
           <PencilIcon
             className="size-[20px] mr-[36px]"
             onClick={() => {
@@ -241,14 +240,16 @@ function OwnerCalendar() {
             }}
           />
 
-          <div className="flex flex-row items-center justify-between">
-            <LeftOutlined
+          <div className="absolute left-1/2 transform -translate-x-1/2 flex flex-row items-center justify-between">
+            <LeftArrowIcon
+              className="cursor-pointer"
               onClick={() => setCurrentDate(currentDate.subtract(1, "day"))}
             />
             <p className="h-[20px] w-[150px] text-[20px]/[20px] font-[600] ">
               {formattedCurrentDate}
             </p>
-            <RightOutlined
+            <RightArrowIcon
+              className="cursor-pointer"
               onClick={() => setCurrentDate(currentDate.add(1, "day"))}
             />
           </div>
@@ -270,27 +271,23 @@ function OwnerCalendar() {
   const Week = () => {
     return (
       <div className="w-full flex flex-col items-center py-5">
-        <div className="flex flex-row w-full justify-between items-center px-4 mb-2">
+        <div className="relative flex flex-row w-full justify-between items-center px-4 mb-2">
           <PencilIcon
             className="size-[20px] mr-[36px]"
             onClick={() => setIsModalOpen(true)}
           />
 
-          <div className="flex flex-row items-center justify-between">
-            <LeftOutlined
-              onClick={() => {
-                const newDate = dayjs(currentDate).subtract(1, "week");
-                setCurrentDate(newDate);
-              }}
+          <div className="absolute left-1/2 transform -translate-x-1/2 flex flex-row items-center justify-between">
+            <LeftArrowIcon
+              className="cursor-pointer"
+              onClick={() => setCurrentDate(currentDate.subtract(1, "week"))}
             />
-            <p className="h-[20px] w-[150px] text-[20px]/[20px] font-[600] text-center">
+            <p className="h-[20px] w-[150px] text-[20px]/[20px] font-[600] ">
               {formattedCurrentWeek}
             </p>
-            <RightOutlined
-              onClick={() => {
-                const newDate = dayjs(currentDate).add(1, "week");
-                setCurrentDate(newDate);
-              }}
+            <RightArrowIcon
+              className="cursor-pointer"
+              onClick={() => setCurrentDate(currentDate.add(1, "week"))}
             />
           </div>
           <DropDown />
@@ -311,7 +308,7 @@ function OwnerCalendar() {
   //대타요청하기
   const handleRequestSub = async () => {
     try {
-      await requestSub(eventData.id);
+      await createShiftSwapRequest(eventData.id);
       setIsSubToastOpen(false);
       SetIsMsgOpen1(true);
     } catch (error) {
@@ -323,7 +320,7 @@ function OwnerCalendar() {
   const handleRequestWork = () => {
     (async () => {
       try {
-        await requestWork(eventData.id, needWorkers);
+        await createExtraShiftRequest(eventData.id, needWorkers);
 
         setAddShiftToastOpen(false);
         setIsMsgOpen2(true);
@@ -347,7 +344,7 @@ function OwnerCalendar() {
           newTime.date.format("YYYY-MM-DD") + "T" + newTime.end.format("HH:mm"),
       };
       console.log(data);
-      await addWorkshift(data.userStoreId, data.start, data.end);
+      await addWorkShift(data.userStoreId, data.start, data.end);
       setNewTime({
         userStoreId: "",
         username: "",
@@ -366,7 +363,7 @@ function OwnerCalendar() {
   const handleDeleteWorkshift = async () => {
     try {
       console.log(eventData.id);
-      await deleteWorkshift(eventData.id);
+      await deleteWorkShift(eventData.id);
       setIsDeleteShift(false);
       setIsMsgOpen3(true);
     } catch (error) {
@@ -389,7 +386,7 @@ function OwnerCalendar() {
         {selectedKey === "1" ? <Day /> : <Week />}
         {/*근무일정추가모달*/}
         {isModalOpen && (
-          <Modal onClose={() => setIsModalOpen(false)}>
+          <Modal xx={true} onClose={() => setIsModalOpen(false)}>
             <div className="flex flex-col w-full items-center justify-center my-2 gap-3">
               <div className="flex flex-col w-full items-center justify-center">
                 <p className="text-[16px] font-[400]">근무일정추가</p>
@@ -409,7 +406,7 @@ function OwnerCalendar() {
                       return current && current < dayjs().startOf("day");
                     }}
                     suffixIcon={
-                      <CalIcon className="size-[15px]" color="#87888c" />
+                      <CalendarIcon className="size-[15px]" color="#87888c" />
                     }
                     onChange={(e) => setNewTime({ ...newTime, date: dayjs(e) })}
                   />
@@ -455,12 +452,12 @@ function OwnerCalendar() {
                   <WorkersDropDown />
                 </div>
               </div>
-              <GreenBtn
-                className="w-full h-[35px] text-[14px] font-[500]"
+              <Button
+                className="w-full h-[32px] text-[14px] font-[500]"
                 onClick={handleAddWorkshift}
               >
                 추가하기
-              </GreenBtn>
+              </Button>
             </div>
           </Modal>
         )}
@@ -479,18 +476,18 @@ function OwnerCalendar() {
                   {eventData.end.format("HH:mm")}
                 </p>
               </div>
-              <GreenBtn
-                className="text-[16px] font-[600] py-6 items-center relative"
+              <Button
+                className="h-[48px] text-[16px] font-[600] items-center relative"
                 onClick={() => {
                   setIsEventToastOpen(false);
                   setAddShiftToastOpen(true);
                 }}
               >
-                <RequestWorkIcon className="absolute left-4" />
+                <UserAddIcon className="absolute left-4" />
                 <span className="w-full text-center">추가 근무 요청</span>
-              </GreenBtn>
-              <GreenBtn
-                className="text-[16px] font-[600] py-6 items-center relative"
+              </Button>
+              <Button
+                className="h-[48px] text-[16px] font-[600] items-center relative"
                 onClick={() => {
                   setIsEventToastOpen(false);
                   setIsDeleteShift(true);
@@ -498,7 +495,7 @@ function OwnerCalendar() {
               >
                 <TrashIcon className="absolute left-4" />
                 <span className="w-full text-center">근무 일정 삭제하기</span>
-              </GreenBtn>
+              </Button>
             </div>
           </Toast>
         )}
@@ -516,20 +513,18 @@ function OwnerCalendar() {
                 </p>
               </div>
               <div className="flex flex-row items-center justify-center w-full gap-5">
-                <p className="flex-shrink-0 h-[25px] border border-[#32d1aa] text-[12px] font-[400] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] flex items-center justify-center px-2">
-                  {activeStore}
-                </p>
+                <RoundTag> {activeStore}</RoundTag>
                 <span className="text-[14px] font-[500]">
                   {eventData.start.format("dd(DD) HH:mm-")}
                   {eventData.end.format("HH:mm")}
                 </span>
               </div>
-              <GreenBtn
-                className="text-[16px] font-[600] py-6 items-center relative"
+              <Button
+                className="h-[48px] text-[16px] font-[600] items-center relative"
                 onClick={handleRequestSub}
               >
                 요청하기
-              </GreenBtn>
+              </Button>
             </div>
           </Toast>
         )}
@@ -549,9 +544,7 @@ function OwnerCalendar() {
               </div>
               <div className="flex flex-row items-center justify-between w-full">
                 <div className="w-[100px]">
-                  <p className="flex-shrink-0 h-[25px] border border-[#32d1aa] text-[12px] font-[400] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] flex items-center justify-center px-2">
-                    {activeStore}
-                  </p>
+                  <RoundTag> {activeStore}</RoundTag>
                 </div>
                 <span className="text-[14px] font-[500]">
                   {eventData.start.format("dd(DD) HH:mm-")}
@@ -571,14 +564,14 @@ function OwnerCalendar() {
                   />
                 </div>
               </div>
-              <GreenBtn
-                className="text-[16px] font-[600] py-6 items-center relative"
+              <Button
+                className="h-[48px] text-[16px] font-[600] items-center relative"
                 onClick={() => {
                   handleRequestWork();
                 }}
               >
                 요청하기
-              </GreenBtn>
+              </Button>
             </div>
           </Toast>
         )}
@@ -593,26 +586,27 @@ function OwnerCalendar() {
                 </p>
               </div>
               <div className="flex flex-row items-center gap-3">
-                <p className="flex-shrink-0 h-[25px] border border-[#32d1aa] text-[12px] font-[400] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] flex items-center justify-center px-2">
-                  {activeStore}
-                </p>
+                <RoundTag>{activeStore}</RoundTag>
                 <span className="text-[14px] font-[500]">
                   {eventData.start.format("dd(DD) HH:mm-")}
                   {eventData.end.format("HH:mm")}
                 </span>
               </div>
               <div className="flex flex-row w-full items-center gap-2">
-                <WhiteBtn
-                  className="flex-1/2"
+                <Button
+                  className="h-[33px] bg-[#fdfffe] border-[1px] border-[#26272a] flex-1/2 text-[14px] font-[400]"
                   onClick={() => {
                     setIsDeleteShift(false);
                   }}
                 >
                   아니오
-                </WhiteBtn>
-                <GreenBtn className="flex-1/2" onClick={handleDeleteWorkshift}>
+                </Button>
+                <Button
+                  className="h-[33px] flex-1/2 text-[14px] font-[400]"
+                  onClick={handleDeleteWorkshift}
+                >
                   예
-                </GreenBtn>
+                </Button>
               </div>
             </div>
           </Modal>

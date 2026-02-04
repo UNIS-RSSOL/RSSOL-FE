@@ -1,29 +1,29 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
-  fetchStoreList,
-  deleteStore,
-  addStore,
-} from "../../../services/owner/MyPageService.js";
-import TopBar from "../../../components/common/alarm/TopBar.jsx";
-import AddItem from "../../../components/common/mypage/AddItem.jsx";
-import DeleteIcon from "../../../assets/icons/DeleteIcon.jsx";
+  getOwnerStoreList,
+  deleteOwnerStore,
+  addOwnerStore,
+} from "../../../services/MypageService.js";
+import TopBar from "../../../components/layout/header/TopBar.jsx";
+import AddItem from "../../../components/mypage/AddItem.jsx";
+import StoreItem from "../../../components/mypage/StoreItem.jsx";
 import AddIcon from "../../../assets/icons/AddIcon.jsx";
 import Modal from "../../../components/common/Modal.jsx";
-import GreenBtn from "../../../components/common/GreenBtn.jsx";
-import WhiteBtn from "../../../components/common/WhiteBtn.jsx";
+import Button from "../../../components/common/Button.jsx";
 import Toast from "../../../components/common/Toast.jsx";
 import TypeIcon from "../../../assets/icons/TypeIcon.jsx";
-import MapIcon from "../../../assets/icons/MapIcon.jsx";
+import MarkerIcon from "../../../assets/icons/MarkerIcon.jsx";
 import PhoneIcon from "../../../assets/icons/PhoneIcon.jsx";
 import SaveIcon from "../../../assets/icons/SaveIcon.jsx";
-import { CalIcon } from "../../../assets/icons/CalIcon.jsx";
+import CalendarIcon from "../../../assets/icons/CalendarIcon.jsx";
 
 function ManageStore() {
-  const navigate = useNavigate();
   const [storeList, setStoreList] = useState([]);
   const [deleteModal, setDeleteModal] = useState(false);
-  const [deletedStore, setDeletedStore] = useState();
+  const [deletedStore, setDeletedStore] = useState({
+    storeId: "",
+    name: "",
+  });
   const [addToast, setAddToast] = useState(false);
   const [newStore, setNewStore] = useState([
     {
@@ -32,7 +32,7 @@ function ManageStore() {
       content: "",
     },
     {
-      icon: <MapIcon />,
+      icon: <MarkerIcon />,
       title: "매장 주소",
       content: "",
     },
@@ -47,7 +47,7 @@ function ManageStore() {
       content: "",
     },
     {
-      icon: <CalIcon />,
+      icon: <CalendarIcon />,
       title: "입사날짜",
       content: "",
       type: "date",
@@ -57,7 +57,7 @@ function ManageStore() {
   useEffect(() => {
     (async () => {
       try {
-        const response = await fetchStoreList();
+        const response = await getOwnerStoreList();
 
         const formattedList = response.map((store) => ({
           storeId: store.storeId,
@@ -70,27 +70,9 @@ function ManageStore() {
     })();
   }, [addToast, deleteModal]);
 
-  const StoreItem = ({ index, store }) => {
-    return (
-      <div className="flex flex-col w-full items-start justify-center">
-        <p className="text-[14px] font-[600] text-left">등록 매장 {index}</p>
-        <div className="flex flex-row w-full justify-between items-center border-b border-[#87888c] py-2">
-          <p className="text-[18px] font-[600] text-left">{store.name}</p>
-          <DeleteIcon
-            onClick={() => {
-              setDeleteModal(true);
-              setDeletedStore(store);
-            }}
-          />
-        </div>
-      </div>
-    );
-  };
-
-  //매장 삭제
   const handleDeleteStore = async () => {
     try {
-      await deleteStore(deletedStore.storeId);
+      await deleteOwnerStore(deletedStore.storeId);
       setDeleteModal(false);
       setDeletedStore("");
     } catch (error) {
@@ -113,11 +95,11 @@ function ManageStore() {
         return;
       }
       console.log(newStore);
-      await addStore(
-        newStore[3].content,
+      await addOwnerStore(
         newStore[0].content,
         newStore[1].content,
         newStore[2].content,
+        newStore[3].content,
         newStore[4].content,
       );
       setAddToast(false);
@@ -128,7 +110,7 @@ function ManageStore() {
           content: "",
         },
         {
-          icon: <MapIcon />,
+          icon: <MarkerIcon />,
           title: "매장 주소",
           content: "",
         },
@@ -143,7 +125,7 @@ function ManageStore() {
           content: "",
         },
         {
-          icon: <SaveIcon />,
+          icon: <CalendarIcon />,
           title: "입사날짜",
           content: "",
           type: "date",
@@ -156,10 +138,18 @@ function ManageStore() {
 
   return (
     <div className="w-full h-full flex flex-col overflow-y-auto">
-      <TopBar title="내 매장 관리" onBack={() => navigate("/owner/mypage")} />
+      <TopBar title="내 매장 관리" />
       <div className="flex flex-col w-full my-10 px-5 gap-5">
         {storeList.map((store, index) => (
-          <StoreItem key={index + 1} index={index + 1} store={store} />
+          <StoreItem
+            key={index + 1}
+            index={index + 1}
+            store={store}
+            onClick={() => {
+              setDeleteModal(true);
+              setDeletedStore(store);
+            }}
+          />
         ))}
         <div
           className="flex flex-row items-center justify-center my-2 gap-3 cursor-pointer"
@@ -170,28 +160,32 @@ function ManageStore() {
         </div>
         {deleteModal && (
           <Modal
+            xx={true}
             onClose={() => {
               setDeleteModal(false);
             }}
           >
             <div className="flex flex-col justify-center w-full py-3 px-1 gap-5">
-              <div className="text-[14px] font-[500] text-center">
+              <div className="text-[14px] font-[500] text-center mt-2">
                 <p>'{deletedStore.name}'을 내 매장에서</p>
                 <p>삭제할까요?</p>
               </div>
               <div className="flex flex-row w-full items-center gap-2">
-                <WhiteBtn
-                  className="flex flex-1/2"
+                <Button
+                  className="flex flex-1/2 w-[136px] h-[33px] bg-[#fdfffe] border-[1px] border-black"
                   onClick={() => {
                     setDeleteModal(false);
                     setDeletedStore("");
                   }}
                 >
                   아니오
-                </WhiteBtn>
-                <GreenBtn className="flex flex-1/2" onClick={handleDeleteStore}>
+                </Button>
+                <Button
+                  className="flex flex-1/2 w-[136px] h-[33px]"
+                  onClick={handleDeleteStore}
+                >
                   예
-                </GreenBtn>
+                </Button>
               </div>
             </div>
           </Modal>
@@ -216,12 +210,12 @@ function ManageStore() {
                 />
               ))}
             </div>
-            <GreenBtn
-              className="py-6 text-[16px] font-[600]"
+            <Button
+              className="w-[361px] h-[48px] text-[16px] font-[600]"
               onClick={handleAddStore}
             >
               추가하기
-            </GreenBtn>
+            </Button>
           </Toast>
         )}
       </div>

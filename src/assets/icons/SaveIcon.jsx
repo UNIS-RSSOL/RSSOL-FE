@@ -6,7 +6,6 @@ function SaveIcon({ className }) {
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
     >
       <path
         d="M16.8 13L16.8 22.6M21.6 17.8L12 17.8"

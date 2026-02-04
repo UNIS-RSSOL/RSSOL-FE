@@ -15,23 +15,23 @@ import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
 import EmpCalendar from "./pages/employee/calendar/EmpCalendar.jsx";
 import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 import EmpManageStore from "./pages/employee/mypage/ManageStore.jsx";
-import AlarmHomeEmp from "./pages/employee/alarm/AlarmHomeEmp.jsx";
-import AlarmHome from "./pages/owner/alarm/AlarmHome.jsx";
-import AlarmCheck from "./pages/owner/alarm/AlarmCheck.jsx";
-import CalModEmp from "./pages/employee/calendarAdd/CalModEmp.jsx";
-import CalAdd from "./pages/owner/calendarAdd/CalAdd.jsx";
-import CalGen from "./pages/owner/calendarAdd/CalGen.jsx";
-import AutoCal from "./pages/owner/calendarAdd/AutoCal.jsx";
-import AddOwner from "./pages/owner/calendarAdd/AddOwner.jsx";
-import ScheduleList from "./pages/owner/calendarAdd/ScheduleList.jsx";
-import ManageEmpPage from "./pages/owner/manage/ManageEmpPage.jsx";
+import EmpNotification from "./pages/employee/notification/EmpNotification.jsx";
+import NotificationHome from "./pages/owner/notification/NotificationHome.jsx";
+import NotificationCheck from "./pages/owner/notification/NotificationCheck.jsx";
+import EmpModifying from "./pages/employee/schedule/EmpModifying.jsx";
+import AddSchedule from "./pages/owner/schedule/AddSchedule.jsx";
+import GenSchedule from "./pages/owner/schedule/GenSchedule.jsx";
+import CandidateSchedule from "./pages/owner/schedule/CandidateSchedule.jsx";
+import OwnerSchedule from "./pages/owner/schedule/OwnerSchedule.jsx";
+import ScheduleList from "./pages/owner/schedule/ScheduleList.jsx";
+import ManageEmp from "./pages/owner/manage/ManageEmp.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
 import EmpHome from "./pages/employee/EmpHome.jsx";
 import Splash from "./pages/common/Splash.jsx";
 
 import { refreshAccessToken } from "./services/kakaoLogin.js";
-import api from "./services/api.js";
+import api from "./services/Api.js";
 
 function App() {
   const location = useLocation();
@@ -45,12 +45,12 @@ function App() {
   const goOnboarding = () => navigate("/onboarding", { replace: true });
   const goHomeByRole = async () => {
     try {
-      await api.get("/api/mypage/owner/profile");
+      await api.get("mypage/owner/profile");
       return navigate("/owner", { replace: true });
     } catch (_) {
       // 2) 알바일 가능성 체크
       try {
-        await api.get("/api/mypage/staff/profile");
+        await api.get("mypage/staff/profile");
         return navigate("/employee", { replace: true });
       } catch (err2) {
         return goLogin();
@@ -107,7 +107,7 @@ function App() {
        --------------------------*/
       let activeStore = null;
       try {
-        const res = await api.get("/api/mypage/active-store");
+        const res = await api.get("mypage/active-store");
         activeStore = res.data;
       } catch (err) {
         // 매장 없음 → 역할에 따라 홈으로 이동 (알바는 active-store 없어도 정상)
@@ -149,28 +149,28 @@ function App() {
   /** -------------------------
    *  루트에서만 인증 체크
    --------------------------*/
-  useEffect(() => {
-    // 인증 체크가 필요한 경로
-    const checkPages = ["/"];
-    // 인증 체크가 불필요한 경로
-    const publicPages = ["/", "/login", "/onboarding", "/auth/kakao/callback"];
+  // useEffect(() => {
+  //   // 인증 체크가 필요한 경로
+  //   const checkPages = ["/"];
+  //   // 인증 체크가 불필요한 경로
+  //   const publicPages = ["/", "/login", "/onboarding", "/auth/kakao/callback"];
 
-    //2025-12-04: mypage, calendar 토큰 파싱 문제
-    const AccessToken = localStorage.getItem("accessToken");
-    const RefreshToken = localStorage.getItem("refreshToken");
+  //   //2025-12-04: mypage, calendar 토큰 파싱 문제
+  //   const AccessToken = localStorage.getItem("accessToken");
+  //   const RefreshToken = localStorage.getItem("refreshToken");
 
-    //토큰 둘 다 없음 → publicPages 외부 접근 차단
-    if (!AccessToken && !RefreshToken) {
-      if (!publicPages.includes(location.pathname)) {
-        navigate("/login", { replace: true });
-      }
-      return;
-    }
+  //   //토큰 둘 다 없음 → publicPages 외부 접근 차단
+  //   if (!AccessToken && !RefreshToken) {
+  //     if (!publicPages.includes(location.pathname)) {
+  //       navigate("/login", { replace: true });
+  //     }
+  //     return;
+  //   }
 
-    if (checkPages.includes(location.pathname)) {
-      checkAuthAndRedirect();
-    }
-  }, [location.pathname, checkAuthAndRedirect]);
+  //   if (checkPages.includes(location.pathname)) {
+  //     checkAuthAndRedirect();
+  //   }
+  // }, [location.pathname, checkAuthAndRedirect]);
 
   /** -------------------------
    *  레이아웃 제외 경로
@@ -180,16 +180,15 @@ function App() {
     "/login",
     "/onboarding",
     "/auth/kakao/callback",
-    "/calAdd",
-    "/calGen",
-    "/autoCal",
-    "/calModEmp",
-    "/addOwner",
-    "/scheduleList",
-    "/alarmHomeEmp",
-    "/alarmHome",
-    "/alarmCheck",
-    "/scheduleList",
+    "/owner/schedule/add",
+    "/owner/schedule/gen",
+    "/owner/schedule/candidate",
+    "/employee/schedule/modifying",
+    "/owner/schedule/my",
+    "/owner/schedule/list",
+    "/employee/notification",
+    "/owner/notification/home",
+    "/owner/notification/check",
     "/employee/mypage/managestore",
     "/owner/mypage/managestore",
   ];
@@ -219,9 +218,11 @@ function App() {
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
 
+          {/* 홈화면 */}
           <Route path="/owner" element={<OwnerHome />} />
           <Route path="/employee" element={<EmpHome />} />
 
+          {/* 마이페이지 */}
           <Route path="/owner/mypage" element={<OwnerPage />} />
           <Route
             path="/owner/mypage/managestore"
@@ -233,21 +234,38 @@ function App() {
             element={<EmpManageStore />}
           />
 
-          <Route path="/calModEmp" element={<CalModEmp />} />
-          <Route path="/calAdd" element={<CalAdd />} />
-          <Route path="/calGen" element={<CalGen />} />
-          <Route path="/autoCal" element={<AutoCal />} />
-          <Route path="/addOwner" element={<AddOwner />} />
-          <Route path="/scheduleList" element={<ScheduleList />} />
-
-          <Route path="/alarmHomeEmp" element={<AlarmHomeEmp />} />
-          <Route path="/alarmHome" element={<AlarmHome />} />
-          <Route path="/alarmCheck" element={<AlarmCheck />} />
-
-          <Route path="/owner/manage" element={<ManageEmpPage />} />
-          <Route path="/employee/manage" element={<ManageSalary />} />
-          <Route path="/owner/calendar" element={<OwnerCalendar />} />
+          {/* 캘린더 */}
           <Route path="/employee/calendar" element={<EmpCalendar />} />
+          <Route path="/owner/calendar" element={<OwnerCalendar />} />
+
+          {/* 근무표생성 */}
+          <Route
+            path="/employee/schedule/modifying"
+            element={<EmpModifying />}
+          />
+          <Route path="/owner/schedule/add" element={<AddSchedule />} />
+          <Route path="/owner/schedule/gen" element={<GenSchedule />} />
+          <Route
+            path="/owner/schedule/candidate"
+            element={<CandidateSchedule />}
+          />
+          <Route path="/owner/schedule/my" element={<OwnerSchedule />} />
+          <Route path="/owner/schedule/list" element={<ScheduleList />} />
+
+          {/* 알림 */}
+          <Route path="/employee/notification" element={<EmpNotification />} />
+          <Route
+            path="/owner/notification/home"
+            element={<NotificationHome />}
+          />
+          <Route
+            path="/owner/notification/check"
+            element={<NotificationCheck />}
+          />
+
+          {/*관리 페이지 */}
+          <Route path="/owner/manage" element={<ManageEmp />} />
+          <Route path="/employee/manage" element={<ManageSalary />} />
         </Routes>
       </main>
 

@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   onboardingOwner,
   onboardingStaff,
-} from "../../services/authService.js";
+} from "../../services/OnboardingService.js";
 import { CaretDownFilled } from "@ant-design/icons";
 import character4 from "../../assets/images/character4.png";
 import character2 from "../../assets/images/character2.png";
-
-const ONBOARDING_ROLE_KEY = "onboardingRole";
-const ONBOARDING_DATA_KEY = "onboardingData";
+import Button from "../../components/common/Button.jsx";
+import BackButton from "../../components/common/BackButton.jsx";
+import OnboardingBtn from "../../components/login/OnboardingBtn.jsx";
 
 // 은행 드롭다운 목록
 const bankItems = [
@@ -46,38 +46,6 @@ export default function Onboarding() {
   });
 
   const navigate = useNavigate();
-
-  // 컴포넌트 마운트 시 localStorage에서 데이터 복원
-  useEffect(() => {
-    const savedRole = localStorage.getItem(ONBOARDING_ROLE_KEY);
-    const savedData = localStorage.getItem(ONBOARDING_DATA_KEY);
-
-    if (savedRole) {
-      setRole(savedRole);
-    }
-
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
-        setFormData(parsedData);
-      } catch (error) {
-        console.error("온보딩 데이터 파싱 실패:", error);
-      }
-    }
-  }, []);
-
-  // localStorage
-  // role이 변경될 때마다 localStorage에 저장
-  useEffect(() => {
-    if (role) {
-      localStorage.setItem(ONBOARDING_ROLE_KEY, role);
-    }
-  }, [role]);
-
-  // formData가 변경될 때마다 localStorage에 저장
-  useEffect(() => {
-    localStorage.setItem(ONBOARDING_DATA_KEY, JSON.stringify(formData));
-  }, [formData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -123,9 +91,20 @@ export default function Onboarding() {
 
     if (step === 2) {
       if (role === "owner") {
-        const { storeName, storeAddress, storePhone, businessNumber, hireDate } =
-          formData;
-        if (!storeName || !storeAddress || !storePhone || !businessNumber || !hireDate) {
+        const {
+          storeName,
+          storeAddress,
+          storePhone,
+          businessNumber,
+          hireDate,
+        } = formData;
+        if (
+          !storeName ||
+          !storeAddress ||
+          !storePhone ||
+          !businessNumber ||
+          !hireDate
+        ) {
           alert("모든 정보를 입력해주세요.");
           return;
         }
@@ -182,10 +161,6 @@ export default function Onboarding() {
         }
         return;
       }
-
-      // 최종 데이터 localStorage에 저장
-      localStorage.setItem(ONBOARDING_ROLE_KEY, role);
-      localStorage.setItem(ONBOARDING_DATA_KEY, JSON.stringify(formData));
     }
 
     if (step < 2) setStep(step + 1);
@@ -205,8 +180,13 @@ export default function Onboarding() {
       return role !== null;
     } else if (step === 2) {
       if (role === "owner") {
-        const { storeName, storeAddress, storePhone, businessNumber, hireDate } =
-          formData;
+        const {
+          storeName,
+          storeAddress,
+          storePhone,
+          businessNumber,
+          hireDate,
+        } = formData;
         return (
           storeName &&
           storeAddress &&
@@ -232,14 +212,11 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-white flex flex-col items-center py-10 px-4 font-Pretendard">
+    <div className="relative w-full min-h-screen bg-white flex flex-col items-center py-10 px-4 font-Pretendard overflow-x-hidden">
       {/* 상단 이전 버튼 */}
-      <button
-        onClick={handleBack}
-        className="self-start text-sm px-4 py-2 bg-gray-200 rounded-lg"
-      >
-        이전
-      </button>
+      <div className="absolute top-10 left-5 flex justify-start w-full">
+        <BackButton />
+      </div>
 
       {/* 컨텐츠 영역 */}
       <div className="w-full max-w-[360px] mt-8 flex flex-col items-center px-4">
@@ -252,49 +229,49 @@ export default function Onboarding() {
         {/* --- STEP CONTENT --- */}
         {step === 1 && (
           <>
-            <h2 className="text-3xl font-bold mb-2 w-full text-left">회원님</h2>
-            <p className="text-base mb-6 w-full text-left">
+            <h2 className="text-[30px] font-[700] mb-2 w-full text-left">
+              회원님
+            </h2>
+            <p className="text-[20px] font-[400] mb-20 w-full text-left">
               계정 유형을 선택해주세요
             </p>
 
-            <div className="flex flex-col gap-4 w-full">
-              <button
-                onClick={() => setRole("owner")}
-                className={`p-4 rounded-xl border flex items-center gap-4 ${
-                  role === "owner" ? "bg-blue-500 text-black" : "bg-white"
-                }`}
+            <div className="flex flex-col gap-7 w-full">
+              <OnboardingBtn
+                value="owner"
+                role={role}
+                onClick={(selectedRole) => setRole(selectedRole)}
               >
                 <img
                   src={character4}
                   alt="사장님 캐릭터"
-                  className="w-16 h-16 object-contain"
+                  className="absolute right-58 top-2 size-[110px] overflow-visible"
                 />
-                <div className="flex flex-col items-start">
-                  <p className="text-base font-bold text-left">사장님</p>
-                  <p className="text-sm text-left">
+                <div className="flex flex-col items-start ml-20">
+                  <p className="text-[20px] font-[400] text-left">사장님</p>
+                  <p className="text-[14px] font-[400] text-left">
                     매장 및 직원 관리를 할 수 있어요!
                   </p>
                 </div>
-              </button>
+              </OnboardingBtn>
 
-              <button
-                onClick={() => setRole("employee")}
-                className={`p-4 rounded-xl border flex items-center gap-4 ${
-                  role === "employee" ? "bg-[#68E194] text-black" : "bg-white"
-                }`}
+              <OnboardingBtn
+                value="employee"
+                role={role}
+                onClick={(selectedRole) => setRole(selectedRole)}
               >
                 <img
                   src={character2}
                   alt="알바생 캐릭터"
-                  className="w-16 h-16 object-contain"
+                  className="absolute left-58 top-2 size-[110px] overflow-visible"
                 />
-                <div className="flex flex-col items-start">
-                  <p className="text-base font-bold text-left">알바생</p>
-                  <p className="text-sm text-left">
+                <div className="flex flex-col items-start mr-20">
+                  <p className="text-[20px] font-[400] text-left">알바생</p>
+                  <p className="text-[14px] font-[400] text-left">
                     월급 확인과 대타 신청을 할 수 있어요!
                   </p>
                 </div>
-              </button>
+              </OnboardingBtn>
             </div>
           </>
         )}
@@ -408,8 +385,9 @@ export default function Onboarding() {
                       <span className="text-sm">
                         {formData.bankId === 0
                           ? "은행 선택"
-                          : bankItems.find((item) => item.key === formData.bankId)
-                              ?.label || "은행 선택"}
+                          : bankItems.find(
+                              (item) => item.key === formData.bankId,
+                            )?.label || "은행 선택"}
                       </span>
                       <CaretDownFilled
                         style={{
@@ -460,20 +438,18 @@ export default function Onboarding() {
                   </p>
                 )}
               </div>
-
-
             </div>
           </>
         )}
 
         {/* --- Bottom Fixed Button --- */}
-        <div className="w-full sticky bottom-0 bg-white pt-6 pb-4">
-          <button
+        <div className="absolute bottom-10">
+          <Button
             onClick={handleNext}
-            className="w-full py-3 bg-blue-500 text-black rounded-lg"
+            className={`w-[360px] h-[48px] text-[16px] font-[600] ${isStepComplete() ? "" : "bg-[#e7eaf3] text-[#87888c] !cursor-not-allowed hover:!opacity-100"}`}
           >
             {step === 2 ? "입력 완료" : "선택 완료"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

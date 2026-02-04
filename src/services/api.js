@@ -1,93 +1,41 @@
 import axios from "axios";
-import { refreshToken, logout } from "./authService";
+import { refreshToken } from "./AuthService";
 
-const getAuthToken = () => {
-  return localStorage.getItem("accessToken");
-};
-
+//axios 인스턴스. 이후 주소 쓸 때는 api/ 이후 부터 쓰면 됨
 const api = axios.create({
-  baseURL: "https://connecti.store",
+  baseURL: "https://connecti.store/api/",
   headers: {
     "Content-Type": "application/json",
   },
 });
 
+//요청 인터셉터
 api.interceptors.request.use(
   (config) => {
-    // 토큰 갱신 요청은 건너뜀
-    if (config._skipAuthRefresh) {
-      return config;
-    }
-
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      config.headers = {
-        ...config.headers,
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      };
+    const accessToken = localStorage.getItem("accessToken");
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    } else {
+      const refreshToken = localStorage.getItem("refreshToken");
+      if (refreshToken) {
+        const newAccessToken = refreshToken(refreshToken);
+        config.headers.Authorization = `Bearer ${newAccessToken.accessToken}`;
+      }
     }
     return config;
   },
   (error) => {
+    console.log("요청 인터셉터 에러: ", error);
     return Promise.reject(error);
   },
 );
 
+//응답 인터셉터
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    // 1. 로그아웃 요청의 403 에러는 무시 (이미 로그아웃된 상태일 수 있음)
-    if (originalRequest?.url?.includes("/api/auth/logout")) {
-      // 로그아웃 요청의 403 에러는 정상적인 경우일 수 있으므로 무시
-      return Promise.reject(error);
-    }
-
-    // 2. 토큰 갱신 요청 자체가 실패한 경우 처리
-    if (originalRequest?.url?.includes("/api/auth/refresh-token")) {
-      // refreshToken 요청 실패 시에만 logout 호출
-      // 단, refreshToken이 없는 경우는 이미 로그아웃 상태이므로 중복 호출 방지
-      const refreshToken = localStorage.getItem("refreshToken");
-      if (refreshToken) {
-        await logout();
-      } else {
-        // refreshToken이 없으면 이미 로그아웃 상태
-        localStorage.removeItem("accessToken");
-        if (!window.location.pathname.includes("/login")) {
-          window.location.href = "/login";
-        }
-      }
-      return Promise.reject(error);
-    }
-
-    // 3. 401/403 에러 발생 시
-    if (
-      (error.response?.status === 401 || error.response?.status === 403) &&
-      !originalRequest._retry
-    ) {
-      // ✅ 중요: 리프레시 토큰이 아예 없으면 갱신 시도 없이 바로 중단
-      const refreshToken = localStorage.getItem("refreshToken");
-      if (!refreshToken) {
-        // refreshToken이 없으면 토큰 갱신 불가능
-        // 로그아웃 처리하지 않고 에러만 반환 (로그인 페이지로 리다이렉트는 상위에서 처리)
-        return Promise.reject(error);
-      }
-
-      originalRequest._retry = true;
-
-      try {
-        const tokenData = await refreshToken();
-        originalRequest.headers.Authorization = `Bearer ${tokenData.accessToken}`;
-        return api(originalRequest);
-      } catch (refreshError) {
-        // refreshToken이 있는데 갱신 실패한 경우에만 logout 호출
-        await logout();
-        return Promise.reject(refreshError);
-      }
-    }
-
+  (response) => {
+    return response;
+  },
+  (error) => {
     return Promise.reject(error);
   },
 );

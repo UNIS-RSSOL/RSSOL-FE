@@ -1,5 +1,3 @@
-import { useState } from "react";
-import React from "react";
 import SplashImage from "../../assets/Splash.svg";
 
 function Splash() {

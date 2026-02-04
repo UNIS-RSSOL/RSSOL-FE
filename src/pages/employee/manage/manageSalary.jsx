@@ -1,15 +1,8 @@
-import { useEffect, useState } from "react";
-import { CoinIcon } from "../../../assets/icons/CoinIcon.jsx";
-import PhoneIcon from "../../../assets/icons/PhoneIcon.jsx";
-import DollarIcon from "../../../assets/icons/DollarIcon.jsx";
-import CopyIcon from "../../../assets/icons/CopyIcon.jsx";
-import Toast from "../../../components/common/Toast.jsx";
-import GreenBtn from "../../../components/common/GreenBtn.jsx";
+import { useState } from "react";
 import Box from "../../../components/common/Box.jsx";
-import LeftOutlined from "@ant-design/icons/es/icons/LeftOutlined";
-import RightOutlined from "@ant-design/icons/es/icons/RightOutlined";
+import LeftArrowIcon from "../../../assets/icons/LeftArrowIcon.jsx";
+import RightArrowIcon from "../../../assets/icons/RightArrowIcon.jsx";
 import { Divider } from "antd";
-import CheckOutlined from "@ant-design/icons/es/icons/CheckOutlined";
 
 const ManageSalary = () => {
   const [openToast, setOpenToast] = useState(false);
@@ -37,16 +30,16 @@ const ManageSalary = () => {
 
   return (
     <div className="flex flex-col w-full items-center mt-5">
-      <Box disabled={true}>
+      <Box disabled={true} className="flex flex-col">
         <div className="flex items-center justify-center">
-          <LeftOutlined
+          <LeftArrowIcon
             className="cursor-pointer"
             onClick={() => setMonth((prev) => Math.max(1, prev - 1))}
           />
           <p className="text-[16px] font-[500] px-5">
             {today.getFullYear()}년 {month}월
           </p>
-          <RightOutlined
+          <RightArrowIcon
             className="cursor-pointer"
             onClick={() => setMonth((prev) => Math.min(12, prev + 1))}
           />
@@ -68,14 +61,14 @@ const ManageSalary = () => {
         </div>
       </Box>
       <div className="w-full h-[8px] bg-[#e7eaf3] my-5" />
-      <Box disabled={true}>
+      <Box className="flex flex-col" disabled={true}>
         <div className="flex items-center justify-center">
-          <LeftOutlined
+          <LeftArrowIcon
             className="cursor-pointer"
             onClick={() => setMonth2((prev) => Math.max(1, prev - 1))}
           />
           <p className="text-[16px] font-[500] px-5">{month2}월 근태 확인</p>
-          <RightOutlined
+          <RightArrowIcon
             className="cursor-pointer"
             onClick={() => setMonth2((prev) => Math.min(12, prev + 1))}
           />
