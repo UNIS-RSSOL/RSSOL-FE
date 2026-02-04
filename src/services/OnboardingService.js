@@ -24,7 +24,7 @@ export const onboardingStaff = async (
 };
 
 //온보딩 사장님
-export const onboardingBoss = async (
+export const onboardingOwner = async (
   name,
   address,
   phoneNumber,

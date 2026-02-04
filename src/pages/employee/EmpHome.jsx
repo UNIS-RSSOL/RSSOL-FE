@@ -1,20 +1,20 @@
-import Box from "../../components/Box.jsx";
-import Note from "../../components/Note.jsx";
-import Button from "../../components/Button.jsx";
-import RoundTag from "../../components/RoundTag.jsx";
-import ColoredCalIcon from "../../assets/newicons/ColoredCalIcon.jsx";
-import ColoredDollarIcon from "../../assets/newicons/ColoredDollarIcon.jsx";
-import ColoredCheckIcon from "../../assets/newicons/ColoredCheckIcon.jsx";
+import Box from "../../components/common/Box.jsx";
+import Note from "../../components/home/Note.jsx";
+import Button from "../../components/common/Button.jsx";
+import RoundTag from "../../components/common/RoundTag.jsx";
+import ColoredCalIcon from "../../assets/icons/ColoredCalIcon.jsx";
+import ColoredDollarIcon from "../../assets/icons/ColoredDollarIcon.jsx";
+import ColoredCheckIcon from "../../assets/icons/ColoredCheckIcon.jsx";
 import { useEffect, useState } from "react";
 import character2 from "../../assets/images/character2.png";
 import character3 from "../../assets/images/character3.png";
-import { getMyScheduleByPeriod } from "../../services/new/WorkShiftService.js";
+import { getMyScheduleByPeriod } from "../../services/WorkShiftService.js";
 import {
   getActiveStore,
   getStaffProfile,
   getStaffStoreList,
-} from "../../services/new/MypageService.js";
-import FloatButton from "../../components/mypage/FloatButton.jsx";
+} from "../../services/MypageService.js";
+import FloatButton from "../../components/home/FloatButton.jsx";
 import dayjs from "dayjs";
 
 function EmpHome() {

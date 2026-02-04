@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import PencilIcon from "../../../assets/newicons/PencilIcon.jsx";
+import PencilIcon from "../../assets/icons/PencilIcon.jsx";
 import InfoItem from "./InfoItem.jsx";
-import RightArrowIcon from "../../../assets/newicons/RightArrowIcon.jsx";
+import RightArrowIcon from "../../assets/icons/RightArrowIcon.jsx";
 
 function InfoBox({ head, myData, onDataUpdate, role }) {
   const [isEdit, setIsEdit] = useState(false);

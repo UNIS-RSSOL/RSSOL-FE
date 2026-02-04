@@ -1,20 +1,20 @@
-import Box from "../../components/Box.jsx";
-import RoundTag from "../../components/RoundTag.jsx";
-import ColoredCalIcon from "../../assets/newicons/ColoredCalIcon.jsx";
-import ColoredDollarIcon from "../../assets/newicons/ColoredDollarIcon.jsx";
-import ColoredCheckIcon from "../../assets/newicons/ColoredCheckIcon.jsx";
-import Button from "../../components/Button.jsx";
+import Box from "../../components/common/Box.jsx";
+import RoundTag from "../../components/common/RoundTag.jsx";
+import ColoredCalIcon from "../../assets/icons/ColoredCalIcon.jsx";
+import ColoredDollarIcon from "../../assets/icons/ColoredDollarIcon.jsx";
+import ColoredCheckIcon from "../../assets/icons/ColoredCheckIcon.jsx";
+import Button from "../../components/common/Button.jsx";
 import { useEffect, useState } from "react";
 import character1 from "../../assets/images/character1.png";
-import Note from "../../components/Note.jsx";
-import OwnerHomeCalendar from "../../components/common/calendar/OwnerHomeCalendar.jsx";
-import { getScheduleByPeriod } from "../../services/new/WorkShiftService.js";
+import Note from "../../components/home/Note.jsx";
+import OwnerHomeCalendar from "../../components/calendar/OwnerHomeCalendar.jsx";
+import { getScheduleByPeriod } from "../../services/WorkShiftService.js";
 import {
   getActiveStore,
   getOwnerStoreList,
-} from "../../services/new/MypageService.js";
+} from "../../services/MypageService.js";
 import dayjs from "dayjs";
-import FloatButton from "../../components/mypage/FloatButton.jsx";
+import FloatButton from "../../components/home/FloatButton.jsx";
 
 function OwnerHome() {
   const [currentTime, setCurrentTime] = useState("");

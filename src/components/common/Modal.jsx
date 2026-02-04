@@ -1,4 +1,4 @@
-import XIcon from "../assets/newicons/XIcon";
+import XIcon from "../../assets/icons/XIcon";
 
 function Modal({ className, children, onClose, xx = false }) {
   const x = xx;

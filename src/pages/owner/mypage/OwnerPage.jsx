@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import InfoBox from "../../../components/common/mypage/InfoBox.jsx";
-import UserIcon from "../../../assets/newicons/UserIcon.jsx";
-import MailIcon from "../../../assets/newicons/MailIcon.jsx";
-import CoinIcon from "../../../assets/newicons/CoinIcon.jsx";
-import SaveIcon from "../../../assets/newicons/SaveIcon.jsx";
-import TypeIcon from "../../../assets/newicons/TypeIcon.jsx";
-import MarkerIcon from "../../../assets/newicons/MarkerIcon.jsx";
-import PhoneIcon from "../../../assets/newicons/PhoneIcon.jsx";
-import FileEditIcon from "../../../assets/newicons/FileEditIcon.jsx";
+import InfoBox from "../../../components/mypage/InfoBox.jsx";
+import UserIcon from "../../../assets/icons/UserIcon.jsx";
+import MailIcon from "../../../assets/icons/MailIcon.jsx";
+import CoinIcon from "../../../assets/icons/CoinIcon.jsx";
+import SaveIcon from "../../../assets/icons/SaveIcon.jsx";
+import TypeIcon from "../../../assets/icons/TypeIcon.jsx";
+import MarkerIcon from "../../../assets/icons/MarkerIcon.jsx";
+import PhoneIcon from "../../../assets/icons/PhoneIcon.jsx";
+import FileEditIcon from "../../../assets/icons/FileEditIcon.jsx";
 import OwnerBtn from "../../../assets/images/OwnerBtn.png";
 import {
   getOwnerProfile,
@@ -16,9 +16,9 @@ import {
   updateOwnerProfile,
   updateOwnerStore,
   getOwnerStoreList,
-} from "../../../services/new/MypageService.js";
+} from "../../../services/MypageService.js";
 
-import { logout } from "../../../services/new/AuthService.js";
+import { logout } from "../../../services/AuthService.js";
 
 function OwnerPage() {
   const navigate = useNavigate();

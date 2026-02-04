@@ -1,4 +1,4 @@
-import Button from "../Button.jsx";
+import Button from "../common/Button.jsx";
 
 function LoginButton({ className = "", onClick, icon, color, children }) {
   return (

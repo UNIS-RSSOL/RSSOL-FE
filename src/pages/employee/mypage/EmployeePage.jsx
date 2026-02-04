@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
-import InfoBox from "../../../components/common/mypage/InfoBox.jsx";
-import UserIcon from "../../../assets/newicons/UserIcon.jsx";
-import MailIcon from "../../../assets/newicons/MailIcon.jsx";
-import FileEditIcon from "../../../assets/newicons/FileEditIcon.jsx";
-import CoinIcon from "../../../assets/newicons/CoinIcon.jsx";
-import StoreIcon from "../../../assets/newicons/StoreIcon.jsx";
+import InfoBox from "../../../components/mypage/InfoBox.jsx";
+import UserIcon from "../../../assets/icons/UserIcon.jsx";
+import MailIcon from "../../../assets/icons/MailIcon.jsx";
+import FileEditIcon from "../../../assets/icons/FileEditIcon.jsx";
+import CoinIcon from "../../../assets/icons/CoinIcon.jsx";
+import StoreIcon from "../../../assets/icons/StoreIcon.jsx";
 import EmpBtn from "../../../assets/images/EmpBtn.png";
 import {
   getStaffProfile,
   getStaffStoreList,
   updateStaffProfile,
-} from "../../../services/new/MypageService.js";
+} from "../../../services/MypageService.js";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../../../services/new/AuthService.js";
+import { logout } from "../../../services/AuthService.js";
 
 function EmployeePage() {
   const navigate = useNavigate();

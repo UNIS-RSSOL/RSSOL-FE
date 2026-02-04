@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -11,12 +11,12 @@ import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
 import {
   getActiveStore,
   getOwnerStore,
-} from "../../../services/new/MypageService.js";
+} from "../../../services/MypageService.js";
 import {
   generateSchedule,
   confirmSchedule,
   requestScheduleInput,
-} from "../../../services/new/ScheduleGenerationService.js";
+} from "../../../services/ScheduleGenerationService.js";
 // ✅ 알림 연동: /api/schedules/requests API 호출 시 백엔드에서 매장 내 직원들에게 자동으로 알림이 전송됩니다.
 // 별도의 알림 API 호출이 필요하지 않습니다.
 import "./AddSchedule.css";

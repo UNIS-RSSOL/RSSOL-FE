@@ -4,8 +4,8 @@ import TopBar from "../../../components/layout/header/TopBar.jsx";
 import { formatTimeAgo } from "../../../utils/timeUtils.js";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
-import { getNotification } from "../../../services/new/NotificationService.js";
-import NotificationItem from "../../../components/common/notification/NotificationItem.jsx";
+import { getNotification } from "../../../services/NotificationService.js";
+import NotificationItem from "../../../components/notification/NotificationItem.jsx";
 
 function EmpNotification() {
   const navigate = useNavigate();

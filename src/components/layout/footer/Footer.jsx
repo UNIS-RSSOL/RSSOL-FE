@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import FooterMenu from "./FooterMenu.jsx";
-import HomeIcon from "../../../assets/newicons/HomeIcon.jsx";
-import CalendarIcon from "../../../assets/newicons/CalendarIcon.jsx";
-import EditIcon from "../../../assets/newicons/EditIcon.jsx";
-import CoinIcon from "../../../assets/newicons/CoinIcon.jsx";
-import UserIcon from "../../../assets/newicons/UserIcon.jsx";
-import { getActiveStore } from "../../../services/new/MypageService.js";
+import HomeIcon from "../../../assets/icons/HomeIcon.jsx";
+import CalendarIcon from "../../../assets/icons/CalendarIcon.jsx";
+import EditIcon from "../../../assets/icons/EditIcon.jsx";
+import CoinIcon from "../../../assets/icons/CoinIcon.jsx";
+import UserIcon from "../../../assets/icons/UserIcon.jsx";
+import { getActiveStore } from "../../../services/MypageService.js";
 
 function Footer() {
   const navigate = useNavigate();

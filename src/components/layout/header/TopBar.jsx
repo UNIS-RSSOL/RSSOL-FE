@@ -1,4 +1,4 @@
-import BackButton from "../../BackButton";
+import BackButton from "../../common/BackButton";
 
 function TopBar({ title }) {
   return (

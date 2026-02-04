@@ -2,16 +2,16 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../common/Button.jsx";
 import RoundTag from "../common/RoundTag.jsx";
-import EmpBtn from "../../../assets/images/EmpBtn.png";
-import OwnerBtn from "../../../assets/images/OwnerBtn.png";
+import EmpBtn from "../../assets/images/EmpBtn.png";
+import OwnerBtn from "../../assets/images/OwnerBtn.png";
 import {
   respondShiftSwapRequest,
   approveShiftSwapRequest,
-} from "../../../services/new/ShiftSwapService.js";
+} from "../../services/ShiftSwapService.js";
 import {
   respondExtraShiftRequest,
   approveExtraShiftRequest,
-} from "../../../services/new/ExtraShiftService.js";
+} from "../../services/ExtraShiftService.js";
 
 /**
  * 알람 번호

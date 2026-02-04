@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { useNavigate } from "react-router-dom";
-import LeftArrowIcon from "../../../assets/newicons/LeftArrowIcon.jsx";
-import RightArrowIcon from "../../../assets/newicons/RightArrowIcon.jsx";
+import LeftArrowIcon from "../../../assets/icons/LeftArrowIcon.jsx";
+import RightArrowIcon from "../../../assets/icons/RightArrowIcon.jsx";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
-import WeekCalendar from "../../../components/common/calendar/WeekCalendar.jsx";
+import WeekCalendar from "../../../components/calendar/WeekCalendar.jsx";
 import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
 
 function GenSchedule() {

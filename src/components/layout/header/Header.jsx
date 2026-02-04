@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import LogoImage from "../../../assets/Logo.jsx";
 import HeaderMenu from "./HeaderMenu.jsx";
-import CalAddIcon from "../../../assets/icons/CalAddIcon.jsx";
-import AlarmIcon from "../../../assets/icons/AlarmIcon.jsx";
-import { LogoImage } from "../../../assets/icons/logo.jsx";
-import { fetchActiveStore } from "../../../services/owner/MyPageService.js";
-import { fetchMyAvailabilities } from "../../../services/employee/ScheduleService.js";
+import CalAddIcon from "../../../assets/icons/CalendarAddIcon.jsx";
+import BellIcon from "../../../assets/icons/BellIcon.jsx";
+import { getActiveStore } from "../../../services/MypageService.js";
+import { getMyWorkAvailability } from "../../../services/WorkAvailabilityService.js";
 
 function Header() {
   const navigate = useNavigate();
@@ -28,7 +28,7 @@ function Header() {
 
     if (menu === "캘린더생성") {
       try {
-        const activeStore = await fetchActiveStore();
+        const activeStore = await getActiveStore();
         const isOwner = activeStore?.position === "OWNER";
 
         if (isOwner) {
@@ -103,8 +103,8 @@ function Header() {
   const checkExistingAvailability = async () => {
     try {
       console.log("🔍 Header: work availability 확인 시작");
-      const availabilities = await fetchMyAvailabilities();
-      console.log("🔍 Header: fetchMyAvailabilities 응답:", availabilities);
+      const availabilities = await getMyWorkAvailability();
+      console.log("🔍 Header: getMyWorkAvailability 응답:", availabilities);
 
       // availabilities가 배열이고 길이가 0보다 크면 true
       const hasAvailability =
@@ -145,7 +145,7 @@ function Header() {
           onClick={() => handleMenuClick("캘린더생성")}
         />
         <HeaderMenu
-          MenuIcon={<AlarmIcon />}
+          MenuIcon={<BellIcon />}
           onClick={() => handleMenuClick("알림")}
         />
       </div>

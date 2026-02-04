@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import "dayjs/locale/ko";
-import { getScheduleByPeriod } from "../../../services/new/WorkShiftService.js";
+import { getScheduleByPeriod } from "../../services/WorkShiftService";
 
 function WeekCalendar({
   date,

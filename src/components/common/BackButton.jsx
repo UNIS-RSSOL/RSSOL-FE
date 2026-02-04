@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Button from "./Button";
-import LeftArrowIcon from "../assets/newicons/LeftArrowIcon.jsx";
+import LeftArrowIcon from "../../assets/icons/LeftArrowIcon.jsx";
 
 function BackButton() {
   const navigate = useNavigate();

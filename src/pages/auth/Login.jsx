@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { LogoImage } from "../../assets/icons/logo2.jsx";
-import { getDevToken } from "../../services/new/DevTokenService.js";
-import { getActiveStore } from "../../services/new/MypageService.js";
+import LogoImage from "../../assets/Logo.jsx";
+import { getDevToken } from "../../services/DevTokenService.js";
+import { getActiveStore } from "../../services/MypageService.js";
 import { goToKakaoLogin } from "../../services/kakaoLogin.js";
 import EmpBtn from "../../assets/images/EmpBtn.png";
 import OwnerBtn from "../../assets/images/OwnerBtn.png";
 import Splash from "../common/Splash.jsx";
-import KakaoIcon from "../../assets/newicons/KakaoIcon.jsx";
-import NaverIcon from "../../assets/newicons/NaverIcon.jsx";
-import GoogleIcon from "../../assets/newicons/GoogleIcon.jsx";
+import KakaoIcon from "../../assets/icons/KakaoIcon.jsx";
+import NaverIcon from "../../assets/icons/NaverIcon.jsx";
+import GoogleIcon from "../../assets/icons/GoogleIcon.jsx";
 import LoginButton from "../../components/login/LoginButton.jsx";
 
 function Login() {
@@ -154,7 +154,7 @@ function Login() {
           />
         </div>
         <LogoImage className="w-[180px] h-auto mb-3" />
-        <p className="text-[15px] font-medium text-[#000]">
+        <p className="text-[15px] font-medium text-[#000] mt-1">
           번거로운 알바 스케줄링, 원터치로 끝!
         </p>
       </div>

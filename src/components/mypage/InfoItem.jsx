@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import CopyIcon from "../../../assets/newicons/CopyIcon.jsx";
-import MessageModal from "../../MessageModal.jsx";
+import CopyIcon from "../../assets/icons/CopyIcon.jsx";
+import MessageModal from "../common/MessageModal.jsx";
 
 function InfoItem({ data, isEdit = false, onUpdate }) {
   const [value, setValue] = useState(data.content);

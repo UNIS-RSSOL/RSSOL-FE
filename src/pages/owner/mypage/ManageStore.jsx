@@ -3,19 +3,19 @@ import {
   getOwnerStoreList,
   deleteOwnerStore,
   addOwnerStore,
-} from "../../../services/new/MypageService.js";
+} from "../../../services/MypageService.js";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
-import AddItem from "../../../components/common/mypage/AddItem.jsx";
+import AddItem from "../../../components/mypage/AddItem.jsx";
 import StoreItem from "../../../components/mypage/StoreItem.jsx";
-import AddIcon from "../../../assets/newicons/AddIcon.jsx";
-import Modal from "../../../components/Modal.jsx";
-import Button from "../../../components/Button.jsx";
-import Toast from "../../../components/Toast.jsx";
-import TypeIcon from "../../../assets/newicons/TypeIcon.jsx";
-import MarkerIcon from "../../../assets/newicons/MarkerIcon.jsx";
-import PhoneIcon from "../../../assets/newicons/PhoneIcon.jsx";
-import SaveIcon from "../../../assets/newicons/SaveIcon.jsx";
-import CalendarIcon from "../../../assets/newicons/CalendarIcon.jsx";
+import AddIcon from "../../../assets/icons/AddIcon.jsx";
+import Modal from "../../../components/common/Modal.jsx";
+import Button from "../../../components/common/Button.jsx";
+import Toast from "../../../components/common/Toast.jsx";
+import TypeIcon from "../../../assets/icons/TypeIcon.jsx";
+import MarkerIcon from "../../../assets/icons/MarkerIcon.jsx";
+import PhoneIcon from "../../../assets/icons/PhoneIcon.jsx";
+import SaveIcon from "../../../assets/icons/SaveIcon.jsx";
+import CalendarIcon from "../../../assets/icons/CalendarIcon.jsx";
 
 function ManageStore() {
   const [storeList, setStoreList] = useState([]);

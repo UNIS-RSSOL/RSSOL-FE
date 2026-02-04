@@ -3,16 +3,16 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
-import EmployeeScheduleCalendar from "../../../components/common/calendar/EmployeeScheduleCalendar.jsx";
+import EmployeeScheduleCalendar from "../../../components/calendar/EmployeeScheduleCalendar.jsx";
 import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
 import {
   getMyWorkAvailability,
   updateMyWorkAvailability,
-} from "../../../services/new/WorkAvailabilityService.js";
+} from "../../../services/WorkAvailabilityService.js";
 import {
   getActiveStore,
   getStaffProfile,
-} from "../../../services/new/MypageService.js";
+} from "../../../services/MypageService.js";
 
 function EmpModifying() {
   const navigate = useNavigate();

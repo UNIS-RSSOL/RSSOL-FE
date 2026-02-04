@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { getScheduleByPeriod } from "../../../services/new/WorkShiftService.js";
+import { getScheduleByPeriod } from "../../services/WorkShiftService";
 
 function DayCalendar({
   date,

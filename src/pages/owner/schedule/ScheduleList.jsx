@@ -3,16 +3,16 @@ import { useNavigate, useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
-import TimeSlotCalendar from "../../../components/common/calendar/TimeSlotCalendar.jsx";
+import TimeSlotCalendar from "../../../components/calendar/TimeSlotCalendar.jsx";
 import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
-import Toast from "../../../components/Toast.jsx";
-import { getAllWorker } from "../../../services/new/StoreService.js";
-import { getStaffWorkAvailability } from "../../../services/new/WorkAvailabilityService.js";
-import { generateScheduleByTime } from "../../../services/new/ScheduleGenerationService.js";
+import Toast from "../../../components/common/Toast.jsx";
+import { getAllWorker } from "../../../services/StoreService.js";
+import { getStaffWorkAvailability } from "../../../services/WorkAvailabilityService.js";
+import { generateScheduleByTime } from "../../../services/ScheduleGenerationService.js";
 import {
   getActiveStore,
   getOwnerProfile,
-} from "../../../services/new/MypageService.js";
+} from "../../../services/MypageService.js";
 
 function ScheduleList() {
   const navigate = useNavigate();

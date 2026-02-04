@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
-import NavBar from "../../../components/common/notification/NavBar.jsx";
-import NotificationItem from "../../../components/common/notification/NotificationItem.jsx";
-import { getNotification } from "../../../services/new/NotificationService.js";
+import NavBar from "../../../components/notification/NavBar.jsx";
+import NotificationItem from "../../../components/notification/NotificationItem.jsx";
+import { getNotification } from "../../../services/NotificationService.js";
 import dayjs from "dayjs";
 import { formatTimeAgo } from "../../../utils/timeUtils.js";
 

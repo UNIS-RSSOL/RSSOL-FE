@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
-import MessageModal from "../../../components/MessageModal.jsx";
-import Toast from "../../../components/Toast.jsx";
-import Button from "../../../components/Button.jsx";
-import RoundTag from "../../../components/RoundTag.jsx";
-import LeftArrowIcon from "../../../assets/newicons/LeftArrowIcon.jsx";
-import RightArrowIcon from "../../../assets/newicons/RightArrowIcon.jsx";
-import MyCalendar from "../../../components/common/calendar/MyCalendar.jsx";
-import { getMyScheduleByPeriod } from "../../../services/new/WorkShiftService.js";
-import { createShiftSwapRequest } from "../../../services/new/ShiftSwapService.js";
+import MessageModal from "../../../components/common/MessageModal.jsx";
+import Toast from "../../../components/common/Toast.jsx";
+import Button from "../../../components/common/Button.jsx";
+import RoundTag from "../../../components/common/RoundTag.jsx";
+import LeftArrowIcon from "../../../assets/icons/LeftArrowIcon.jsx";
+import RightArrowIcon from "../../../assets/icons/RightArrowIcon.jsx";
+import MyCalendar from "../../../components/calendar/MyCalendar.jsx";
+import { getMyScheduleByPeriod } from "../../../services/WorkShiftService.js";
+import { createShiftSwapRequest } from "../../../services/ShiftSwapService.js";
 
 function EmpCalendar() {
   const today = dayjs();

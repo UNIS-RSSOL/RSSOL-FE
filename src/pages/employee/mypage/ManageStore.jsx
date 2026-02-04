@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
-import MessageModal from "../../../components/MessageModal.jsx";
+import MessageModal from "../../../components/common/MessageModal.jsx";
 import StoreItem from "../../../components/mypage/StoreItem.jsx";
-import AddIcon from "../../../assets/newicons/AddIcon.jsx";
-import Modal from "../../../components/Modal.jsx";
-import Button from "../../../components/Button.jsx";
-import Toast from "../../../components/Toast.jsx";
-import SaveIcon from "../../../assets/newicons/SaveIcon.jsx";
-import CalendarIcon from "../../../assets/newicons/CalendarIcon.jsx";
-import AddItem from "../../../components/common/mypage/AddItem.jsx";
+import AddIcon from "../../../assets/icons/AddIcon.jsx";
+import Modal from "../../../components/common/Modal.jsx";
+import Button from "../../../components/common/Button.jsx";
+import Toast from "../../../components/common/Toast.jsx";
+import SaveIcon from "../../../assets/icons/SaveIcon.jsx";
+import CalendarIcon from "../../../assets/icons/CalendarIcon.jsx";
+import AddItem from "../../../components/mypage/AddItem.jsx";
 import {
   getStaffStoreList,
   deleteStaffStore,
   addStaffStore,
-} from "../../../services/new/MypageService.js";
+} from "../../../services/MypageService.js";
 
 function ManageStore() {
   const [storeList, setStoreList] = useState([]);

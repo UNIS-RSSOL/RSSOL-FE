@@ -1,5 +1,4 @@
-import Button from "../Button";
-import { useState, useEffect } from "react";
+import Button from "../common/Button";
 
 function OnboardingBtn({ onClick, children, role, value }) {
   const selected = role === value;

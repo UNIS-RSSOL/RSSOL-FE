@@ -15,24 +15,23 @@ import OwnerCalendar from "./pages/owner/calendar/OwnerCalendar.jsx";
 import EmpCalendar from "./pages/employee/calendar/EmpCalendar.jsx";
 import EmployeePage from "./pages/employee/mypage/EmployeePage.jsx";
 import EmpManageStore from "./pages/employee/mypage/ManageStore.jsx";
-import EmpNotification from "./pages/employee/alarm/EmpNotification.jsx";
-import NotificationHome from "./pages/owner/alarm/NotificationHome.jsx";
-import NotificationCheck from "./pages/owner/alarm/NotificationCheck.jsx";
+import EmpNotification from "./pages/employee/notification/EmpNotification.jsx";
+import NotificationHome from "./pages/owner/notification/NotificationHome.jsx";
+import NotificationCheck from "./pages/owner/notification/NotificationCheck.jsx";
 import EmpModifying from "./pages/employee/schedule/EmpModifying.jsx";
 import AddSchedule from "./pages/owner/schedule/AddSchedule.jsx";
 import GenSchedule from "./pages/owner/schedule/GenSchedule.jsx";
 import CandidateSchedule from "./pages/owner/schedule/CandidateSchedule.jsx";
-import OwnerSchedule from "./pages/owner/calendarAdd/OwnerSchedule.jsx";
+import OwnerSchedule from "./pages/owner/schedule/OwnerSchedule.jsx";
 import ScheduleList from "./pages/owner/schedule/ScheduleList.jsx";
 import ManageEmp from "./pages/owner/manage/ManageEmp.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
 import EmpHome from "./pages/employee/EmpHome.jsx";
 import Splash from "./pages/common/Splash.jsx";
-import Test from "./Test.jsx";
 
 import { refreshAccessToken } from "./services/kakaoLogin.js";
-import api from "./services/api.js";
+import api from "./services/Api.js";
 
 function App() {
   const location = useLocation();
@@ -46,12 +45,12 @@ function App() {
   const goOnboarding = () => navigate("/onboarding", { replace: true });
   const goHomeByRole = async () => {
     try {
-      await api.get("/api/mypage/owner/profile");
+      await api.get("mypage/owner/profile");
       return navigate("/owner", { replace: true });
     } catch (_) {
       // 2) 알바일 가능성 체크
       try {
-        await api.get("/api/mypage/staff/profile");
+        await api.get("mypage/staff/profile");
         return navigate("/employee", { replace: true });
       } catch (err2) {
         return goLogin();
@@ -108,7 +107,7 @@ function App() {
        --------------------------*/
       let activeStore = null;
       try {
-        const res = await api.get("/api/mypage/active-store");
+        const res = await api.get("mypage/active-store");
         activeStore = res.data;
       } catch (err) {
         // 매장 없음 → 역할에 따라 홈으로 이동 (알바는 active-store 없어도 정상)
@@ -186,7 +185,7 @@ function App() {
     "/owner/schedule/candidate",
     "/employee/schedule/modifying",
     "/owner/schedule/my",
-    "/owner/scheduleList",
+    "/owner/schedule/list",
     "/employee/notification",
     "/owner/notification/home",
     "/owner/notification/check",
@@ -214,7 +213,6 @@ function App() {
 
       <main className="flex-1 overflow-y-auto">
         <Routes>
-          <Route path="/test" element={<Test />} />
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
@@ -252,7 +250,7 @@ function App() {
             element={<CandidateSchedule />}
           />
           <Route path="/owner/schedule/my" element={<OwnerSchedule />} />
-          <Route path="/owner/scheduleList" element={<ScheduleList />} />
+          <Route path="/owner/schedule/list" element={<ScheduleList />} />
 
           {/* 알림 */}
           <Route path="/employee/notification" element={<EmpNotification />} />

@@ -3,13 +3,12 @@ import { useNavigate } from "react-router-dom";
 import {
   onboardingOwner,
   onboardingStaff,
-} from "../../services/authService.js";
+} from "../../services/OnboardingService.js";
 import { CaretDownFilled } from "@ant-design/icons";
 import character4 from "../../assets/images/character4.png";
 import character2 from "../../assets/images/character2.png";
-import Button from "../../components/Button.jsx";
-import LeftArrowIcon from "../../assets/newicons/LeftArrowIcon.jsx";
-import BackButton from "../../components/BackButton.jsx";
+import Button from "../../components/common/Button.jsx";
+import BackButton from "../../components/common/BackButton.jsx";
 import OnboardingBtn from "../../components/login/OnboardingBtn.jsx";
 
 // 은행 드롭다운 목록

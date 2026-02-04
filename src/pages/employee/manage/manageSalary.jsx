@@ -1,7 +1,7 @@
 import { useState } from "react";
-import Box from "../../../components/Box.jsx";
-import LeftArrowIcon from "../../../assets/newicons/LeftArrowIcon.jsx";
-import RightArrowIcon from "../../../assets/newicons/RightArrowIcon.jsx";
+import Box from "../../../components/common/Box.jsx";
+import LeftArrowIcon from "../../../assets/icons/LeftArrowIcon.jsx";
+import RightArrowIcon from "../../../assets/icons/RightArrowIcon.jsx";
 import { Divider } from "antd";
 
 const ManageSalary = () => {

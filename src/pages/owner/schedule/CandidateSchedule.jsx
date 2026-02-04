@@ -5,13 +5,13 @@ import "dayjs/locale/ko";
 
 import TopBar from "../../../components/layout/header/TopBar.jsx";
 import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
-import AutoCalCalendar from "../../../components/common/calendar/AutoCalCalendar.jsx";
-import Modal from "../../../components/Modal.jsx";
-import Button from "../../../components/Button.jsx";
+import AutoCalCalendar from "../../../components/calendar/AutoCalCalendar.jsx";
+import Modal from "../../../components/common/Modal.jsx";
+import Button from "../../../components/common/Button.jsx";
 import {
   confirmSchedule,
   getScheduleCandidate,
-} from "../../../services/new/ScheduleGenerationService.js";
+} from "../../../services/ScheduleGenerationService.js";
 dayjs.locale("ko");
 
 /**

@@ -3,19 +3,19 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
-import OwnerScheduleCalendar from "../../../components/common/calendar/OwnerScheduleCalendar.jsx";
+import OwnerScheduleCalendar from "../../../components/calendar/OwnerScheduleCalendar.jsx";
 import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
-import Toast from "../../../components/Toast.jsx";
+import Toast from "../../../components/common/Toast.jsx";
 import {
   getMyWorkAvailability,
   updateMyWorkAvailability,
-} from "../../../services/new/WorkAvailabilityService.js";
-import { getScheduleByPeriod } from "../../../services/new/WorkShiftService.js";
+} from "../../../services/WorkAvailabilityService.js";
+import { getScheduleByPeriod } from "../../../services/WorkShiftService.js";
 import {
   getOwnerProfile,
   getOwnerStore,
   getActiveStore,
-} from "../../../services/new/MypageService.js";
+} from "../../../services/MypageService.js";
 
 function OwnerSchedule() {
   const navigate = useNavigate();

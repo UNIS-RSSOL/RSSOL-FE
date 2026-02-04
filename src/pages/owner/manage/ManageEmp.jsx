@@ -1,13 +1,13 @@
 import { useState } from "react";
-import CoinIcon from "../../../assets/newicons/CoinIcon.jsx";
-import PhoneIcon from "../../../assets/newicons/PhoneIcon.jsx";
-import RoundTag from "../../../components/RoundTag.jsx";
-import DollarIcon from "../../../assets/newicons/DollarIcon.jsx";
-import Box from "../../../components/Box.jsx";
-import Toast from "../../../components/Toast.jsx";
-import Button from "../../../components/Button.jsx";
-import LeftArrowIcon from "../../../assets/newicons/LeftArrowIcon.jsx";
-import RightArrowIcon from "../../../assets/newicons/RightArrowIcon.jsx";
+import CoinIcon from "../../../assets/icons/CoinIcon.jsx";
+import PhoneIcon from "../../../assets/icons/PhoneIcon.jsx";
+import RoundTag from "../../../components/common/RoundTag.jsx";
+import DollarIcon from "../../../assets/icons/DollarIcon.jsx";
+import Box from "../../../components/common/Box.jsx";
+import Toast from "../../../components/common/Toast.jsx";
+import Button from "../../../components/common/Button.jsx";
+import LeftArrowIcon from "../../../assets/icons/LeftArrowIcon.jsx";
+import RightArrowIcon from "../../../assets/icons/RightArrowIcon.jsx";
 import { Divider } from "antd";
 import CheckOutlined from "@ant-design/icons/es/icons/CheckOutlined";
 
