@@ -17,7 +17,7 @@
  * 프론트엔드 URL을 쿼리 파라미터로 추가하면 KOE101 에러가 발생합니다.
  */
 
-import api from "./api.js";
+import api from "./Api.js";
 
 // 카카오 클라이언트 ID (환경변수에서 가져오거나 직접 설정)
 const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID || "";
