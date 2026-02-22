@@ -193,6 +193,8 @@ function App() {
     "/employee/mypage/managestore",
     "/owner/mypage/managestore",
     "/owner/store-settings",
+    "/owner/calendar",
+    "/employee/calendar",
   ];
 
   const hideLayout =
@@ -213,7 +215,7 @@ function App() {
   }
 
   return (
-    <div className="w-full max-w-[393px] bg-[#F8FBFE] mx-auto h-screen flex flex-col font-Pretendard">
+    <div className="w-full max-w-[393px] bg-[#F8FBFE] mx-auto h-screen flex flex-col font-Pretendard overflow-x-hidden">
       {!hideLayout && <Header />}
 
       <main className="flex-1 overflow-y-auto">
