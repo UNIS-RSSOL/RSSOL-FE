@@ -4,12 +4,16 @@ import {
   onboardingOwner,
   onboardingStaff,
 } from "../../services/OnboardingService.js";
-import { CaretDownFilled } from "@ant-design/icons";
-import character4 from "../../assets/images/character4.png";
-import character2 from "../../assets/images/character2.png";
+import {
+  CaretDownFilled,
+  ClockCircleOutlined,
+  PlusCircleOutlined,
+} from "@ant-design/icons";
 import Button from "../../components/common/Button.jsx";
 import BackButton from "../../components/common/BackButton.jsx";
 import OnboardingBtn from "../../components/login/OnboardingBtn.jsx";
+import TimeRangeSelect from "../../components/common/TimeRangeSelect.jsx";
+import ToggleHeader from "../../components/common/ToggleHeader.jsx";
 
 // 은행 드롭다운 목록
 const bankItems = [
@@ -22,6 +26,12 @@ const bankItems = [
   { label: "카카오은행", key: 7 },
   { label: "토스은행", key: 8 },
 ];
+
+// 파트 타임 라벨
+const getPartTimeLabel = (index) => {
+  if (index === 0) return "오픈조";
+  return `구간 ${index + 1}`;
+};
 
 export default function Onboarding() {
   const [step, setStep] = useState(1);
@@ -43,6 +53,22 @@ export default function Onboarding() {
     storePhone: "",
     businessNumber: "",
     account: "",
+  });
+
+  // Step 3: 매장 운영 정보
+  const [operatingHours, setOperatingHours] = useState({
+    start: "09:00",
+    end: "22:00",
+  });
+  const [partTimes, setPartTimes] = useState([
+    { start: "09:00", end: "14:00" },
+    { start: "14:00", end: "22:00" },
+  ]);
+  const [partTimeEnabled, setPartTimeEnabled] = useState(true);
+  const [breakTimeEnabled, setBreakTimeEnabled] = useState(true);
+  const [breakTime, setBreakTime] = useState({
+    start: "14:00",
+    end: "15:00",
   });
 
   const navigate = useNavigate();
@@ -109,27 +135,8 @@ export default function Onboarding() {
           return;
         }
 
-        // 사장님 온보딩 API 호출
-        setIsLoading(true);
-        setError("");
-        try {
-          await onboardingOwner(
-            storeName,
-            storeAddress,
-            storePhone,
-            businessNumber,
-            hireDate,
-          );
-          // 성공 시 사장님 홈으로 이동
-          navigate("/owner");
-        } catch (err) {
-          console.error("온보딩(사장님) 실패:", err);
-          setError(
-            err.response?.data?.message || "온보딩 등록에 실패했습니다.",
-          );
-        } finally {
-          setIsLoading(false);
-        }
+        // Step 3 매장 운영 정보 입력으로 이동
+        setStep(3);
         return;
       } else {
         const { storeCode, bankId, account, hireDate } = formData;
@@ -144,23 +151,53 @@ export default function Onboarding() {
           return;
         }
 
-        // 알바생 온보딩 API 호출
-        setIsLoading(true);
-        setError("");
-        try {
-          await onboardingStaff(storeCode, bankId, account, hireDate);
-          // 성공 시 알바생 홈으로 이동
-          navigate("/employee");
-        } catch (err) {
-          console.error("온보딩(알바생) 실패:", err);
-          setError(
-            err.response?.data?.message || "온보딩 등록에 실패했습니다.",
-          );
-        } finally {
-          setIsLoading(false);
-        }
+        // [임시] 백엔드 미연결 → API 호출 없이 바로 이동 (백엔드 연결 후 아래 주석 해제)
+        navigate("/employee");
         return;
+        // // 알바생 온보딩 API 호출
+        // setIsLoading(true);
+        // setError("");
+        // try {
+        //   await onboardingStaff(storeCode, bankId, account, hireDate);
+        //   navigate("/employee");
+        // } catch (err) {
+        //   console.error("온보딩(알바생) 실패:", err);
+        //   setError(
+        //     err.response?.data?.message || "온보딩 등록에 실패했습니다.",
+        //   );
+        // } finally {
+        //   setIsLoading(false);
+        // }
+        // return;
       }
+    }
+
+    if (step === 3) {
+      // [임시] 백엔드 미연결 → API 호출 없이 바로 이동 (백엔드 연결 후 아래 주석 해제)
+      navigate("/owner");
+      return;
+      // // 사장님 온보딩 API 호출
+      // setIsLoading(true);
+      // setError("");
+      // try {
+      //   await onboardingOwner(
+      //     formData.storeName,
+      //     formData.storeAddress,
+      //     formData.storePhone,
+      //     formData.businessNumber,
+      //     formData.hireDate,
+      //   );
+      //   // TODO: 매장 운영 정보 API 호출 (operatingHours, partTimes, breakTime)
+      //   navigate("/owner");
+      // } catch (err) {
+      //   console.error("온보딩(사장님) 실패:", err);
+      //   setError(
+      //     err.response?.data?.message || "온보딩 등록에 실패했습니다.",
+      //   );
+      // } finally {
+      //   setIsLoading(false);
+      // }
+      // return;
     }
 
     if (step < 2) setStep(step + 1);
@@ -172,6 +209,29 @@ export default function Onboarding() {
       return;
     }
     setStep(step - 1);
+  };
+
+  // Step 3 handlers
+  const handleAddPartTime = () => {
+    const lastEnd =
+      partTimes.length > 0
+        ? partTimes[partTimes.length - 1].end
+        : operatingHours.start;
+    setPartTimes((prev) => [
+      ...prev,
+      { start: lastEnd, end: operatingHours.end },
+    ]);
+  };
+
+  const handleRemovePartTime = (index) => {
+    if (partTimes.length <= 1) return;
+    setPartTimes((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handlePartTimeChange = (index, field, value) => {
+    setPartTimes((prev) =>
+      prev.map((pt, i) => (i === index ? { ...pt, [field]: value } : pt)),
+    );
   };
 
   // 완료 조건 체크
@@ -207,26 +267,40 @@ export default function Onboarding() {
           hireDate
         );
       }
+    } else if (step === 3) {
+      return (
+        operatingHours.start &&
+        operatingHours.end &&
+        partTimes.length > 0 &&
+        partTimes.every((pt) => pt.start && pt.end)
+      );
     }
     return false;
+  };
+
+  // 버튼 텍스트
+  const getButtonText = () => {
+    if (step === 1) return "선택 완료";
+    if (step === 2 && role === "owner") return "다음";
+    return "입력 완료";
   };
 
   return (
     <div className="relative w-full min-h-screen bg-white flex flex-col items-center py-10 px-4 font-Pretendard overflow-x-hidden">
       {/* 상단 이전 버튼 */}
       <div className="absolute top-10 left-5 flex justify-start w-full">
-        <BackButton />
+        <BackButton onClick={handleBack} />
       </div>
 
       {/* 컨텐츠 영역 */}
-      <div className="w-full max-w-[360px] mt-8 flex flex-col items-center px-4">
+      <div className="w-full max-w-[393px] mt-8 flex flex-col items-center px-[8px] pb-[80px]">
         {error && (
           <div className="w-full mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
             {error}
           </div>
         )}
 
-        {/* --- STEP CONTENT --- */}
+        {/* --- STEP 1: 역할 선택 --- */}
         {step === 1 && (
           <>
             <h2 className="text-[30px] font-[700] mb-2 w-full text-left">
@@ -242,12 +316,7 @@ export default function Onboarding() {
                 role={role}
                 onClick={(selectedRole) => setRole(selectedRole)}
               >
-                <img
-                  src={character4}
-                  alt="사장님 캐릭터"
-                  className="absolute right-58 top-2 size-[110px] overflow-visible"
-                />
-                <div className="flex flex-col items-start ml-20">
+                <div className="flex flex-col items-start">
                   <p className="text-[20px] font-[400] text-left">사장님</p>
                   <p className="text-[14px] font-[400] text-left">
                     매장 및 직원 관리를 할 수 있어요!
@@ -260,12 +329,7 @@ export default function Onboarding() {
                 role={role}
                 onClick={(selectedRole) => setRole(selectedRole)}
               >
-                <img
-                  src={character2}
-                  alt="알바생 캐릭터"
-                  className="absolute left-58 top-2 size-[110px] overflow-visible"
-                />
-                <div className="flex flex-col items-start mr-20">
+                <div className="flex flex-col items-start">
                   <p className="text-[20px] font-[400] text-left">알바생</p>
                   <p className="text-[14px] font-[400] text-left">
                     월급 확인과 대타 신청을 할 수 있어요!
@@ -276,7 +340,7 @@ export default function Onboarding() {
           </>
         )}
 
-        {/* STEP 2 - Owner */}
+        {/* --- STEP 2: 사장님 매장 정보 --- */}
         {step === 2 && role === "owner" && (
           <>
             <h2 className="text-3xl font-bold mb-2 w-full text-left">회원님</h2>
@@ -284,7 +348,7 @@ export default function Onboarding() {
               매장 정보를 입력해주세요
             </p>
 
-            <div className="flex flex-col gap-4 w-full">
+            <div className="flex flex-col gap-[17.5px] w-full">
               {[
                 {
                   label: "매장 이름",
@@ -307,21 +371,20 @@ export default function Onboarding() {
                   placeholder: "사업자 등록 번호를 입력해주세요.",
                 },
                 {
-                  label: "입사날짜",
+                  label: "입사 날짜",
                   name: "hireDate",
-                  placeholder: "입사날짜를 선택해주세요.",
-                  type: "date",
+                  placeholder: "0000.00.00",
                 },
               ].map((item) => (
                 <div key={item.name} className="flex flex-col">
                   <p className="text-sm mb-1 text-left">{item.label}</p>
                   <input
                     name={item.name}
-                    type={item.type || "text"}
+                    type="text"
                     value={formData[item.name]}
                     onChange={handleChange}
                     placeholder={item.placeholder}
-                    className="border p-2 rounded-lg w-full"
+                    className="border h-[61px] py-[17.5px] px-[26.25px] rounded-[11px] w-full text-sm"
                   />
                   {item.name === "storePhone" && errors.storePhone && (
                     <p className="text-[10px] text-[#f74a4a] text-left mt-1">
@@ -339,7 +402,7 @@ export default function Onboarding() {
           </>
         )}
 
-        {/* STEP 2 - Employee */}
+        {/* --- STEP 2: 알바생 정보 --- */}
         {step === 2 && role === "employee" && (
           <>
             <h2 className="text-3xl font-bold mb-2 w-full text-left">회원님</h2>
@@ -442,13 +505,135 @@ export default function Onboarding() {
           </>
         )}
 
+        {/* --- STEP 3: 사장님 매장 운영 정보 --- */}
+        {step === 3 && role === "owner" && (
+          <>
+            <h2 className="text-[30px] font-[700] mb-2 w-full text-left">
+              {formData.storeName}
+            </h2>
+            <p className="text-[20px] font-[400] mb-8 w-full text-left">
+              매장 정보를 입력해주세요.
+            </p>
+
+            <div className="flex flex-col gap-6 w-full">
+              {/* 매장 운영 시간 */}
+              <div className="flex items-center gap-2">
+                <ClockCircleOutlined
+                  style={{ fontSize: "18px", color: "#87888c" }}
+                />
+                <p className="text-[16px] font-[600]">
+                  매장 운영 시간
+                  <span className="text-[#f74a4a]">*</span>
+                </p>
+                <div className="ml-auto">
+                  <TimeRangeSelect
+                    start={operatingHours.start}
+                    end={operatingHours.end}
+                    onStartChange={(val) =>
+                      setOperatingHours((prev) => ({ ...prev, start: val }))
+                    }
+                    onEndChange={(val) =>
+                      setOperatingHours((prev) => ({ ...prev, end: val }))
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* 파트 타임 나누기 */}
+              <div className="w-full text-left">
+                <div className="mb-1">
+                  <ToggleHeader
+                    enabled={partTimeEnabled}
+                    onToggle={() => setPartTimeEnabled(!partTimeEnabled)}
+                    title="파트 타임 나누기"
+                  />
+                </div>
+
+                {partTimeEnabled && (
+                  <>
+                    <p className="text-[12px] text-[#87888c] mb-0.5 ml-7">
+                      *오픈/마감 등 자유롭게 스케줄 단위를 나눌 수 있어요.
+                    </p>
+                    <p className="text-[12px] text-[#F74A4A] mb-4 ml-7">
+                      *근무 시간을 입력해주세요!
+                    </p>
+
+                    <div className="flex flex-col gap-3">
+                      {partTimes.map((pt, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-3 ml-7"
+                        >
+                          <span className="text-[14px] font-[500] min-w-[60px] shrink-0 text-left">
+                            {getPartTimeLabel(idx)}
+                          </span>
+                          <TimeRangeSelect
+                            start={pt.start}
+                            end={pt.end}
+                            onStartChange={(val) =>
+                              handlePartTimeChange(idx, "start", val)
+                            }
+                            onEndChange={(val) =>
+                              handlePartTimeChange(idx, "end", val)
+                            }
+                          />
+                          <div
+                            onClick={() => handleRemovePartTime(idx)}
+                            className={`w-[22px] h-[22px] rounded-full bg-[#555] text-white flex items-center justify-center text-[10px] shrink-0 ${partTimes.length <= 1 ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
+                          >
+                            ✕
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div
+                      onClick={handleAddPartTime}
+                      className="flex items-center justify-center gap-1 w-full mt-4 py-2 text-[14px] text-[#87888c] cursor-pointer"
+                    >
+                      <PlusCircleOutlined /> 추가하기
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* 브레이크타임 */}
+              <div className="w-full text-left">
+                <ToggleHeader
+                  enabled={breakTimeEnabled}
+                  onToggle={() => setBreakTimeEnabled(!breakTimeEnabled)}
+                  title="브레이크타임"
+                >
+                  {breakTimeEnabled && (
+                    <div className="ml-auto shrink-0">
+                      <TimeRangeSelect
+                        start={breakTime.start}
+                        end={breakTime.end}
+                        onStartChange={(val) =>
+                          setBreakTime((prev) => ({ ...prev, start: val }))
+                        }
+                        onEndChange={(val) =>
+                          setBreakTime((prev) => ({ ...prev, end: val }))
+                        }
+                      />
+                    </div>
+                  )}
+                </ToggleHeader>
+                <p className="text-[12px] text-[#87888c] mt-2 ml-7">
+                  * 브레이크 타임이 있다면, 해당 구간은 급여 계산에서 제외해요.
+                </p>
+              </div>
+            </div>
+          </>
+        )}
+
         {/* --- Bottom Fixed Button --- */}
-        <div className="absolute bottom-10">
+        <div className="absolute bottom-10 w-full px-[8px]">
           <Button
             onClick={handleNext}
-            className={`w-[360px] h-[48px] text-[16px] font-[600] ${isStepComplete() ? "" : "bg-[#e7eaf3] text-[#87888c] !cursor-not-allowed hover:!opacity-100"}`}
+            className={`!w-full h-[53px] text-[16px] font-[600] rounded-[11px] ${isStepComplete() ? "!bg-[#3370FF] text-white" : "!bg-[#E7EAF3] !text-[#87888c] !cursor-not-allowed hover:!opacity-100"}`}
           >
-            {step === 2 ? "입력 완료" : "선택 완료"}
+            {getButtonText()}
           </Button>
         </div>
       </div>
