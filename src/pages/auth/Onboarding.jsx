@@ -8,11 +8,12 @@ import {
   CaretDownFilled,
   ClockCircleOutlined,
   PlusCircleOutlined,
-  CheckCircleFilled,
 } from "@ant-design/icons";
 import Button from "../../components/common/Button.jsx";
 import BackButton from "../../components/common/BackButton.jsx";
 import OnboardingBtn from "../../components/login/OnboardingBtn.jsx";
+import TimeRangeSelect from "../../components/common/TimeRangeSelect.jsx";
+import ToggleHeader from "../../components/common/ToggleHeader.jsx";
 
 // 은행 드롭다운 목록
 const bankItems = [
@@ -26,66 +27,11 @@ const bankItems = [
   { label: "토스은행", key: 8 },
 ];
 
-// 시간 옵션 (30분 단위)
-const timeOptions = [];
-for (let h = 0; h < 24; h++) {
-  for (let m = 0; m < 60; m += 30) {
-    timeOptions.push(
-      `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`,
-    );
-  }
-}
-
 // 파트 타임 라벨
 const getPartTimeLabel = (index) => {
   if (index === 0) return "오픈조";
   return `구간 ${index + 1}`;
 };
-
-// 시간 선택 드롭다운
-function TimeSelect({ value, onChange }) {
-  return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="bg-transparent border-0 py-1 text-[14px] cursor-pointer outline-none"
-    >
-      {timeOptions.map((t) => (
-        <option key={t} value={t}>
-          {t}
-        </option>
-      ))}
-    </select>
-  );
-}
-
-// 시간 범위 선택 (시작 - 끝)
-function TimeRangeSelect({ start, end, onStartChange, onEndChange }) {
-  return (
-    <div className="flex items-center gap-2">
-      <TimeSelect value={start} onChange={onStartChange} />
-      <span className="text-[14px] text-[#87888c]">-</span>
-      <TimeSelect value={end} onChange={onEndChange} />
-    </div>
-  );
-}
-
-// 토글 섹션 헤더 (체크 아이콘 + 제목)
-function ToggleHeader({ enabled, onToggle, title, children }) {
-  return (
-    <div className="flex items-center gap-2">
-      <div onClick={onToggle} className="cursor-pointer shrink-0">
-        <CheckCircleFilled
-          style={{ fontSize: "20px", color: enabled ? "#3370FF" : "#D9D9D9" }}
-        />
-      </div>
-      <p className="text-[16px] font-[600] whitespace-nowrap shrink-0">
-        {title}
-      </p>
-      {children}
-    </div>
-  );
-}
 
 export default function Onboarding() {
   const [step, setStep] = useState(1);

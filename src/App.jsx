@@ -27,6 +27,7 @@ import ScheduleList from "./pages/owner/schedule/ScheduleList.jsx";
 import ManageEmp from "./pages/owner/manage/ManageEmp.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
+import StoreSettings from "./pages/owner/StoreSettings.jsx";
 import EmpHome from "./pages/employee/EmpHome.jsx";
 import Splash from "./pages/common/Splash.jsx";
 
@@ -191,10 +192,12 @@ function App() {
     "/owner/notification/check",
     "/employee/mypage/managestore",
     "/owner/mypage/managestore",
+    "/owner/store-settings",
   ];
 
   const hideLayout =
     location.pathname === "/employee" ||
+    location.pathname === "/owner" ||
     hideLayoutPages.some((p) =>
       p === "/" ? location.pathname === "/" : location.pathname.startsWith(p),
     );
@@ -210,7 +213,7 @@ function App() {
   }
 
   return (
-    <div className="w-[393px] bg-[#F8FBFE] min-[393px]:w-[393px] mx-auto h-screen flex flex-col font-Pretendard">
+    <div className="w-full max-w-[393px] bg-[#F8FBFE] mx-auto h-screen flex flex-col font-Pretendard">
       {!hideLayout && <Header />}
 
       <main className="flex-1 overflow-y-auto">
@@ -223,6 +226,9 @@ function App() {
           {/* 홈화면 */}
           <Route path="/owner" element={<OwnerHome />} />
           <Route path="/employee" element={<EmpHome />} />
+
+          {/* 매장 설정 */}
+          <Route path="/owner/store-settings" element={<StoreSettings />} />
 
           {/* 마이페이지 */}
           <Route path="/owner/mypage" element={<OwnerPage />} />
