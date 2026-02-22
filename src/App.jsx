@@ -193,9 +193,11 @@ function App() {
     "/owner/mypage/managestore",
   ];
 
-  const hideLayout = hideLayoutPages.some((p) =>
-    p === "/" ? location.pathname === "/" : location.pathname.startsWith(p),
-  );
+  const hideLayout =
+    location.pathname === "/employee" ||
+    hideLayoutPages.some((p) =>
+      p === "/" ? location.pathname === "/" : location.pathname.startsWith(p),
+    );
 
   /** -------------------------
    *  인증 체크 중 → 스플래시

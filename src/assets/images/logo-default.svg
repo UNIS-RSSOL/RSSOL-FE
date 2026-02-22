@@ -1,0 +1,27 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+<line x1="702.471" y1="237.471" x2="587.471" y2="436.657" stroke="#004DFF" stroke-width="90" stroke-linecap="round"/>
+<line x1="45" y1="-45" x2="275" y2="-45" transform="matrix(0.5 0.866025 0.866025 -0.5 720.132 176.167)" stroke="#004DFF" stroke-width="90" stroke-linecap="round"/>
+<line x1="50" y1="-50" x2="250" y2="-50" transform="matrix(1 0 0 -1 362 742)" stroke="url(#paint0_linear_4_8)" stroke-width="100" stroke-linecap="round"/>
+<line x1="50" y1="-50" x2="250" y2="-50" transform="matrix(1 0 0 -1 362 542)" stroke="url(#paint1_linear_4_8)" stroke-width="100" stroke-linecap="round"/>
+<line x1="50" y1="-50" x2="250" y2="-50" transform="matrix(1 0 0 -1 362 642)" stroke="url(#paint2_linear_4_8)" stroke-width="100" stroke-linecap="round"/>
+<mask id="path-6-outside-1_4_8" maskUnits="userSpaceOnUse" x="172" y="180" width="320" height="320" fill="black">
+<rect fill="white" x="172" y="180" width="320" height="320"/>
+<path d="M332 190C414.843 190 482 257.157 482 340C482 422.843 414.843 490 332 490C249.157 490 182 422.843 182 340C182 257.157 249.157 190 332 190ZM332 280C298.863 280 272 306.863 272 340C272 373.137 298.863 400 332 400C365.137 400 392 373.137 392 340C392 306.863 365.137 280 332 280Z"/>
+</mask>
+<path d="M332 190C414.843 190 482 257.157 482 340C482 422.843 414.843 490 332 490C249.157 490 182 422.843 182 340C182 257.157 249.157 190 332 190ZM332 280C298.863 280 272 306.863 272 340C272 373.137 298.863 400 332 400C365.137 400 392 373.137 392 340C392 306.863 365.137 280 332 280Z" fill="#004DFF"/>
+<path d="M332 190V200C409.32 200 472 262.68 472 340H482H492C492 251.634 420.366 180 332 180V190ZM482 340H472C472 417.32 409.32 480 332 480V490V500C420.366 500 492 428.366 492 340H482ZM332 490V480C254.68 480 192 417.32 192 340H182H172C172 428.366 243.634 500 332 500V490ZM182 340H192C192 262.68 254.68 200 332 200V190V180C243.634 180 172 251.634 172 340H182ZM332 280V270C293.34 270 262 301.34 262 340H272H282C282 312.386 304.386 290 332 290V280ZM272 340H262C262 378.66 293.34 410 332 410V400V390C304.386 390 282 367.614 282 340H272ZM332 400V410C370.66 410 402 378.66 402 340H392H382C382 367.614 359.614 390 332 390V400ZM392 340H402C402 301.34 370.66 270 332 270V280V290C359.614 290 382 312.386 382 340H392Z" fill="white" mask="url(#path-6-outside-1_4_8)"/>
+<defs>
+<linearGradient id="paint0_linear_4_8" x1="150" y1="0" x2="150" y2="1" gradientUnits="userSpaceOnUse">
+<stop stop-color="#004DFF"/>
+<stop offset="1" stop-color="#002E99"/>
+</linearGradient>
+<linearGradient id="paint1_linear_4_8" x1="150" y1="0" x2="150" y2="1" gradientUnits="userSpaceOnUse">
+<stop stop-color="#004DFF"/>
+<stop offset="1" stop-color="#002E99"/>
+</linearGradient>
+<linearGradient id="paint2_linear_4_8" x1="150" y1="0" x2="150" y2="1" gradientUnits="userSpaceOnUse">
+<stop stop-color="#004DFF"/>
+<stop offset="1" stop-color="#002E99"/>
+</linearGradient>
+</defs>
+</svg>
