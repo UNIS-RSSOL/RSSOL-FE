@@ -1,6 +1,11 @@
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { getScheduleByPeriod } from "../../services/WorkShiftService";
+import TimelineGrid, { GridLines, calcEventPosition } from "./TimelineGrid.jsx";
+import {
+  MOCK_WORKERS,
+  createMockDayEvents,
+} from "../../mocks/mockData.js"; // TODO: API 연결 후 이 import 제거
 
 function DayCalendar({
   date,
@@ -9,155 +14,88 @@ function DayCalendar({
   setSelectedEventProp,
   storeId,
   refreshKey,
+  className = "",
 }) {
-  const hours = Array.from({ length: 16 }, (_, i) => i + 8);
-  const [blank, setBlank] = useState(Array.from({ length: 7 }, () => "."));
-  const [workers, setWorkers] = useState();
-  const [events, setEvents] = useState();
-  const colors = ["#68e194", "#32d1aa", "#00c1bd"];
+  const [workers, setWorkers] = useState(MOCK_WORKERS); // TODO: API 연결 후 [] 로 변경
+  const [events, setEvents] = useState(() =>
+    createMockDayEvents(dayjs().format("YYYY-MM-DD")), // TODO: API 연결 후 [] 로 변경
+  );
 
   useEffect(() => {
     (async () => {
       try {
-        console.log("📅 DayCalendar - 스케줄 조회 시작:", {
-          date: date.format("YYYY-MM-DD"),
-          storeId,
-          refreshKey,
-        });
-
         const schedules = await getScheduleByPeriod(
           date.format("YYYY-MM-DD"),
           date.format("YYYY-MM-DD"),
           storeId,
         );
 
-        console.log("📅 DayCalendar - 스케줄 조회 완료:", {
-          scheduleCount: schedules?.length || 0,
-          schedules,
-        });
+        if (schedules && schedules.length > 0) {
+          const uniqueWorkers = Array.from(
+            new Map(
+              schedules.map((s) => [
+                `${s.userStoreId}-${s.userId}`,
+                { userStoreId: s.userStoreId, username: s.username },
+              ]),
+            ).values(),
+          );
 
-        const uniqueWorkers = Array.from(
-          new Map(
-            schedules.map((schedule) => [
-              `${schedule.userStoreId}-${schedule.userId}`, // Combine both IDs for uniqueness
-              {
-                userStoreId: schedule.userStoreId,
-                username: schedule.username,
-              },
-            ]),
-          ).values(),
-        );
-        const formattedEvents = schedules.map((schedule) => ({
-          id: schedule.id,
-          userStoreId: schedule.userStoreId,
-          username: schedule.username,
-          start: schedule.startDatetime,
-          end: schedule.endDatetime,
-        }));
-
-        setWorkers(uniqueWorkers);
-        setEvents(formattedEvents);
-
-        const len = uniqueWorkers?.length || 0;
-        const newBlank = Array.from(
-          { length: Math.max(0, 7 - len) },
-          () => ".",
-        );
-        setBlank(newBlank);
+          setWorkers(uniqueWorkers);
+          setEvents(
+            schedules.map((s) => ({
+              id: s.id,
+              userStoreId: s.userStoreId,
+              username: s.username,
+              start: s.startDatetime,
+              end: s.endDatetime,
+            })),
+          );
+        }
+        // else: 목업 데이터 유지 (API 연결 후 빈 상태 표시로 변경)
       } catch (error) {
-        console.error("Error fetching schedules:", error);
+        console.error("일간 스케줄 조회 실패:", error);
+        // 목업 데이터 유지 (API 연결 후 에러 처리로 변경)
       }
     })();
   }, [date, storeId, refreshKey]);
 
-  const isFirstHour = (event, hour) => {
-    if (!event) return false;
-    const startHour = dayjs(event.start).hour();
-    return hour === startHour;
-  };
-
-  const isLastHour = (event, hour) => {
-    if (!event) return false;
-    let endHour = dayjs(event.end).hour();
-    if (endHour === 0) endHour = 24;
-    return hour === endHour - 1;
-  };
-
-  const getEventForCell = (userStoreId, hour) => {
-    return events.find((event) => {
-      if (event.userStoreId !== userStoreId) return false;
-      const startHour = dayjs(event.start).hour();
-      let endHour = dayjs(event.end).hour();
-      if (endHour === 0) endHour = 24;
-      return hour >= startHour && hour < endHour;
-    });
-  };
-
-  const getColorIndex = (startHour) => {
-    const totalHours = hours.length - 1;
-    const segmentSize = Math.trunc(totalHours / colors.length);
-    const normalizedHour = startHour - hours[0];
-    return Math.min(
-      colors.length - 1,
-      Math.floor(normalizedHour / segmentSize),
-    );
-  };
-
-  const getEventColor = (event) => {
-    if (!event) return "white";
-    const startHour = dayjs(event.start).hour();
-    const colorIndex = getColorIndex(startHour);
-    return colors[colorIndex];
-  };
+  const getEventsForWorker = (userStoreId) =>
+    events.filter((e) => e.userStoreId === userStoreId);
 
   return (
-    <div className="flex flex-row w-full h-[596px] max-w-[362px] border-[0.5px] border-black rounded-[20px] bg-white items-center overflow-x-auto overflow-y-hidden">
-      <div className="flex-shrink-0 flex-col w-[66px]">
-        <div className="h-[30px] flex-shrink-0" />
-        {hours.map((hour) => (
-          <div key={hour}>
-            <div className="flex flex-shrink-0 h-[35px] items-center justify-center border-t border-[#e7eaf3]">
-              {String(hour)}:00
-            </div>
-          </div>
-        ))}
-      </div>
-      {workers?.map((worker) => (
+    <TimelineGrid
+      accentColor="#FF4D4D"
+      leftWidth={60}
+      leftColumn={workers.map((worker) => (
         <div
           key={worker.userStoreId}
-          className="flex flex-shrink-0 flex-col w-[42px] border-l border-[#e7eaf3]"
+          className="h-[56px] flex items-center text-[13px] font-[500] truncate pr-2"
         >
-          <div className="flex flex-shrink-0 h-[30px]" />
-
-          {hours.map((hour) => {
-            const event = getEventForCell(worker.userStoreId, hour);
+          {worker.username}
+        </div>
+      ))}
+      className={className}
+    >
+      {workers.map((worker) => (
+        <div key={worker.userStoreId} className="h-[56px] relative">
+          <GridLines accentColor="#FF4D4D" />
+          {getEventsForWorker(worker.userStoreId).map((event) => {
+            const pos = calcEventPosition(event.start, event.end);
+            if (!pos) return null;
             const isSelected =
-              selectedEventProp &&
-              selectedEventProp.id === event?.id &&
-              selectedEventProp.userStoreId === worker.userStoreId &&
-              selectedEventProp.start === event?.start &&
-              selectedEventProp.end === event?.end;
-            const firstHour = isFirstHour(event, hour);
-            const lastHour = isLastHour(event, hour);
-            const isMiddleHour = (() => {
-              if (!event) return false;
-              const startHour = dayjs(event.start).hour();
-              let endHour = dayjs(event.end).hour();
-              if (endHour === 0) endHour = 24;
-              const middleHour = Math.floor((startHour + endHour - 1) / 2);
-              return hour === middleHour;
-            })();
+              selectedEventProp && selectedEventProp.id === event.id;
 
-            return event ? (
+            return (
               <div
-                key={`${worker.userStoreId}-${hour}`}
-                className={`flex h-[35px] items-center justify-center border-t border-[#e7eaf3] cursor-pointer 
-                  ${isSelected ? "border-x-2 border-x-black" : ""}
-                  ${isSelected && firstHour ? "border-t-2 border-t-black" : ""}
-                  ${isSelected && lastHour ? "border-b-2 border-b-black" : ""}`}
+                key={event.id}
+                className={`absolute top-[6px] bottom-[6px] rounded-[8px] flex items-start pt-[6px] px-[6px] cursor-pointer ${
+                  isSelected ? "ring-2 ring-black brightness-90" : ""
+                }`}
                 style={{
-                  backgroundColor: getEventColor(event),
-                  filter: isSelected ? "brightness(0.8)" : "none",
+                  left: `${pos.left}%`,
+                  width: `${pos.width}%`,
+                  backgroundColor: "#E7EAF3",
+                  border: "1px solid #E7EAF3",
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -172,36 +110,15 @@ function DayCalendar({
                   onEventClick(clickedEvent);
                 }}
               >
-                {isMiddleHour ? (
-                  <span className="text-black text-[12px] font-[400]">
-                    {worker.username}
-                  </span>
-                ) : null}
+                <span className="text-[12px] font-[500] truncate">
+                  {worker.username}
+                </span>
               </div>
-            ) : (
-              <div
-                key={`${worker.userStoreId}-${hour}`}
-                className="flex h-[35px] border-t border-[#e7eaf3] bg-white"
-              />
             );
           })}
         </div>
       ))}
-      {blank &&
-        blank.map((_, index) => (
-          <div
-            key={`blank-${index}`}
-            className={`flex-shrink-0 flex-col w-[42px] border-l border-[#e7eaf3] last:border-r-0 ${index === 0 ? "border-l" : ""}`}
-          >
-            <div className="h-[30px] " />
-            {hours.map((hour) => (
-              <div key={hour}>
-                <div className="flex h-[35px] items-center justify-center border-t border-[#e7eaf3]" />
-              </div>
-            ))}
-          </div>
-        ))}
-    </div>
+    </TimelineGrid>
   );
 }
 

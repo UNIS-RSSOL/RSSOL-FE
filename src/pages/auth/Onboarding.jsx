@@ -151,53 +151,51 @@ export default function Onboarding() {
           return;
         }
 
-        // [임시] 백엔드 미연결 → API 호출 없이 바로 이동 (백엔드 연결 후 아래 주석 해제)
+        // TODO: API 연결 시 아래 3줄(navigate~return) 제거 후 주석 블록 해제
         navigate("/employee");
         return;
-        // // 알바생 온보딩 API 호출
-        // setIsLoading(true);
-        // setError("");
-        // try {
-        //   await onboardingStaff(storeCode, bankId, account, hireDate);
-        //   navigate("/employee");
-        // } catch (err) {
-        //   console.error("온보딩(알바생) 실패:", err);
-        //   setError(
-        //     err.response?.data?.message || "온보딩 등록에 실패했습니다.",
-        //   );
-        // } finally {
-        //   setIsLoading(false);
-        // }
-        // return;
+        /* ── 알바생 온보딩 API (연결 시 주석 해제) ──
+        setIsLoading(true);
+        setError("");
+        try {
+          await onboardingStaff(storeCode, bankId, account, hireDate);
+          navigate("/employee");
+        } catch (err) {
+          console.error("온보딩(알바생) 실패:", err);
+          setError(err.response?.data?.message || "온보딩 등록에 실패했습니다.");
+        } finally {
+          setIsLoading(false);
+        }
+        return;
+        ── */
       }
     }
 
     if (step === 3) {
-      // [임시] 백엔드 미연결 → API 호출 없이 바로 이동 (백엔드 연결 후 아래 주석 해제)
+      // TODO: API 연결 시 아래 3줄(navigate~return) 제거 후 주석 블록 해제
       navigate("/owner");
       return;
-      // // 사장님 온보딩 API 호출
-      // setIsLoading(true);
-      // setError("");
-      // try {
-      //   await onboardingOwner(
-      //     formData.storeName,
-      //     formData.storeAddress,
-      //     formData.storePhone,
-      //     formData.businessNumber,
-      //     formData.hireDate,
-      //   );
-      //   // TODO: 매장 운영 정보 API 호출 (operatingHours, partTimes, breakTime)
-      //   navigate("/owner");
-      // } catch (err) {
-      //   console.error("온보딩(사장님) 실패:", err);
-      //   setError(
-      //     err.response?.data?.message || "온보딩 등록에 실패했습니다.",
-      //   );
-      // } finally {
-      //   setIsLoading(false);
-      // }
-      // return;
+      /* ── 사장님 온보딩 API (연결 시 주석 해제) ──
+      setIsLoading(true);
+      setError("");
+      try {
+        await onboardingOwner(
+          formData.storeName,
+          formData.storeAddress,
+          formData.storePhone,
+          formData.businessNumber,
+          formData.hireDate,
+        );
+        // TODO: 매장 운영 정보 API 호출 (operatingHours, partTimes, breakTime)
+        navigate("/owner");
+      } catch (err) {
+        console.error("온보딩(사장님) 실패:", err);
+        setError(err.response?.data?.message || "온보딩 등록에 실패했습니다.");
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+      ── */
     }
 
     if (step < 2) setStep(step + 1);

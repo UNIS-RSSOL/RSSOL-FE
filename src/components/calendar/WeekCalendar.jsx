@@ -2,6 +2,18 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import "dayjs/locale/ko";
 import { getScheduleByPeriod } from "../../services/WorkShiftService";
+import {
+  MOCK_WORKERS,
+  createMockWeekEvents,
+} from "../../mocks/mockData.js"; // TODO: API 연결 후 이 import 제거
+
+const DAYS = ["일", "월", "화", "수", "목", "금", "토"];
+
+const getDayColor = (idx) => {
+  if (idx === 0) return "text-[#FF8A8A]";
+  if (idx === 6) return "text-[#7BA3FF]";
+  return "text-[#999999]";
+};
 
 function WeekCalendar({
   date,
@@ -10,114 +22,91 @@ function WeekCalendar({
   setSelectedEventProp,
   storeId,
   refreshKey,
+  className = "",
 }) {
-  const hours = Array.from({ length: 16 }, (_, i) => i + 8);
   const [week, setWeek] = useState([]);
-  const days = ["일", "월", "화", "수", "목", "금", "토"];
-  const [workers, setWorkers] = useState([]);
+  const [workers, setWorkers] = useState(MOCK_WORKERS);
   const [events, setEvents] = useState([]);
-  const colors = ["#68e194", "#32d1aa", "#00c1bd"];
 
   useEffect(() => {
     (async () => {
-      let startOfWeek = dayjs(date).locale("ko").startOf("week");
-      const weekArray = [];
-      weekArray.push(
-        ...Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, "day")),
-      );
-      setWeek(weekArray);
+      try {
+        const startOfWeek = dayjs(date).locale("ko").startOf("week");
+        setWeek(
+          Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, "day")),
+        );
 
-      console.log("📅 WeekCalendar - 스케줄 조회 시작:", {
-        startDate: startOfWeek.format("YYYY-MM-DD"),
-        endDate: startOfWeek.add(6, "day").format("YYYY-MM-DD"),
-        storeId,
-        refreshKey,
-      });
+        const schedules = await getScheduleByPeriod(
+          startOfWeek.format("YYYY-MM-DD"),
+          startOfWeek.add(6, "day").format("YYYY-MM-DD"),
+          storeId,
+        );
 
-      const schedules = await getScheduleByPeriod(
-        startOfWeek.format("YYYY-MM-DD"),
-        startOfWeek.add(6, "day").format("YYYY-MM-DD"),
-        storeId,
-      );
+        if (schedules && schedules.length > 0) {
+          const uniqueWorkers = Array.from(
+            new Map(
+              schedules.map((s) => [
+                `${s.userStoreId}-${s.userId}`,
+                { userStoreId: s.userStoreId, username: s.username },
+              ]),
+            ).values(),
+          );
 
-      console.log("📅 WeekCalendar - 스케줄 조회 완료:", {
-        scheduleCount: schedules?.length || 0,
-        schedules,
-      });
-
-      const uniqueWorkers = Array.from(
-        new Map(
-          schedules.map((schedule) => [
-            `${schedule.userStoreId}-${schedule.userId}`, // Combine both IDs for uniqueness
-            {
-              userStoreId: schedule.userStoreId,
-              username: schedule.username,
-            },
-          ]),
-        ).values(),
-      );
-      const formattedEvents = schedules.map((schedule) => ({
-        id: schedule.id,
-        userStoreId: schedule.userStoreId,
-        username: schedule.username,
-        start: schedule.startDatetime,
-        end: schedule.endDatetime,
-      }));
-
-      setWorkers(uniqueWorkers);
-      setEvents(formattedEvents);
+          setWorkers(uniqueWorkers);
+          setEvents(
+            schedules.map((s) => ({
+              id: s.id,
+              userStoreId: s.userStoreId,
+              username: s.username,
+              start: s.startDatetime,
+              end: s.endDatetime,
+            })),
+          );
+        } else {
+          setWorkers(MOCK_WORKERS);
+          setEvents(createMockWeekEvents(startOfWeek));
+        }
+      } catch (error) {
+        console.error("Error fetching schedules:", error);
+        const startOfWeek = dayjs(date).locale("ko").startOf("week");
+        setWeek(
+          Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, "day")),
+        );
+        setWorkers(MOCK_WORKERS);
+        setEvents(createMockWeekEvents(startOfWeek));
+      }
     })();
   }, [date, storeId, refreshKey]);
 
-  const getEventForCell = (userStoreId, day) => {
-    return events.find((event) => {
-      if (event.userStoreId !== userStoreId) return false;
-      const date = dayjs(event.start).format("YYYY-MM-DD");
-      return day === date;
-    });
-  };
-
-  const getColorIndex = (startHour) => {
-    const totalHours = hours.length - 1;
-    const segmentSize = Math.trunc(totalHours / colors.length);
-    const normalizedHour = startHour - hours[0];
-    return Math.min(
-      colors.length - 1,
-      Math.floor(normalizedHour / segmentSize),
+  const getEventForCell = (userStoreId, day) =>
+    events.find(
+      (e) =>
+        e.userStoreId === userStoreId &&
+        dayjs(e.start).format("YYYY-MM-DD") === day,
     );
-  };
 
   return (
-    <div
-      className={`flex flex-col w-[362px] h-[550px] border-[0.5px] border-black rounded-[20px] bg-white items-center overflow-x-hidden ${workers.length < 8 ? "overflow-y-hidden" : "overflow-y-auto"}`}
-    >
-      <div className="flex flex-shrink-0 flex-row w-full h-[35px]">
-        <div className="flex-shrink-0 w-[52px] h-full" />
-        {days.map((day) => (
-          <div key={day}>
-            <div className="flex-shrink-0 flex w-[44px] h-full items-center justify-center border-l border-[#e7eaf3]">
-              {day}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="flex flex-shrink-0 flex-row w-full h-[35px] border-t border-[#e7eaf3]">
-        <div className="flex-shrink-0 w-[52px] h-full" />
-        {week.map((w) => (
+    <div className={`w-full flex flex-col ${className}`}>
+      {/* Day name headers */}
+      <div className="flex border-b border-[#E7EAF3]">
+        <div className="w-[60px] shrink-0 border-r border-[#E7EAF3]" />
+        {DAYS.map((day, idx) => (
           <div
-            key={w.format("DD")}
-            className="flex-shrink-0 flex w-[44px] h-full items-center justify-center border-l border-[#e7eaf3]"
+            key={day}
+            className={`flex-1 text-center text-[13px] font-[600] py-2 ${getDayColor(idx)}`}
           >
-            {w.format("DD")}
+            {day}
           </div>
         ))}
       </div>
+
+      {/* Worker rows */}
       {workers.map((worker) => (
         <div
           key={worker.userStoreId}
-          className="flex flex-shrink-0 flex-row w-full h-[60px] border-t border-[#e7eaf3]"
+          className="flex h-[70px]"
         >
-          <div className="flex flex-shrink-0 w-[52px] h-full items-center justify-center">
+          <div className="w-[60px] shrink-0 flex items-center text-[13px] font-[500] truncate pr-2 border-r border-[#E7EAF3]">
             {worker.username}
           </div>
           {week.map((w) => {
@@ -128,61 +117,50 @@ function WeekCalendar({
             const isSelected =
               selectedEventProp &&
               selectedEventProp.id === event?.id &&
-              selectedEventProp.userStoreId === worker.userStoreId &&
-              selectedEventProp.start === event?.start &&
-              selectedEventProp.end === event?.end;
+              selectedEventProp.userStoreId === worker.userStoreId;
 
-            return event ? (
+            return (
               <div
-                key={`${worker.userStoreId}-${w.format("DD")}`}
-                className={`flex flex-col flex-shrink-0 w-[44px] h-full items-center justify-center border-l border-[#e7eaf3] cursor-pointer
-                  ${isSelected ? "border-2 border-black" : ""}`}
-                style={{
-                  backgroundColor:
-                    colors[getColorIndex(dayjs(event.start).hour())],
-                  filter: isSelected ? "brightness(0.8)" : "none",
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const clickedEvent = {
-                    id: event.id,
-                    userStoreId: event.userStoreId,
-                    username: event.username,
-                    start: event.start,
-                    end: event.end,
-                  };
-                  setSelectedEventProp(clickedEvent);
-                  onEventClick(clickedEvent);
-                }}
+                key={w.format("DD")}
+                className="flex-1 flex items-center justify-center p-[3px]"
               >
-                <span className="text-[12px]/[16px] font-[400]">
-                  {dayjs(event.start).format("HH:mm")}
-                </span>
-                <span className="h-[5px] w-[1px] bg-black my-[2px]" />
-                <span className="text-[12px]/[16px] font-[400]">
-                  {dayjs(event.end).format("HH:mm")}
-                </span>
+                {event ? (
+                  <div
+                    className={`w-full h-full rounded-[10px] flex items-center justify-center cursor-pointer ${
+                      isSelected
+                        ? "bg-[#C8C8C8] ring-2 ring-black"
+                        : "bg-[#E0E0E0]"
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const clickedEvent = {
+                        id: event.id,
+                        userStoreId: event.userStoreId,
+                        username: event.username,
+                        start: event.start,
+                        end: event.end,
+                      };
+                      setSelectedEventProp(clickedEvent);
+                      onEventClick(clickedEvent);
+                    }}
+                  >
+                    <span className="text-[11px] font-[500] text-black">
+                      {dayjs(event.start).format("H")}-
+                      {dayjs(event.end).format("H")}
+                    </span>
+                  </div>
+                ) : null}
               </div>
-            ) : (
-              <div
-                key={`${worker.userStoreId}-${w.format("DD")}`}
-                className="flex flex-shrink-0 w-[44px] h-full items-center justify-center border-l border-[#e7eaf3]"
-              ></div>
             );
           })}
         </div>
       ))}
-      {workers.length < 8 && (
-        <div className="flex flex-shrink-0 flex-row w-full h-full border-t border-[#e7eaf3]">
-          <div className="flex-shrink-0 w-[52px] h-full " />
-          {week.map((w) => (
-            <div
-              key={w}
-              className="flex flex-shrink-0 w-[44px] h-full border-l border-[#e7eaf3]"
-            />
-          ))}
-        </div>
-      )}
+
+      {/* Empty fill */}
+      <div className="flex flex-1">
+        <div className="w-[60px] shrink-0 border-r border-[#E7EAF3]" />
+        <div className="flex-1" />
+      </div>
     </div>
   );
 }

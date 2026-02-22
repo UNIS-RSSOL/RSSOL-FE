@@ -14,6 +14,7 @@ import Button from "../../components/common/Button.jsx";
 import BackButton from "../../components/common/BackButton.jsx";
 import TimeRangeSelect from "../../components/common/TimeRangeSelect.jsx";
 import ToggleHeader from "../../components/common/ToggleHeader.jsx";
+import PillToggle from "../../components/common/PillToggle.jsx";
 
 // 파트 타임 라벨
 const getPartTimeLabel = (index) => {
@@ -304,28 +305,14 @@ function StoreSettings() {
         {/* 하단 고정: 탭 + 버튼 */}
         <div className="absolute bottom-10 w-full px-[8px] flex flex-col items-center gap-[12px]">
           {/* 탭 토글 */}
-          <div className="inline-flex rounded-full border-[1px] border-[#B3B3B3] overflow-hidden">
-            <div
-              onClick={() => setActiveTab("info")}
-              className={`w-[80px] py-[15px] text-[14px] font-[500] text-center cursor-pointer transition-colors border-r-[1px] border-[#B3B3B3] ${
-                activeTab === "info"
-                  ? "bg-[#E6E6E6] text-black"
-                  : "bg-white text-[#87888c]"
-              }`}
-            >
-              정보
-            </div>
-            <div
-              onClick={() => setActiveTab("schedule")}
-              className={`w-[80px] py-[15px] text-[14px] font-[500] text-center cursor-pointer transition-colors ${
-                activeTab === "schedule"
-                  ? "bg-[#E6E6E6] text-black"
-                  : "bg-white text-[#87888c]"
-              }`}
-            >
-              스케줄
-            </div>
-          </div>
+          <PillToggle
+            tabs={[
+              { key: "info", label: "정보" },
+              { key: "schedule", label: "스케줄" },
+            ]}
+            activeKey={activeTab}
+            onChange={setActiveTab}
+          />
 
           {/* 입력 완료 버튼 */}
           <Button
