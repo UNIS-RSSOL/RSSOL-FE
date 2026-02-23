@@ -25,6 +25,7 @@ import CandidateSchedule from "./pages/owner/schedule/CandidateSchedule.jsx";
 import OwnerSchedule from "./pages/owner/schedule/OwnerSchedule.jsx";
 import ScheduleList from "./pages/owner/schedule/ScheduleList.jsx";
 import ManageEmp from "./pages/owner/manage/ManageEmp.jsx";
+import EmployeeProfile from "./pages/owner/manage/EmployeeProfile.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
 import EmpHome from "./pages/employee/EmpHome.jsx";
@@ -191,6 +192,7 @@ function App() {
     "/owner/notification/check",
     "/employee/mypage/managestore",
     "/owner/mypage/managestore",
+    "/owner/manage/employee",
   ];
 
   const hideLayout = hideLayoutPages.some((p) =>
@@ -265,6 +267,7 @@ function App() {
 
           {/*관리 페이지 */}
           <Route path="/owner/manage" element={<ManageEmp />} />
+          <Route path="/owner/manage/employee" element={<EmployeeProfile />} />
           <Route path="/employee/manage" element={<ManageSalary />} />
         </Routes>
       </main>
