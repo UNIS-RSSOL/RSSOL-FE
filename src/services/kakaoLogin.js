@@ -23,7 +23,7 @@ import api from "./Api.js";
 const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID || "";
 
 // 백엔드 주소 (항상 배포 주소 사용)
-const BACKEND_BASE_URL = "https://connecti.store";
+const BACKEND_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // 백엔드 카카오 콜백 경로
 const BACKEND_CALLBACK_PATH = "/api/auth/kakao/callback";
