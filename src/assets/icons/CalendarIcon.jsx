@@ -1,4 +1,4 @@
-function CalendarIcon({ className, filled = false, color = "black" }) {
+function CalendarIcon({ className, filled = false, color = "black", fillColor = "#32D1AA" }) {
   return (
     <svg
       width="19"
@@ -10,7 +10,7 @@ function CalendarIcon({ className, filled = false, color = "black" }) {
     >
       <path
         d="M4 20.125C2.34315 20.125 1 18.7819 1 17.125V5.63928C1 3.98242 2.34315 2.63928 4 2.63928H15C16.6569 2.63928 18 3.98242 18 5.63928L18 17.125C18 18.7819 16.6569 20.125 15 20.125H4Z"
-        fill={filled ? "#32D1AA" : "none"}
+        fill={filled ? fillColor : "none"}
       />
       <path
         d="M4.64286 6.46426H14.2812M3.98512 1V2.63948M14.8125 1V2.63928M18 5.63928L18 17.125C18 18.7819 16.6569 20.125 15 20.125H4C2.34315 20.125 1 18.7819 1 17.125V5.63928C1 3.98242 2.34315 2.63928 4 2.63928H15C16.6569 2.63928 18 3.98242 18 5.63928Z"

@@ -28,6 +28,7 @@ import ManageEmp from "./pages/owner/manage/ManageEmp.jsx";
 import EmployeeProfile from "./pages/owner/manage/EmployeeProfile.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
+import StoreSettings from "./pages/owner/StoreSettings.jsx";
 import EmpHome from "./pages/employee/EmpHome.jsx";
 import Splash from "./pages/common/Splash.jsx";
 
@@ -193,11 +194,17 @@ function App() {
     "/employee/mypage/managestore",
     "/owner/mypage/managestore",
     "/owner/manage/employee",
+    "/owner/store-settings",
+    "/owner/calendar",
+    "/employee/calendar",
   ];
 
-  const hideLayout = hideLayoutPages.some((p) =>
-    p === "/" ? location.pathname === "/" : location.pathname.startsWith(p),
-  );
+  const hideLayout =
+    location.pathname === "/employee" ||
+    location.pathname === "/owner" ||
+    hideLayoutPages.some((p) =>
+      p === "/" ? location.pathname === "/" : location.pathname.startsWith(p),
+    );
 
   /** -------------------------
    *  인증 체크 중 → 스플래시
@@ -210,7 +217,7 @@ function App() {
   }
 
   return (
-    <div className="w-[393px] bg-[#F8FBFE] min-[393px]:w-[393px] mx-auto h-screen flex flex-col font-Pretendard">
+    <div className="w-full max-w-[393px] bg-[#F8FBFE] mx-auto h-screen flex flex-col font-Pretendard overflow-x-hidden">
       {!hideLayout && <Header />}
 
       <main className="flex-1 overflow-y-auto">
@@ -223,6 +230,9 @@ function App() {
           {/* 홈화면 */}
           <Route path="/owner" element={<OwnerHome />} />
           <Route path="/employee" element={<EmpHome />} />
+
+          {/* 매장 설정 */}
+          <Route path="/owner/store-settings" element={<StoreSettings />} />
 
           {/* 마이페이지 */}
           <Route path="/owner/mypage" element={<OwnerPage />} />

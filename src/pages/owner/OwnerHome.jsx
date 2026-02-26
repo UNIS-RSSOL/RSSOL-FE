@@ -1,159 +1,104 @@
-import Box from "../../components/common/Box.jsx";
-import RoundTag from "../../components/common/RoundTag.jsx";
-import ColoredCalIcon from "../../assets/icons/ColoredCalIcon.jsx";
-import ColoredDollarIcon from "../../assets/icons/ColoredDollarIcon.jsx";
-import ColoredCheckIcon from "../../assets/icons/ColoredCheckIcon.jsx";
-import Button from "../../components/common/Button.jsx";
-import { useEffect, useState } from "react";
-import character1 from "../../assets/images/character1.png";
-import Note from "../../components/home/Note.jsx";
-import OwnerHomeCalendar from "../../components/calendar/OwnerHomeCalendar.jsx";
-import { getScheduleByPeriod } from "../../services/WorkShiftService.js";
-import {
-  getActiveStore,
-  getOwnerStoreList,
-} from "../../services/MypageService.js";
-import dayjs from "dayjs";
-import FloatButton from "../../components/home/FloatButton.jsx";
+import { Settings } from "lucide-react";
+import useHomePage from "../../hooks/useHomePage.js";
+
+import BellIcon from "../../assets/icons/BellIcon.jsx";
+import BottomNav from "../../components/layout/BottomNav.jsx";
+import HomeHeader from "../../components/home/HomeHeader.jsx";
+import WorkInfoCard from "../../components/home/WorkInfoCard.jsx";
+import TasksCard from "../../components/home/TasksCard.jsx";
+import MiniTimeline from "../../components/home/MiniTimeline.jsx";
+import HomeSidebar from "../../components/home/HomeSidebar.jsx";
+import AppOnlyModal from "../../components/home/AppOnlyModal.jsx";
 
 function OwnerHome() {
-  const [currentTime, setCurrentTime] = useState("");
-  let today = dayjs();
-  const firstDay = today.format("YYYY.MM.") + "01";
-  const dat = ["일", "월", "화", "수", "목", "금", "토"];
-  const [wage, setWage] = useState(0);
-  const [workers, setWorkers] = useState([]);
-  const [events, setEvents] = useState([]);
-  const [storeList, setStoreList] = useState([]);
-  const [activeStore, setActiveStore] = useState({ storeId: null, name: "" });
+  const {
+    today,
+    activeStore,
+    storeList,
+    todaySchedules,
+    todayShift,
+    todos,
+    toggleTodo,
+    sidebarOpen,
+    setSidebarOpen,
+    isAppModalOpen,
+    setIsAppModalOpen,
+    handleCheckIn,
+    handleStoreChange,
+    handleLogout,
+    navigate,
+  } = useHomePage("owner");
 
-  const handleActiveStoreChange = (newActiveStore) => {
-    setActiveStore(newActiveStore);
-  };
+  /* ── 사장님 전용: 사이드바 메뉴 ── */
+  const sidebarMenuItems = [
+    {
+      label: "직원관리",
+      onClick: () => {
+        setSidebarOpen(false);
+        navigate("/owner/manage");
+      },
+    },
+    {
+      label: "급여관리",
+      onClick: () => {
+        setSidebarOpen(false);
+        /* TODO: 급여관리 페이지 라우트 연결 */
+      },
+    },
+  ];
 
-  const FormattedDate = (date, day) => {
-    const d = dat[today.format("d")];
-    return day
-      ? date.format("YYYY.MM.DD(") + d + ")"
-      : date.format("YYYY.MM.DD");
-  };
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const stores = await getOwnerStoreList();
-        const active = await getActiveStore();
-
-        setStoreList(stores);
-        setActiveStore({
-          storeId: active.storeId,
-          name: active.name,
-        });
-        console.log(activeStore);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
-
-    const updateTime = () => {
-      const now = new Date();
-      const hours = now.getHours().toString().padStart(2, "0");
-      const minutes = now.getMinutes().toString().padStart(2, "0");
-      setCurrentTime(`${hours}:${minutes}`);
-    };
-
-    updateTime();
-    const intervalId = setInterval(updateTime, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      const schedules = await getScheduleByPeriod(
-        today.format("YYYY-MM-DD"),
-        today.format("YYYY-MM-DD"),
-      );
-
-      const formattedEvents = schedules.map((schedule) => ({
-        id: schedule.id,
-        workerId: schedule.userStoreId,
-        worker: schedule.username,
-        start: schedule.startDatetime,
-        end: schedule.endDatetime,
-      }));
-      const uniqueWorkers = Array.from(
-        schedules
-          .reduce((map, schedule) => {
-            if (!map.has(schedule.userStoreId)) {
-              map.set(schedule.userStoreId, {
-                id: schedule.userStoreId,
-                name: schedule.username,
-              });
-            }
-            return map;
-          }, new Map())
-          .values(),
-      );
-      setWorkers(uniqueWorkers);
-      setEvents(formattedEvents);
-    })();
-  }, [activeStore]);
+  const sidebarTitleExtra = (
+    <div
+      className="cursor-pointer p-[4px]"
+      onClick={() => {
+        setSidebarOpen(false);
+        navigate("/owner/store-settings");
+      }}
+    >
+      <Settings size={20} strokeWidth={1.5} color="black" />
+    </div>
+  );
 
   return (
-    <div className="w-full flex flex-col py-7 px-5">
-      <div className="w-full flex flex-col items-start">
-        <RoundTag>{FormattedDate(today, true)}</RoundTag>
-        <div className="flex items-center mt-2">
-          <p className="text-[24px] font-[600]">
-            {activeStore?.name} 오늘의 일정은?
-          </p>
-          <ColoredCalIcon />
-        </div>
-      </div>
-      <div className="flex justify-center w-full">
-        <Note className="w-full my-5 overflow-x-hidden" hole={workers.length}>
-          <OwnerHomeCalendar e={events} w={workers} />
-        </Note>
-      </div>
-      <div className="flex items-center my-2">
-        <ColoredCheckIcon />
-        <p className="text-[18px] font-[500] ml-1">출퇴근 체크!</p>
-      </div>
-      <div className="flex justify-center w-full">
-        <Box className="flex items-center justify-between mb-5" disabled={true}>
-          <div className="flex flex-col items-center justify-center">
-            <p className="text-[16px] font-[500]">{activeStore?.name}</p>
-            <p className="text-[14px] font-[400] text-[#7a7676]">
-              {FormattedDate(today)}
-            </p>
-          </div>
-          <p className="text-[24px] font-[400]">{currentTime}</p>
-          <Button className={"w-[136px] h-[32px]"}>출근하기</Button>
-        </Box>
-      </div>
-      <div className="flex items-center my-2">
-        <ColoredDollarIcon />
-        <p className="text-[18px] font-[500] ml-1">급여관리</p>
-      </div>
-      <div className="flex justify-center w-full">
-        <Box
-          className="items-center justify-between px-7 py-2 w-full"
-          disabled={true}
-        >
-          <div className="flex flex-col items-start justify-center">
-            <p className="text-[16px] font-[500]">이번 달 누적 지출은?</p>
-            <p className="text-[12px] font-[400] mb-5">
-              {firstDay}-{FormattedDate(today)}
-            </p>
-            <p className="text-[24px] font-[400]">{wage}원</p>
-          </div>
-          <img src={character1} alt="character" className="size-[115px] mr-1" />
-        </Box>
-      </div>
-      <FloatButton
-        stores={storeList}
-        active={activeStore}
-        onActiveStoreChange={handleActiveStoreChange}
+    <div className="w-full h-full flex flex-col bg-white font-Pretendard">
+      <HomeHeader
+        storeName={activeStore.name}
+        onMenuClick={() => setSidebarOpen(true)}
+        rightIcon={<BellIcon />}
+        onRightClick={() => navigate("/owner/notification/home")}
+      />
+
+      <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden px-[16px] pt-[8px] pb-[16px]">
+        <p className="text-[14px] font-[600] leading-[20px] mb-[12px] text-left">
+          {today.format("M월 D일")}
+        </p>
+
+        <WorkInfoCard todayShift={todayShift} onCheckIn={handleCheckIn} />
+        <TasksCard todos={todos} onToggle={toggleTodo} />
+        <MiniTimeline className="flex-1" schedules={todaySchedules} />
+      </main>
+
+      <BottomNav role="owner" activePage="home" />
+
+      <HomeSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        storeName={activeStore.name}
+        titleExtra={sidebarTitleExtra}
+        menuItems={sidebarMenuItems}
+        storeList={storeList}
+        activeStoreId={activeStore.storeId}
+        onStoreChange={handleStoreChange}
+        onMyPage={() => {
+          setSidebarOpen(false);
+          navigate("/owner/mypage");
+        }}
+        onLogout={handleLogout}
+      />
+
+      <AppOnlyModal
+        isOpen={isAppModalOpen}
+        onClose={() => setIsAppModalOpen(false)}
       />
     </div>
   );
