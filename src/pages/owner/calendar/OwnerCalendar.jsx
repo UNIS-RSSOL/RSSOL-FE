@@ -26,7 +26,7 @@ import { createExtraShiftRequest } from "../../../services/ExtraShiftService.js"
 import { getAllWorker } from "../../../services/StoreService.js";
 import HomeHeader from "../../../components/home/HomeHeader.jsx";
 import BellIcon from "../../../assets/icons/BellIcon.jsx";
-import BottomNav from "../../../components/layout/BottomNav.jsx";
+import Footer from "../../../components/layout/footer/Footer.jsx";
 import PillToggle from "../../../components/common/PillToggle.jsx";
 
 dayjs.locale("ko");
@@ -568,7 +568,7 @@ function OwnerCalendar() {
         </div>
       </div>
 
-      <BottomNav role="owner" activePage="calendar" />
+      <Footer />
     </div>
   );
 }

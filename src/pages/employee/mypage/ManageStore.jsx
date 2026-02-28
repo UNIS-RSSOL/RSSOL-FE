@@ -9,6 +9,7 @@ import Toast from "../../../components/common/Toast.jsx";
 import SaveIcon from "../../../assets/icons/SaveIcon.jsx";
 import CalendarIcon from "../../../assets/icons/CalendarIcon.jsx";
 import AddItem from "../../../components/mypage/AddItem.jsx";
+import Footer from "../../../components/layout/footer/Footer.jsx";
 import {
   getStaffStoreList,
   deleteStaffStore,
@@ -51,6 +52,13 @@ function ManageStore() {
         setStoreList(formattedList);
       } catch (error) {
         console.error(error);
+        // API 실패 시 목업 데이터
+        setStoreList([
+          { storeId: 1, name: "알바 솔로몬 1호점" },
+          { storeId: 2, name: "알바 솔로몬 2호점" },
+          { storeId: 3, name: "알바 솔로몬 3호점" },
+          { storeId: 4, name: "알바 솔로몬 4호점" },
+        ]);
       }
     })();
   }, [addToast, deleteModal]);
@@ -101,7 +109,8 @@ function ManageStore() {
   return (
     <div className="flex flex-col w-full h-full">
       <TopBar title="등록 매장 관리" />
-      <div className="flex flex-col w-full my-10 px-5 gap-5">
+      <main className="flex-1 overflow-y-auto">
+      <div className="flex flex-col w-full my-10 px-[16px] gap-4">
         {storeList.map((store, index) => (
           <StoreItem
             key={index + 1}
@@ -143,10 +152,9 @@ function ManageStore() {
                   아니오
                 </Button>
                 <Button
-                  className="flex flex-1/2 w-[136px] h-[33px]"
+                  className="flex flex-1/2 w-[136px] h-[33px] !bg-[#3370FF] text-white"
                   onClick={handleDeleteStore}
                 >
-                  {" "}
                   예
                 </Button>
               </div>
@@ -195,6 +203,8 @@ function ManageStore() {
           추가 완료되었어요!
         </MessageModal>
       </div>
+      </main>
+      <Footer />
     </div>
   );
 }

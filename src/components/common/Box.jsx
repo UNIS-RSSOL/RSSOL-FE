@@ -9,7 +9,7 @@ function Box({
 }) {
   return (
     <div
-      className={`flex w-[360px] p-[15px] bg-white rounded-[15px] shadow-[0px_4px_8px_0px_rgba(0,0,0,0.20)] items-center ${isSelected ? "bg-[#68E194]/[0.2] border-[1px] border-[#68E194]" : "bg-[#FDFFFE]"} ${disabled ? "cursor-default" : "cursor-pointer"} ${className}`}
+      className={`flex w-[340px] p-[15px] bg-white rounded-[15px] shadow-[0px_4px_8px_0px_rgba(0,0,0,0.20)] items-center ${isSelected ? "bg-[#68E194]/[0.2] border-[1px] border-[#68E194]" : "bg-[#FDFFFE]"} ${disabled ? "cursor-default" : "cursor-pointer"} ${className}`}
       onClick={disabled ? () => {} : onClick}
     >
       {children}

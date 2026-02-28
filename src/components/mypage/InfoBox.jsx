@@ -39,7 +39,7 @@ function InfoBox({ head, myData, onDataUpdate, role }) {
         <p className="text-[18px] font-[500]">{head}</p>
         {isEdit ? (
           <p
-            className="flex items-center justify-center h-[25px] rounded-full px-[9px] border border-[#68e194] text-[14px] font-[400] bg-[#fefffe] cursor-pointer"
+            className="flex items-center justify-center h-[25px] rounded-full px-[9px] border border-[#3370FF] text-[14px] font-[400] bg-[#fefffe] cursor-pointer"
             onClick={handleSave}
           >
             수정완료
@@ -54,7 +54,7 @@ function InfoBox({ head, myData, onDataUpdate, role }) {
       </div>
       <div className="flex flex-col w-full gap-3">
         {tempData.map((d) =>
-          d.title === "내 매장 관리" ? (
+          d.title === "내 매장 관리" || d.title === "등록 매장 관리" ? (
             <div
               key={d.title}
               className="flex flex-row w-full items-center gap-2"

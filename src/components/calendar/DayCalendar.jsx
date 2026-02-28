@@ -15,13 +15,22 @@ function DayCalendar({
   storeId,
   refreshKey,
   className = "",
+  externalWorkers,
+  externalEvents,
 }) {
-  const [workers, setWorkers] = useState(MOCK_WORKERS); // TODO: API 연결 후 [] 로 변경
-  const [events, setEvents] = useState(() =>
-    createMockDayEvents(dayjs().format("YYYY-MM-DD")), // TODO: API 연결 후 [] 로 변경
+  const [workers, setWorkers] = useState(externalWorkers || MOCK_WORKERS);
+  const [events, setEvents] = useState(
+    externalEvents || createMockDayEvents(dayjs().format("YYYY-MM-DD")),
   );
 
   useEffect(() => {
+    // 외부 데이터가 제공되면 API 호출 건너뜀
+    if (externalWorkers && externalEvents) {
+      setWorkers(externalWorkers);
+      setEvents(externalEvents);
+      return;
+    }
+
     (async () => {
       try {
         const schedules = await getScheduleByPeriod(
@@ -51,13 +60,11 @@ function DayCalendar({
             })),
           );
         }
-        // else: 목업 데이터 유지 (API 연결 후 빈 상태 표시로 변경)
       } catch (error) {
         console.error("일간 스케줄 조회 실패:", error);
-        // 목업 데이터 유지 (API 연결 후 에러 처리로 변경)
       }
     })();
-  }, [date, storeId, refreshKey]);
+  }, [date, storeId, refreshKey, externalWorkers, externalEvents]);
 
   const getEventsForWorker = (userStoreId) =>
     events.filter((e) => e.userStoreId === userStoreId);
