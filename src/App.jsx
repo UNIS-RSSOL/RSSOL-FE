@@ -30,6 +30,8 @@ import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
 import StoreSettings from "./pages/owner/StoreSettings.jsx";
 import EmpHome from "./pages/employee/EmpHome.jsx";
+import OwnerTodo from "./pages/owner/OwnerTodo.jsx";
+import EmployeeTodo from "./pages/employee/EmployeeTodo.jsx";
 import Splash from "./pages/common/Splash.jsx";
 
 import { refreshAccessToken } from "./services/kakaoLogin.js";
@@ -183,6 +185,7 @@ function App() {
     "/onboarding",
     "/auth/kakao/callback",
     "/owner/schedule/add",
+    "/calAdd",
     "/owner/schedule/gen",
     "/owner/schedule/candidate",
     "/employee/schedule/modifying",
@@ -197,6 +200,8 @@ function App() {
     "/owner/store-settings",
     "/owner/calendar",
     "/employee/calendar",
+    "/owner/todo",
+    "/employee/todo",
   ];
 
   const hideLayout =
@@ -250,11 +255,16 @@ function App() {
           <Route path="/employee/calendar" element={<EmpCalendar />} />
           <Route path="/owner/calendar" element={<OwnerCalendar />} />
 
+          {/* 할 일 */}
+          <Route path="/employee/todo" element={<EmployeeTodo />} />
+          <Route path="/owner/todo" element={<OwnerTodo />} />
+
           {/* 근무표생성 */}
           <Route
             path="/employee/schedule/modifying"
             element={<EmpModifying />}
           />
+          <Route path="/calAdd" element={<AddSchedule />} />
           <Route path="/owner/schedule/add" element={<AddSchedule />} />
           <Route path="/owner/schedule/gen" element={<GenSchedule />} />
           <Route

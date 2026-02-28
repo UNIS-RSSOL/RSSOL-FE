@@ -25,9 +25,9 @@ export const generateSchedule = async (
 };
 
 //근무표 생성(타임으로 나눔)
-export const generateScheduleByTime = async (settingId, candidateCount) => {
+export const generateScheduleByTime = async (scheduleRequestId, candidateCount) => {
   try {
-    const response = await api.post(`schedules/${settingId}/generate`, {
+    const response = await api.post(`schedules/requests/${scheduleRequestId}/generate`, {
       generationOptions: { candidateCount },
     });
     return response.data;
@@ -77,13 +77,14 @@ export const getScheduleCandidate = async (key, index) => {
 
 //근무표 지정
 export const confirmSchedule = async (
+  scheduleRequestId,
   candidateKey,
   index,
   startDate,
   endDate,
 ) => {
   try {
-    const response = await api.post("schedules/confirm", {
+    const response = await api.post(`schedules/requests/${scheduleRequestId}/confirm`, {
       candidateKey,
       index,
       startDate,
@@ -92,6 +93,17 @@ export const confirmSchedule = async (
     return response.data;
   } catch (error) {
     console.error("근무표 지정 실패:", error);
+    throw error;
+  }
+};
+
+//근무 가능 시간 제출 상태 조회
+export const getSubmissionStatus = async (storeId) => {
+  try {
+    const response = await api.get(`schedules/requests/${storeId}/submission-status`);
+    return response.data;
+  } catch (error) {
+    console.error("제출 상태 조회 실패:", error);
     throw error;
   }
 };

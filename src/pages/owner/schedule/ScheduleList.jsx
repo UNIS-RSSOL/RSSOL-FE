@@ -8,7 +8,10 @@ import BottomBar from "../../../components/layout/footer/BottomBar.jsx";
 import Toast from "../../../components/common/Toast.jsx";
 import { getAllWorker } from "../../../services/StoreService.js";
 import { getStaffWorkAvailability } from "../../../services/WorkAvailabilityService.js";
-import { generateScheduleByTime } from "../../../services/ScheduleGenerationService.js";
+import {
+  generateScheduleByTime,
+  getSubmissionStatus,
+} from "../../../services/ScheduleGenerationService.js";
 import {
   getActiveStore,
   getOwnerProfile,
@@ -25,12 +28,14 @@ function ScheduleList() {
   const [selectedHour, setSelectedHour] = useState(null);
   const [storeId, setStoreId] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState(null);
+  const [isLoadingStatus, setIsLoadingStatus] = useState(false);
 
-  // CalAdd에서 전달받은 정보 (settingId, 시간 구간, 시작일, 종료일 등)
+  // CalAdd에서 전달받은 정보 (scheduleRequestId, 시간 구간, 시작일, 종료일 등)
   // location.state가 없으면 localStorage에서 가져오기 (새로고침 대비)
   const [scheduleConfig, setScheduleConfig] = useState(() => {
     const stateConfig = location.state || {};
-    if (stateConfig.settingId) {
+    if (stateConfig.scheduleRequestId) {
       return stateConfig;
     }
     // location.state에 없으면 localStorage에서 가져오기
@@ -45,30 +50,30 @@ function ScheduleList() {
     }
     return {};
   });
-  const settingId = scheduleConfig.settingId;
+  const scheduleRequestId = scheduleConfig.scheduleRequestId;
 
   // location.state 변경 시 scheduleConfig 업데이트
   useEffect(() => {
-    // location.state에 settingId가 있으면 그것을 사용
-    if (location.state?.settingId) {
+    // location.state에 scheduleRequestId가 있으면 그것을 사용
+    if (location.state?.scheduleRequestId) {
       setScheduleConfig(location.state);
       // localStorage에도 저장 (일관성 유지)
       localStorage.setItem("scheduleConfig", JSON.stringify(location.state));
     }
   }, [location.state]);
 
-  // 컴포넌트 마운트 시 또는 settingId가 없을 때 localStorage에서 다시 확인
+  // 컴포넌트 마운트 시 또는 scheduleRequestId가 없을 때 localStorage에서 다시 확인
   useEffect(() => {
-    // location.state가 없고, 현재 scheduleConfig에 settingId가 없으면 localStorage에서 확인
-    if (!location.state?.settingId && !scheduleConfig.settingId) {
+    // location.state가 없고, 현재 scheduleConfig에 scheduleRequestId가 없으면 localStorage에서 확인
+    if (!location.state?.scheduleRequestId && !scheduleConfig.scheduleRequestId) {
       const savedConfig = localStorage.getItem("scheduleConfig");
       if (savedConfig) {
         try {
           const parsedConfig = JSON.parse(savedConfig);
-          if (parsedConfig.settingId) {
+          if (parsedConfig.scheduleRequestId) {
             console.log(
               "📝 ScheduleList: localStorage에서 scheduleConfig 로드:",
-              parsedConfig.settingId,
+              parsedConfig.scheduleRequestId,
             );
             setScheduleConfig(parsedConfig);
           }
@@ -506,19 +511,59 @@ function ScheduleList() {
   const handleGenerateSchedule = async () => {
     if (isGenerating) return;
 
-    if (!settingId) {
+    if (!scheduleRequestId) {
       alert(
         "설정 정보를 불러올 수 없습니다. 먼저 근무표 생성 요청을 해주세요.",
       );
       return;
     }
 
+    // 제출 상태 확인
+    if (storeId) {
+      try {
+        const status = await getSubmissionStatus(storeId);
+        console.log("📊 제출 상태 확인:", status);
+
+        // 응답 형식에 따라 제출 완료 여부 확인
+        // CASE 1: allSubmitted 필드가 있는 경우
+        if (status?.allSubmitted === false) {
+          const submitted = status.submitted || 0;
+          const total = status.totalEmployees || 0;
+          alert(
+            `아직 제출하지 않은 직원이 있습니다.\n제출 완료: ${submitted}/${total}명`,
+          );
+          return;
+        }
+
+        // CASE 2: 직원별 제출 상태가 객체인 경우
+        if (status && typeof status === "object" && !Array.isArray(status)) {
+          const employeeNames = Object.keys(status);
+          const notSubmitted = employeeNames.filter(
+            (name) => !status[name] || status[name]?.submitted === false,
+          );
+          if (notSubmitted.length > 0) {
+            alert(
+              `아직 제출하지 않은 직원이 있습니다.\n미제출: ${notSubmitted.join(", ")}`,
+            );
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("제출 상태 확인 실패:", error);
+        // 제출 상태 확인 실패 시에도 진행 가능하도록 경고만 표시
+        const shouldContinue = window.confirm(
+          "제출 상태를 확인할 수 없습니다. 계속 진행하시겠습니까?",
+        );
+        if (!shouldContinue) return;
+      }
+    }
+
     try {
       setIsGenerating(true);
 
-      // /api/schedules/{settingId}/generate API 호출
+      // /api/schedules/requests/{scheduleRequestId}/generate API 호출
       // generationOptions에 candidateCount 포함 (기본값: 5)
-      const result = await generateScheduleByTime(settingId, 5);
+      const result = await generateScheduleByTime(scheduleRequestId, 5);
 
       if (result && result.candidateScheduleKey) {
         // 근무표 생성 완료 플래그 저장 (다음에 caladdicon 클릭 시 CalAdd로 이동)
@@ -543,6 +588,7 @@ function ScheduleList() {
 
         navigate("/autoCal", {
           state: {
+            scheduleRequestId,
             candidateKey: result.candidateScheduleKey,
             startDate,
             endDate,
@@ -568,6 +614,70 @@ function ScheduleList() {
       <div className="flex-1 overflow-y-auto">
         <div className="px-4 py-3 flex flex-col gap-4">
           <p className="text-center font-bold text-lg">직원 스케줄 목록</p>
+
+          {/* 제출 상태 표시 */}
+          {submissionStatus && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-blue-900">
+                  근무표 생성 요청 상태
+                </span>
+                {isLoadingStatus && (
+                  <span className="text-xs text-blue-600">확인 중...</span>
+                )}
+              </div>
+              {(() => {
+                // 응답 형식에 따라 표시
+                if (submissionStatus.allSubmitted !== undefined) {
+                  const submitted = submissionStatus.submitted || 0;
+                  const total = submissionStatus.totalEmployees || 0;
+                  const allSubmitted = submissionStatus.allSubmitted;
+                  return (
+                    <div className="mt-2">
+                      <p className="text-sm text-blue-800">
+                        {allSubmitted ? (
+                          <span className="font-semibold text-green-600">
+                            ✅ 모든 직원 제출 완료 ({submitted}/{total}명)
+                          </span>
+                        ) : (
+                          <span className="font-semibold text-orange-600">
+                            ⏳ 제출 진행 중 ({submitted}/{total}명)
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  );
+                } else if (
+                  typeof submissionStatus === "object" &&
+                  !Array.isArray(submissionStatus)
+                ) {
+                  const employeeNames = Object.keys(submissionStatus);
+                  const submittedCount = employeeNames.filter(
+                    (name) =>
+                      submissionStatus[name] === true ||
+                      submissionStatus[name]?.submitted === true,
+                  ).length;
+                  const totalCount = employeeNames.length;
+                  return (
+                    <div className="mt-2">
+                      <p className="text-sm text-blue-800">
+                        {submittedCount === totalCount ? (
+                          <span className="font-semibold text-green-600">
+                            ✅ 모든 직원 제출 완료 ({submittedCount}/{totalCount}명)
+                          </span>
+                        ) : (
+                          <span className="font-semibold text-orange-600">
+                            ⏳ 제출 진행 중 ({submittedCount}/{totalCount}명)
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+            </div>
+          )}
 
           <div className="flex justify-center">
             <TimeSlotCalendar
@@ -673,6 +783,13 @@ function ScheduleList() {
         singleButton
         singleButtonText={isGenerating ? "생성 중..." : "생성하기"}
         onSingleClick={handleGenerateSchedule}
+        disabledSingle={
+          isGenerating ||
+          (submissionStatus &&
+            typeof submissionStatus === "object" &&
+            !Array.isArray(submissionStatus) &&
+            submissionStatus.allSubmitted === false)
+        }
       />
 
       <Toast isOpen={toastOpen} onClose={() => setToastOpen(false)}>
