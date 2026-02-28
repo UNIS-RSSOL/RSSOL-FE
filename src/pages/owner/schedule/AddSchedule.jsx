@@ -241,12 +241,12 @@ export default function AddSchedule() {
         requestData.endDate,
         requestData.timeSegments,
       );
-      const settingId = result?.scheduleSettingId || result?.settingId;
-      if (result && settingId) {
+      const scheduleRequestId = result?.scheduleRequestId || result?.id || result?.requestId;
+      if (result && scheduleRequestId) {
         localStorage.setItem("hasScheduleRequest", "true");
         localStorage.removeItem("scheduleGenerationCompleted");
         const scheduleConfigData = {
-          settingId,
+          scheduleRequestId,
           timeSegments,
           openTime,
           closeTime,

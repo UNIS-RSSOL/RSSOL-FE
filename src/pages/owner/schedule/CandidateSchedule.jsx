@@ -25,6 +25,7 @@ export default function CandidateSchedule() {
 
   const {
     candidateKey,
+    scheduleRequestId,
     startDate,
     endDate,
     generatedCount = 5,
@@ -194,6 +195,11 @@ export default function CandidateSchedule() {
       return;
     }
 
+    if (!scheduleRequestId) {
+      alert("근무표 요청 정보가 없습니다. 먼저 근무표를 생성해주세요.");
+      return;
+    }
+
     if (isSubmitting) return;
 
     try {
@@ -201,6 +207,7 @@ export default function CandidateSchedule() {
 
       // API 요청 데이터 확인
       const requestData = {
+        scheduleRequestId,
         candidateKey,
         index: selectedIndex,
         startDate: defaultStartDate,
@@ -210,6 +217,7 @@ export default function CandidateSchedule() {
       console.log("📤 근무표 확정 요청:", requestData);
 
       const result = await confirmSchedule(
+        scheduleRequestId,
         candidateKey,
         selectedIndex,
         defaultStartDate,
@@ -238,6 +246,7 @@ export default function CandidateSchedule() {
         error: error.response?.data || error.message,
         status: error.response?.status,
         requestData: {
+          scheduleRequestId,
           candidateKey,
           index: selectedIndex,
           startDate: defaultStartDate,
