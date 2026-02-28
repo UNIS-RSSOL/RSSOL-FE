@@ -32,7 +32,7 @@ export const addTodo = async (title, content, category, dueDate = null) => {
 //할 일 수정
 export const updateTodo = async (todoId, title, content, category, dueDate = null) => {
   try {
-    const response = await api.patch(`todos/${todoId}`, {
+    const response = await api.put(`todos/${todoId}`, {
       title,
       content,
       category,
@@ -57,11 +57,9 @@ export const deleteTodo = async (todoId) => {
 };
 
 //할 일 완료/미완료 토글
-export const toggleTodoComplete = async (todoId, completed) => {
+export const toggleTodoComplete = async (todoId) => {
   try {
-    const response = await api.patch(`todos/${todoId}/complete`, {
-      completed,
-    });
+    const response = await api.patch(`todos/${todoId}/toggle`);
     return response.data;
   } catch (error) {
     console.error("할 일 완료 상태 변경 실패:", error);

@@ -4,7 +4,13 @@ import dayjs from "dayjs";
 import "dayjs/locale/ko";
 
 import { getActiveStore } from "../../services/MypageService.js";
-import { getTodos } from "../../services/TodoService.js";
+import {
+  getTodos,
+  addTodo,
+  updateTodo,
+  deleteTodo,
+  toggleTodoComplete,
+} from "../../services/TodoService.js";
 
 import BellIcon from "../../assets/icons/BellIcon.jsx";
 import CalendarIcon from "../../assets/icons/CalendarIcon.jsx";
@@ -35,6 +41,10 @@ function OwnerTodo() {
     MY_TODO: [],
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingTodoId, setEditingTodoId] = useState(null);
+  const [newTodoText, setNewTodoText] = useState("");
+  const [editTodoText, setEditTodoText] = useState("");
 
   const [currentDate, setCurrentDate] = useState(dayjs());
   const days = ["일", "월", "화", "수", "목", "금", "토"];
@@ -49,23 +59,26 @@ function OwnerTodo() {
     setCurrentDate((prev) => prev.add(1, "day"));
   };
 
+  const loadTodos = async () => {
+    try {
+      const allTodos = await getTodos();
+      const categorized = {
+        STORE_ALL: allTodos.filter((todo) => todo.category === "STORE_ALL"),
+        HANDOVER: allTodos.filter((todo) => todo.category === "HANDOVER"),
+        MY_TODO: allTodos.filter((todo) => todo.category === "MY_TODO"),
+      };
+      setTodos(categorized);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     (async () => {
       try {
         const active = await getActiveStore();
         setActiveStore({ storeId: active.storeId, name: active.name });
-
-        // 모든 카테고리의 할 일 조회
-        const allTodos = await getTodos();
-        
-        // 카테고리별로 분류
-        const categorized = {
-          STORE_ALL: allTodos.filter((todo) => todo.category === "STORE_ALL"),
-          HANDOVER: allTodos.filter((todo) => todo.category === "HANDOVER"),
-          MY_TODO: allTodos.filter((todo) => todo.category === "MY_TODO"),
-        };
-        
-        setTodos(categorized);
+        await loadTodos();
       } catch (error) {
         console.error(error);
       } finally {
@@ -73,6 +86,73 @@ function OwnerTodo() {
       }
     })();
   }, []);
+
+  const handleCategoryClick = (category) => {
+    setEditingCategory(category);
+    setNewTodoText("");
+  };
+
+  const handleCreateTodo = async (category) => {
+    if (!newTodoText.trim()) {
+      setEditingCategory(null);
+      return;
+    }
+
+    try {
+      await addTodo(newTodoText.trim(), "", category);
+      setNewTodoText("");
+      setEditingCategory(null);
+      await loadTodos();
+    } catch (error) {
+      console.error("할 일 생성 실패:", error);
+    }
+  };
+
+  const handleToggleTodo = async (todoId) => {
+    try {
+      await toggleTodoComplete(todoId);
+      await loadTodos();
+    } catch (error) {
+      console.error("할 일 완료 토글 실패:", error);
+    }
+  };
+
+  const handleDeleteTodo = async (todoId, e) => {
+    e.stopPropagation();
+    try {
+      await deleteTodo(todoId);
+      await loadTodos();
+    } catch (error) {
+      console.error("할 일 삭제 실패:", error);
+    }
+  };
+
+  const handleStartEdit = (todo, e) => {
+    e.stopPropagation();
+    setEditingTodoId(todo.id);
+    setEditTodoText(todo.title);
+  };
+
+  const handleSaveEdit = async (todo) => {
+    if (!editTodoText.trim()) {
+      setEditingTodoId(null);
+      return;
+    }
+
+    try {
+      await updateTodo(todo.id, editTodoText.trim(), todo.content || "", todo.category);
+      setEditingTodoId(null);
+      setEditTodoText("");
+      await loadTodos();
+    } catch (error) {
+      console.error("할 일 수정 실패:", error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTodoId(null);
+    setEditTodoText("");
+  };
 
   const canEdit = (category) => {
     // "매장 전체"는 owner만 추가/수정 가능
@@ -114,9 +194,7 @@ function OwnerTodo() {
         <div className="mb-[32px] flex flex-col items-start">
           {canEdit("STORE_ALL") && (
             <button
-              onClick={() => {
-                /* TODO: 추가 모달 열기 */
-              }}
+              onClick={() => handleCategoryClick("STORE_ALL")}
               className="flex items-center justify-between px-[16px] h-[40px] rounded-[20px] border bg-[#ffffff] mb-[12px] w-fit"
               style={{ borderWidth: "1px", borderColor: "#C7C7C7" }}
             >
@@ -129,8 +207,24 @@ function OwnerTodo() {
               </div>
             </button>
           )}
-          <div className="space-y-[8px]">
-            {todos.STORE_ALL.length === 0 ? (
+          {editingCategory === "STORE_ALL" && (
+            <input
+              type="text"
+              value={newTodoText}
+              onChange={(e) => setNewTodoText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleCreateTodo("STORE_ALL");
+                }
+              }}
+              onBlur={() => handleCreateTodo("STORE_ALL")}
+              autoFocus
+              className="w-full px-[12px] py-[8px] border border-gray-300 rounded-[8px] mb-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
+              placeholder="할 일을 입력하세요"
+            />
+          )}
+          <div className="space-y-[8px] w-full">
+            {todos.STORE_ALL.length === 0 && editingCategory !== "STORE_ALL" ? (
               <p className="text-[14px] text-gray-400 text-left py-[16px]">
                 할 일이 없습니다
               </p>
@@ -138,25 +232,58 @@ function OwnerTodo() {
               todos.STORE_ALL.map((todo) => (
                 <div
                   key={todo.id}
-                  className="p-[12px] bg-gray-50 rounded-[8px] border border-gray-200"
+                  className="flex items-center gap-[8px] p-[12px] bg-gray-50 rounded-[8px] border border-gray-200"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <p className="text-[14px] font-[500] mb-[4px]">
-                        {todo.title}
-                      </p>
-                      {todo.content && (
-                        <p className="text-[12px] text-gray-600">
-                          {todo.content}
-                        </p>
-                      )}
-                    </div>
-                    {canEdit("STORE_ALL") && (
-                      <button className="text-[12px] text-gray-500 ml-[8px] bg-transparent border-none p-0 cursor-pointer appearance-none outline-none focus:outline-none focus:ring-0 hover:bg-transparent active:bg-transparent">
-                        수정
-                      </button>
+                  <div
+                    className={`w-[20px] h-[20px] rounded-full border-[2px] shrink-0 flex items-center justify-center cursor-pointer ${
+                      todo.completed
+                        ? "bg-[#3370FF] border-[#3370FF]"
+                        : "border-[#D9D9D9] bg-white"
+                    }`}
+                    onClick={() => handleToggleTodo(todo.id)}
+                  >
+                    {todo.completed && (
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                        <path
+                          d="M1 4L3.5 6.5L9 1"
+                          stroke="white"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
                     )}
                   </div>
+                  {editingTodoId === todo.id ? (
+                    <input
+                      type="text"
+                      value={editTodoText}
+                      onChange={(e) => setEditTodoText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleSaveEdit(todo);
+                        } else if (e.key === "Escape") {
+                          handleCancelEdit();
+                        }
+                      }}
+                      onBlur={() => handleSaveEdit(todo)}
+                      autoFocus
+                      className="flex-1 px-[8px] py-[4px] border border-gray-300 rounded-[4px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
+                    />
+                  ) : (
+                    <span
+                      className="flex-1 text-[14px] cursor-pointer"
+                      onClick={(e) => handleStartEdit(todo, e)}
+                    >
+                      {todo.title}
+                    </span>
+                  )}
+                  <button
+                    onClick={(e) => handleDeleteTodo(todo.id, e)}
+                    className="text-[16px] text-gray-500 hover:text-red-500 bg-transparent border-none p-0 cursor-pointer appearance-none outline-none focus:outline-none shrink-0"
+                  >
+                    ×
+                  </button>
                 </div>
               ))
             )}
@@ -167,9 +294,7 @@ function OwnerTodo() {
         <div className="mb-[32px] flex flex-col items-start">
           {canEdit("HANDOVER") && (
             <button
-              onClick={() => {
-                /* TODO: 추가 모달 열기 */
-              }}
+              onClick={() => handleCategoryClick("HANDOVER")}
               className="flex items-center justify-between px-[16px] h-[40px] rounded-[20px] border bg-[#ffffff] mb-[12px] w-fit"
               style={{ borderWidth: "1px", borderColor: "#C7C7C7" }}
             >
@@ -180,11 +305,26 @@ function OwnerTodo() {
                 </span>
                 <span className="text-[16px] ml-[8px]">+</span>
               </div>
-
             </button>
           )}
-          <div className="space-y-[8px]">
-            {todos.HANDOVER.length === 0 ? (
+          {editingCategory === "HANDOVER" && (
+            <input
+              type="text"
+              value={newTodoText}
+              onChange={(e) => setNewTodoText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleCreateTodo("HANDOVER");
+                }
+              }}
+              onBlur={() => handleCreateTodo("HANDOVER")}
+              autoFocus
+              className="w-full px-[12px] py-[8px] border border-gray-300 rounded-[8px] mb-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
+              placeholder="할 일을 입력하세요"
+            />
+          )}
+          <div className="space-y-[8px] w-full">
+            {todos.HANDOVER.length === 0 && editingCategory !== "HANDOVER" ? (
               <p className="text-[14px] text-gray-400 text-left py-[16px]">
                 할 일이 없습니다
               </p>
@@ -192,25 +332,58 @@ function OwnerTodo() {
               todos.HANDOVER.map((todo) => (
                 <div
                   key={todo.id}
-                  className="p-[12px] bg-gray-50 rounded-[8px] border border-gray-200"
+                  className="flex items-center gap-[8px] p-[12px] bg-gray-50 rounded-[8px] border border-gray-200"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <p className="text-[14px] font-[500] mb-[4px]">
-                        {todo.title}
-                      </p>
-                      {todo.content && (
-                        <p className="text-[12px] text-gray-600">
-                          {todo.content}
-                        </p>
-                      )}
-                    </div>
-                    {canEdit("HANDOVER") && (
-                      <button className="text-[12px] text-gray-500 ml-[8px] bg-transparent border-none p-0 cursor-pointer appearance-none outline-none focus:outline-none focus:ring-0 hover:bg-transparent active:bg-transparent">
-                        수정
-                      </button>
+                  <div
+                    className={`w-[20px] h-[20px] rounded-full border-[2px] shrink-0 flex items-center justify-center cursor-pointer ${
+                      todo.completed
+                        ? "bg-[#3370FF] border-[#3370FF]"
+                        : "border-[#D9D9D9] bg-white"
+                    }`}
+                    onClick={() => handleToggleTodo(todo.id)}
+                  >
+                    {todo.completed && (
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                        <path
+                          d="M1 4L3.5 6.5L9 1"
+                          stroke="white"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
                     )}
                   </div>
+                  {editingTodoId === todo.id ? (
+                    <input
+                      type="text"
+                      value={editTodoText}
+                      onChange={(e) => setEditTodoText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleSaveEdit(todo);
+                        } else if (e.key === "Escape") {
+                          handleCancelEdit();
+                        }
+                      }}
+                      onBlur={() => handleSaveEdit(todo)}
+                      autoFocus
+                      className="flex-1 px-[8px] py-[4px] border border-gray-300 rounded-[4px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
+                    />
+                  ) : (
+                    <span
+                      className="flex-1 text-[14px] cursor-pointer"
+                      onClick={(e) => handleStartEdit(todo, e)}
+                    >
+                      {todo.title}
+                    </span>
+                  )}
+                  <button
+                    onClick={(e) => handleDeleteTodo(todo.id, e)}
+                    className="text-[16px] text-gray-500 hover:text-red-500 bg-transparent border-none p-0 cursor-pointer appearance-none outline-none focus:outline-none shrink-0"
+                  >
+                    ×
+                  </button>
                 </div>
               ))
             )}
@@ -221,9 +394,7 @@ function OwnerTodo() {
         <div className="mb-[32px] flex flex-col items-start">
           {canEdit("MY_TODO") && (
             <button
-              onClick={() => {
-                /* TODO: 추가 모달 열기 */
-              }}
+              onClick={() => handleCategoryClick("MY_TODO")}
               className="flex items-center justify-between px-[16px] h-[40px] rounded-[20px] border bg-[#ffffff] mb-[12px] w-fit"
               style={{ borderWidth: "1px", borderColor: "#C7C7C7" }}
             >
@@ -236,8 +407,24 @@ function OwnerTodo() {
               </div>
             </button>
           )}
-          <div className="space-y-[8px]">
-            {todos.MY_TODO.length === 0 ? (
+          {editingCategory === "MY_TODO" && (
+            <input
+              type="text"
+              value={newTodoText}
+              onChange={(e) => setNewTodoText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleCreateTodo("MY_TODO");
+                }
+              }}
+              onBlur={() => handleCreateTodo("MY_TODO")}
+              autoFocus
+              className="w-full px-[12px] py-[8px] border border-gray-300 rounded-[8px] mb-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
+              placeholder="할 일을 입력하세요"
+            />
+          )}
+          <div className="space-y-[8px] w-full">
+            {todos.MY_TODO.length === 0 && editingCategory !== "MY_TODO" ? (
               <p className="text-[14px] text-gray-400 text-left py-[16px]">
                 할 일이 없습니다
               </p>
@@ -245,25 +432,58 @@ function OwnerTodo() {
               todos.MY_TODO.map((todo) => (
                 <div
                   key={todo.id}
-                  className="p-[12px] bg-gray-50 rounded-[8px] border border-gray-200"
+                  className="flex items-center gap-[8px] p-[12px] bg-gray-50 rounded-[8px] border border-gray-200"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <p className="text-[14px] font-[500] mb-[4px]">
-                        {todo.title}
-                      </p>
-                      {todo.content && (
-                        <p className="text-[12px] text-gray-600">
-                          {todo.content}
-                        </p>
-                      )}
-                    </div>
-                    {canEdit("MY_TODO") && (
-                      <button className="text-[12px] text-gray-500 ml-[8px] bg-transparent border-none p-0 cursor-pointer appearance-none outline-none focus:outline-none focus:ring-0 hover:bg-transparent active:bg-transparent">
-                        수정
-                      </button>
+                  <div
+                    className={`w-[20px] h-[20px] rounded-full border-[2px] shrink-0 flex items-center justify-center cursor-pointer ${
+                      todo.completed
+                        ? "bg-[#3370FF] border-[#3370FF]"
+                        : "border-[#D9D9D9] bg-white"
+                    }`}
+                    onClick={() => handleToggleTodo(todo.id)}
+                  >
+                    {todo.completed && (
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                        <path
+                          d="M1 4L3.5 6.5L9 1"
+                          stroke="white"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
                     )}
                   </div>
+                  {editingTodoId === todo.id ? (
+                    <input
+                      type="text"
+                      value={editTodoText}
+                      onChange={(e) => setEditTodoText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleSaveEdit(todo);
+                        } else if (e.key === "Escape") {
+                          handleCancelEdit();
+                        }
+                      }}
+                      onBlur={() => handleSaveEdit(todo)}
+                      autoFocus
+                      className="flex-1 px-[8px] py-[4px] border border-gray-300 rounded-[4px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
+                    />
+                  ) : (
+                    <span
+                      className="flex-1 text-[14px] cursor-pointer"
+                      onClick={(e) => handleStartEdit(todo, e)}
+                    >
+                      {todo.title}
+                    </span>
+                  )}
+                  <button
+                    onClick={(e) => handleDeleteTodo(todo.id, e)}
+                    className="text-[16px] text-gray-500 hover:text-red-500 bg-transparent border-none p-0 cursor-pointer appearance-none outline-none focus:outline-none shrink-0"
+                  >
+                    ×
+                  </button>
                 </div>
               ))
             )}
