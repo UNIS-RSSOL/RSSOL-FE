@@ -3,7 +3,7 @@ import { refreshToken } from "./AuthService";
 
 //axios 인스턴스. 이후 주소 쓸 때는 api/ 이후 부터 쓰면 됨
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_BASE_URL}/api/`,
+  baseURL: "https://api.rssolplan.com/api/",
   headers: {
     "Content-Type": "application/json",
   },

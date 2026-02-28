@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import dayjs from "dayjs";
 import CoinIcon from "../../../assets/icons/CoinIcon.jsx";
 import PhoneIcon from "../../../assets/icons/PhoneIcon.jsx";
 import RoundTag from "../../../components/common/RoundTag.jsx";
@@ -10,14 +11,36 @@ import LeftArrowIcon from "../../../assets/icons/LeftArrowIcon.jsx";
 import RightArrowIcon from "../../../assets/icons/RightArrowIcon.jsx";
 import { Divider } from "antd";
 import CheckOutlined from "@ant-design/icons/es/icons/CheckOutlined";
+import { getAllWorkerSummary } from "../../../services/StoreService";
 
 const ManageEmp = () => {
   const [openToast, setOpenToast] = useState(false);
   const [tab, setTab] = useState(0);
+  const [employees, setEmployees] = useState([]);
+  const [currentDate, setCurrentDate] = useState(dayjs());
 
-  const EmployeeInfo = () => {
-    const [isChecked, setIsChecked] = useState(false);
+  useEffect(() => {
+    (async () => {
+      const response = await getAllWorkerSummary(
+        currentDate.format("YYYY"),
+        currentDate.format("M"),
+      );
+      setEmployees(response);
+      console.log(response);
+    })();
+  }, []);
 
+  const EmployeeInfo = ({
+    username,
+    role,
+    lateCount,
+    absenceCount,
+    monthlypay,
+    tel,
+    bankName,
+    accountNumber,
+    checked,
+  }) => {
     return (
       <div className="flex flex-row w-full items-center">
         <div className="flex-shrink-0 w-[70px] h-[70px] bg-[#68E194] rounded-full border-[3px] border-white shadow-[0_2px_4px_0_RGBA(0,0,0,0.25)] mr-[16px]" />
@@ -26,46 +49,47 @@ const ManageEmp = () => {
             className={`flex-1 flex flex-row items-center justify-between ${tab === 0 && "mb-2"}`}
           >
             <div className="flex flex-row items-center min-w-0">
-              <p className="text-[16px] font-[600] truncate mr-2">김민솔</p>
+              <p className="text-[16px] font-[600] truncate mr-2">{username}</p>
               {tab === 0 && (
                 <RoundTag className="!px-3 !py-[1px] !text-[12px] !font-[400]">
-                  매니저
+                  {role === "STAFF" ? "알바" : "사장"}
                 </RoundTag>
               )}
             </div>
             {tab === 0 && (
               <div className="flex-shrink-0 flex flex-row items-center gap-2">
                 <p className="text-[12px] font-[400] text-[#26272A] whitespace-nowrap">
-                  지각 1회
+                  지각 {lateCount}회
                 </p>
                 <p className="text-[12px] font-[400] text-[#26272A] whitespace-nowrap">
-                  결근 0회
+                  결근 {absenceCount}회
                 </p>
               </div>
             )}
           </div>
           <div className="flex flex-row items-center">
             <CoinIcon className="size-[18px]" />
-            <p className="text-[14px] font-[500] pl-3">600,000원</p>
+            <p className="text-[14px] font-[500] pl-3">{monthlypay}원</p>
           </div>
           {tab === 0 && (
             <div className="flex flex-row items-center">
               <PhoneIcon className="size-[18px]" />
-              <p className="text-[14px] font-[500] pl-3">010-0000-0000</p>
+              <p className="text-[14px] font-[500] pl-3">{tel}</p>
             </div>
           )}
           <div className="flex flex-row items-center">
             <DollarIcon />
-            <p className="text-[14px] font-[500] pl-3">농협 302000000000</p>
+            <p className="text-[14px] font-[500] pl-3">
+              {bankName} {accountNumber}
+            </p>
           </div>
         </div>
         {tab === 1 && (
           <div className="flex flex-col items-center justify-center gap-2">
             <div
-              className="flex size-[30px] rounded-full border-[1px] border-[#606060] cursor-pointer items-center justify-center"
-              onClick={() => setIsChecked(!isChecked)}
+              className={`flex size-[30px] rounded-full border-[1px] ${checked ? "border-[#32d1aa]" : "border-[#606060]"} cursor-pointer items-center justify-center`}
             >
-              {isChecked && (
+              {checked && (
                 <CheckOutlined
                   style={{ fontWeight: "bold", fontSize: "20px" }}
                 />
@@ -94,11 +118,34 @@ const ManageEmp = () => {
   };
 
   const TotalEmployee = () => {
+    const [checked, setChecked] = useState();
+
+    useEffect(() => {
+      console.log(checked);
+    }, [checked]);
+
     return (
-      <div className="flex w-full justify-center mt-5">
-        <Box disabled={false}>
-          <EmployeeInfo />
-        </Box>
+      <div className="flex flex-col w-full h-full items-center mt-5 gap-5 ">
+        {employees?.staffList?.map((emp) => (
+          <Box
+            key={emp.userStoreId}
+            disabled={false}
+            isSelected={checked === emp.userStoreId}
+            onClick={() => setChecked(emp.userStoreId)}
+          >
+            <EmployeeInfo
+              username={emp.username}
+              role={emp.role}
+              lateCount={emp.lateCount}
+              absenceCount={emp.absenceCount}
+              monthlypay={emp.monthlypay}
+              tel={emp.tel}
+              bankName={emp.bankName}
+              accountNumber={emp.accountNumber}
+              checked={checked === emp.userStoreId}
+            />
+          </Box>
+        ))}
         {openToast && (
           <Toast>
             <p className="text-[16px] font-[600]">직원 관리하기</p>
@@ -186,10 +233,10 @@ const ManageEmp = () => {
           <div
             className={`text-[18px] font-[500] cursor-pointer ${tab === 0 ? "text-black" : "text-[#87888C]"}`}
           >
-            <div className="w-[80%] mx-auto">
+            <div className="w-[80%] mx-auto font-[500] text-[18px]">
               전체 직원
               {tab === 0 && (
-                <div className="w-full h-[3px] bg-[#32d1aa] rounded-full"></div>
+                <div className="w-full h-[3px] bg-[#6694FF] rounded-full"></div>
               )}
             </div>
           </div>
@@ -198,10 +245,10 @@ const ManageEmp = () => {
           <div
             className={`text-[18px] font-[500] cursor-pointer ${tab === 1 ? "text-black" : "text-[#87888C]"}`}
           >
-            <div className="w-[80%] mx-auto">
+            <div className="w-[80%] mx-auto font-[500] text-[18px]">
               급여 관리
               {tab === 1 && (
-                <div className="w-full h-[3px] bg-[#32d1aa] rounded-full"></div>
+                <div className="w-full h-[3px] bg-[#6694FF] rounded-full"></div>
               )}
             </div>
           </div>
