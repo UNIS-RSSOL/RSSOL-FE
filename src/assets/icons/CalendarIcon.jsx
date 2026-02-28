@@ -1,4 +1,4 @@
-function CalendarIcon({ className, filled = false, color = "black", fillColor = "#32D1AA" }) {
+function CalendarIcon({ className, filled = false, color = "black", fillColor = "#3370FF" }) {
   return (
     <svg
       width="19"

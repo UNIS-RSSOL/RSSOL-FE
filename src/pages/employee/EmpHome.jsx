@@ -1,7 +1,7 @@
 import useHomePage from "../../hooks/useHomePage.js";
 
 import BellIcon from "../../assets/icons/BellIcon.jsx";
-import BottomNav from "../../components/layout/BottomNav.jsx";
+import Footer from "../../components/layout/footer/Footer.jsx";
 import HomeHeader from "../../components/home/HomeHeader.jsx";
 import WorkInfoCard from "../../components/home/WorkInfoCard.jsx";
 import TasksCard from "../../components/home/TasksCard.jsx";
@@ -58,7 +58,7 @@ function EmpHome() {
         <MiniTimeline className="flex-1" schedules={todaySchedules} />
       </main>
 
-      <BottomNav role="employee" activePage="home" />
+      <Footer />
 
       <HomeSidebar
         isOpen={sidebarOpen}

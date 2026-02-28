@@ -54,7 +54,7 @@ function InfoBox({ head, myData, onDataUpdate, role }) {
       </div>
       <div className="flex flex-col w-full gap-3">
         {tempData.map((d) =>
-          d.title === "내 매장 관리" ? (
+          d.title === "내 매장 관리" || d.title === "등록 매장 관리" ? (
             <div
               key={d.title}
               className="flex flex-row w-full items-center gap-2"

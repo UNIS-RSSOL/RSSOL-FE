@@ -1,4 +1,4 @@
-function HomeIcon({ className, filled = false, fillColor = "#32D1AA" }) {
+function HomeIcon({ className, filled = false, fillColor = "#3370FF" }) {
   return (
     <svg
       width="20"

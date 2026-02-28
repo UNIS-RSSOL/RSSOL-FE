@@ -164,7 +164,7 @@ function OwnerPage() {
         {!profile || profile === "" || profile === null ? (
           <img src={OwnerBtn} alt="profile" className="size-[150px] my-5" />
         ) : (
-          <div className="flex items-center justify-center size-[130px] bg-[#68e194] border-3 border-[#fdfffe] shadow-[0_4px_8px_0_rgba(0,0,0,0.2)] overflow-hidden rounded-full my-7">
+          <div className="flex items-center justify-center size-[142px] bg-[#3370FF]/20 border-3 border-[#fdfffe] shadow-[0_4px_8px_0_rgba(0,0,0,0.2)] overflow-hidden rounded-full my-7">
             <img src={profile} alt="profile" />
           </div>
         )}

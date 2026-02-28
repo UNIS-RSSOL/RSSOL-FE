@@ -9,7 +9,7 @@ import DateNavigation from "../../../components/common/DateNavigation.jsx";
 import MyCalendar from "../../../components/calendar/MyCalendar.jsx";
 import HomeHeader from "../../../components/home/HomeHeader.jsx";
 import BellIcon from "../../../assets/icons/BellIcon.jsx";
-import BottomNav from "../../../components/layout/BottomNav.jsx";
+import Footer from "../../../components/layout/footer/Footer.jsx";
 import { getMyScheduleByPeriod } from "../../../services/WorkShiftService.js";
 import { createShiftSwapRequest } from "../../../services/ShiftSwapService.js";
 import { getActiveStore } from "../../../services/MypageService.js";
@@ -136,7 +136,7 @@ function EmpCalendar() {
         </div>
       </main>
 
-      <BottomNav role="employee" activePage="calendar" />
+      <Footer />
     </div>
   );
 }

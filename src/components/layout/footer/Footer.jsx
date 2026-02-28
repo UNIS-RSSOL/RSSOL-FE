@@ -8,11 +8,27 @@ import CoinIcon from "../../../assets/icons/CoinIcon.jsx";
 import UserIcon from "../../../assets/icons/UserIcon.jsx";
 import { getActiveStore } from "../../../services/MypageService.js";
 
+const ACTIVE_COLOR = "#3370FF";
+
 function Footer() {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedMenu, setSelectedMenu] = useState("홈");
-  const [role, setRole] = useState(null);
+
+  // URL 경로에서 role 판별 (즉시) + API로 보정
+  const getRoleFromPath = (path) => {
+    if (path.includes("owner")) return "owner";
+    if (path.includes("employee")) return "employee";
+    return null;
+  };
+
+  const [role, setRole] = useState(() => getRoleFromPath(location.pathname));
+
+  useEffect(() => {
+    // URL 변경 시 즉시 role 업데이트
+    const pathRole = getRoleFromPath(location.pathname);
+    if (pathRole) setRole(pathRole);
+  }, [location.pathname]);
 
   useEffect(() => {
     (async () => {
@@ -44,78 +60,41 @@ function Footer() {
     setSelectedMenu(menu);
   };
 
+  const isHome = selectedMenu === "홈";
+  const isCalendar = selectedMenu === "캘린더";
+  const isManage = selectedMenu === "관리";
+  const isMypage = selectedMenu === "마이페이지";
+
   return (
-    <div className="w-full h-[60px] flex flex-row justify-between items-center px-2 shadow-[0_-2px_7px_0_rgba(0,0,0,0.1)] bg-white">
-      {selectedMenu === "홈" ? (
-        <FooterMenu
-          MenuIcon={<HomeIcon filled="true" />}
-          title="홈"
-          onClick={() => {
-            handleMenuClick("홈");
-            navigate(`/${role}`);
-          }}
-        />
-      ) : (
-        <FooterMenu
-          MenuIcon={<HomeIcon />}
-          title="홈"
-          onClick={() => {
-            handleMenuClick("홈");
-            navigate(`/${role}`);
-          }}
-        />
-      )}
-      {selectedMenu === "캘린더" ? (
-        <FooterMenu
-          MenuIcon={<CalendarIcon filled={true} />}
-          title="캘린더"
-          onClick={() => {
-            handleMenuClick("캘린더");
-            navigate(`/${role}/calendar`);
-          }}
-        />
-      ) : (
-        <FooterMenu
-          MenuIcon={<CalendarIcon />}
-          title="캘린더"
-          onClick={() => {
-            handleMenuClick("캘린더");
-            navigate(`/${role}/calendar`);
-          }}
-        />
-      )}
+    <div className="w-full h-[60px] flex flex-row justify-around items-center shrink-0 shadow-[0_-2px_7px_0_rgba(0,0,0,0.1)] bg-white">
+      <FooterMenu
+        MenuIcon={<HomeIcon filled={isHome} fillColor={ACTIVE_COLOR} />}
+        title="홈"
+        onClick={() => {
+          handleMenuClick("홈");
+          navigate(`/${role}`);
+        }}
+      />
+      <FooterMenu
+        MenuIcon={<CalendarIcon filled={isCalendar} fillColor={ACTIVE_COLOR} />}
+        title="캘린더"
+        onClick={() => {
+          handleMenuClick("캘린더");
+          navigate(`/${role}/calendar`);
+        }}
+      />
       {role === "owner" ? (
-        selectedMenu === "관리" ? (
-          <FooterMenu
-            MenuIcon={<EditIcon filled="true" />}
-            title="직원관리"
-            onClick={() => {
-              handleMenuClick("관리");
-              navigate("/owner/manage");
-            }}
-          />
-        ) : (
-          <FooterMenu
-            MenuIcon={<EditIcon />}
-            title="직원관리"
-            onClick={() => {
-              handleMenuClick("관리");
-              navigate("/owner/manage");
-            }}
-          />
-        )
-      ) : selectedMenu === "관리" ? (
         <FooterMenu
-          MenuIcon={<CoinIcon filled={true} />}
-          title="급여관리"
+          MenuIcon={<EditIcon filled={isManage} fillColor={ACTIVE_COLOR} />}
+          title="직원관리"
           onClick={() => {
             handleMenuClick("관리");
-            navigate("/employee/manage");
+            navigate("/owner/manage");
           }}
         />
       ) : (
         <FooterMenu
-          MenuIcon={<CoinIcon />}
+          MenuIcon={<CoinIcon filled={isManage} fillColor={ACTIVE_COLOR} />}
           title="급여관리"
           onClick={() => {
             handleMenuClick("관리");
@@ -123,25 +102,14 @@ function Footer() {
           }}
         />
       )}
-      {selectedMenu === "마이페이지" ? (
-        <FooterMenu
-          MenuIcon={<UserIcon filled={true} />}
-          title="마이페이지"
-          onClick={() => {
-            handleMenuClick("마이페이지");
-            navigate(`/${role}/mypage`);
-          }}
-        />
-      ) : (
-        <FooterMenu
-          MenuIcon={<UserIcon />}
-          title="마이페이지"
-          onClick={() => {
-            handleMenuClick("마이페이지");
-            navigate(`/${role}/mypage`);
-          }}
-        />
-      )}
+      <FooterMenu
+        MenuIcon={<UserIcon filled={isMypage} fillColor={ACTIVE_COLOR} />}
+        title="마이페이지"
+        onClick={() => {
+          handleMenuClick("마이페이지");
+          navigate(`/${role}/mypage`);
+        }}
+      />
     </div>
   );
 }

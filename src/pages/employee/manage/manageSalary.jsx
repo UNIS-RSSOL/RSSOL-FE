@@ -29,7 +29,7 @@ const ManageSalary = () => {
   };
 
   return (
-    <div className="flex flex-col w-full items-center mt-5">
+    <div className="flex flex-col w-full items-center px-[16px] mt-5">
       <Box disabled={true} className="flex flex-col">
         <div className="flex items-center justify-center">
           <LeftArrowIcon
