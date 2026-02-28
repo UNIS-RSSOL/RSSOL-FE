@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import LeftArrowIcon from "../../../assets/icons/LeftArrowIcon";
 import RightArrowIcon from "../../../assets/icons/RightArrowIcon";
@@ -8,7 +9,8 @@ import PencilIcon from "../../../assets/icons/PencilIcon";
 import { getEmployeeAttendance } from "../../../services/ViewAttendanceService";
 import { getEmployeeProfile } from "../../../services/ViewProfileService";
 
-function EmployeeProfile({ userStoreId }) {
+function EmployeeProfile() {
+  const { userStoreId } = useParams();
   const [page, setPage] = useState(1);
   const [profile, setProfile] = useState();
 
@@ -43,7 +45,12 @@ function EmployeeProfile({ userStoreId }) {
   };
 
   const StatusBox = () => {
-    const status = 1;
+    const status =
+      profile?.status === "HIRED"
+        ? 1
+        : profile?.status === "ON_LEAVING"
+          ? 2
+          : 3;
     return (
       <div className="flex h-[25px] rounded-full divide-x-1 border-[1px] border-[#b3b3b3] divide-[#b3b3b3] overflow-hidden">
         <span
@@ -95,8 +102,8 @@ function EmployeeProfile({ userStoreId }) {
           <PositionBox />
         </div>
         <div className="flex items-center justify-between">
+          <p className="font-[400] text-[16px]">근무 매장</p>
           <p className="font-[400] text-[16px]">{profile?.storeName}</p>
-          <p className="font-[400] text-[16px]">RSSOL</p>
         </div>
         <div className="flex items-center justify-between">
           <p className="font-[400] text-[16px]">계좌</p>
@@ -105,7 +112,7 @@ function EmployeeProfile({ userStoreId }) {
           </p>
         </div>
         <div className="flex items-center justify-between">
-          <p className="font-[400] text-[16px]">전화번호</p>
+          <p className="font-[400] text-[16px]">이메일</p>
           <p className="font-[400] text-[16px]">{profile?.email}</p>
         </div>
         <div className="flex items-center justify-between">
@@ -120,6 +127,7 @@ function EmployeeProfile({ userStoreId }) {
 
   const Calendar = () => {
     const [currentDate, setCurrentDate] = useState(dayjs());
+    const [attendance, setAttendance] = useState(null);
     const firstDayOfMonth = currentDate.startOf("month");
     const lastDayOfMonth = currentDate.endOf("month");
     const firstWeekStart =
@@ -143,12 +151,18 @@ function EmployeeProfile({ userStoreId }) {
     useEffect(() => {
       (async () => {
         try {
+          const today = dayjs();
+          const end =
+            currentDate.format("M") === today.format("M")
+              ? today.format("YYYY-MM-DD")
+              : lastDayOfMonth.format("YYYY-MM-DD");
           const response = await getEmployeeAttendance(
             userStoreId,
             firstDayOfMonth.format("YYYY-MM-DD"),
-            lastDayOfMonth.format("YYYY-MM-DD"),
+            end,
           );
           console.log(response);
+          setAttendance(response);
         } catch (error) {
           console.error("Error fetching employee attendance:", error);
         }
@@ -182,13 +196,30 @@ function EmployeeProfile({ userStoreId }) {
               {week.map((day, dayIndex) => (
                 <div
                   key={dayIndex}
-                  className={`w-[55px] h-full text-center text-[14px] font-[700] ${day.format("MM") == currentDate.format("MM") ? "text-black" : "text-[#b3b3b3]"}`}
+                  className="flex flex-col w-[55px] h-full items-center"
                 >
-                  {day.format("D")}
+                  <span className="text-[14px] font-[700] text-center">
+                    {day.format("D")}
+                  </span>
+                  <div className={`flex size-[18px] rounded-full bg-black`} />
                 </div>
               ))}
             </div>
           ))}
+        </div>
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-row items-center gap-2">
+            <div className="justify-center bg-[#616161] rounded-full size-[18px]"></div>
+            <span>정상 출근 회</span>
+          </div>
+          <div className="flex flex-row items-center gap-2">
+            <div className="justify-center bg-[#b3b3b3] rounded-full size-[18px]"></div>
+            <span>지각 {attendance?.totalLateCount}회</span>
+          </div>
+          <div className="flex flex-row items-center gap-2">
+            <div className="justify-center bg-[#E2E2E2] rounded-full size-[18px]"></div>
+            <span>결근 {attendance?.totalAbsentCount}회</span>
+          </div>
         </div>
       </div>
     );

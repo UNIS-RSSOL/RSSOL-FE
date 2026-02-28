@@ -89,7 +89,7 @@ function Footer() {
           title="직원관리"
           onClick={() => {
             handleMenuClick("관리");
-            navigate("/owner/manage");
+            navigate("/owner/manage/employee");
           }}
         />
       ) : (

@@ -8,12 +8,14 @@ import NaverIcon from "../../assets/icons/NaverIcon.jsx";
 import GoogleIcon from "../../assets/icons/GoogleIcon.jsx";
 import LoginButton from "../../components/login/LoginButton.jsx";
 import logoWhite from "../../assets/images/logo-white.svg";
+import { getDevToken } from "../../services/DevTokenService.js";
 
 function Login() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [email, setEmail] = useState();
 
   useEffect(() => {
     const checkAutoLogin = async () => {
@@ -100,30 +102,34 @@ function Login() {
       </div>
 
       {/* 개발용 바이패스 */}
-      {import.meta.env.DEV && (
-        <div className="flex gap-4 pb-[40px]">
-          <button
-            className="text-white/60 text-[12px] underline"
-            onClick={() => {
-              localStorage.setItem("accessToken", "dev-token");
-              localStorage.setItem("refreshToken", "dev-refresh");
+
+      <div className="flex gap-4 pb-[40px]">
+        <button
+          className="text-white/60 text-[12px] underline"
+          onClick={async () => {
+            try {
+              const response = await getDevToken("ownerA@example.com");
+              console.log(response);
+              localStorage.setItem("accessToken", response);
               navigate("/owner");
-            }}
-          >
-            DEV 사장
-          </button>
-          <button
-            className="text-white/60 text-[12px] underline"
-            onClick={() => {
-              localStorage.setItem("accessToken", "dev-token");
-              localStorage.setItem("refreshToken", "dev-refresh");
-              navigate("/employee");
-            }}
-          >
-            DEV 알바
-          </button>
-        </div>
-      )}
+            } catch (error) {
+              console.error("개발 토큰 실패:", error);
+            }
+          }}
+        >
+          DEV 사장
+        </button>
+        <button
+          className="text-white/60 text-[12px] underline"
+          onClick={() => {
+            localStorage.setItem("accessToken", "dev-token");
+            localStorage.setItem("refreshToken", "dev-refresh");
+            navigate("/employee");
+          }}
+        >
+          DEV 알바
+        </button>
+      </div>
     </div>
   );
 }

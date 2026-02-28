@@ -24,7 +24,8 @@ import GenSchedule from "./pages/owner/schedule/GenSchedule.jsx";
 import CandidateSchedule from "./pages/owner/schedule/CandidateSchedule.jsx";
 import OwnerSchedule from "./pages/owner/schedule/OwnerSchedule.jsx";
 import ScheduleList from "./pages/owner/schedule/ScheduleList.jsx";
-import ManageEmp from "./pages/owner/manage/ManageEmp.jsx";
+import AllStaff from "./pages/owner/manage/AllStaff.jsx";
+import ManageWage from "./pages/owner/manage/ManageWage.jsx";
 import EmployeeProfile from "./pages/owner/manage/EmployeeProfile.jsx";
 import ManageSalary from "./pages/employee/manage/manageSalary.jsx";
 import OwnerHome from "./pages/owner/OwnerHome.jsx";
@@ -191,9 +192,9 @@ function App() {
     "/employee/notification",
     "/owner/notification/home",
     "/owner/notification/check",
-    "/employee/mypage",
+    "/employee/notification",
     "/owner/mypage",
-    "/owner/manage/employee",
+    "/employee/mypage",
     "/owner/store-settings",
     "/owner/calendar",
     "/employee/calendar",
@@ -202,6 +203,7 @@ function App() {
   const hideLayout =
     location.pathname === "/employee" ||
     location.pathname === "/owner" ||
+    location.pathname.startsWith("/owner/manage/employee/") ||
     hideLayoutPages.some((p) =>
       p === "/" ? location.pathname === "/" : location.pathname.startsWith(p),
     );
@@ -217,7 +219,7 @@ function App() {
   }
 
   return (
-    <div className="w-full max-w-[393px] bg-[#F8FBFE] mx-auto h-screen flex flex-col font-Pretendard overflow-x-hidden">
+    <div className="w-[393px] bg-[#F8FBFE] mx-auto h-screen flex flex-col font-Pretendard overflow-x-hidden">
       {!hideLayout && <Header />}
 
       <main className="flex-1 overflow-y-auto">
@@ -276,8 +278,12 @@ function App() {
           />
 
           {/*관리 페이지 */}
-          <Route path="/owner/manage" element={<ManageEmp />} />
-          <Route path="/owner/manage/employee" element={<EmployeeProfile />} />
+          <Route path="/owner/manage/employee" element={<AllStaff />} />
+          <Route
+            path="/owner/manage/employee/:userStoreId"
+            element={<EmployeeProfile />}
+          />
+          <Route path="/owner/manage/wage" element={<ManageWage />} />
           <Route path="/employee/manage" element={<ManageSalary />} />
         </Routes>
       </main>
