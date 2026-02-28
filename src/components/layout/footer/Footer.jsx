@@ -32,13 +32,19 @@ function Footer() {
 
   useEffect(() => {
     (async () => {
+      // 개발용: API 없을 때 mock (Footer role 설정)
+      if (import.meta.env.VITE_USE_MOCK === "true") {
+        setRole("owner");
+        return;
+      }
       try {
         const response = await getActiveStore();
-        const r = response.position;
+        const r = response?.position;
         if (r === "OWNER") setRole("owner");
         else setRole("employee");
       } catch (error) {
-        console.error(error);
+        console.warn("Footer: 활성 매장 조회 실패 → owner 기본값 사용");
+        setRole("owner");
       }
     })();
   }, []);

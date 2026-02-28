@@ -183,6 +183,7 @@ function App() {
     "/onboarding",
     "/auth/kakao/callback",
     "/owner/schedule/add",
+    "/calAdd",
     "/owner/schedule/gen",
     "/owner/schedule/candidate",
     "/employee/schedule/modifying",
@@ -255,6 +256,7 @@ function App() {
             path="/employee/schedule/modifying"
             element={<EmpModifying />}
           />
+          <Route path="/calAdd" element={<AddSchedule />} />
           <Route path="/owner/schedule/add" element={<AddSchedule />} />
           <Route path="/owner/schedule/gen" element={<GenSchedule />} />
           <Route
