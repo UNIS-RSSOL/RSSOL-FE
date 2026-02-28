@@ -1,4 +1,11 @@
 /* ============================
+   0) CalAdd 페이지 레이아웃
+   ============================ */
+  .add-schedule-page {
+    min-width: 320px;
+  }
+
+/* ============================
    1) 달력 전체 초기화
    - 배경 제거, 테두리 제거
    ============================ */
@@ -19,12 +26,19 @@
   }
   
   .fc .fc-scrollgrid,
+  .fc .fc-scrollgrid-sync-table,
   .fc td,
   .fc th,
   .fc-theme-standard td,
   .fc-theme-standard th,
   .fc-scrollgrid-section {
     border: none !important;
+  }
+
+  .fc table,
+  .fc .fc-scrollgrid-sync-table {
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
   }
   
   /* ============================
@@ -37,19 +51,39 @@
   }
   
   /* ============================
-     3) 요일 헤더 스타일
+     3) 캘린더 내장 요일 헤더 숨김 (커스텀 상단바 사용)
      ============================ */
-  .fc-col-header,
-  .fc-col-header-cell {
-    background: transparent !important;
-    border: none !important;
-    padding: 6px 0 !important;
+  .fc-col-header {
+    display: none !important;
   }
-  
-  .fc .fc-col-header-cell-cushion {
+
+  /* ============================
+     3-1) 플로팅 요일 상단바
+     - sticky wrapper: 배경 0% (뒤로 달력 비침)
+     - inner bar: 회색 유지
+     ============================ */
+  .calendar-weekday-bar-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 12px 8px 16px;
+    background: transparent;
+  }
+
+  .calendar-weekday-bar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #f2f2f2;
+    padding: 6px 0px;
+    margin: 0 0px;
+    border-radius: 20px;
     font-size: 14px;
-    font-weight: 700 !important;
-    color: #000 !important;
+    font-weight: 700;
+    letter-spacing: 0.9em;
+  }
+
+  .calendar-weekday-cell {
+    text-align: center;
   }
   
   /* ============================
@@ -96,56 +130,40 @@
     }
         
   
-  /* 시작/끝 날짜 원 */
+  /* 선택된 날짜: 배경 #004DFF, 글씨 흰색, 연결된 pill 형태 */
   .range-start .fc-daygrid-day-frame::before,
-  .range-end .fc-daygrid-day-frame::before {
-    content: "";
-    position: absolute;
-    width: 45px;
-    height:45px;
-    background: #68E194;
-    border-radius: 50%;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 5 !important;
-  }
-    
-  .range-start .fc-daygrid-day-frame::after {
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 50%;
-    width: 50%;
-    height: 45px;
-    background: rgba(104, 225, 148, 0.4);
-    z-index: 0;
-  }
-
-  .range-end .fc-daygrid-day-frame::after {
-    content: "";
-    position: absolute;
-    top: 2px;
-    right: 50%;
-    width: 50%;
-    height: 45px;
-    background: rgba(104, 225, 148, 0.4);
-    z-index: 0;
-  }
-
-  
-  /* 사이 날짜: 전체 셀 배경 */
+  .range-end .fc-daygrid-day-frame::before,
   .range-between .fc-daygrid-day-frame::before {
     content: "";
     position: absolute;
     top: 2px;
-    left: 0%;
+    left: 0;
     width: 100%;
     height: 45px;
-    bottom: 0;
-    background: rgba(104, 225, 148, 0.4);
-    border-radius: 0 !important; /* 좌우 경계 완전 제거 */
-    z-index: 1 !important;       /* 원(시작/종료) 아래로 보내기 */
+    background: #004dff;
+    z-index: 5 !important;
+  }
+
+  /* range-start: 왼쪽만 둥글게 → between과 연결 */
+  .range-start .fc-daygrid-day-frame::before {
+    border-radius: 50% 0 0 50%;
+  }
+
+  /* range-between: 직사각형 */
+  .range-between .fc-daygrid-day-frame::before {
+    border-radius: 0;
+  }
+
+  /* range-end: 오른쪽만 둥글게 → between과 연결 */
+  .range-end .fc-daygrid-day-frame::before {
+    border-radius: 0 50% 50% 0;
+  }
+
+  .range-start .date-num,
+  .range-end .date-num,
+  .range-between .date-num {
+    color: #fff !important;
+    z-index: 10 !important;
   }
 
   /* ============================
@@ -208,6 +226,59 @@
     max-width: 90%;
     width: 100%;
     margin: 0 auto;
+  }
+
+  .concurrent-staff-btn {
+    background: white;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .concurrent-staff-btn:hover {
+    background: #f5f5f5;
+  }
+
+  /* ============================
+     9-1) 동시 근무자 수 조정 컨테이너
+     ============================ */
+  .concurrent-staff-container {
+    width: 100%;
+    height: 60px;
+    border-radius: 25px;
+    border: 1px solid #B3B3B3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    box-sizing: border-box;
+  }
+
+  .concurrent-staff-label {
+    font-weight: 500;
+  }
+
+  .concurrent-staff-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ============================
+     9-2) 생성하기 버튼
+     ============================ */
+  .create-schedule-btn {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    color: inherit;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    font-weight: 700;
+    text-decoration: underline;
   }
 
   /* ============================
@@ -332,4 +403,120 @@
 
   .delete-time-btn:focus {
     outline: none !important;
+  }
+
+  /* ============================
+     13-1) 헤더 도움말 버튼 (기본 스타일 제거, 검정)
+     ============================ */
+  .add-schedule-help-btn {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    color: #000;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ============================
+     14) CalAdd 커스텀 하단바
+     화면 너비에 따라 유동, 버튼 4개 동일 간격
+     ============================ */
+  .add-schedule-bottom-bar {
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    width: 340px;
+    max-width: 92%;
+    height: 120px;
+    border-radius: 35px;
+    margin: 0 auto 16px;
+    background-color: #fff;
+  }
+
+  .add-schedule-bottom-bar-flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 0 16px;
+    box-sizing: border-box;
+  }
+
+  .add-schedule-bottom-bar button,
+  .add-schedule-bottom-bar .add-schedule-bottom-bar-item {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font: inherit;
+    color: inherit;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .add-schedule-bottom-bar-back {
+    flex-shrink: 0;
+  }
+
+  .add-schedule-bottom-bar-back:hover {
+    opacity: 0.8;
+  }
+
+  .add-schedule-bottom-bar-tab {
+    font-size: 14px;
+    font-weight: 400;
+    color: #4b5563;
+  }
+
+  .add-schedule-bottom-bar-tab-active {
+    font-weight: 700;
+    color: #68e194;
+  }
+
+  /* 스크롤바 숨김, 마우스/터치 스크롤은 유지 */
+  .calendar-scroll-hide-bar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .calendar-scroll-hide-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 하단바 sticky wrapper: 바깥 배경 투명, 달력 위에 겹침 */
+  .add-schedule-bottom-bar-sticky {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    padding: 0 0 16px;
+    background: transparent;
+  }
+
+  /* 탭 전환 시 페이지 높이 일정하게 유지 (기간=긴 콘텐츠, 인원=짧은 콘텐츠 → 최소 높이로 통일) */
+  .add-schedule-content-with-bar .calendar-scroll-container,
+  .add-schedule-content-with-bar .schedule-unit-container {
+    padding-bottom: 100px !important;
+    min-height: calc(100vh - 60px);
+    box-sizing: border-box;
+  }
+
+  .add-schedule-bottom-bar .add-schedule-request-btn {
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    background-color: #004dff;
+    color: #fff;
   }
