@@ -154,7 +154,7 @@ function EmployeePage() {
           {/* 로그아웃 */}
           <div className="flex items-center justify-center py-5">
             <p
-              className="text-[12px]/[12px] font-[400] border-b border-black hover:text-[#68e194] hover:border-[#68e194] transition-colors duration-100 cursor-pointer"
+              className="text-[12px]/[12px] font-[400] border-b border-black hover:text-[#3370FF] hover:border-[#3370FF] transition-colors duration-100 cursor-pointer"
               onClick={handleLogout}
             >
               로그아웃

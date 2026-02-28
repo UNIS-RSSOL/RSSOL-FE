@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
+import "dayjs/locale/ko";
+import DayCalendar from "../../../components/calendar/DayCalendar.jsx";
+import WeekCalendar from "../../../components/calendar/WeekCalendar.jsx";
+import DateNavigation from "../../../components/common/DateNavigation.jsx";
+import PillToggle from "../../../components/common/PillToggle.jsx";
+import RoundTag from "../../../components/common/RoundTag.jsx";
 import MessageModal from "../../../components/common/MessageModal.jsx";
 import Toast from "../../../components/common/Toast.jsx";
 import Button from "../../../components/common/Button.jsx";
-import RoundTag from "../../../components/common/RoundTag.jsx";
-import DateNavigation from "../../../components/common/DateNavigation.jsx";
-import MyCalendar from "../../../components/calendar/MyCalendar.jsx";
 import HomeHeader from "../../../components/home/HomeHeader.jsx";
 import BellIcon from "../../../assets/icons/BellIcon.jsx";
 import Footer from "../../../components/layout/footer/Footer.jsx";
@@ -14,49 +17,184 @@ import { getMyScheduleByPeriod } from "../../../services/WorkShiftService.js";
 import { createShiftSwapRequest } from "../../../services/ShiftSwapService.js";
 import { getActiveStore } from "../../../services/MypageService.js";
 
+dayjs.locale("ko");
+
+// 알바 목업 데이터 (매장 기준)
+const MOCK_STORES = [
+  { userStoreId: "store-1", username: "투썸 신촌점" },
+  { userStoreId: "store-2", username: "롯데리아 이대점" },
+];
+
+const createMockDayEvents = (dateStr) => [
+  {
+    id: "mock-day-1",
+    userStoreId: "store-1",
+    username: "투썸 신촌점",
+    start: `${dateStr}T08:00`,
+    end: `${dateStr}T14:00`,
+  },
+  {
+    id: "mock-day-2",
+    userStoreId: "store-2",
+    username: "롯데리아 이대점",
+    start: `${dateStr}T11:00`,
+    end: `${dateStr}T15:00`,
+  },
+];
+
+const createMockWeekEvents = (startOfWeek) => [
+  {
+    id: "mock-week-1",
+    userStoreId: "store-1",
+    username: "투썸 신촌점",
+    start: `${startOfWeek.add(1, "day").format("YYYY-MM-DD")}T09:00`,
+    end: `${startOfWeek.add(1, "day").format("YYYY-MM-DD")}T14:00`,
+  },
+  {
+    id: "mock-week-2",
+    userStoreId: "store-1",
+    username: "투썸 신촌점",
+    start: `${startOfWeek.add(3, "day").format("YYYY-MM-DD")}T09:00`,
+    end: `${startOfWeek.add(3, "day").format("YYYY-MM-DD")}T14:00`,
+  },
+  {
+    id: "mock-week-3",
+    userStoreId: "store-2",
+    username: "롯데리아 이대점",
+    start: `${startOfWeek.add(2, "day").format("YYYY-MM-DD")}T11:00`,
+    end: `${startOfWeek.add(2, "day").format("YYYY-MM-DD")}T16:00`,
+  },
+  {
+    id: "mock-week-4",
+    userStoreId: "store-2",
+    username: "롯데리아 이대점",
+    start: `${startOfWeek.add(5, "day").format("YYYY-MM-DD")}T10:00`,
+    end: `${startOfWeek.add(5, "day").format("YYYY-MM-DD")}T15:00`,
+  },
+];
+
 function EmpCalendar() {
   const navigate = useNavigate();
   const today = dayjs();
-  const [activeStoreName, setActiveStoreName] = useState("");
+  const [selectedKey, setSelectedKey] = useState("1");
   const [currentDate, setCurrentDate] = useState(today);
-  const formattedCurrentWeek = `${currentDate.format("YY")}.${currentDate.format("MM")} ${Math.ceil(currentDate.date() / 7)}주차`;
+
+  const formattedCurrentDate = currentDate.format("YYYY.MM.DD(dd)");
+  const startOfWeek = currentDate.startOf("week");
+  const formattedCurrentWeek = `${startOfWeek.format("YYYY.MM.DD")} - ${startOfWeek.add(6, "day").format("YYYY.MM.DD")}`;
+
+  // 데이터 상태
+  const [activeStoreName, setActiveStoreName] = useState("");
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
   const [eventData, setEventData] = useState();
+  const [dayWorkers, setDayWorkers] = useState(MOCK_STORES);
+  const [dayEvents, setDayEvents] = useState(createMockDayEvents(today.format("YYYY-MM-DD")));
+  const [weekWorkers, setWeekWorkers] = useState(MOCK_STORES);
+  const [weekEvents, setWeekEvents] = useState(createMockWeekEvents(today.startOf("week")));
+
+  // 모달/토스트 상태
   const [isEventToastOpen, setIsEventToastOpen] = useState(false);
   const [isMsgOpen, setIsMsgOpen] = useState(false);
-  const [schedules, setSchedules] = useState([]);
 
+  // 활성 매장 로딩
   useEffect(() => {
     (async () => {
       try {
         const active = await getActiveStore();
         setActiveStoreName(active.name);
       } catch (error) {
-        console.error(error);
+        console.error("활성 매장 조회 실패:", error);
       }
     })();
   }, []);
 
+  // 일간: 내 스케줄 조회 → 매장별 데이터로 변환
   useEffect(() => {
+    if (selectedKey !== "1") return;
     (async () => {
       try {
-        const response = await getMyScheduleByPeriod(
-          currentDate.startOf("week").format("YYYY-MM-DD"),
-          currentDate.endOf("week").format("YYYY-MM-DD"),
-        );
-        setSchedules(response);
+        const dateStr = currentDate.format("YYYY-MM-DD");
+        const response = await getMyScheduleByPeriod(dateStr, dateStr);
+        if (response && response.length > 0) {
+          const uniqueStores = Array.from(
+            new Map(
+              response.map((s) => [
+                s.storeId,
+                { userStoreId: s.storeId, username: s.storeName },
+              ]),
+            ).values(),
+          );
+          setDayWorkers(uniqueStores);
+          setDayEvents(
+            response.map((s) => ({
+              id: s.id,
+              userStoreId: s.storeId,
+              username: s.storeName,
+              start: s.startDatetime,
+              end: s.endDatetime,
+            })),
+          );
+        }
+        // API 성공하지만 빈 데이터면 목업 유지
       } catch (error) {
-        console.error("내 스케줄 조회 실패:", error);
+        console.error("일간 스케줄 조회 실패:", error);
+        // 목업 데이터 유지
+        setDayWorkers(MOCK_STORES);
+        setDayEvents(createMockDayEvents(currentDate.format("YYYY-MM-DD")));
       }
     })();
-  }, [currentDate]);
+  }, [currentDate, selectedKey]);
+
+  // 주간: 내 스케줄 조회 → 매장별 데이터로 변환
+  useEffect(() => {
+    if (selectedKey !== "2") return;
+    (async () => {
+      try {
+        const weekStart = currentDate.startOf("week");
+        const response = await getMyScheduleByPeriod(
+          weekStart.format("YYYY-MM-DD"),
+          weekStart.add(6, "day").format("YYYY-MM-DD"),
+        );
+        if (response && response.length > 0) {
+          const uniqueStores = Array.from(
+            new Map(
+              response.map((s) => [
+                s.storeId,
+                { userStoreId: s.storeId, username: s.storeName },
+              ]),
+            ).values(),
+          );
+          setWeekWorkers(uniqueStores);
+          setWeekEvents(
+            response.map((s) => ({
+              id: s.id,
+              userStoreId: s.storeId,
+              username: s.storeName,
+              start: s.startDatetime,
+              end: s.endDatetime,
+            })),
+          );
+        }
+      } catch (error) {
+        console.error("주간 스케줄 조회 실패:", error);
+        // 목업 데이터 유지
+        const weekStart = currentDate.startOf("week");
+        setWeekWorkers(MOCK_STORES);
+        setWeekEvents(createMockWeekEvents(weekStart));
+      }
+    })();
+  }, [currentDate, selectedKey]);
+
+  const handleViewChange = (key) => {
+    setSelectedKey(key);
+    setCurrentDate(today);
+  };
 
   const handleEventClick = (e) => {
     setSelectedCalendarEvent(e);
     setEventData({
       id: e.id,
-      storeId: e.storeId,
-      storeName: e.storeName,
+      storeName: e.username,
       start: dayjs(e.start),
       end: dayjs(e.end),
     });
@@ -74,7 +212,7 @@ function EmpCalendar() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-white font-Pretendard">
+    <div className="w-full h-full flex flex-col bg-white font-Pretendard relative">
       <HomeHeader
         storeName={activeStoreName}
         onMenuClick={() => navigate("/employee")}
@@ -82,22 +220,47 @@ function EmpCalendar() {
         onRightClick={() => navigate("/employee/notification")}
       />
 
-      <main className="flex-1 overflow-y-auto overflow-x-hidden">
-        <div className="w-full flex flex-col items-center py-5">
-          <div className="my-4">
-            <DateNavigation
-              label={formattedCurrentWeek}
-              onPrev={() => setCurrentDate(currentDate.subtract(7, "day"))}
-              onNext={() => setCurrentDate(currentDate.add(7, "day"))}
-            />
-          </div>
-          <MyCalendar
-            date={currentDate}
-            onEventClick={handleEventClick}
-            selectedEventProp={selectedCalendarEvent}
-            setSelectedEventProp={setSelectedCalendarEvent}
-            schedule={schedules}
-          />
+      <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden">
+        <div className="flex-1 flex flex-col">
+          {selectedKey === "1" ? (
+            <div className="w-full h-full flex flex-col py-5 px-[16px]">
+              <DateNavigation
+                label={formattedCurrentDate}
+                onPrev={() => setCurrentDate(currentDate.subtract(1, "day"))}
+                onNext={() => setCurrentDate(currentDate.add(1, "day"))}
+              />
+              <DayCalendar
+                className="flex-1"
+                key={`day-${currentDate.format("YYYY-MM-DD")}`}
+                date={currentDate}
+                onEventClick={handleEventClick}
+                selectedEventProp={selectedCalendarEvent}
+                setSelectedEventProp={setSelectedCalendarEvent}
+                externalWorkers={dayWorkers}
+                externalEvents={dayEvents}
+              />
+            </div>
+          ) : (
+            <div className="w-full h-full flex flex-col py-5 px-[16px]">
+              <DateNavigation
+                label={formattedCurrentWeek}
+                onPrev={() => setCurrentDate(currentDate.subtract(1, "week"))}
+                onNext={() => setCurrentDate(currentDate.add(1, "week"))}
+              />
+              <WeekCalendar
+                className="flex-1"
+                key={`week-${currentDate.format("YYYY-MM-DD")}`}
+                date={currentDate}
+                onEventClick={handleEventClick}
+                selectedEventProp={selectedCalendarEvent}
+                setSelectedEventProp={setSelectedCalendarEvent}
+                externalWorkers={weekWorkers}
+                externalEvents={weekEvents}
+              />
+            </div>
+          )}
+
+          {/* 대타 요청 토스트 */}
           {isEventToastOpen && (
             <Toast
               isOpen={isEventToastOpen}
@@ -135,6 +298,28 @@ function EmpCalendar() {
           />
         </div>
       </main>
+
+      {/* 일간/주간 토글 + 추가 버튼 (네비바 위 플로팅) */}
+      <div className="absolute bottom-[68px] left-0 w-full flex flex-row items-center justify-center px-4 pointer-events-none z-10">
+        <div className="flex-1" />
+        <div className="pointer-events-auto">
+          <PillToggle
+            tabs={[
+              { key: "1", label: "일간" },
+              { key: "2", label: "주간" },
+            ]}
+            activeKey={selectedKey}
+            onChange={handleViewChange}
+          />
+        </div>
+        <div className="flex-1 flex justify-end pointer-events-auto">
+          <div className="w-[50px] h-[50px] rounded-full border-[1px] border-[#B3B3B3] bg-white flex items-center justify-center cursor-pointer shadow-[0_2px_8px_0_rgba(0,0,0,0.15)]">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 4V16M4 10H16" stroke="#87888C" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </div>
+        </div>
+      </div>
 
       <Footer />
     </div>

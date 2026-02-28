@@ -39,7 +39,7 @@ function InfoBox({ head, myData, onDataUpdate, role }) {
         <p className="text-[18px] font-[500]">{head}</p>
         {isEdit ? (
           <p
-            className="flex items-center justify-center h-[25px] rounded-full px-[9px] border border-[#68e194] text-[14px] font-[400] bg-[#fefffe] cursor-pointer"
+            className="flex items-center justify-center h-[25px] rounded-full px-[9px] border border-[#3370FF] text-[14px] font-[400] bg-[#fefffe] cursor-pointer"
             onClick={handleSave}
           >
             수정완료

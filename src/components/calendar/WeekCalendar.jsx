@@ -23,19 +23,28 @@ function WeekCalendar({
   storeId,
   refreshKey,
   className = "",
+  externalWorkers,
+  externalEvents,
 }) {
   const [week, setWeek] = useState([]);
-  const [workers, setWorkers] = useState(MOCK_WORKERS);
-  const [events, setEvents] = useState([]);
+  const [workers, setWorkers] = useState(externalWorkers || MOCK_WORKERS);
+  const [events, setEvents] = useState(externalEvents || []);
 
   useEffect(() => {
+    const startOfWeek = dayjs(date).locale("ko").startOf("week");
+    setWeek(
+      Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, "day")),
+    );
+
+    // 외부 데이터가 제공되면 API 호출 건너뜀
+    if (externalWorkers && externalEvents) {
+      setWorkers(externalWorkers);
+      setEvents(externalEvents);
+      return;
+    }
+
     (async () => {
       try {
-        const startOfWeek = dayjs(date).locale("ko").startOf("week");
-        setWeek(
-          Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, "day")),
-        );
-
         const schedules = await getScheduleByPeriod(
           startOfWeek.format("YYYY-MM-DD"),
           startOfWeek.add(6, "day").format("YYYY-MM-DD"),
@@ -68,15 +77,11 @@ function WeekCalendar({
         }
       } catch (error) {
         console.error("Error fetching schedules:", error);
-        const startOfWeek = dayjs(date).locale("ko").startOf("week");
-        setWeek(
-          Array.from({ length: 7 }, (_, i) => startOfWeek.add(i, "day")),
-        );
         setWorkers(MOCK_WORKERS);
         setEvents(createMockWeekEvents(startOfWeek));
       }
     })();
-  }, [date, storeId, refreshKey]);
+  }, [date, storeId, refreshKey, externalWorkers, externalEvents]);
 
   const getEventForCell = (userStoreId, day) =>
     events.find(
