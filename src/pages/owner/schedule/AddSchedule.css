@@ -430,10 +430,11 @@
      ============================ */
   .add-schedule-bottom-bar {
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
     width: 340px;
     max-width: 92%;
-    height: 120px;
+    height: 60px;
+    min-height: 60px;
     border-radius: 35px;
     margin: 0 auto 16px;
     background-color: #fff;
@@ -454,6 +455,7 @@
     margin: 0;
     padding: 0;
     border: none;
+    height: 90%;
     background: transparent;
     font: inherit;
     color: inherit;
