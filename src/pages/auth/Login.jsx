@@ -105,7 +105,7 @@ function Login() {
 
       <div className="flex gap-4 pb-[40px]">
         <button
-          className="text-white/60 text-[12px] underline"
+          className=" text-white/60 text-[12px] underline"
           onClick={() => {
             localStorage.setItem("accessToken", "dev-token");
             localStorage.setItem("refreshToken", "dev-refresh");
