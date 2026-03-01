@@ -15,9 +15,10 @@ import { requestScheduleInput } from "../../../services/ScheduleGenerationServic
 // 별도의 알림 API 호출이 필요하지 않습니다.
 import HelpIcon from "../../../assets/icons/HelpIcon.jsx";
 import BackArrowCircleIcon from "../../../assets/icons/BackArrowCircleIcon.jsx";
+import PeopleIcon from "../../../assets/icons/PeopleIcon.jsx";
 import "./AddSchedule.css";
 
-// 백엔드 없을 때 UI 작업용 mock (VITE_USE_MOCK=true 또는 API 실패 시 사용)
+// 백엔드 없을 때 UI 작업용 mock (API 실패 시 storeId 기본값만 사용)
 const MOCK_STORE = { storeId: 1, storeName: "테스트 매장" };
 
 export default function AddSchedule() {
@@ -31,6 +32,7 @@ export default function AddSchedule() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("기간"); // 탭: 기간 | 인원
   const [showRequestPopup, setShowRequestPopup] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   // -------------------------
   // 날짜 선택 로직
@@ -121,23 +123,16 @@ export default function AddSchedule() {
   // -------------------------
   useEffect(() => {
     const loadStoreId = async () => {
-      // 개발용: .env에 VITE_USE_MOCK=true 시 API 스킵
-      if (import.meta.env.VITE_USE_MOCK === "true") {
-        setStoreId(MOCK_STORE.storeId);
-        setStoreName(MOCK_STORE.storeName);
-        return;
-      }
-
       try {
         const activeStore = await getActiveStore();
         const id = activeStore?.storeId || activeStore?.id;
         if (id) setStoreId(id);
         else setStoreId(MOCK_STORE.storeId);
         const name = activeStore?.name || activeStore?.storeName;
-        setStoreName(name || MOCK_STORE.storeName || "매장");
+        setStoreName(name || "매장");
       } catch (error) {
         setStoreId(MOCK_STORE.storeId);
-        setStoreName(MOCK_STORE.storeName || "매장");
+        setStoreName("매장");
       }
     };
     loadStoreId();
@@ -235,6 +230,7 @@ export default function AddSchedule() {
       };
       requestData.timeSegments = timeSegments;
       const result = await requestScheduleInput(
+        storeIdToSend,
         requestData.openTime,
         requestData.closeTime,
         requestData.startDate,
@@ -288,6 +284,7 @@ export default function AddSchedule() {
           type="button"
           className="add-schedule-help-btn"
           aria-label="도움말"
+          onClick={() => setShowHelpModal(true)}
         >
           <HelpIcon />
         </button>
@@ -352,22 +349,27 @@ export default function AddSchedule() {
           style={{ display: activeTab === "인원" ? undefined : "none" }}
           aria-hidden={activeTab !== "인원"}
         >
-          <div className="flex items-center justify-between">
-            <div className="text-left">
-              <h2 className="text-2xl font-bold mb-2">
+          <div className="flex items-center gap-4 w-fit">
+            <div className="text-left w-fit">
+              <h2 className="text-xl font-bold mb-2 whitespace-nowrap">
                 동시 근무자 수를 알려주세요!
               </h2>
-              <p className="text-lg font-medium">저장된 파트 타임 구간이 없어요.</p>
+              <p className="text-base font-medium whitespace-nowrap">저장된 파트 타임 구간이 없어요.</p>
             </div>
-            <button
-              type="button"
-              className="create-schedule-btn"
-            >
-              생성하기
-            </button>
+            <div className="text-right w-fit">
+              <button
+                type="button"
+                className="create-schedule-btn w-fit whitespace-nowrap text-sm font-semibold"
+              >
+                생성하기
+              </button>
+            </div>
           </div>
           <div className="concurrent-staff-container">
-            <span className="concurrent-staff-label">동시 근무자 수</span>
+            <div className="flex items-center gap-2">
+              <PeopleIcon />
+              <span className="concurrent-staff-label">동시 근무자 수</span>
+            </div>
             <div className="concurrent-staff-controls">
               <button
                 type="button"
@@ -465,6 +467,63 @@ export default function AddSchedule() {
               >
                 요청하기
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 도움말 모달 */}
+      {showHelpModal && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowHelpModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl w-full max-w-[390px] p-6 space-y-4 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 닫기 버튼 */}
+            <button
+              type="button"
+              onClick={() => setShowHelpModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700"
+              aria-label="닫기"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            {/* 모달 내용 */}
+            <div className="space-y-4 pr-8">
+              <h3 className="text-xl font-bold text-gray-900">근무표 생성 방법</h3>
+              <div className="space-y-3 text-base text-gray-700 leading-relaxed">
+                <p>
+                  <span className="font-semibold">1.</span> 기간 탭을 눌러 근무표를 생성하고자 하는 기간을 설정해주세요.
+                </p>
+                <p>
+                  <span className="font-semibold">2.</span> 인원 탭을 눌러 근무시간대에 배치될 인원을 설정해주세요.
+                  <br />
+                  만약, 매장 정보에 저장된 파트타임이 있다면 파트타임별 근무인원 배치가 가능해요.
+                  <br />
+                  저장된 파트타임이 없다면 한시간 간격으로 나누어 근무표 생성이 돼요.
+                </p>
+                <p>
+                  <span className="font-semibold">3.</span> 근무표 요청 버튼을 눌러 입력한 정보가 맞는지 확인해주세요. 맞다면 요청하기 버튼을, 틀렸다면 수정하기 버튼을 눌러주세요.
+                  <br />
+                  요청하기 버튼을 누르면 매장 내 근무자들에게 근무표 제출 알람이 가요.
+                </p>
+              </div>
             </div>
           </div>
         </div>

@@ -621,7 +621,7 @@ function OwnerSchedule() {
       setToastOpen(true);
       setTimeout(() => {
         setToastOpen(false);
-        navigate("/scheduleList");
+        navigate("/owner/schedule/list");
       }, 2000);
     } catch (error) {
       console.error("근무 가능 시간 수정 실패:", error);
