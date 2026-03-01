@@ -39,6 +39,7 @@ export const generateScheduleByTime = async (scheduleRequestId, candidateCount) 
 
 //근무표 생성 요청(근무자들에게 입력받기)
 export const requestScheduleInput = async (
+  storeId,
   openTime,
   closeTime,
   startDate,
@@ -47,6 +48,7 @@ export const requestScheduleInput = async (
 ) => {
   try {
     const response = await api.post(`schedules/requests`, {
+      storeId,
       openTime,
       closeTime,
       startDate,

@@ -229,6 +229,7 @@ export default function AddSchedule() {
       };
       requestData.timeSegments = timeSegments;
       const result = await requestScheduleInput(
+        storeIdToSend,
         requestData.openTime,
         requestData.closeTime,
         requestData.startDate,
