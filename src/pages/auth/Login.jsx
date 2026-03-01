@@ -106,15 +106,10 @@ function Login() {
       <div className="flex gap-4 pb-[40px]">
         <button
           className="text-white/60 text-[12px] underline"
-          onClick={async () => {
-            try {
-              const response = await getDevToken("ownerA@example.com");
-              console.log(response);
-              localStorage.setItem("accessToken", response);
-              navigate("/owner");
-            } catch (error) {
-              console.error("개발 토큰 실패:", error);
-            }
+          onClick={() => {
+            localStorage.setItem("accessToken", "dev-token");
+            localStorage.setItem("refreshToken", "dev-refresh");
+            navigate("/owner");
           }}
         >
           DEV 사장
