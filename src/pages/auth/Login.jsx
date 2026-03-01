@@ -106,20 +106,22 @@ function Login() {
       <div className="flex gap-4 pb-[40px]">
         <button
           className=" text-white/60 text-[12px] underline"
-          onClick={() => {
-            localStorage.setItem("accessToken", "dev-token");
-            localStorage.setItem("refreshToken", "dev-refresh");
+          onClick={async () => {
+            const res = await getDevToken("ownerA@example.com");
+            localStorage.setItem("accessToken", res);
             navigate("/owner");
+            console.log(res);
           }}
         >
           DEV 사장
         </button>
         <button
           className="text-white/60 text-[12px] underline"
-          onClick={() => {
-            localStorage.setItem("accessToken", "dev-token");
-            localStorage.setItem("refreshToken", "dev-refresh");
+          onClick={async () => {
+            const res = await getDevToken("staff1@example.com");
+            localStorage.setItem("accessToken", res);
             navigate("/employee");
+            console.log(res);
           }}
         >
           DEV 알바
