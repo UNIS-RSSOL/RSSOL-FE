@@ -692,14 +692,14 @@ function ScheduleList() {
                 전체 직원 가능 근무 시간대
               </p>
               <button
-                onClick={() => navigate("/addOwner")}
+                onClick={() => navigate("/owner/schedule/my")}
                 className="font-medium rounded-full flex items-center justify-center"
                 style={{
                   width: "100px",
                   height: "25px",
                   fontSize: "14px",
-                  backgroundColor: "#68E194",
-                  color: "#000000",
+                  backgroundColor: "#3370FF",
+                  color: "#ffffff",
                   WebkitAppearance: "none",
                   appearance: "none",
                   border: "none",
@@ -734,7 +734,7 @@ function ScheduleList() {
                   >
                     <div
                       className={`flex-shrink-0 w-12 h-12 rounded-full border-2 border-white shadow-sm ${
-                        hasError ? "bg-red-300" : "bg-[#68E194]"
+                        hasError ? "bg-red-300" : "bg-[#3370FF]"
                       }`}
                     />
                     <div className="flex-1 min-w-0">
@@ -808,7 +808,7 @@ function ScheduleList() {
               <div className="flex flex-col gap-3">
                 {availableWorkers.map((worker) => (
                   <div key={worker.id} className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 bg-[#68E194] rounded-full border-2 border-white shadow-sm" />
+                    <div className="flex-shrink-0 w-10 h-10 bg-[#3370FF] rounded-full border-2 border-white shadow-sm" />
                     <p className="text-base font-semibold">
                       {worker.username ||
                         worker.name ||

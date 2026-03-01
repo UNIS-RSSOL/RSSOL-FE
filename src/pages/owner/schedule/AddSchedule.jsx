@@ -15,6 +15,7 @@ import { requestScheduleInput } from "../../../services/ScheduleGenerationServic
 // 별도의 알림 API 호출이 필요하지 않습니다.
 import HelpIcon from "../../../assets/icons/HelpIcon.jsx";
 import BackArrowCircleIcon from "../../../assets/icons/BackArrowCircleIcon.jsx";
+import PeopleIcon from "../../../assets/icons/PeopleIcon.jsx";
 import "./AddSchedule.css";
 
 // 백엔드 없을 때 UI 작업용 mock (API 실패 시 storeId 기본값만 사용)
@@ -365,7 +366,10 @@ export default function AddSchedule() {
             </div>
           </div>
           <div className="concurrent-staff-container">
-            <span className="concurrent-staff-label">동시 근무자 수</span>
+            <div className="flex items-center gap-2">
+              <PeopleIcon />
+              <span className="concurrent-staff-label">동시 근무자 수</span>
+            </div>
             <div className="concurrent-staff-controls">
               <button
                 type="button"

@@ -248,7 +248,8 @@
     border: 1px solid #B3B3B3;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 16px;
     padding: 0 16px;
     box-sizing: border-box;
   }
@@ -311,7 +312,7 @@
 
   .time-input:focus {
     outline: none !important;
-    border-color: #68E194 !important;
+    border-color: #3370FF !important;
   }
 
   .time-slot-row {
@@ -484,7 +485,7 @@
 
   .add-schedule-bottom-bar-tab-active {
     font-weight: 700;
-    color: #68e194;
+    color: #3370FF;
   }
 
   /* 스크롤바 숨김, 마우스/터치 스크롤은 유지 */
