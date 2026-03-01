@@ -1,13 +1,29 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import LeftArrowIcon from "../../../assets/icons/LeftArrowIcon";
 import RightArrowIcon from "../../../assets/icons/RightArrowIcon";
 import BackButton from "../../../components/common/BackButton";
 import Button from "../../../components/common/Button";
 import PencilIcon from "../../../assets/icons/PencilIcon";
+import { getEmployeeAttendance } from "../../../services/ViewAttendanceService";
+import { getEmployeeProfile } from "../../../services/ViewProfileService";
 
 function EmployeeProfile() {
+  const { userStoreId } = useParams();
   const [page, setPage] = useState(1);
+  const [profile, setProfile] = useState();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await getEmployeeProfile(userStoreId);
+        setProfile(response);
+      } catch (error) {
+        console.error("Error fetching employee profile:", error);
+      }
+    })();
+  }, [userStoreId]);
 
   const PageBox = () => {
     return (
@@ -29,7 +45,12 @@ function EmployeeProfile() {
   };
 
   const StatusBox = () => {
-    const status = 1;
+    const status =
+      profile?.status === "HIRED"
+        ? 1
+        : profile?.status === "ON_LEAVING"
+          ? 2
+          : 3;
     return (
       <div className="flex h-[25px] rounded-full divide-x-1 border-[1px] border-[#b3b3b3] divide-[#b3b3b3] overflow-hidden">
         <span
@@ -52,7 +73,7 @@ function EmployeeProfile() {
   };
 
   const PositionBox = () => {
-    const position = 1;
+    const position = profile?.position === "STAFF" ? 2 : 1;
     return (
       <div className="flex h-[25px] rounded-full divide-x-1 border-[1px] border-[#b3b3b3] divide-[#b3b3b3] overflow-hidden">
         <span
@@ -82,19 +103,23 @@ function EmployeeProfile() {
         </div>
         <div className="flex items-center justify-between">
           <p className="font-[400] text-[16px]">근무 매장</p>
-          <p className="font-[400] text-[16px]">RSSOL</p>
+          <p className="font-[400] text-[16px]">{profile?.storeName}</p>
         </div>
         <div className="flex items-center justify-between">
           <p className="font-[400] text-[16px]">계좌</p>
-          <p className="font-[400] text-[16px]">국민 00000000</p>
+          <p className="font-[400] text-[16px]">
+            {profile?.bankName} {profile?.accountNumber}
+          </p>
         </div>
         <div className="flex items-center justify-between">
-          <p className="font-[400] text-[16px]">전화번호</p>
-          <p className="font-[400] text-[16px]">010-0000-000</p>
+          <p className="font-[400] text-[16px]">이메일</p>
+          <p className="font-[400] text-[16px]">{profile?.email}</p>
         </div>
         <div className="flex items-center justify-between">
           <p className="font-[400] text-[16px]">입사일자</p>
-          <p className="font-[400] text-[16px]">2016.01.27 (+373일 째)</p>
+          <p className="font-[400] text-[16px]">
+            {profile?.hireDate} (+{profile?.daysWorked}일 째)
+          </p>
         </div>
       </div>
     );
@@ -102,20 +127,17 @@ function EmployeeProfile() {
 
   const Calendar = () => {
     const [currentDate, setCurrentDate] = useState(dayjs());
-
+    const [attendance, setAttendance] = useState(null);
     const firstDayOfMonth = currentDate.startOf("month");
     const lastDayOfMonth = currentDate.endOf("month");
-
     const firstWeekStart =
       firstDayOfMonth.day() === 6
         ? firstDayOfMonth.subtract(6, "day")
         : firstDayOfMonth.subtract(firstDayOfMonth.day(), "day");
-
     const lastWeekEnd =
       lastDayOfMonth.day() === 6
         ? lastDayOfMonth
         : lastDayOfMonth.add(6 - lastDayOfMonth.day(), "day");
-
     const totalWeeks = Math.ceil(lastWeekEnd.diff(firstWeekStart, "day") / 7);
     const weeks = [];
     for (let i = 0; i < totalWeeks; i++) {
@@ -125,6 +147,27 @@ function EmployeeProfile() {
       }
       weeks.push(arr);
     }
+
+    useEffect(() => {
+      (async () => {
+        try {
+          const today = dayjs();
+          const end =
+            currentDate.format("M") === today.format("M")
+              ? today.format("YYYY-MM-DD")
+              : lastDayOfMonth.format("YYYY-MM-DD");
+          const response = await getEmployeeAttendance(
+            userStoreId,
+            firstDayOfMonth.format("YYYY-MM-DD"),
+            end,
+          );
+          console.log(response);
+          setAttendance(response);
+        } catch (error) {
+          console.error("Error fetching employee attendance:", error);
+        }
+      })();
+    }, [currentDate]);
 
     return (
       <div>
@@ -153,13 +196,30 @@ function EmployeeProfile() {
               {week.map((day, dayIndex) => (
                 <div
                   key={dayIndex}
-                  className={`w-[55px] h-full text-center text-[14px] font-[700] ${day.format("MM") == currentDate.format("MM") ? "text-black" : "text-[#b3b3b3]"}`}
+                  className="flex flex-col w-[55px] h-full items-center"
                 >
-                  {day.format("D")}
+                  <span className="text-[14px] font-[700] text-center">
+                    {day.format("D")}
+                  </span>
+                  <div className={`flex size-[18px] rounded-full bg-black`} />
                 </div>
               ))}
             </div>
           ))}
+        </div>
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-row items-center gap-2">
+            <div className="justify-center bg-[#616161] rounded-full size-[18px]"></div>
+            <span>정상 출근 회</span>
+          </div>
+          <div className="flex flex-row items-center gap-2">
+            <div className="justify-center bg-[#b3b3b3] rounded-full size-[18px]"></div>
+            <span>지각 {attendance?.totalLateCount}회</span>
+          </div>
+          <div className="flex flex-row items-center gap-2">
+            <div className="justify-center bg-[#E2E2E2] rounded-full size-[18px]"></div>
+            <span>결근 {attendance?.totalAbsentCount}회</span>
+          </div>
         </div>
       </div>
     );
@@ -179,7 +239,9 @@ function EmployeeProfile() {
       <div className="flex flex-col my-7 gap-5">
         <div className="flex flex-col items-start">
           <div className="size-[80px] bg-[#d9d9d9] rounded-full my-2"></div>
-          <p className="font-[510] text-[30px] text-left">정지유</p>
+          <p className="font-[510] text-[30px] text-left">
+            {profile?.username}
+          </p>
         </div>
 
         {page === 1 && <InfoPage />}
