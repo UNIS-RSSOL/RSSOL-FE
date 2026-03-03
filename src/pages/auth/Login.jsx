@@ -107,10 +107,9 @@ function Login() {
         <button
           className=" text-white/60 text-[12px] underline"
           onClick={async () => {
-            const res = await getDevToken("ownerA@example.com");
-            localStorage.setItem("accessToken", res);
+            localStorage.setItem("accessToken", "dev-token");
+            localStorage.setItem("refreshToken", "dev-refresh");
             navigate("/owner");
-            console.log(res);
           }}
         >
           DEV 사장
@@ -118,10 +117,9 @@ function Login() {
         <button
           className="text-white/60 text-[12px] underline"
           onClick={async () => {
-            const res = await getDevToken("staff1@example.com");
-            localStorage.setItem("accessToken", res);
+            localStorage.setItem("accessToken", "dev-token");
+            localStorage.setItem("refreshToken", "dev-refresh");
             navigate("/employee");
-            console.log(res);
           }}
         >
           DEV 알바
