@@ -134,6 +134,7 @@ function ManageWage() {
                   <EmployeeInfo
                     tab={1}
                     key={emp.userStoreId}
+                    profileImageUrl={emp.profileImageUrl}
                     username={emp.username}
                     monthlypay={emp.monthlyPay || 0}
                     bankName={emp.bankName}
