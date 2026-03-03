@@ -77,6 +77,7 @@ function AllStaff() {
               >
                 <EmployeeInfo
                   tab={0}
+                  profileImageUrl={emp.profileImageUrl}
                   username={emp.username}
                   role={emp.role}
                   lateCount={emp.lateCount}

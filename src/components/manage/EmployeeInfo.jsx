@@ -7,6 +7,7 @@ import { useState } from "react";
 
 function EmployeeInfo({
   tab,
+  profileImageUrl,
   username,
   role,
   lateCount,
@@ -26,7 +27,9 @@ function EmployeeInfo({
 
   return (
     <div className="flex flex-row w-full items-center">
-      <div className="flex-shrink-0 w-[70px] h-[70px] bg-[#68E194] rounded-full border-[3px] border-white shadow-[0_2px_4px_0_RGBA(0,0,0,0.25)] mr-[16px]" />
+      <div className=" flex justify-center items-center flex-shrink-0 w-[70px] h-[70px] bg-[#68E194] rounded-full border-[3px] border-white shadow-[0_2px_4px_0_RGBA(0,0,0,0.25)] mr-[16px] overflow-hidden">
+        <img src={profileImageUrl} className="size-[70px]" />
+      </div>
       <div className="flex flex-col w-full gap-1">
         <div
           className={`flex-1 flex flex-row items-center justify-between ${tab === 0 && "mb-2"}`}
@@ -35,7 +38,7 @@ function EmployeeInfo({
             <p className="text-[16px] font-[600] truncate mr-2">{username}</p>
             {tab === 0 && (
               <RoundTag className="!px-3 !py-[1px] !text-[12px] !font-[400]">
-                {role === "STAFF" ? "알바" : "사장"}
+                {role === "STAFF" ? "알바" : "매니저"}
               </RoundTag>
             )}
           </div>
@@ -52,12 +55,12 @@ function EmployeeInfo({
         </div>
         <div className="flex flex-row items-center">
           <CoinIcon className="size-[18px]" />
-          <p className="text-[14px] font-[500] pl-3">{monthlypay}원</p>
+          <p className="text-[14px] font-[500] pl-3">{monthlypay || 0}원</p>
         </div>
         {tab === 0 && (
           <div className="flex flex-row items-center">
             <PhoneIcon className="size-[18px]" />
-            <p className="text-[14px] font-[500] pl-3">{tel}</p>
+            <p className="text-[14px] font-[500] pl-3">{tel || "-"}</p>
           </div>
         )}
         <div className="flex flex-row items-center">

@@ -35,7 +35,7 @@ function OwnerHome() {
       label: "직원관리",
       onClick: () => {
         setSidebarOpen(false);
-        navigate("/owner/manage");
+        navigate("/owner/manage/employee");
       },
     },
     {
