@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import LeftArrowIcon from "../../../assets/icons/LeftArrowIcon";
@@ -128,8 +128,11 @@ function EmployeeProfile() {
   const Calendar = () => {
     const [currentDate, setCurrentDate] = useState(dayjs());
     const [attendance, setAttendance] = useState(null);
+    const [weeks, setWeeks] = useState([]);
+
     const firstDayOfMonth = currentDate.startOf("month");
     const lastDayOfMonth = currentDate.endOf("month");
+
     const firstWeekStart =
       firstDayOfMonth.day() === 6
         ? firstDayOfMonth.subtract(6, "day")
@@ -139,13 +142,12 @@ function EmployeeProfile() {
         ? lastDayOfMonth
         : lastDayOfMonth.add(6 - lastDayOfMonth.day(), "day");
     const totalWeeks = Math.ceil(lastWeekEnd.diff(firstWeekStart, "day") / 7);
-    const weeks = [];
-    for (let i = 0; i < totalWeeks; i++) {
-      let arr = [];
-      for (let j = 0; j < 7; j++) {
-        arr.push(firstWeekStart.add(i * 7 + j, "day"));
-      }
-      weeks.push(arr);
+
+    const dayOfMonth = [];
+    let i = firstDayOfMonth;
+    while (!i.isAfter(lastDayOfMonth, "day")) {
+      dayOfMonth.push(i.format("YYYY-MM-DD"));
+      i = i.add(1, "day");
     }
 
     useEffect(() => {
@@ -161,13 +163,41 @@ function EmployeeProfile() {
             firstDayOfMonth.format("YYYY-MM-DD"),
             end,
           );
-          console.log(response);
           setAttendance(response);
         } catch (error) {
           console.error("Error fetching employee attendance:", error);
         }
       })();
     }, [currentDate]);
+
+    useEffect(() => {
+      if (!attendance) return;
+
+      const attendanceMap = {};
+      attendance.attendances.forEach((item) => {
+        attendanceMap[item.workDate] = item;
+      });
+
+      const newWeeks = [];
+      for (let i = 0; i < totalWeeks; i++) {
+        let arr = [];
+        for (let j = 0; j < 7; j++) {
+          const targetDate = firstWeekStart
+            .add(i * 7 + j, "day")
+            .format("YYYY-MM-DD");
+          if (attendanceMap[targetDate]) {
+            arr.push(attendanceMap[targetDate]);
+          } else {
+            arr.push({
+              workDate: targetDate,
+              attendanceStatus: "OFF",
+            });
+          }
+        }
+        newWeeks.push(arr);
+      }
+      setWeeks(newWeeks);
+    }, [attendance]);
 
     return (
       <div>
@@ -193,24 +223,28 @@ function EmployeeProfile() {
               key={index}
               className="flex flex-row h-[55px] justify-center items-center"
             >
-              {week.map((day, dayIndex) => (
+              {week.map((day) => (
                 <div
-                  key={dayIndex}
+                  key={day.workDate}
                   className="flex flex-col w-[55px] h-full items-center"
                 >
-                  <span className="text-[14px] font-[700] text-center">
-                    {day.format("D")}
+                  <span
+                    className={`text-[14px] font-[700] text-center ${dayjs(day.workDate).format("M") === currentDate.format("M") ? "text-black" : "text-[#B3B3B3]"}`}
+                  >
+                    {dayjs(day.workDate).format("D")}
                   </span>
-                  <div className={`flex size-[18px] rounded-full bg-black`} />
+                  <div
+                    className={`flex size-[18px] rounded-full ${day.attendanceStatus === "ABSENT" ? "bg-[#E2E2E2]" : day.attendanceStatus === "LATE" ? "bg-[#B3B3B3]" : day.attendanceStatus === "ATTENDANCE" ? "bg-[#616161]" : "bg-white"}`}
+                  />
                 </div>
               ))}
             </div>
           ))}
         </div>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 mt-5">
           <div className="flex flex-row items-center gap-2">
             <div className="justify-center bg-[#616161] rounded-full size-[18px]"></div>
-            <span>정상 출근 회</span>
+            <span>정상 출근 {attendance?.totalAttendance}회</span>
           </div>
           <div className="flex flex-row items-center gap-2">
             <div className="justify-center bg-[#b3b3b3] rounded-full size-[18px]"></div>
@@ -238,7 +272,9 @@ function EmployeeProfile() {
       <BackButton />
       <div className="flex flex-col my-7 gap-5">
         <div className="flex flex-col items-start">
-          <div className="size-[80px] bg-[#d9d9d9] rounded-full my-2"></div>
+          <div className="flex justify-center items-center size-[80px] bg-[#d9d9d9] rounded-full my-2 overflow-hidden">
+            <img src={profile?.profileImageUrl} className="size-[80px]" />
+          </div>
           <p className="font-[510] text-[30px] text-left">
             {profile?.username}
           </p>
