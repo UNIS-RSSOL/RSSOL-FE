@@ -284,7 +284,7 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="relative w-full min-h-screen bg-white flex flex-col items-center py-10 px-4 font-Pretendard overflow-x-hidden">
+    <div className="relative w-full min-h-screen bg-white flex flex-col items-center py-10 font-Pretendard overflow-x-hidden">
       {/* 상단 이전 버튼 */}
       <div className="absolute top-10 left-5 flex justify-start w-full">
         <BackButton onClick={handleBack} />
