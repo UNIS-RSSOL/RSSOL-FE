@@ -15,7 +15,6 @@ function Login() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [email, setEmail] = useState();
 
   useEffect(() => {
     const checkAutoLogin = async () => {
@@ -101,30 +100,21 @@ function Login() {
         </LoginButton>
       </div>
 
-      {/* 개발용 바이패스 */}
-
-      <div className="flex gap-4 pb-[40px]">
-        <button
-          className=" text-white/60 text-[12px] underline"
-          onClick={async () => {
-            localStorage.setItem("accessToken", "dev-token");
-            localStorage.setItem("refreshToken", "dev-refresh");
+      <div
+        className="absolute bottom-0 flex w-full h-[20px]"
+        onClick={async () => {
+          const email = prompt("로그인하세요");
+          const response = await getDevToken(email);
+          localStorage.setItem("accessToken", response);
+          console.log(response);
+          const store = await getActiveStore();
+          if (store.position === "OWNER") {
             navigate("/owner");
-          }}
-        >
-          DEV 사장
-        </button>
-        <button
-          className="text-white/60 text-[12px] underline"
-          onClick={async () => {
-            localStorage.setItem("accessToken", "dev-token");
-            localStorage.setItem("refreshToken", "dev-refresh");
+          } else {
             navigate("/employee");
-          }}
-        >
-          DEV 알바
-        </button>
-      </div>
+          }
+        }}
+      ></div>
     </div>
   );
 }
