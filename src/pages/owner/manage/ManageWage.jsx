@@ -12,9 +12,10 @@ import { getTotalWage } from "../../../services/PayrollService.js";
 function ManageWage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState(1);
-  const [currentDate, setCurrentDate] = useState(dayjs());
+
   const [employees, setEmployees] = useState();
   const [wage, setWage] = useState();
+  const [currentDate, setCurrentDate] = useState(dayjs());
   const start = currentDate.startOf("month");
   const end = currentDate.endOf("month");
 
