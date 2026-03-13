@@ -73,7 +73,7 @@ function DayCalendar({
   return (
     <TimelineGrid
       accentColor="#FF4D4D"
-      leftWidth={hideLabels ? 0 : 80}
+      leftWidth={hideLabels ? 0 : 60}
       leftColumn={hideLabels ? [] : workers.map((worker) => (
         <div
           key={worker.userStoreId}

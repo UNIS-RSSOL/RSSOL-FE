@@ -284,7 +284,7 @@ function EmpCalendar() {
                   </span>
                 </div>
                 <Button
-                  className="w-[361px] h-[48px] text-[16px] font-[600] items-center"
+                  className="w-full h-[48px] text-[16px] font-[600]"
                   onClick={handleRequestSub}
                 >
                   요청하기

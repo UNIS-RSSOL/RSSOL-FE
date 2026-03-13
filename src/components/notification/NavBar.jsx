@@ -9,7 +9,7 @@ function NavBar({ currentTab, setCurrentTab }) {
   const handleTabClick = (tab) => {
     setCurrentTab(tab);
 
-    if (tab === "all") navigate("/owner/notifiaction/home"); // AlarmHome.jsx
+    if (tab === "all") navigate("/owner/notification/home"); // AlarmHome.jsx
     if (tab === "final") navigate("/owner/notification/check"); // AlarmCheck.jsx
   };
 
@@ -23,7 +23,7 @@ function NavBar({ currentTab, setCurrentTab }) {
       >
         전체 알림
         {currentTab === "all" && (
-          <div className="absolute bottom-0 h-[3px] w-full bg-[#68E194]"></div>
+          <div className="absolute bottom-0 h-[3px] w-full bg-[#3370FF]"></div>
         )}
       </div>
 
@@ -35,7 +35,7 @@ function NavBar({ currentTab, setCurrentTab }) {
       >
         최종 승인
         {currentTab === "final" && (
-          <div className="absolute bottom-0 h-[3px] w-full bg-[#68E194]"></div>
+          <div className="absolute bottom-0 h-[3px] w-full bg-[#3370FF]"></div>
         )}
       </div>
     </div>

@@ -116,7 +116,7 @@ function NotificationItem({
       )}
 
       <div className="flex-1 flex flex-col items-start gap-1">
-        <RoundTag className="flex items-center bg-[#fdfffe] border-[#32d1aa] border-[1px] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] font-[400] text-[12px]/[16px] px-3 h-[24px]">
+        <RoundTag className="flex items-center bg-[#fdfffe] border-[#3370FF] border-[1px] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] font-[400] text-[12px]/[16px] px-3 h-[24px]">
           {storename || "매장"}
         </RoundTag>
         <p className="text-[14px] font-[500] text-left">{children}</p>
