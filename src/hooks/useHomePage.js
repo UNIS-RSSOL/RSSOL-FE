@@ -15,6 +15,11 @@ import {
 } from "../services/MypageService.js";
 import { getScheduleByPeriod } from "../services/WorkShiftService.js";
 import { getMyScheduleByPeriod } from "../services/WorkShiftService.js";
+import {
+  getTodayAttendance,
+  checkIn,
+  checkOut,
+} from "../services/AttendanceService.js";
 
 import { MOCK_TODAY_SCHEDULES, MOCK_TODOS } from "../mocks/mockData.js";
 
@@ -28,6 +33,7 @@ export default function useHomePage(role) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAppModalOpen, setIsAppModalOpen] = useState(false);
   const [todos, setTodos] = useState(MOCK_TODOS); // TODO: API 연결 후 빈 배열로 변경
+  const [attendance, setAttendance] = useState(null); // 오늘 출퇴근 상태
 
   /* ── 초기 데이터 로딩 ── */
   useEffect(() => {
@@ -52,6 +58,14 @@ export default function useHomePage(role) {
           setTodaySchedules(schedules);
         }
         // else: 목업 데이터 유지
+
+        // 오늘 출퇴근 상태 조회
+        try {
+          const att = await getTodayAttendance();
+          setAttendance(att);
+        } catch {
+          // 출퇴근 상태 조회 실패 시 무시
+        }
       } catch (error) {
         console.error("홈 데이터 로딩 실패:", error);
         // 목업 데이터 유지
@@ -69,17 +83,25 @@ export default function useHomePage(role) {
   };
 
   /* ── 출근 처리 ── */
-  const isInApp = () =>
-    typeof window !== "undefined" && !!window.ReactNativeWebView;
-
-  const handleCheckIn = () => {
-    if (!isInApp()) {
-      setIsAppModalOpen(true);
-      return;
+  const handleCheckIn = async () => {
+    try {
+      const res = await checkIn();
+      setAttendance(res);
+    } catch (error) {
+      console.error("출근 실패:", error);
+      alert(error.response?.data?.message || "출근 처리에 실패했습니다.");
     }
-    window.ReactNativeWebView.postMessage(
-      JSON.stringify({ action: "goToGPS" }),
-    );
+  };
+
+  /* ── 퇴근 처리 ── */
+  const handleCheckOut = async () => {
+    try {
+      const res = await checkOut();
+      setAttendance(res);
+    } catch (error) {
+      console.error("퇴근 실패:", error);
+      alert(error.response?.data?.message || "퇴근 처리에 실패했습니다.");
+    }
   };
 
   /* ── 매장 전환 ── */
@@ -108,11 +130,13 @@ export default function useHomePage(role) {
     todayShift,
     todos,
     toggleTodo,
+    attendance,
     sidebarOpen,
     setSidebarOpen,
     isAppModalOpen,
     setIsAppModalOpen,
     handleCheckIn,
+    handleCheckOut,
     handleStoreChange,
     handleLogout,
     navigate,
