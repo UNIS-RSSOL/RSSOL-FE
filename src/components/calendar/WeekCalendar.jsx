@@ -111,7 +111,7 @@ function WeekCalendar({
           key={worker.userStoreId}
           className="flex h-[70px]"
         >
-          <div className="w-[60px] shrink-0 flex items-center text-[13px] font-[500] pr-2 pl-1 border-r border-[#E7EAF3] break-all leading-tight">
+          <div className="w-[60px] shrink-0 flex items-center justify-center text-center text-[13px] font-[500] px-1 border-r border-[#E7EAF3] break-all leading-tight">
             {worker.username}
           </div>
           {week.map((w) => {
