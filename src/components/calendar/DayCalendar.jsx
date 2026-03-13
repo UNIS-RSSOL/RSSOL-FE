@@ -17,6 +17,7 @@ function DayCalendar({
   className = "",
   externalWorkers,
   externalEvents,
+  hideLabels = false,
 }) {
   const [workers, setWorkers] = useState(externalWorkers || MOCK_WORKERS);
   const [events, setEvents] = useState(
@@ -72,11 +73,11 @@ function DayCalendar({
   return (
     <TimelineGrid
       accentColor="#FF4D4D"
-      leftWidth={60}
-      leftColumn={workers.map((worker) => (
+      leftWidth={hideLabels ? 0 : 80}
+      leftColumn={hideLabels ? [] : workers.map((worker) => (
         <div
           key={worker.userStoreId}
-          className="h-[56px] flex items-center text-[13px] font-[500] truncate pr-2"
+          className="h-[56px] flex items-center text-[13px] font-[500] pr-2 pl-1 break-all leading-tight"
         >
           {worker.username}
         </div>

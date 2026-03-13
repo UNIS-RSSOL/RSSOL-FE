@@ -238,6 +238,7 @@ function EmpCalendar() {
                 setSelectedEventProp={setSelectedCalendarEvent}
                 externalWorkers={dayWorkers}
                 externalEvents={dayEvents}
+                hideLabels
               />
             </div>
           ) : (

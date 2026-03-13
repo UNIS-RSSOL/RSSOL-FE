@@ -94,7 +94,7 @@ function WeekCalendar({
     <div className={`w-full flex flex-col ${className}`}>
       {/* Day name headers */}
       <div className="flex border-b border-[#E7EAF3]">
-        <div className="w-[60px] shrink-0 border-r border-[#E7EAF3]" />
+        <div className="w-[80px] shrink-0 border-r border-[#E7EAF3]" />
         {DAYS.map((day, idx) => (
           <div
             key={day}
@@ -111,7 +111,7 @@ function WeekCalendar({
           key={worker.userStoreId}
           className="flex h-[70px]"
         >
-          <div className="w-[60px] shrink-0 flex items-center text-[13px] font-[500] truncate pr-2 border-r border-[#E7EAF3]">
+          <div className="w-[80px] shrink-0 flex items-center text-[13px] font-[500] pr-2 pl-1 border-r border-[#E7EAF3] break-all leading-tight">
             {worker.username}
           </div>
           {week.map((w) => {
@@ -163,7 +163,7 @@ function WeekCalendar({
 
       {/* Empty fill */}
       <div className="flex flex-1">
-        <div className="w-[60px] shrink-0 border-r border-[#E7EAF3]" />
+        <div className="w-[80px] shrink-0 border-r border-[#E7EAF3]" />
         <div className="flex-1" />
       </div>
     </div>
