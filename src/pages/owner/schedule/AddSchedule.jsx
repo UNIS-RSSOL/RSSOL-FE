@@ -629,7 +629,7 @@ export default function AddSchedule() {
           onClick={() => setShowRequestPopup(false)}
         >
           <div
-            className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-[390px] p-4 sm:p-6 space-y-4 sm:space-y-6"
+            className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[500px] p-4 sm:p-6 space-y-4 sm:space-y-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-2">
@@ -683,7 +683,7 @@ export default function AddSchedule() {
           onClick={() => setShowHelpModal(false)}
         >
           <div
-            className="bg-white rounded-2xl w-full max-w-[390px] p-4 sm:p-6 space-y-4 relative"
+            className="bg-white rounded-2xl w-full sm:max-w-[500px] p-4 sm:p-6 space-y-4 relative"
             onClick={(e) => e.stopPropagation()}
           >
             {/* 닫기 버튼 */}

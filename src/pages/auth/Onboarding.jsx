@@ -291,7 +291,7 @@ export default function Onboarding() {
       </div>
 
       {/* 컨텐츠 영역 */}
-      <div className="w-full max-w-[393px] mt-8 flex flex-col items-center px-[8px] pb-[80px]">
+      <div className="w-full mt-8 flex flex-col items-center px-[8px] pb-[80px]">
         {error && (
           <div className="w-full mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
             {error}
