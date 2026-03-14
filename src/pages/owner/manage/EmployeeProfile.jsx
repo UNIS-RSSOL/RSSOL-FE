@@ -284,7 +284,7 @@ function EmployeeProfile() {
         {page === 2 && <AttendPage />}
       </div>
       <PageBox />
-      <Button className="fixed left-1/2 bottom-5 h-[60px] w-[368px] bg-[#b31b1b] text-white font-[500] text-[16px] -translate-x-1/2">
+      <Button className="fixed left-1/2 bottom-5 h-[60px] w-[calc(100%-40px)] max-w-[368px] bg-[#b31b1b] text-white font-[500] text-[16px] -translate-x-1/2">
         삭제
       </Button>
     </div>
