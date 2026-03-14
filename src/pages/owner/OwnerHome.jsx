@@ -44,7 +44,7 @@ function OwnerHome() {
       label: "급여관리",
       onClick: () => {
         setSidebarOpen(false);
-        /* TODO: 급여관리 페이지 라우트 연결 */
+        navigate("/owner/manage/wage");
       },
     },
   ];
