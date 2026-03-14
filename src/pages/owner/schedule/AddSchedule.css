@@ -248,7 +248,7 @@
     border: 1px solid #B3B3B3;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     gap: 16px;
     padding: 0 16px;
     box-sizing: border-box;
@@ -486,6 +486,9 @@
   .add-schedule-bottom-bar-tab-active {
     font-weight: 700;
     color: #3370FF;
+    text-decoration: underline;
+    text-decoration-color: #3370FF;
+    text-underline-offset: 4px;
   }
 
   /* 스크롤바 숨김, 마우스/터치 스크롤은 유지 */

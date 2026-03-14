@@ -11,6 +11,7 @@ import {
   getOwnerStore,
 } from "../../../services/MypageService.js";
 import { requestScheduleInput } from "../../../services/ScheduleGenerationService.js";
+import { getActiveStoreSettings } from "../../../services/StoreSettingService.js";
 // ✅ 알림 연동: /api/schedules/requests API 호출 시 백엔드에서 매장 내 직원들에게 자동으로 알림이 전송됩니다.
 // 별도의 알림 API 호출이 필요하지 않습니다.
 import HelpIcon from "../../../assets/icons/HelpIcon.jsx";
@@ -20,6 +21,14 @@ import "./AddSchedule.css";
 
 // 백엔드 없을 때 UI 작업용 mock (API 실패 시 storeId 기본값만 사용)
 const MOCK_STORE = { storeId: 1, storeName: "테스트 매장" };
+
+// 파트 타임 라벨
+const getPartTimeLabel = (index) => {
+  if (index === 0) return "오픈";
+  if (index === 1) return "미들";
+  if (index === 2) return "마감";
+  return `구간 ${index + 1}`;
+};
 
 export default function AddSchedule() {
   const navigate = useNavigate();
@@ -33,6 +42,12 @@ export default function AddSchedule() {
   const [activeTab, setActiveTab] = useState("기간"); // 탭: 기간 | 인원
   const [showRequestPopup, setShowRequestPopup] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  
+  // 파트타임 구간 관련 상태
+  const [partTimeSegments, setPartTimeSegments] = useState([]); // 파트타임 구간 목록
+  const [partTimePersonnel, setPartTimePersonnel] = useState({}); // 각 구간별 인원 수 { "0": 1, "1": 1, "2": 1 }
+  const [hasPartTimeSegments, setHasPartTimeSegments] = useState(false); // 파트타임 구간 존재 여부
+  const [isLoadingPartTime, setIsLoadingPartTime] = useState(false);
 
   // -------------------------
   // 날짜 선택 로직
@@ -139,6 +154,64 @@ export default function AddSchedule() {
   }, []);
 
   // -------------------------
+  // 파트타임 구간 조회
+  // -------------------------
+  useEffect(() => {
+    const loadPartTimeSegments = async () => {
+      if (!storeId) return;
+      
+      // ============================================
+      // 🧪 임시 테스트 모드: 파트타임 구간 화면 확인용
+      // 화면 확인 후 아래 3줄을 주석 처리하거나 삭제하세요
+      // ============================================
+      const TEST_MODE = false; // false로 변경하면 실제 API 호출
+      if (TEST_MODE) {
+        const testSegments = [
+          { startTime: "09:00", endTime: "12:00" },
+          { startTime: "13:00", endTime: "18:00" },
+          { startTime: "19:00", endTime: "22:00" },
+        ];
+        setPartTimeSegments(testSegments);
+        setHasPartTimeSegments(true);
+        setPartTimePersonnel({ 0: 1, 1: 1, 2: 1 });
+        setIsLoadingPartTime(false);
+        return;
+      }
+      // ============================================
+      
+      setIsLoadingPartTime(true);
+      try {
+        const settings = await getActiveStoreSettings();
+        // API 응답 구조에 따라 조정 필요
+        const segments = settings?.partTimeSegments || settings?.partTimes || [];
+        
+        if (segments && segments.length > 0) {
+          setPartTimeSegments(segments);
+          setHasPartTimeSegments(true);
+          // 각 구간별 인원 수 초기화 (기본값 1)
+          const initialPersonnel = {};
+          segments.forEach((_, index) => {
+            initialPersonnel[index] = 1;
+          });
+          setPartTimePersonnel(initialPersonnel);
+        } else {
+          setHasPartTimeSegments(false);
+          setPartTimeSegments([]);
+        }
+      } catch (error) {
+        console.error("파트타임 구간 조회 실패:", error);
+        // API 실패 시 파트타임 구간 없음으로 처리
+        setHasPartTimeSegments(false);
+        setPartTimeSegments([]);
+      } finally {
+        setIsLoadingPartTime(false);
+      }
+    };
+    
+    loadPartTimeSegments();
+  }, [storeId]);
+
+  // -------------------------
   // 근무표 생성 핸들러
   // -------------------------
   // 기간 탭 진입 시 현재 월로 스크롤
@@ -197,15 +270,51 @@ export default function AddSchedule() {
         setShowRequestPopup(false);
         return;
       }
-      const openTime = "09:00:00";
-      const closeTime = "18:00:00";
-      const timeSegments = [
-        {
-          startTime: openTime,
-          endTime: closeTime,
-          requiredStaff: concurrentStaffCount,
-        },
-      ];
+      
+      // 파트타임 구간이 있으면 각 구간별로 timeSegments 생성, 없으면 전체 시간대에 동시 근무자 수 적용
+      let timeSegments = [];
+      let openTime = "09:00:00";
+      let closeTime = "18:00:00";
+      
+      if (hasPartTimeSegments && partTimeSegments.length > 0) {
+        // 파트타임 구간별로 timeSegments 생성
+        timeSegments = partTimeSegments.map((segment, index) => {
+          const startTime = segment.startTime || segment.start || "09:00:00";
+          const endTime = segment.endTime || segment.end || "18:00:00";
+          const requiredStaff = partTimePersonnel[index] || 1;
+          
+          // 첫 구간의 시작 시간을 openTime으로, 마지막 구간의 종료 시간을 closeTime으로 설정
+          if (index === 0) {
+            openTime = startTime.includes(":") && startTime.length === 5 
+              ? `${startTime}:00` 
+              : startTime;
+          }
+          if (index === partTimeSegments.length - 1) {
+            closeTime = endTime.includes(":") && endTime.length === 5 
+              ? `${endTime}:00` 
+              : endTime;
+          }
+          
+          return {
+            startTime: startTime.includes(":") && startTime.length === 5 
+              ? `${startTime}:00` 
+              : startTime,
+            endTime: endTime.includes(":") && endTime.length === 5 
+              ? `${endTime}:00` 
+              : endTime,
+            requiredStaff,
+          };
+        });
+      } else {
+        // 파트타임 구간이 없으면 전체 시간대에 동시 근무자 수 적용
+        timeSegments = [
+          {
+            startTime: openTime,
+            endTime: closeTime,
+            requiredStaff: concurrentStaffCount,
+          },
+        ];
+      }
       const storeIdToSend = Number(currentStoreId);
       if (isNaN(storeIdToSend) || !storeIdToSend) {
         alert("매장 정보를 불러올 수 없습니다. 다시 시도해주세요.");
@@ -349,49 +458,129 @@ export default function AddSchedule() {
           style={{ display: activeTab === "인원" ? undefined : "none" }}
           aria-hidden={activeTab !== "인원"}
         >
-          <div className="flex items-center gap-4 w-fit">
-            <div className="text-left w-fit">
-              <h2 className="text-xl font-bold mb-2 whitespace-nowrap">
-                동시 근무자 수를 알려주세요!
-              </h2>
-              <p className="text-base font-medium whitespace-nowrap">저장된 파트 타임 구간이 없어요.</p>
+          {isLoadingPartTime ? (
+            <div className="flex items-center justify-center py-8">
+              <span className="text-base text-gray-500">로딩 중...</span>
             </div>
-            <div className="text-right w-fit">
-              <button
-                type="button"
-                className="create-schedule-btn w-fit whitespace-nowrap text-sm font-semibold"
-              >
-                생성하기
-              </button>
-            </div>
-          </div>
-          <div className="concurrent-staff-container">
-            <div className="flex items-center gap-2">
-              <PeopleIcon />
-              <span className="concurrent-staff-label">동시 근무자 수</span>
-            </div>
-            <div className="concurrent-staff-controls">
-              <button
-                type="button"
-                className="concurrent-staff-btn w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-lg font-medium"
-                onClick={() =>
-                  setConcurrentStaffCount((c) => Math.max(1, c - 1))
-                }
-              >
-                -
-              </button>
-              <span className="min-w-[24px] text-center font-semibold">
-                {concurrentStaffCount}
-              </span>
-              <button
-                type="button"
-                className="concurrent-staff-btn w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-lg font-medium"
-                onClick={() => setConcurrentStaffCount((c) => c + 1)}
-              >
-                +
-              </button>
-            </div>
-          </div>
+          ) : hasPartTimeSegments ? (
+            // 파트타임 구간이 있는 경우
+            <>
+              <div className="flex items-center gap-4 w-fit">
+                <div className="text-left w-fit">
+                  <h2 className="text-xl font-bold mb-2 whitespace-nowrap">
+                    이대로 진행할까요?
+                  </h2>
+                  <p className="text-base font-medium whitespace-nowrap">저장된 파트 타임 구간이 있어요.</p>
+                </div>
+                <div className="text-right w-fit">
+                  <button
+                    type="button"
+                    className="create-schedule-btn w-fit whitespace-nowrap text-sm font-semibold"
+                    onClick={() => navigate("/owner/store-settings")}
+                  >
+                    수정하기
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-4">
+                {partTimeSegments.map((segment, index) => {
+                  const startTime = segment.startTime || segment.start || "09:00";
+                  const endTime = segment.endTime || segment.end || "18:00";
+                  const personnel = partTimePersonnel[index] || 1;
+                  
+                  return (
+                    <div key={index} className="concurrent-staff-container">
+                      <div className="flex items-center gap-2">
+                        <span className="concurrent-staff-label font-semibold min-w-[60px]">
+                          {getPartTimeLabel(index)}
+                        </span>
+                        <span className="concurrent-staff-label text-gray-600">
+                          {startTime}-{endTime}
+                        </span>
+                      </div>
+                      <div className="concurrent-staff-controls">
+                        <button
+                          type="button"
+                          className="concurrent-staff-btn w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-lg font-medium"
+                          onClick={() =>
+                            setPartTimePersonnel((prev) => ({
+                              ...prev,
+                              [index]: Math.max(1, (prev[index] || 1) - 1),
+                            }))
+                          }
+                        >
+                          -
+                        </button>
+                        <span className="min-w-[24px] text-center font-semibold">
+                          {personnel}
+                        </span>
+                        <button
+                          type="button"
+                          className="concurrent-staff-btn w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-lg font-medium"
+                          onClick={() =>
+                            setPartTimePersonnel((prev) => ({
+                              ...prev,
+                              [index]: (prev[index] || 1) + 1,
+                            }))
+                          }
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            // 파트타임 구간이 없는 경우
+            <>
+              <div className="flex items-center gap-4 w-fit">
+                <div className="text-left w-fit">
+                  <h2 className="text-xl font-bold mb-2 whitespace-nowrap">
+                    동시 근무자 수를 알려주세요!
+                  </h2>
+                  <p className="text-base font-medium whitespace-nowrap">저장된 파트 타임 구간이 없어요.</p>
+                </div>
+                <div className="text-right w-fit">
+                  <button
+                    type="button"
+                    className="create-schedule-btn w-fit whitespace-nowrap text-sm font-semibold"
+                    onClick={() => navigate("/owner/store-settings")}
+                  >
+                    생성하기
+                  </button>
+                </div>
+              </div>
+              <div className="concurrent-staff-container">
+                <div className="flex items-center gap-2">
+                  <PeopleIcon />
+                  <span className="concurrent-staff-label">동시 근무자 수</span>
+                </div>
+                <div className="concurrent-staff-controls">
+                  <button
+                    type="button"
+                    className="concurrent-staff-btn w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-lg font-medium"
+                    onClick={() =>
+                      setConcurrentStaffCount((c) => Math.max(1, c - 1))
+                    }
+                  >
+                    -
+                  </button>
+                  <span className="min-w-[24px] text-center font-semibold">
+                    {concurrentStaffCount}
+                  </span>
+                  <button
+                    type="button"
+                    className="concurrent-staff-btn w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-lg font-medium"
+                    onClick={() => setConcurrentStaffCount((c) => c + 1)}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
         {/* 커스텀 하단바: sticky, 달력 위에 겹침, 바깥 배경 투명 */}
         <div className="add-schedule-bottom-bar-sticky">
@@ -447,9 +636,24 @@ export default function AddSchedule() {
               <p className="text-base font-medium">
                 근무 기간: {periodText}
               </p>
-              <p className="text-base font-medium">
-                근무 인원: {totalPersonnel}명
-              </p>
+              {hasPartTimeSegments && partTimeSegments.length > 0 ? (
+                <div className="space-y-1">
+                  {partTimeSegments.map((segment, index) => {
+                    const startTime = segment.startTime || segment.start || "09:00";
+                    const endTime = segment.endTime || segment.end || "18:00";
+                    const personnel = partTimePersonnel[index] || 1;
+                    return (
+                      <p key={index} className="text-base font-medium">
+                        {getPartTimeLabel(index)} ({startTime}-{endTime}): {personnel}명
+                      </p>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-base font-medium">
+                  근무 인원: {totalPersonnel}명
+                </p>
+              )}
             </div>
             <div className="flex gap-3">
               <button
