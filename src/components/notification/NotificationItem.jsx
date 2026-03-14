@@ -185,7 +185,7 @@ function NotificationItem({
               <Button
                 className={`w-[132px] h-[32px] font-[500] text-[14px]`}
                 onClick={() => {
-                  navigate("/calModEmp");
+                  navigate("/employee/schedule/modifying");
                 }}
               >
                 추가하기

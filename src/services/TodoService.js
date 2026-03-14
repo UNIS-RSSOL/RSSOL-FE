@@ -16,15 +16,26 @@ export const getTodos = async (category = null) => {
 //할 일 추가
 export const addTodo = async (title, content, category, dueDate = null) => {
   try {
-    const response = await api.post("todos", {
+    const requestData = {
       title,
       content,
       category,
       dueDate,
-    });
+    };
+    console.log("📤 POST /todos 요청 데이터:", requestData);
+    
+    const response = await api.post("todos", requestData);
+    
+    console.log("✅ POST /todos 성공:", response.data);
     return response.data;
   } catch (error) {
-    console.error("할 일 추가 실패:", error);
+    console.error("❌ 할 일 추가 실패:", error);
+    console.error("에러 상세:", {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+    });
     throw error;
   }
 };
