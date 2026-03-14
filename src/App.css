@@ -1,8 +1,16 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+/* 데스크톱에서는 최대 너비 제한 (선택사항) */
+@media (min-width: 1280px) {
+  #root {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
 }
 
 .logo {
