@@ -169,6 +169,7 @@ function OwnerCalendar() {
       SetIsMsgOpen1(true);
     } catch (error) {
       console.error("대타 요청 실패:", error);
+      alert(error.response?.data?.message || "대타 요청에 실패했습니다.");
     }
   };
 
@@ -180,6 +181,7 @@ function OwnerCalendar() {
       setNeedWorkers(1);
     } catch (error) {
       console.error("추가 근무 요청 실패:", error);
+      alert(error.response?.data?.message || "추가 근무 요청에 실패했습니다.");
     }
   };
 
@@ -201,6 +203,7 @@ function OwnerCalendar() {
       setIsMsgOpen(true);
     } catch (error) {
       console.error("근무 블록 추가 실패:", error);
+      alert(error.response?.data?.message || "근무 일정 추가에 실패했습니다.");
     }
   };
 
@@ -211,6 +214,7 @@ function OwnerCalendar() {
       setIsMsgOpen3(true);
     } catch (error) {
       console.error("근무 블록 삭제 실패:", error);
+      alert(error.response?.data?.message || "근무 일정 삭제에 실패했습니다.");
     }
   };
 

@@ -26,18 +26,18 @@ import HomeHeader from "../../components/home/HomeHeader.jsx";
 dayjs.locale("ko");
 
 const TODO_CATEGORIES = {
-  STORE_ALL: "매장 전체",
+  STORE: "매장 전체",
   HANDOVER: "인수인계",
-  MY_TODO: "내 할 일",
+  PERSONAL: "내 할 일",
 };
 
 function OwnerTodo() {
   const navigate = useNavigate();
   const [activeStore, setActiveStore] = useState({ storeId: null, name: "" });
   const [todos, setTodos] = useState({
-    STORE_ALL: [],
+    STORE: [],
     HANDOVER: [],
-    MY_TODO: [],
+    PERSONAL: [],
   });
   const [isLoading, setIsLoading] = useState(true);
   const [editingCategory, setEditingCategory] = useState(null);
@@ -60,22 +60,13 @@ function OwnerTodo() {
 
   const loadTodos = async () => {
     try {
-      const allTodos = await getTodos();
       const selectedDateStr = currentDate.format("YYYY-MM-DD");
-      
-      // 날짜별로 필터링 (dueDate가 없거나 선택한 날짜와 일치하는 할 일만 표시)
-      const filteredTodos = allTodos.filter((todo) => {
-        if (!todo.dueDate) return true; // dueDate가 없으면 모든 날짜에 표시
-        const todoDate = dayjs(todo.dueDate).format("YYYY-MM-DD");
-        return todoDate === selectedDateStr;
+      const res = await getTodos(selectedDateStr);
+      setTodos({
+        STORE: res.storeTodos || [],
+        HANDOVER: res.handoverTodos || [],
+        PERSONAL: res.personalTodos || [],
       });
-      
-      const categorized = {
-        STORE_ALL: filteredTodos.filter((todo) => todo.category === "STORE_ALL"),
-        HANDOVER: filteredTodos.filter((todo) => todo.category === "HANDOVER"),
-        MY_TODO: filteredTodos.filter((todo) => todo.category === "MY_TODO"),
-      };
-      setTodos(categorized);
     } catch (error) {
       console.error(error);
     }
@@ -117,9 +108,7 @@ function OwnerTodo() {
     const dueDate = currentDate.format("YYYY-MM-DD");
 
     try {
-      console.log("할 일 생성 시도:", { title: todoText, category, dueDate });
-      const response = await addTodo(todoText, "", category, dueDate);
-      console.log("할 일 생성 성공:", response);
+      const response = await addTodo(todoText, category, dueDate);
       
       setNewTodoText("");
       setEditingCategory(null);
@@ -156,7 +145,7 @@ function OwnerTodo() {
   const handleStartEdit = (todo, e) => {
     e.stopPropagation();
     setEditingTodoId(todo.id);
-    setEditTodoText(todo.title);
+    setEditTodoText(todo.content);
   };
 
   const handleSaveEdit = async (todo) => {
@@ -166,7 +155,7 @@ function OwnerTodo() {
     }
 
     try {
-      await updateTodo(todo.id, editTodoText.trim(), todo.content || "", todo.category);
+      await updateTodo(todo.id, editTodoText.trim());
       setEditingTodoId(null);
       setEditTodoText("");
       await loadTodos();
@@ -182,7 +171,7 @@ function OwnerTodo() {
 
   const canEdit = (category) => {
     // "매장 전체"는 owner만 추가/수정 가능
-    if (category === "STORE_ALL") return true; // owner는 항상 true
+    if (category === "STORE") return true; // owner는 항상 true
     // "인수인계"와 "내 할 일"은 모두 추가/수정 가능
     return true;
   };
@@ -218,26 +207,26 @@ function OwnerTodo() {
 
         {/* 매장 전체 */}
         <div className="mb-[32px] flex flex-col items-start">
-          {canEdit("STORE_ALL") && (
+          {canEdit("STORE") && (
             <button
-              onClick={() => handleCategoryClick("STORE_ALL")}
+              onClick={() => handleCategoryClick("STORE")}
               className="flex items-center justify-between px-[16px] h-[40px] rounded-[20px] border bg-[#ffffff] mb-[12px] w-fit"
               style={{ borderWidth: "1px", borderColor: "#C7C7C7" }}
             >
               <div className="flex items-center gap-[8px]">
                 <TodoAllIcon />
                 <span className="text-[14px] font-[500]">
-                  {TODO_CATEGORIES.STORE_ALL}
+                  {TODO_CATEGORIES.STORE}
                 </span>
                 <span className="text-[16px] ml-[8px]">+</span>
               </div>
             </button>
           )}
-          {editingCategory === "STORE_ALL" && (
+          {editingCategory === "STORE" && (
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                handleCreateTodo("STORE_ALL");
+                handleCreateTodo("STORE");
               }}
               className="flex items-center gap-[8px] w-full mb-[8px]"
             >
@@ -271,12 +260,12 @@ function OwnerTodo() {
             </form>
           )}
           <div className="space-y-[8px] w-full">
-            {todos.STORE_ALL.length === 0 && editingCategory !== "STORE_ALL" ? (
+            {todos.STORE.length === 0 && editingCategory !== "STORE" ? (
               <p className="text-[14px] text-gray-400 text-left py-[16px]">
                 할 일이 없습니다
               </p>
             ) : (
-              todos.STORE_ALL.map((todo) => (
+              todos.STORE.map((todo) => (
                 <div
                   key={todo.id}
                   className="flex items-center gap-[8px] p-[12px] bg-gray-50 rounded-[8px] border border-gray-200"
@@ -322,7 +311,7 @@ function OwnerTodo() {
                       className="flex-1 text-[14px] cursor-pointer"
                       onClick={(e) => handleStartEdit(todo, e)}
                     >
-                      {todo.title}
+                      {todo.content}
                     </span>
                   )}
                   <button
@@ -443,7 +432,7 @@ function OwnerTodo() {
                       className="flex-1 text-[14px] cursor-pointer"
                       onClick={(e) => handleStartEdit(todo, e)}
                     >
-                      {todo.title}
+                      {todo.content}
                     </span>
                   )}
                   <button
@@ -460,26 +449,26 @@ function OwnerTodo() {
 
         {/* 내 할 일 */}
         <div className="mb-[32px] flex flex-col items-start">
-          {canEdit("MY_TODO") && (
+          {canEdit("PERSONAL") && (
             <button
-              onClick={() => handleCategoryClick("MY_TODO")}
+              onClick={() => handleCategoryClick("PERSONAL")}
               className="flex items-center justify-between px-[16px] h-[40px] rounded-[20px] border bg-[#ffffff] mb-[12px] w-fit"
               style={{ borderWidth: "1px", borderColor: "#C7C7C7" }}
             >
               <div className="flex items-center gap-[8px]">
                 <TodoUserIcon />
                 <span className="text-[14px] font-[500]">
-                  {TODO_CATEGORIES.MY_TODO}
+                  {TODO_CATEGORIES.PERSONAL}
                 </span>
                 <span className="text-[16px] ml-[8px]">+</span>
               </div>
             </button>
           )}
-          {editingCategory === "MY_TODO" && (
+          {editingCategory === "PERSONAL" && (
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                handleCreateTodo("MY_TODO");
+                handleCreateTodo("PERSONAL");
               }}
               className="flex items-center gap-[8px] w-full mb-[8px]"
             >
@@ -513,12 +502,12 @@ function OwnerTodo() {
             </form>
           )}
           <div className="space-y-[8px] w-full">
-            {todos.MY_TODO.length === 0 && editingCategory !== "MY_TODO" ? (
+            {todos.PERSONAL.length === 0 && editingCategory !== "PERSONAL" ? (
               <p className="text-[14px] text-gray-400 text-left py-[16px]">
                 할 일이 없습니다
               </p>
             ) : (
-              todos.MY_TODO.map((todo) => (
+              todos.PERSONAL.map((todo) => (
                 <div
                   key={todo.id}
                   className="flex items-center gap-[8px] p-[12px] bg-gray-50 rounded-[8px] border border-gray-200"
@@ -564,7 +553,7 @@ function OwnerTodo() {
                       className="flex-1 text-[14px] cursor-pointer"
                       onClick={(e) => handleStartEdit(todo, e)}
                     >
-                      {todo.title}
+                      {todo.content}
                     </span>
                   )}
                   <button

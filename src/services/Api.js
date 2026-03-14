@@ -3,7 +3,7 @@ import { refreshToken } from "./AuthService";
 
 //axios 인스턴스. 이후 주소 쓸 때는 api/ 이후 부터 쓰면 됨
 const api = axios.create({
-  baseURL: "https://api.rssolplan.com/api/",
+  baseURL: `${import.meta.env.VITE_API_URL || "https://api.rssolplan.com"}/api/`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -51,16 +51,13 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // 403 또는 401 에러이고, 아직 재시도하지 않은 요청인 경우
+    // 401 에러이고, 아직 재시도하지 않은 요청인 경우 (403은 권한 부족이므로 토큰 갱신 불필요)
     if (
-      (error.response?.status === 403 || error.response?.status === 401) &&
+      error.response?.status === 401 &&
       !originalRequest._retry &&
       !originalRequest._skipAuthRefresh // refresh-token API는 제외
     ) {
-      console.warn(
-        `⚠️ ${error.response?.status} 에러 발생:`,
-        originalRequest.url
-      );
+      console.warn("⚠️ 401 에러 발생:", originalRequest.url);
       if (isRefreshing) {
         // 이미 토큰 갱신 중이면 대기
         return new Promise((resolve, reject) => {

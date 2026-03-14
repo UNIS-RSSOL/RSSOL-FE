@@ -105,7 +105,7 @@ export const goToKakaoLogin = (e) => {
 
   // 카카오 인증 URL 생성
   // redirect_uri는 백엔드 콜백 URL만 사용 (프론트엔드 URL 절대 포함하지 않음)
-  // prompt=login: 항상 로그인 화면을 보여줌 (기존 세션 무시)zzzzzzzzzzz
+  // prompt=login: 항상 로그인 화면을 보여줌 (기존 세션 무시)
   const kakaoLoginUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${cleanClientId}&redirect_uri=${encodeURIComponent(backendCallbackUrl)}&response_type=code&prompt=login`;
 
   console.log("🔐 카카오 로그인 시작");
