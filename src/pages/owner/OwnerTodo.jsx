@@ -113,14 +113,24 @@ function OwnerTodo() {
       return;
     }
 
+    const todoText = newTodoText.trim();
+    const dueDate = currentDate.format("YYYY-MM-DD");
+
     try {
-      const dueDate = currentDate.format("YYYY-MM-DD");
-      await addTodo(newTodoText.trim(), "", category, dueDate);
+      console.log("할 일 생성 시도:", { title: todoText, category, dueDate });
+      const response = await addTodo(todoText, "", category, dueDate);
+      console.log("할 일 생성 성공:", response);
+      
       setNewTodoText("");
       setEditingCategory(null);
       await loadTodos();
     } catch (error) {
       console.error("할 일 생성 실패:", error);
+      console.error("에러 상세:", error.response?.data || error.message);
+      alert(
+        error.response?.data?.message || 
+        "할 일 추가에 실패했습니다. 다시 시도해주세요."
+      );
     }
   };
 
@@ -224,27 +234,27 @@ function OwnerTodo() {
             </button>
           )}
           {editingCategory === "STORE_ALL" && (
-            <div className="flex items-center gap-[8px] w-full mb-[8px]">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleCreateTodo("STORE_ALL");
+              }}
+              className="flex items-center gap-[8px] w-full mb-[8px]"
+            >
               <input
                 type="text"
                 value={newTodoText}
                 onChange={(e) => setNewTodoText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleCreateTodo("STORE_ALL");
-                  }
-                }}
                 autoFocus
                 className="flex-1 px-[12px] py-[8px] border border-gray-300 rounded-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
                 placeholder="할 일을 입력하세요"
               />
               <button
-                type="button"
-                onClick={() => handleCreateTodo("STORE_ALL")}
+                type="submit"
                 disabled={!newTodoText.trim()}
-                className={`w-[36px] h-[36px] rounded-full flex items-center justify-center shrink-0 ${
+                className={`w-[36px] h-[36px] rounded-full flex items-center justify-center shrink-0 transition-colors ${
                   newTodoText.trim()
-                    ? "bg-[#3370FF] cursor-pointer"
+                    ? "bg-[#3370FF] cursor-pointer hover:bg-[#2563EB]"
                     : "bg-gray-300 cursor-not-allowed"
                 }`}
               >
@@ -258,7 +268,7 @@ function OwnerTodo() {
                   />
                 </svg>
               </button>
-            </div>
+            </form>
           )}
           <div className="space-y-[8px] w-full">
             {todos.STORE_ALL.length === 0 && editingCategory !== "STORE_ALL" ? (
@@ -345,27 +355,27 @@ function OwnerTodo() {
             </button>
           )}
           {editingCategory === "HANDOVER" && (
-            <div className="flex items-center gap-[8px] w-full mb-[8px]">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleCreateTodo("HANDOVER");
+              }}
+              className="flex items-center gap-[8px] w-full mb-[8px]"
+            >
               <input
                 type="text"
                 value={newTodoText}
                 onChange={(e) => setNewTodoText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleCreateTodo("HANDOVER");
-                  }
-                }}
                 autoFocus
                 className="flex-1 px-[12px] py-[8px] border border-gray-300 rounded-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
                 placeholder="할 일을 입력하세요"
               />
               <button
-                type="button"
-                onClick={() => handleCreateTodo("HANDOVER")}
+                type="submit"
                 disabled={!newTodoText.trim()}
-                className={`w-[36px] h-[36px] rounded-full flex items-center justify-center shrink-0 ${
+                className={`w-[36px] h-[36px] rounded-full flex items-center justify-center shrink-0 transition-colors ${
                   newTodoText.trim()
-                    ? "bg-[#3370FF] cursor-pointer"
+                    ? "bg-[#3370FF] cursor-pointer hover:bg-[#2563EB]"
                     : "bg-gray-300 cursor-not-allowed"
                 }`}
               >
@@ -379,7 +389,7 @@ function OwnerTodo() {
                   />
                 </svg>
               </button>
-            </div>
+            </form>
           )}
           <div className="space-y-[8px] w-full">
             {todos.HANDOVER.length === 0 && editingCategory !== "HANDOVER" ? (
@@ -466,27 +476,27 @@ function OwnerTodo() {
             </button>
           )}
           {editingCategory === "MY_TODO" && (
-            <div className="flex items-center gap-[8px] w-full mb-[8px]">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleCreateTodo("MY_TODO");
+              }}
+              className="flex items-center gap-[8px] w-full mb-[8px]"
+            >
               <input
                 type="text"
                 value={newTodoText}
                 onChange={(e) => setNewTodoText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleCreateTodo("MY_TODO");
-                  }
-                }}
                 autoFocus
                 className="flex-1 px-[12px] py-[8px] border border-gray-300 rounded-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
                 placeholder="할 일을 입력하세요"
               />
               <button
-                type="button"
-                onClick={() => handleCreateTodo("MY_TODO")}
+                type="submit"
                 disabled={!newTodoText.trim()}
-                className={`w-[36px] h-[36px] rounded-full flex items-center justify-center shrink-0 ${
+                className={`w-[36px] h-[36px] rounded-full flex items-center justify-center shrink-0 transition-colors ${
                   newTodoText.trim()
-                    ? "bg-[#3370FF] cursor-pointer"
+                    ? "bg-[#3370FF] cursor-pointer hover:bg-[#2563EB]"
                     : "bg-gray-300 cursor-not-allowed"
                 }`}
               >
@@ -500,7 +510,7 @@ function OwnerTodo() {
                   />
                 </svg>
               </button>
-            </div>
+            </form>
           )}
           <div className="space-y-[8px] w-full">
             {todos.MY_TODO.length === 0 && editingCategory !== "MY_TODO" ? (
