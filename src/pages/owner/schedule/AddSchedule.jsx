@@ -385,13 +385,13 @@ export default function AddSchedule() {
 
   return (
     <div className="add-schedule-page w-full flex flex-col h-screen">
-      <div className="flex items-center justify-between h-[60px] px-4 bg-white shadow-[0_4px_8px_0_rgba(0,0,0,0.08)] flex-shrink-0">
-        <span className="text-[18px] font-semibold text-gray-900">
+        <div className="flex items-center justify-between h-[60px] px-3 sm:px-4 bg-white shadow-[0_4px_8px_0_rgba(0,0,0,0.08)] flex-shrink-0 gap-2">
+        <span className="text-base sm:text-[18px] font-semibold text-gray-900 truncate min-w-0 flex-1">
           {storeName || "매장"}
         </span>
         <button
           type="button"
-          className="add-schedule-help-btn"
+          className="add-schedule-help-btn flex-shrink-0"
           aria-label="도움말"
           onClick={() => setShowHelpModal(true)}
         >
@@ -403,7 +403,7 @@ export default function AddSchedule() {
         className="flex-1 overflow-auto calendar-scroll-hide-bar add-schedule-content-with-bar bg-white"
       >
         <div
-          className="calendar-scroll-container p-4 space-y-6 bg-white relative"
+          className="calendar-scroll-container p-3 sm:p-4 space-y-4 sm:space-y-6 bg-white relative"
           style={{ display: activeTab === "기간" ? undefined : "none" }}
           aria-hidden={activeTab !== "기간"}
         >
@@ -454,7 +454,7 @@ export default function AddSchedule() {
         </div>
 
         <div
-          className="p-4 space-y-6 schedule-unit-container bg-white"
+          className="p-3 sm:p-4 space-y-4 sm:space-y-6 schedule-unit-container bg-white"
           style={{ display: activeTab === "인원" ? undefined : "none" }}
           aria-hidden={activeTab !== "인원"}
         >
@@ -465,17 +465,17 @@ export default function AddSchedule() {
           ) : hasPartTimeSegments ? (
             // 파트타임 구간이 있는 경우
             <>
-              <div className="flex items-center gap-4 w-fit">
-                <div className="text-left w-fit">
-                  <h2 className="text-xl font-bold mb-2 whitespace-nowrap">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full">
+                <div className="text-left flex-1 min-w-0">
+                  <h2 className="text-xl font-bold mb-2 break-keep">
                     이대로 진행할까요?
                   </h2>
-                  <p className="text-base font-medium whitespace-nowrap">저장된 파트 타임 구간이 있어요.</p>
+                  <p className="text-base font-medium break-keep">저장된 파트 타임 구간이 있어요.</p>
                 </div>
-                <div className="text-right w-fit">
+                <div className="text-right sm:text-right flex-shrink-0">
                   <button
                     type="button"
-                    className="create-schedule-btn w-fit whitespace-nowrap text-sm font-semibold"
+                    className="create-schedule-btn w-fit text-sm font-semibold"
                     onClick={() => navigate("/owner/store-settings")}
                   >
                     수정하기
@@ -490,11 +490,11 @@ export default function AddSchedule() {
                   
                   return (
                     <div key={index} className="concurrent-staff-container">
-                      <div className="flex items-center gap-2">
-                        <span className="concurrent-staff-label font-semibold min-w-[60px]">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span className="concurrent-staff-label font-semibold min-w-[50px] sm:min-w-[60px] flex-shrink-0">
                           {getPartTimeLabel(index)}
                         </span>
-                        <span className="concurrent-staff-label text-gray-600">
+                        <span className="concurrent-staff-label text-gray-600 break-keep">
                           {startTime}-{endTime}
                         </span>
                       </div>
@@ -535,17 +535,17 @@ export default function AddSchedule() {
           ) : (
             // 파트타임 구간이 없는 경우
             <>
-              <div className="flex items-center gap-4 w-fit">
-                <div className="text-left w-fit">
-                  <h2 className="text-xl font-bold mb-2 whitespace-nowrap">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 w-full">
+                <div className="text-left flex-1 min-w-0">
+                  <h2 className="text-xl font-bold mb-2 break-keep">
                     동시 근무자 수를 알려주세요!
                   </h2>
-                  <p className="text-base font-medium whitespace-nowrap">저장된 파트 타임 구간이 없어요.</p>
+                  <p className="text-base font-medium break-keep">저장된 파트 타임 구간이 없어요.</p>
                 </div>
-                <div className="text-right w-fit">
+                <div className="text-right sm:text-right flex-shrink-0">
                   <button
                     type="button"
-                    className="create-schedule-btn w-fit whitespace-nowrap text-sm font-semibold"
+                    className="create-schedule-btn w-fit text-sm font-semibold"
                     onClick={() => navigate("/owner/store-settings")}
                   >
                     생성하기
@@ -553,9 +553,9 @@ export default function AddSchedule() {
                 </div>
               </div>
               <div className="concurrent-staff-container">
-                <div className="flex items-center gap-2">
-                  <PeopleIcon />
-                  <span className="concurrent-staff-label">동시 근무자 수</span>
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <PeopleIcon className="flex-shrink-0" />
+                  <span className="concurrent-staff-label break-keep">동시 근무자 수</span>
                 </div>
                 <div className="concurrent-staff-controls">
                   <button
@@ -629,11 +629,11 @@ export default function AddSchedule() {
           onClick={() => setShowRequestPopup(false)}
         >
           <div
-            className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-[390px] p-6 space-y-6"
+            className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-[390px] p-4 sm:p-6 space-y-4 sm:space-y-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-2">
-              <p className="text-base font-medium">
+              <p className="text-sm sm:text-base font-medium break-keep">
                 근무 기간: {periodText}
               </p>
               {hasPartTimeSegments && partTimeSegments.length > 0 ? (
@@ -643,23 +643,23 @@ export default function AddSchedule() {
                     const endTime = segment.endTime || segment.end || "18:00";
                     const personnel = partTimePersonnel[index] || 1;
                     return (
-                      <p key={index} className="text-base font-medium">
+                      <p key={index} className="text-sm sm:text-base font-medium break-keep">
                         {getPartTimeLabel(index)} ({startTime}-{endTime}): {personnel}명
                       </p>
                     );
                   })}
                 </div>
               ) : (
-                <p className="text-base font-medium">
+                <p className="text-sm sm:text-base font-medium break-keep">
                   근무 인원: {totalPersonnel}명
                 </p>
               )}
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setShowRequestPopup(false)}
-                className="flex-1 py-3 rounded-xl font-semibold border border-gray-300 text-gray-700"
+                className="flex-1 py-3 rounded-xl font-semibold border border-gray-300 text-gray-700 text-sm sm:text-base"
               >
                 수정하기
               </button>
@@ -667,7 +667,7 @@ export default function AddSchedule() {
                 type="button"
                 onClick={handleRequestSchedule}
                 disabled={isLoading}
-                className="flex-1 py-3 rounded-xl font-semibold bg-[#68E194] text-black disabled:opacity-60"
+                className="flex-1 py-3 rounded-xl font-semibold bg-[#68E194] text-black disabled:opacity-60 text-sm sm:text-base"
               >
                 요청하기
               </button>
@@ -683,7 +683,7 @@ export default function AddSchedule() {
           onClick={() => setShowHelpModal(false)}
         >
           <div
-            className="bg-white rounded-2xl w-full max-w-[390px] p-6 space-y-4 relative"
+            className="bg-white rounded-2xl w-full max-w-[390px] p-4 sm:p-6 space-y-4 relative"
             onClick={(e) => e.stopPropagation()}
           >
             {/* 닫기 버튼 */}
@@ -709,20 +709,20 @@ export default function AddSchedule() {
             </button>
 
             {/* 모달 내용 */}
-            <div className="space-y-4 pr-8">
-              <h3 className="text-xl font-bold text-gray-900">근무표 생성 방법</h3>
-              <div className="space-y-3 text-base text-gray-700 leading-relaxed">
-                <p>
+            <div className="space-y-4 pr-6 sm:pr-8">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900">근무표 생성 방법</h3>
+              <div className="space-y-3 text-sm sm:text-base text-gray-700 leading-relaxed">
+                <p className="break-keep">
                   <span className="font-semibold">1.</span> 기간 탭을 눌러 근무표를 생성하고자 하는 기간을 설정해주세요.
                 </p>
-                <p>
+                <p className="break-keep">
                   <span className="font-semibold">2.</span> 인원 탭을 눌러 근무시간대에 배치될 인원을 설정해주세요.
                   <br />
                   만약, 매장 정보에 저장된 파트타임이 있다면 파트타임별 근무인원 배치가 가능해요.
                   <br />
                   저장된 파트타임이 없다면 한시간 간격으로 나누어 근무표 생성이 돼요.
                 </p>
-                <p>
+                <p className="break-keep">
                   <span className="font-semibold">3.</span> 근무표 요청 버튼을 눌러 입력한 정보가 맞는지 확인해주세요. 맞다면 요청하기 버튼을, 틀렸다면 수정하기 버튼을 눌러주세요.
                   <br />
                   요청하기 버튼을 누르면 매장 내 근무자들에게 근무표 제출 알람이 가요.
