@@ -19,60 +19,6 @@ import { getActiveStore } from "../../../services/MypageService.js";
 
 dayjs.locale("ko");
 
-// 알바 목업 데이터 (매장 기준)
-const MOCK_STORES = [
-  { userStoreId: "store-1", username: "투썸 신촌점" },
-  { userStoreId: "store-2", username: "롯데리아 이대점" },
-];
-
-const createMockDayEvents = (dateStr) => [
-  {
-    id: "mock-day-1",
-    userStoreId: "store-1",
-    username: "투썸 신촌점",
-    start: `${dateStr}T08:00`,
-    end: `${dateStr}T14:00`,
-  },
-  {
-    id: "mock-day-2",
-    userStoreId: "store-2",
-    username: "롯데리아 이대점",
-    start: `${dateStr}T11:00`,
-    end: `${dateStr}T15:00`,
-  },
-];
-
-const createMockWeekEvents = (startOfWeek) => [
-  {
-    id: "mock-week-1",
-    userStoreId: "store-1",
-    username: "투썸 신촌점",
-    start: `${startOfWeek.add(1, "day").format("YYYY-MM-DD")}T09:00`,
-    end: `${startOfWeek.add(1, "day").format("YYYY-MM-DD")}T14:00`,
-  },
-  {
-    id: "mock-week-2",
-    userStoreId: "store-1",
-    username: "투썸 신촌점",
-    start: `${startOfWeek.add(3, "day").format("YYYY-MM-DD")}T09:00`,
-    end: `${startOfWeek.add(3, "day").format("YYYY-MM-DD")}T14:00`,
-  },
-  {
-    id: "mock-week-3",
-    userStoreId: "store-2",
-    username: "롯데리아 이대점",
-    start: `${startOfWeek.add(2, "day").format("YYYY-MM-DD")}T11:00`,
-    end: `${startOfWeek.add(2, "day").format("YYYY-MM-DD")}T16:00`,
-  },
-  {
-    id: "mock-week-4",
-    userStoreId: "store-2",
-    username: "롯데리아 이대점",
-    start: `${startOfWeek.add(5, "day").format("YYYY-MM-DD")}T10:00`,
-    end: `${startOfWeek.add(5, "day").format("YYYY-MM-DD")}T15:00`,
-  },
-];
-
 function EmpCalendar() {
   const navigate = useNavigate();
   const today = dayjs();
@@ -87,10 +33,10 @@ function EmpCalendar() {
   const [activeStoreName, setActiveStoreName] = useState("");
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
   const [eventData, setEventData] = useState();
-  const [dayWorkers, setDayWorkers] = useState(MOCK_STORES);
-  const [dayEvents, setDayEvents] = useState(createMockDayEvents(today.format("YYYY-MM-DD")));
-  const [weekWorkers, setWeekWorkers] = useState(MOCK_STORES);
-  const [weekEvents, setWeekEvents] = useState(createMockWeekEvents(today.startOf("week")));
+  const [dayWorkers, setDayWorkers] = useState([]);
+  const [dayEvents, setDayEvents] = useState([]);
+  const [weekWorkers, setWeekWorkers] = useState([]);
+  const [weekEvents, setWeekEvents] = useState([]);
 
   // 모달/토스트 상태
   const [isEventToastOpen, setIsEventToastOpen] = useState(false);
@@ -135,12 +81,8 @@ function EmpCalendar() {
             })),
           );
         }
-        // API 성공하지만 빈 데이터면 목업 유지
       } catch (error) {
         console.error("일간 스케줄 조회 실패:", error);
-        // 목업 데이터 유지
-        setDayWorkers(MOCK_STORES);
-        setDayEvents(createMockDayEvents(currentDate.format("YYYY-MM-DD")));
       }
     })();
   }, [currentDate, selectedKey]);
@@ -177,10 +119,6 @@ function EmpCalendar() {
         }
       } catch (error) {
         console.error("주간 스케줄 조회 실패:", error);
-        // 목업 데이터 유지
-        const weekStart = currentDate.startOf("week");
-        setWeekWorkers(MOCK_STORES);
-        setWeekEvents(createMockWeekEvents(weekStart));
       }
     })();
   }, [currentDate, selectedKey]);

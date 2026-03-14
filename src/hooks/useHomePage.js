@@ -21,18 +21,16 @@ import {
   checkOut,
 } from "../services/AttendanceService.js";
 
-import { MOCK_TODAY_SCHEDULES, MOCK_TODOS } from "../mocks/mockData.js";
-
 export default function useHomePage(role) {
   const navigate = useNavigate();
   const today = dayjs();
 
   const [activeStore, setActiveStore] = useState({ storeId: null, name: "" });
   const [storeList, setStoreList] = useState([]);
-  const [todaySchedules, setTodaySchedules] = useState(MOCK_TODAY_SCHEDULES); // TODO: API 연결 후 빈 배열로 변경
+  const [todaySchedules, setTodaySchedules] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAppModalOpen, setIsAppModalOpen] = useState(false);
-  const [todos, setTodos] = useState(MOCK_TODOS); // TODO: API 연결 후 빈 배열로 변경
+  const [todos, setTodos] = useState([]);
   const [attendance, setAttendance] = useState(null); // 오늘 출퇴근 상태
 
   /* ── 초기 데이터 로딩 ── */
@@ -57,7 +55,6 @@ export default function useHomePage(role) {
         if (schedules && schedules.length > 0) {
           setTodaySchedules(schedules);
         }
-        // else: 목업 데이터 유지
 
         // 오늘 출퇴근 상태 조회
         try {

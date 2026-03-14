@@ -2,11 +2,6 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { getScheduleByPeriod } from "../../services/WorkShiftService";
 import TimelineGrid, { GridLines, calcEventPosition } from "./TimelineGrid.jsx";
-import {
-  MOCK_WORKERS,
-  createMockDayEvents,
-} from "../../mocks/mockData.js"; // TODO: API 연결 후 이 import 제거
-
 function DayCalendar({
   date,
   onEventClick,
@@ -19,10 +14,8 @@ function DayCalendar({
   externalEvents,
   hideLabels = false,
 }) {
-  const [workers, setWorkers] = useState(externalWorkers || MOCK_WORKERS);
-  const [events, setEvents] = useState(
-    externalEvents || createMockDayEvents(dayjs().format("YYYY-MM-DD")),
-  );
+  const [workers, setWorkers] = useState(externalWorkers || []);
+  const [events, setEvents] = useState(externalEvents || []);
 
   useEffect(() => {
     // 외부 데이터가 제공되면 API 호출 건너뜀

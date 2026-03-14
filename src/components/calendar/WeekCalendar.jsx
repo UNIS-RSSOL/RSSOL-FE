@@ -2,11 +2,6 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import "dayjs/locale/ko";
 import { getScheduleByPeriod } from "../../services/WorkShiftService";
-import {
-  MOCK_WORKERS,
-  createMockWeekEvents,
-} from "../../mocks/mockData.js"; // TODO: API 연결 후 이 import 제거
-
 const DAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 const getDayColor = (idx) => {
@@ -27,7 +22,7 @@ function WeekCalendar({
   externalEvents,
 }) {
   const [week, setWeek] = useState([]);
-  const [workers, setWorkers] = useState(externalWorkers || MOCK_WORKERS);
+  const [workers, setWorkers] = useState(externalWorkers || []);
   const [events, setEvents] = useState(externalEvents || []);
 
   useEffect(() => {
@@ -71,14 +66,9 @@ function WeekCalendar({
               end: s.endDatetime,
             })),
           );
-        } else {
-          setWorkers(MOCK_WORKERS);
-          setEvents(createMockWeekEvents(startOfWeek));
         }
       } catch (error) {
         console.error("Error fetching schedules:", error);
-        setWorkers(MOCK_WORKERS);
-        setEvents(createMockWeekEvents(startOfWeek));
       }
     })();
   }, [date, storeId, refreshKey, externalWorkers, externalEvents]);
