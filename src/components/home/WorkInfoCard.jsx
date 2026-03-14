@@ -17,7 +17,7 @@ function WorkInfoCard({ todayShift, onCheckIn, onCheckOut, attendance }) {
           <span className="inline-flex items-center justify-center min-w-[70px] h-[30px] bg-[#F0F0F0] text-[#87888c] rounded-[20px] px-[12px] text-[12px] font-[500]">
             {todayShift
               ? `${dayjs(todayShift.startDatetime).format("HH:mm")} - ${dayjs(todayShift.endDatetime).format("HH:mm")}`
-              : "출근 전"}
+              : "오늘 근무 없음"}
           </span>
         </div>
         <div className="flex items-center gap-[8px]">

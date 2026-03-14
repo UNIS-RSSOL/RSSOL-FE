@@ -9,6 +9,9 @@ function TasksCard({ todos, onToggle }) {
           </span>
         </div>
         <div className="flex flex-col gap-[8px]">
+          {todos.length === 0 && (
+            <p className="text-[13px] text-[#87888c] text-center py-[8px]">등록된 할 일이 없습니다.</p>
+          )}
           {todos.map((todo) => (
             <div
               key={todo.id}

@@ -185,16 +185,11 @@ function OwnerCalendar() {
 
   const handleAddWorkshift = async () => {
     try {
-      const data = {
-        userStoreId: newTime.userStoreId,
-        start:
-          newTime.date.format("YYYY-MM-DD") +
-          "T" +
-          newTime.start.format("HH:mm"),
-        end:
-          newTime.date.format("YYYY-MM-DD") + "T" + newTime.end.format("HH:mm"),
-      };
-      await addWorkShift(data.userStoreId, data.start, data.end);
+      const startDatetime =
+        newTime.date.format("YYYY-MM-DD") + "T" + newTime.start.format("HH:mm:ss");
+      const endDatetime =
+        newTime.date.format("YYYY-MM-DD") + "T" + newTime.end.format("HH:mm:ss");
+      await addWorkShift(newTime.userStoreId, startDatetime, endDatetime);
       setNewTime({
         userStoreId: "",
         username: "",
