@@ -201,6 +201,7 @@ function OwnerCalendar() {
       });
       setIsModalOpen(false);
       setIsMsgOpen(true);
+      setRefreshKey((prev) => prev + 1);
     } catch (error) {
       console.error("근무 블록 추가 실패:", error);
       alert(error.response?.data?.message || "근무 일정 추가에 실패했습니다.");
@@ -212,6 +213,7 @@ function OwnerCalendar() {
       await deleteWorkShift(eventData.id);
       setIsDeleteShift(false);
       setIsMsgOpen3(true);
+      setRefreshKey((prev) => prev + 1);
     } catch (error) {
       console.error("근무 블록 삭제 실패:", error);
       alert(error.response?.data?.message || "근무 일정 삭제에 실패했습니다.");

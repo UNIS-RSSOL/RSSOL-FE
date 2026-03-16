@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import Modal from "./Modal";
 
-function MessageModal({ isOpen, children, onClose, duration = 1000 }) {
+function MessageModal({ isOpen, message, children, onClose, duration = 1000 }) {
   useEffect(() => {
     if (isOpen && duration) {
       const timer = setTimeout(() => {
@@ -15,7 +15,7 @@ function MessageModal({ isOpen, children, onClose, duration = 1000 }) {
 
   return (
     <Modal className="py-5 px-10" xx={false}>
-      <p>{children}</p>
+      <p>{message || children}</p>
     </Modal>
   );
 }
