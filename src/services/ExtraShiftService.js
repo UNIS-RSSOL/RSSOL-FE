@@ -4,13 +4,13 @@ import api from "./Api.js";
 //추가 인력 요청 생성
 export const createExtraShiftRequest = async (
   shiftId,
-  headCount,
+  headcount,
   note = "",
 ) => {
   try {
     const response = await api.post("extra-shift/requests", {
       shiftId,
-      headCount,
+      headcount,
       note,
     });
     return response.data;
