@@ -21,7 +21,7 @@ function TasksCard({ todos, onToggle }) {
         <div className="flex items-center justify-between mb-[12px]">
           <p className="text-[16px] font-[600]">오늘 해야할 일</p>
           <span
-            className="inline-flex items-center justify-center min-w-[70px] h-[30px] bg-white text-[#3370FF] border border-[#3370FF] rounded-[20px] px-[12px] text-[12px] font-[500] cursor-pointer select-none"
+            className="inline-flex items-center justify-center min-w-[70px] h-[30px] bg-white text-black border border-[#3370FF] rounded-[20px] px-[12px] text-[12px] font-[500] cursor-pointer select-none"
             onClick={handleTabClick}
           >
             {currentTab.label}
