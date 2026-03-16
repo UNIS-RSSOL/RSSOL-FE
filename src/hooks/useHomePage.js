@@ -31,7 +31,7 @@ export default function useHomePage(role) {
   const [myTodayShift, setMyTodayShift] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAppModalOpen, setIsAppModalOpen] = useState(false);
-  const [todos, setTodos] = useState([]);
+  const [todos, setTodos] = useState({ STORE: [], HANDOVER: [], PERSONAL: [] });
   const [attendance, setAttendance] = useState(null); // 오늘 출퇴근 상태
 
   /* ── 초기 데이터 로딩 ── */
@@ -68,15 +68,15 @@ export default function useHomePage(role) {
           }
         }
 
-        // 오늘 할 일 조회
+        // 오늘 할 일 조회 (전체 카테고리)
         try {
           const todoRes = await getTodos(todayStr);
-          const storeTodos = (todoRes.storeTodos || []).map((t) => ({
-            ...t,
-            text: t.content,
-            done: t.completed,
-          }));
-          setTodos(storeTodos);
+          const mapTodos = (arr) => (arr || []).map((t) => ({ ...t, text: t.content, done: t.completed }));
+          setTodos({
+            STORE: mapTodos(todoRes.storeTodos),
+            HANDOVER: mapTodos(todoRes.handoverTodos),
+            PERSONAL: mapTodos(todoRes.personalTodos),
+          });
         } catch {
           // 할 일 조회 실패 시 무시
         }
@@ -101,9 +101,13 @@ export default function useHomePage(role) {
   const toggleTodo = async (id) => {
     try {
       await toggleTodoComplete(id);
-      setTodos((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
-      );
+      setTodos((prev) => {
+        const updated = {};
+        for (const key of Object.keys(prev)) {
+          updated[key] = prev[key].map((t) => (t.id === id ? { ...t, done: !t.done } : t));
+        }
+        return updated;
+      });
     } catch (error) {
       console.error("할 일 토글 실패:", error);
     }

@@ -1,18 +1,37 @@
+import { useState } from "react";
+
+const TABS = [
+  { key: "STORE", label: "매장전체" },
+  { key: "HANDOVER", label: "인수인계" },
+  { key: "PERSONAL", label: "내 할일" },
+];
+
 function TasksCard({ todos, onToggle }) {
+  const [tabIndex, setTabIndex] = useState(0);
+  const currentTab = TABS[tabIndex];
+  const currentTodos = todos[currentTab.key] || [];
+
+  const handleTabClick = () => {
+    setTabIndex((prev) => (prev + 1) % TABS.length);
+  };
+
   return (
     <div className="border-[1px] border-[#E7EAF3] rounded-[25px] overflow-hidden mb-[16px]">
       <div className="px-[16px] py-[14px]">
         <div className="flex items-center justify-between mb-[12px]">
           <p className="text-[16px] font-[600]">오늘 해야할 일</p>
-          <span className="inline-flex items-center justify-center min-w-[70px] h-[30px] bg-[#F0F0F0] text-[#87888c] rounded-[20px] px-[12px] text-[12px] font-[500]">
-            매장전체
+          <span
+            className="inline-flex items-center justify-center min-w-[70px] h-[30px] bg-[#F0F0F0] text-[#87888c] rounded-[20px] px-[12px] text-[12px] font-[500] cursor-pointer select-none"
+            onClick={handleTabClick}
+          >
+            {currentTab.label}
           </span>
         </div>
         <div className="flex flex-col gap-[8px]">
-          {todos.length === 0 && (
+          {currentTodos.length === 0 && (
             <p className="text-[13px] text-[#87888c] text-center py-[8px]">등록된 할 일이 없습니다.</p>
           )}
-          {todos.map((todo) => (
+          {currentTodos.map((todo) => (
             <div
               key={todo.id}
               className="flex items-center gap-[8px] cursor-pointer"
