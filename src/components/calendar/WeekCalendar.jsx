@@ -38,6 +38,9 @@ function WeekCalendar({
       return;
     }
 
+    // storeId 로드 전이면 대기
+    if (!storeId) return;
+
     (async () => {
       try {
         const schedules = await getScheduleByPeriod(

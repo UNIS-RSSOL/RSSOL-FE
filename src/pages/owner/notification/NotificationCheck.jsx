@@ -48,8 +48,9 @@ function NotificationCheck() {
                 storename={alarm.storeName}
                 time={time}
                 id={alarm.shiftSwapRequestId || alarm.extraShiftRequestId}
+                responseId={alarm.extraShiftResponseId}
                 status={alarm.shiftSwapStatus || alarm.extraShiftStatus}
-                approval={alarm.shiftSwapManagerApprovalStatus}
+                approval={alarm.shiftSwapManagerApprovalStatus || alarm.extraShiftManagerApprovalStatus}
                 owner={false}
               >
                 {alarm.message}

@@ -251,13 +251,7 @@ function EmpCalendar() {
             onChange={handleViewChange}
           />
         </div>
-        <div className="flex-1 flex justify-end pointer-events-auto">
-          <div className="w-[50px] h-[50px] rounded-full border-[1px] border-[#B3B3B3] bg-white flex items-center justify-center cursor-pointer shadow-[0_2px_8px_0_rgba(0,0,0,0.15)]">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 4V16M4 10H16" stroke="#87888C" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </div>
-        </div>
+        <div className="flex-1" />
       </div>
 
       <Footer />

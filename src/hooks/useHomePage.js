@@ -13,8 +13,8 @@ import {
   getStaffStoreList,
   changeActiveStore,
 } from "../services/MypageService.js";
-import { getScheduleByPeriod } from "../services/WorkShiftService.js";
-import { getMyScheduleByPeriod } from "../services/WorkShiftService.js";
+import { getScheduleByPeriod, getMyScheduleByPeriod } from "../services/WorkShiftService.js";
+import { getTodos, toggleTodoComplete } from "../services/TodoService.js";
 import {
   getTodayAttendance,
   checkIn,
@@ -68,6 +68,19 @@ export default function useHomePage(role) {
           }
         }
 
+        // 오늘 할 일 조회
+        try {
+          const todoRes = await getTodos(todayStr);
+          const storeTodos = (todoRes.storeTodos || []).map((t) => ({
+            ...t,
+            text: t.content,
+            done: t.completed,
+          }));
+          setTodos(storeTodos);
+        } catch {
+          // 할 일 조회 실패 시 무시
+        }
+
         // 오늘 출퇴근 상태 조회
         try {
           const att = await getTodayAttendance();
@@ -85,10 +98,15 @@ export default function useHomePage(role) {
   const todayShift = myTodayShift;
 
   /* ── 할 일 토글 ── */
-  const toggleTodo = (id) => {
-    setTodos((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
-    );
+  const toggleTodo = async (id) => {
+    try {
+      await toggleTodoComplete(id);
+      setTodos((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
+      );
+    } catch (error) {
+      console.error("할 일 토글 실패:", error);
+    }
   };
 
   /* ── 출근 처리 ── */

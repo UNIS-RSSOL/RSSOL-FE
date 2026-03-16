@@ -28,6 +28,7 @@ function NotificationItem({
   time,
   children,
   id,
+  responseId,
   status,
   approval,
   owner,
@@ -95,7 +96,7 @@ function NotificationItem({
   //알바생 인력요청 최종 승인/미승인
   const handleApproveStaffRequest = async (requestId, action) => {
     try {
-      const response = await approveExtraShiftRequest(requestId, action);
+      const response = await approveExtraShiftRequest(requestId, responseId, action);
       setIsDisabled(true);
       if (action === "APPROVE") setIsAccepted(true);
       else setIsAccepted(false);
