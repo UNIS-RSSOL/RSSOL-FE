@@ -34,7 +34,7 @@ function MiniTimeline({ schedules, className = "" }) {
               }}
             >
               <span className="text-[12px] font-[500] truncate">
-                {s.storeName}
+                {s.username || s.storeName}
               </span>
             </div>
           );

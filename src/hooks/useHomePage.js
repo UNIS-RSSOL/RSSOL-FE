@@ -28,6 +28,7 @@ export default function useHomePage(role) {
   const [activeStore, setActiveStore] = useState({ storeId: null, name: "" });
   const [storeList, setStoreList] = useState([]);
   const [todaySchedules, setTodaySchedules] = useState([]);
+  const [myTodayShift, setMyTodayShift] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAppModalOpen, setIsAppModalOpen] = useState(false);
   const [todos, setTodos] = useState([]);
@@ -47,13 +48,24 @@ export default function useHomePage(role) {
         setStoreList(stores);
 
         const todayStr = today.format("YYYY-MM-DD");
-        const schedules =
-          role === "owner"
-            ? await getScheduleByPeriod(todayStr, todayStr)
-            : await getMyScheduleByPeriod(todayStr, todayStr);
 
-        if (schedules && schedules.length > 0) {
-          setTodaySchedules(schedules);
+        if (role === "owner") {
+          // 매장 전체 스케줄 (MiniTimeline용)
+          const storeSchedules = await getScheduleByPeriod(todayStr, todayStr);
+          if (storeSchedules && storeSchedules.length > 0) {
+            setTodaySchedules(storeSchedules);
+          }
+          // 본인 스케줄 (근무시간 표시용)
+          const mySchedules = await getMyScheduleByPeriod(todayStr, todayStr);
+          if (mySchedules && mySchedules.length > 0) {
+            setMyTodayShift(mySchedules[0]);
+          }
+        } else {
+          const mySchedules = await getMyScheduleByPeriod(todayStr, todayStr);
+          if (mySchedules && mySchedules.length > 0) {
+            setTodaySchedules(mySchedules);
+            setMyTodayShift(mySchedules[0]);
+          }
         }
 
         // 오늘 출퇴근 상태 조회
@@ -70,7 +82,7 @@ export default function useHomePage(role) {
     })();
   }, []);
 
-  const todayShift = todaySchedules[0];
+  const todayShift = myTodayShift;
 
   /* ── 할 일 토글 ── */
   const toggleTodo = (id) => {
