@@ -158,7 +158,7 @@ function EmpCalendar() {
         onRightClick={() => navigate("/employee/notification")}
       />
 
-      <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden">
+      <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden scrollbar-hide">
         <div className="flex-1 flex flex-col">
           {selectedKey === "1" ? (
             <div className="w-full h-full flex flex-col py-5 px-[16px]">

@@ -227,7 +227,7 @@ function OwnerCalendar() {
         onRightClick={() => navigate("/owner/notification/home")}
       />
 
-      <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden">
+      <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden scrollbar-hide">
         <ConfigProvider
           theme={{
             components: {
