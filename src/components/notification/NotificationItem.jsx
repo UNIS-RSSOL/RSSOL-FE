@@ -114,20 +114,20 @@ function NotificationItem({
   };
 
   return (
-    <div className={`flex flex-row px-5 my-2 items-center gap-4 ${isDisabled ? "opacity-60" : ""}`}>
+    <div className={`flex flex-row px-5 my-2 items-start gap-4 overflow-hidden ${isDisabled ? "opacity-60" : ""}`}>
       {!img || img === "" || img === null ? (
-        <img src={defaultImg} alt="profile" className="size-[47px]" />
+        <img src={defaultImg} alt="profile" className="size-[47px] shrink-0" />
       ) : (
         <div className="size-[45px] rounded-full shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] flex-shrink-0 overflow-hidden">
           <img src={img} alt="profile" className="w-full h-full object-cover" />
         </div>
       )}
 
-      <div className="flex-1 flex flex-col items-start gap-1">
+      <div className="flex-1 min-w-0 flex flex-col items-start gap-1">
         <RoundTag className="flex items-center bg-[#fdfffe] border-[#3370FF] border-[1px] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] font-[400] text-[12px]/[16px] px-3 h-[24px]">
           {storename || "매장"}
         </RoundTag>
-        <p className="text-[14px] font-[500] text-left">{children}</p>
+        <p className="text-[14px] font-[500] text-left break-words w-full">{children}</p>
         <span className="text-[10px] font-[400] text-[#87888c]">{time}</span>
         <div className="w-full flex justify-end items-center gap-2">
           {alarmType === 2 ? (
