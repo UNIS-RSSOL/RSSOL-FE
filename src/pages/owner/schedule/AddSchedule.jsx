@@ -367,7 +367,34 @@ export default function AddSchedule() {
       }
     } catch (error) {
       console.error("근무표 생성 요청 실패:", error);
-      alert("근무표 생성 요청에 실패했습니다. 다시 시도해주세요.");
+      
+      // 더 자세한 오류 메시지 표시
+      let errorMessage = "근무표 생성 요청에 실패했습니다. 다시 시도해주세요.";
+      
+      if (error.response) {
+        // 서버 응답이 있는 경우
+        const status = error.response.status;
+        if (status === 404) {
+          errorMessage = "API 엔드포인트를 찾을 수 없습니다. 관리자에게 문의해주세요.";
+        } else if (status === 400) {
+          errorMessage = "요청 데이터가 올바르지 않습니다. 입력 정보를 확인해주세요.";
+        } else if (status === 401 || status === 403) {
+          errorMessage = "인증이 필요합니다. 다시 로그인해주세요.";
+        } else if (status >= 500) {
+          errorMessage = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+        }
+        
+        // 서버에서 보낸 오류 메시지가 있으면 표시
+        const serverMessage = error.response.data?.message || error.response.data?.error;
+        if (serverMessage) {
+          errorMessage += `\n\n오류 내용: ${serverMessage}`;
+        }
+      } else if (error.request) {
+        // 요청은 보냈지만 응답을 받지 못한 경우
+        errorMessage = "서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.";
+      }
+      
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }

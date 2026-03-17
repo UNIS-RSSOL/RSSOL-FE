@@ -46,6 +46,46 @@ function EmployeeTodo() {
   const [newTodoText, setNewTodoText] = useState("");
   const [editTodoText, setEditTodoText] = useState("");
 
+  // 임시 데이터 (API에서 받아온 할 일이 없을 때만 사용)
+  const [mockTodos, setMockTodos] = useState({
+    STORE: [
+      {
+        id: "mock-store-1",
+        content: "매장 공용 체크리스트 예시",
+        completed: true,
+      },
+      {
+        id: "mock-store-2",
+        content: "안전 수칙 안내문 확인",
+        completed: false,
+      },
+    ],
+    HANDOVER: [
+      {
+        id: "mock-handover-1",
+        content: "지난 근무 인수인계 내용 확인",
+        completed: false,
+      },
+      {
+        id: "mock-handover-2",
+        content: "마감 인수인계 준비",
+        completed: true,
+      },
+    ],
+    PERSONAL: [
+      {
+        id: "mock-personal-1",
+        content: "개인 교육 자료 읽기",
+        completed: false,
+      },
+      {
+        id: "mock-personal-2",
+        content: "내 출근 시간 다시 확인",
+        completed: true,
+      },
+    ],
+  });
+
   const [currentDate, setCurrentDate] = useState(dayjs());
   const days = ["일", "월", "화", "수", "목", "금", "토"];
   const dayOfWeek = days[currentDate.day()];
@@ -170,6 +210,16 @@ function EmployeeTodo() {
     setEditTodoText("");
   };
 
+  // 임시 데이터용 토글 핸들러 (체크 버튼 on/off 전용)
+  const handleToggleMockTodo = (categoryKey, todoId) => {
+    setMockTodos((prev) => ({
+      ...prev,
+      [categoryKey]: prev[categoryKey].map((todo) =>
+        todo.id === todoId ? { ...todo, completed: !todo.completed } : todo
+      ),
+    }));
+  };
+
   const canEdit = (category) => {
     // "매장 전체"는 employee는 추가/수정 불가
     if (category === "STORE") return false;
@@ -215,7 +265,7 @@ function EmployeeTodo() {
               }
             }}
             disabled={!canEdit("STORE")}
-            className="flex items-center gap-[8px] px-[16px] h-[40px] rounded-[20px] border bg-[#ffffff] mb-[12px] w-fit disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-[8px] px-[16px] h-[40px] rounded-[20px] border bg-[#ffffff] mb-[16px] w-fit disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ borderWidth: "1px", borderColor: "#C7C7C7" }}
           >
             <div className="flex items-center gap-[8px]">
@@ -263,71 +313,81 @@ function EmployeeTodo() {
               </button>
             </form>
           )}
-          <div className="space-y-[8px] w-full">
-            {todos.STORE.length === 0 && editingCategory !== "STORE" ? (
-              <p className="text-[14px] text-gray-400 text-left py-[16px]">
-                할 일이 없습니다
-              </p>
-            ) : (
-              todos.STORE.map((todo) => (
-                <div
-                  key={todo.id}
-                  className="flex items-center gap-[8px] p-[12px] bg-gray-50 rounded-[8px] border border-gray-200"
-                >
+          <div className="w-full">
+            {(todos.STORE.length > 0 ? todos.STORE : mockTodos.STORE).map(
+              (todo) => {
+                const isMock = todo.id.toString().startsWith("mock-");
+                const onToggle = isMock
+                  ? () => handleToggleMockTodo("STORE", todo.id)
+                  : () => handleToggleTodo(todo.id);
+
+                return (
                   <div
-                    className={`w-[20px] h-[20px] rounded-full border-[2px] shrink-0 flex items-center justify-center cursor-pointer ${
-                      todo.completed
-                        ? "bg-[#3370FF] border-[#3370FF]"
-                        : "border-[#D9D9D9] bg-white"
-                    }`}
-                    onClick={() => handleToggleTodo(todo.id)}
+                    key={todo.id}
+                    className="flex items-center gap-[8px] py-[8px] border-b border-gray-100 last:border-b-0"
                   >
-                    {todo.completed && (
-                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                        <path
-                          d="M1 4L3.5 6.5L9 1"
-                          stroke="white"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                    <div
+                      className={`w-[20px] h-[20px] rounded-full border-[2px] shrink-0 flex items-center justify-center cursor-pointer ${
+                        todo.completed
+                          ? "bg-[#3370FF] border-[#3370FF]"
+                          : "border-[#D9D9D9] bg-white"
+                      }`}
+                      onClick={onToggle}
+                    >
+                      {todo.completed && (
+                        <svg
+                          width="10"
+                          height="8"
+                          viewBox="0 0 10 8"
+                          fill="none"
+                        >
+                          <path
+                            d="M1 4L3.5 6.5L9 1"
+                            stroke="white"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    {editingTodoId === todo.id && !isMock ? (
+                      <input
+                        type="text"
+                        value={editTodoText}
+                        onChange={(e) => setEditTodoText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleSaveEdit(todo);
+                          } else if (e.key === "Escape") {
+                            handleCancelEdit();
+                          }
+                        }}
+                        onBlur={() => handleSaveEdit(todo)}
+                        autoFocus
+                        className="flex-1 px-[8px] py-[4px] border border-gray-300 rounded-[4px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
+                      />
+                    ) : (
+                      <span
+                        className="flex-1 text-[14px] cursor-pointer"
+                        onClick={(e) =>
+                          canEdit("STORE") && !isMock && handleStartEdit(todo, e)
+                        }
+                      >
+                        {todo.content}
+                      </span>
+                    )}
+                    {canEdit("STORE") && !isMock && (
+                      <button
+                        onClick={(e) => handleDeleteTodo(todo.id, e)}
+                        className="text-[16px] text-gray-500 hover:text-red-500 bg-transparent border-none p-0 cursor-pointer appearance-none outline-none focus:outline-none shrink-0"
+                      >
+                        ×
+                      </button>
                     )}
                   </div>
-                  {editingTodoId === todo.id ? (
-                    <input
-                      type="text"
-                      value={editTodoText}
-                      onChange={(e) => setEditTodoText(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          handleSaveEdit(todo);
-                        } else if (e.key === "Escape") {
-                          handleCancelEdit();
-                        }
-                      }}
-                      onBlur={() => handleSaveEdit(todo)}
-                      autoFocus
-                      className="flex-1 px-[8px] py-[4px] border border-gray-300 rounded-[4px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
-                    />
-                  ) : (
-                    <span
-                      className="flex-1 text-[14px] cursor-pointer"
-                      onClick={(e) => canEdit("STORE") && handleStartEdit(todo, e)}
-                    >
-                      {todo.content}
-                    </span>
-                  )}
-                  {canEdit("STORE") && (
-                    <button
-                      onClick={(e) => handleDeleteTodo(todo.id, e)}
-                      className="text-[16px] text-gray-500 hover:text-red-500 bg-transparent border-none p-0 cursor-pointer appearance-none outline-none focus:outline-none shrink-0"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))
+                );
+              }
             )}
           </div>
         </div>
@@ -337,7 +397,7 @@ function EmployeeTodo() {
           {canEdit("HANDOVER") && (
             <button
               onClick={() => handleCategoryClick("HANDOVER")}
-              className="flex items-center gap-[8px] px-[16px] h-[40px] rounded-[20px] border bg-[#ffffff] mb-[12px] w-fit"
+              className="flex items-center gap-[8px] px-[16px] h-[40px] rounded-[20px] border bg-[#ffffff] mb-[16px] w-fit"
               style={{ borderWidth: "1px", borderColor: "#C7C7C7" }}
             >
               <div className="flex items-center gap-[8px]">
@@ -386,16 +446,20 @@ function EmployeeTodo() {
               </button>
             </form>
           )}
-          <div className="space-y-[8px] w-full">
-            {todos.HANDOVER.length === 0 && editingCategory !== "HANDOVER" ? (
-              <p className="text-[14px] text-gray-400 text-left py-[16px]">
-                할 일이 없습니다
-              </p>
-            ) : (
-              todos.HANDOVER.map((todo) => (
+          <div className="w-full">
+            {(todos.HANDOVER.length > 0
+              ? todos.HANDOVER
+              : mockTodos.HANDOVER
+            ).map((todo) => {
+              const isMock = todo.id.toString().startsWith("mock-");
+              const onToggle = isMock
+                ? () => handleToggleMockTodo("HANDOVER", todo.id)
+                : () => handleToggleTodo(todo.id);
+
+              return (
                 <div
                   key={todo.id}
-                  className="flex items-center gap-[8px] p-[12px] bg-gray-50 rounded-[8px] border border-gray-200"
+                  className="flex items-center gap-[8px] py-[8px] border-b border-gray-100 last:border-b-0"
                 >
                   <div
                     className={`w-[20px] h-[20px] rounded-full border-[2px] shrink-0 flex items-center justify-center cursor-pointer ${
@@ -403,7 +467,7 @@ function EmployeeTodo() {
                         ? "bg-[#3370FF] border-[#3370FF]"
                         : "border-[#D9D9D9] bg-white"
                     }`}
-                    onClick={() => handleToggleTodo(todo.id)}
+                    onClick={onToggle}
                   >
                     {todo.completed && (
                       <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -417,7 +481,7 @@ function EmployeeTodo() {
                       </svg>
                     )}
                   </div>
-                  {editingTodoId === todo.id ? (
+                  {editingTodoId === todo.id && !isMock ? (
                     <input
                       type="text"
                       value={editTodoText}
@@ -436,20 +500,22 @@ function EmployeeTodo() {
                   ) : (
                     <span
                       className="flex-1 text-[14px] cursor-pointer"
-                      onClick={(e) => handleStartEdit(todo, e)}
+                      onClick={(e) => !isMock && handleStartEdit(todo, e)}
                     >
                       {todo.content}
                     </span>
                   )}
-                  <button
-                    onClick={(e) => handleDeleteTodo(todo.id, e)}
-                    className="text-[16px] text-gray-500 hover:text-red-500 bg-transparent border-none p-0 cursor-pointer appearance-none outline-none focus:outline-none shrink-0"
-                  >
-                    ×
-                  </button>
+                  {!isMock && (
+                    <button
+                      onClick={(e) => handleDeleteTodo(todo.id, e)}
+                      className="text-[16px] text-gray-500 hover:text-red-500 bg-transparent border-none p-0 cursor-pointer appearance-none outline-none focus:outline-none shrink-0"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
-              ))
-            )}
+              );
+            })}
           </div>
         </div>
 
@@ -458,7 +524,7 @@ function EmployeeTodo() {
           {canEdit("PERSONAL") && (
             <button
               onClick={() => handleCategoryClick("PERSONAL")}
-              className="flex items-center gap-[8px] px-[16px] h-[40px] rounded-[20px] border bg-[#ffffff] mb-[12px] w-fit"
+              className="flex items-center gap-[8px] px-[16px] h-[40px] rounded-[20px] border bg-[#ffffff] mb-[16px] w-fit"
               style={{ borderWidth: "1px", borderColor: "#C7C7C7" }}
             >
               <div className="flex items-center gap-[8px]">
@@ -507,16 +573,20 @@ function EmployeeTodo() {
               </button>
             </form>
           )}
-          <div className="space-y-[8px] w-full">
-            {todos.PERSONAL.length === 0 && editingCategory !== "PERSONAL" ? (
-              <p className="text-[14px] text-gray-400 text-left py-[16px]">
-                할 일이 없습니다
-              </p>
-            ) : (
-              todos.PERSONAL.map((todo) => (
+          <div className="w-full">
+            {(todos.PERSONAL.length > 0
+              ? todos.PERSONAL
+              : mockTodos.PERSONAL
+            ).map((todo) => {
+              const isMock = todo.id.toString().startsWith("mock-");
+              const onToggle = isMock
+                ? () => handleToggleMockTodo("PERSONAL", todo.id)
+                : () => handleToggleTodo(todo.id);
+
+              return (
                 <div
                   key={todo.id}
-                  className="flex items-center gap-[8px] p-[12px] bg-gray-50 rounded-[8px] border border-gray-200"
+                  className="flex items-center gap-[8px] py-[8px] border-b border-gray-100 last:border-b-0"
                 >
                   <div
                     className={`w-[20px] h-[20px] rounded-full border-[2px] shrink-0 flex items-center justify-center cursor-pointer ${
@@ -524,7 +594,7 @@ function EmployeeTodo() {
                         ? "bg-[#3370FF] border-[#3370FF]"
                         : "border-[#D9D9D9] bg-white"
                     }`}
-                    onClick={() => handleToggleTodo(todo.id)}
+                    onClick={onToggle}
                   >
                     {todo.completed && (
                       <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -538,7 +608,7 @@ function EmployeeTodo() {
                       </svg>
                     )}
                   </div>
-                  {editingTodoId === todo.id ? (
+                  {editingTodoId === todo.id && !isMock ? (
                     <input
                       type="text"
                       value={editTodoText}
@@ -557,20 +627,22 @@ function EmployeeTodo() {
                   ) : (
                     <span
                       className="flex-1 text-[14px] cursor-pointer"
-                      onClick={(e) => handleStartEdit(todo, e)}
+                      onClick={(e) => !isMock && handleStartEdit(todo, e)}
                     >
                       {todo.content}
                     </span>
                   )}
-                  <button
-                    onClick={(e) => handleDeleteTodo(todo.id, e)}
-                    className="text-[16px] text-gray-500 hover:text-red-500 bg-transparent border-none p-0 cursor-pointer appearance-none outline-none focus:outline-none shrink-0"
-                  >
-                    ×
-                  </button>
+                  {!isMock && (
+                    <button
+                      onClick={(e) => handleDeleteTodo(todo.id, e)}
+                      className="text-[16px] text-gray-500 hover:text-red-500 bg-transparent border-none p-0 cursor-pointer appearance-none outline-none focus:outline-none shrink-0"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
-              ))
-            )}
+              );
+            })}
           </div>
         </div>
       </main>
