@@ -2,11 +2,6 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import "dayjs/locale/ko";
 import { getScheduleByPeriod } from "../../services/WorkShiftService";
-import {
-  MOCK_WORKERS,
-  createMockWeekEvents,
-} from "../../mocks/mockData.js"; // TODO: API 연결 후 이 import 제거
-
 const DAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 const getDayColor = (idx) => {
@@ -27,7 +22,7 @@ function WeekCalendar({
   externalEvents,
 }) {
   const [week, setWeek] = useState([]);
-  const [workers, setWorkers] = useState(externalWorkers || MOCK_WORKERS);
+  const [workers, setWorkers] = useState(externalWorkers || []);
   const [events, setEvents] = useState(externalEvents || []);
 
   useEffect(() => {
@@ -42,6 +37,9 @@ function WeekCalendar({
       setEvents(externalEvents);
       return;
     }
+
+    // storeId 로드 전이면 대기
+    if (!storeId) return;
 
     (async () => {
       try {
@@ -71,14 +69,9 @@ function WeekCalendar({
               end: s.endDatetime,
             })),
           );
-        } else {
-          setWorkers(MOCK_WORKERS);
-          setEvents(createMockWeekEvents(startOfWeek));
         }
       } catch (error) {
         console.error("Error fetching schedules:", error);
-        setWorkers(MOCK_WORKERS);
-        setEvents(createMockWeekEvents(startOfWeek));
       }
     })();
   }, [date, storeId, refreshKey, externalWorkers, externalEvents]);
@@ -111,7 +104,7 @@ function WeekCalendar({
           key={worker.userStoreId}
           className="flex h-[70px]"
         >
-          <div className="w-[60px] shrink-0 flex items-center text-[13px] font-[500] truncate pr-2 border-r border-[#E7EAF3]">
+          <div className="w-[60px] shrink-0 flex items-center justify-center text-center text-[13px] font-[500] px-1 border-r border-[#E7EAF3] break-all leading-tight">
             {worker.username}
           </div>
           {week.map((w) => {

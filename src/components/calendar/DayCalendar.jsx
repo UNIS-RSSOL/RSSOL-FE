@@ -2,11 +2,6 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { getScheduleByPeriod } from "../../services/WorkShiftService";
 import TimelineGrid, { GridLines, calcEventPosition } from "./TimelineGrid.jsx";
-import {
-  MOCK_WORKERS,
-  createMockDayEvents,
-} from "../../mocks/mockData.js"; // TODO: API 연결 후 이 import 제거
-
 function DayCalendar({
   date,
   onEventClick,
@@ -17,11 +12,10 @@ function DayCalendar({
   className = "",
   externalWorkers,
   externalEvents,
+  hideLabels = false,
 }) {
-  const [workers, setWorkers] = useState(externalWorkers || MOCK_WORKERS);
-  const [events, setEvents] = useState(
-    externalEvents || createMockDayEvents(dayjs().format("YYYY-MM-DD")),
-  );
+  const [workers, setWorkers] = useState(externalWorkers || []);
+  const [events, setEvents] = useState(externalEvents || []);
 
   useEffect(() => {
     // 외부 데이터가 제공되면 API 호출 건너뜀
@@ -30,6 +24,9 @@ function DayCalendar({
       setEvents(externalEvents);
       return;
     }
+
+    // storeId 로드 전이면 대기
+    if (!storeId) return;
 
     (async () => {
       try {
@@ -72,11 +69,11 @@ function DayCalendar({
   return (
     <TimelineGrid
       accentColor="#FF4D4D"
-      leftWidth={60}
-      leftColumn={workers.map((worker) => (
+      leftWidth={hideLabels ? 0 : 60}
+      leftColumn={hideLabels ? [] : workers.map((worker) => (
         <div
           key={worker.userStoreId}
-          className="h-[56px] flex items-center text-[13px] font-[500] truncate pr-2"
+          className="h-[56px] flex items-center text-[13px] font-[500] pr-2 pl-1 break-all leading-tight"
         >
           {worker.username}
         </div>

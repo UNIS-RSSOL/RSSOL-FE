@@ -13,10 +13,13 @@ import {
   getStaffStoreList,
   changeActiveStore,
 } from "../services/MypageService.js";
-import { getScheduleByPeriod } from "../services/WorkShiftService.js";
-import { getMyScheduleByPeriod } from "../services/WorkShiftService.js";
-
-import { MOCK_TODAY_SCHEDULES, MOCK_TODOS } from "../mocks/mockData.js";
+import { getScheduleByPeriod, getMyScheduleByPeriod } from "../services/WorkShiftService.js";
+import { getTodos, toggleTodoComplete } from "../services/TodoService.js";
+import {
+  getTodayAttendance,
+  checkIn,
+  checkOut,
+} from "../services/AttendanceService.js";
 
 export default function useHomePage(role) {
   const navigate = useNavigate();
@@ -24,10 +27,12 @@ export default function useHomePage(role) {
 
   const [activeStore, setActiveStore] = useState({ storeId: null, name: "" });
   const [storeList, setStoreList] = useState([]);
-  const [todaySchedules, setTodaySchedules] = useState(MOCK_TODAY_SCHEDULES); // TODO: API 연결 후 빈 배열로 변경
+  const [todaySchedules, setTodaySchedules] = useState([]);
+  const [myTodayShift, setMyTodayShift] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAppModalOpen, setIsAppModalOpen] = useState(false);
-  const [todos, setTodos] = useState(MOCK_TODOS); // TODO: API 연결 후 빈 배열로 변경
+  const [todos, setTodos] = useState({ STORE: [], HANDOVER: [], PERSONAL: [] });
+  const [attendance, setAttendance] = useState(null); // 오늘 출퇴근 상태
 
   /* ── 초기 데이터 로딩 ── */
   useEffect(() => {
@@ -43,15 +48,46 @@ export default function useHomePage(role) {
         setStoreList(stores);
 
         const todayStr = today.format("YYYY-MM-DD");
-        const schedules =
-          role === "owner"
-            ? await getScheduleByPeriod(todayStr, todayStr)
-            : await getMyScheduleByPeriod(todayStr, todayStr);
 
-        if (schedules && schedules.length > 0) {
-          setTodaySchedules(schedules);
+        if (role === "owner") {
+          // 매장 전체 스케줄 (MiniTimeline용)
+          const storeSchedules = await getScheduleByPeriod(todayStr, todayStr);
+          if (storeSchedules && storeSchedules.length > 0) {
+            setTodaySchedules(storeSchedules);
+          }
+          // 본인 스케줄 (근무시간 표시용)
+          const mySchedules = await getMyScheduleByPeriod(todayStr, todayStr);
+          if (mySchedules && mySchedules.length > 0) {
+            setMyTodayShift(mySchedules[0]);
+          }
+        } else {
+          const mySchedules = await getMyScheduleByPeriod(todayStr, todayStr);
+          if (mySchedules && mySchedules.length > 0) {
+            setTodaySchedules(mySchedules);
+            setMyTodayShift(mySchedules[0]);
+          }
         }
-        // else: 목업 데이터 유지
+
+        // 오늘 할 일 조회 (전체 카테고리)
+        try {
+          const todoRes = await getTodos(todayStr);
+          const mapTodos = (arr) => (arr || []).map((t) => ({ ...t, text: t.content, done: t.completed }));
+          setTodos({
+            STORE: mapTodos(todoRes.storeTodos),
+            HANDOVER: mapTodos(todoRes.handoverTodos),
+            PERSONAL: mapTodos(todoRes.personalTodos),
+          });
+        } catch {
+          // 할 일 조회 실패 시 무시
+        }
+
+        // 오늘 출퇴근 상태 조회
+        try {
+          const att = await getTodayAttendance();
+          setAttendance(att);
+        } catch {
+          // 출퇴근 상태 조회 실패 시 무시
+        }
       } catch (error) {
         console.error("홈 데이터 로딩 실패:", error);
         // 목업 데이터 유지
@@ -59,27 +95,44 @@ export default function useHomePage(role) {
     })();
   }, []);
 
-  const todayShift = todaySchedules[0];
+  const todayShift = myTodayShift;
 
   /* ── 할 일 토글 ── */
-  const toggleTodo = (id) => {
-    setTodos((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
-    );
+  const toggleTodo = async (id) => {
+    try {
+      await toggleTodoComplete(id);
+      setTodos((prev) => {
+        const updated = {};
+        for (const key of Object.keys(prev)) {
+          updated[key] = prev[key].map((t) => (t.id === id ? { ...t, done: !t.done } : t));
+        }
+        return updated;
+      });
+    } catch (error) {
+      console.error("할 일 토글 실패:", error);
+    }
   };
 
   /* ── 출근 처리 ── */
-  const isInApp = () =>
-    typeof window !== "undefined" && !!window.ReactNativeWebView;
-
-  const handleCheckIn = () => {
-    if (!isInApp()) {
-      setIsAppModalOpen(true);
-      return;
+  const handleCheckIn = async () => {
+    try {
+      const res = await checkIn();
+      setAttendance(res);
+    } catch (error) {
+      console.error("출근 실패:", error);
+      alert(error.response?.data?.message || "출근 처리에 실패했습니다.");
     }
-    window.ReactNativeWebView.postMessage(
-      JSON.stringify({ action: "goToGPS" }),
-    );
+  };
+
+  /* ── 퇴근 처리 ── */
+  const handleCheckOut = async () => {
+    try {
+      const res = await checkOut();
+      setAttendance(res);
+    } catch (error) {
+      console.error("퇴근 실패:", error);
+      alert(error.response?.data?.message || "퇴근 처리에 실패했습니다.");
+    }
   };
 
   /* ── 매장 전환 ── */
@@ -108,11 +161,13 @@ export default function useHomePage(role) {
     todayShift,
     todos,
     toggleTodo,
+    attendance,
     sidebarOpen,
     setSidebarOpen,
     isAppModalOpen,
     setIsAppModalOpen,
     handleCheckIn,
+    handleCheckOut,
     handleStoreChange,
     handleLogout,
     navigate,

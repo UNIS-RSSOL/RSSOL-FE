@@ -27,18 +27,18 @@ import HomeHeader from "../../components/home/HomeHeader.jsx";
 dayjs.locale("ko");
 
 const TODO_CATEGORIES = {
-  STORE_ALL: "매장 전체",
+  STORE: "매장 전체",
   HANDOVER: "인수인계",
-  MY_TODO: "내 할 일",
+  PERSONAL: "내 할 일",
 };
 
 function EmployeeTodo() {
   const navigate = useNavigate();
   const [activeStore, setActiveStore] = useState({ storeId: null, name: "" });
   const [todos, setTodos] = useState({
-    STORE_ALL: [],
+    STORE: [],
     HANDOVER: [],
-    MY_TODO: [],
+    PERSONAL: [],
   });
   const [isLoading, setIsLoading] = useState(true);
   const [editingCategory, setEditingCategory] = useState(null);
@@ -61,13 +61,13 @@ function EmployeeTodo() {
 
   const loadTodos = async () => {
     try {
-      const allTodos = await getTodos();
-      const categorized = {
-        STORE_ALL: allTodos.filter((todo) => todo.category === "STORE_ALL"),
-        HANDOVER: allTodos.filter((todo) => todo.category === "HANDOVER"),
-        MY_TODO: allTodos.filter((todo) => todo.category === "MY_TODO"),
-      };
-      setTodos(categorized);
+      const selectedDateStr = currentDate.format("YYYY-MM-DD");
+      const res = await getTodos(selectedDateStr);
+      setTodos({
+        STORE: res.storeTodos || [],
+        HANDOVER: res.handoverTodos || [],
+        PERSONAL: res.personalTodos || [],
+      });
     } catch (error) {
       console.error(error);
     }
@@ -87,6 +87,13 @@ function EmployeeTodo() {
     })();
   }, []);
 
+  // 날짜 변경 시 할 일 다시 로드
+  useEffect(() => {
+    if (!isLoading) {
+      loadTodos();
+    }
+  }, [currentDate]);
+
   const handleCategoryClick = (category) => {
     setEditingCategory(category);
     setNewTodoText("");
@@ -98,13 +105,22 @@ function EmployeeTodo() {
       return;
     }
 
+    const todoText = newTodoText.trim();
+    const dueDate = currentDate.format("YYYY-MM-DD");
+
     try {
-      await addTodo(newTodoText.trim(), "", category);
+      const response = await addTodo(todoText, category, dueDate);
+      
       setNewTodoText("");
       setEditingCategory(null);
       await loadTodos();
     } catch (error) {
       console.error("할 일 생성 실패:", error);
+      console.error("에러 상세:", error.response?.data || error.message);
+      alert(
+        error.response?.data?.message || 
+        "할 일 추가에 실패했습니다. 다시 시도해주세요."
+      );
     }
   };
 
@@ -130,7 +146,7 @@ function EmployeeTodo() {
   const handleStartEdit = (todo, e) => {
     e.stopPropagation();
     setEditingTodoId(todo.id);
-    setEditTodoText(todo.title);
+    setEditTodoText(todo.content);
   };
 
   const handleSaveEdit = async (todo) => {
@@ -140,7 +156,7 @@ function EmployeeTodo() {
     }
 
     try {
-      await updateTodo(todo.id, editTodoText.trim(), todo.content || "", todo.category);
+      await updateTodo(todo.id, editTodoText.trim());
       setEditingTodoId(null);
       setEditTodoText("");
       await loadTodos();
@@ -156,7 +172,7 @@ function EmployeeTodo() {
 
   const canEdit = (category) => {
     // "매장 전체"는 employee는 추가/수정 불가
-    if (category === "STORE_ALL") return false;
+    if (category === "STORE") return false;
     // "인수인계"와 "내 할 일"은 모두 추가/수정 가능
     return true;
   };
@@ -194,45 +210,66 @@ function EmployeeTodo() {
         <div className="mb-[32px] flex flex-col items-start">
           <button
             onClick={() => {
-              if (canEdit("STORE_ALL")) {
-                handleCategoryClick("STORE_ALL");
+              if (canEdit("STORE")) {
+                handleCategoryClick("STORE");
               }
             }}
-            disabled={!canEdit("STORE_ALL")}
+            disabled={!canEdit("STORE")}
             className="flex items-center gap-[8px] px-[16px] h-[40px] rounded-[20px] border bg-[#ffffff] mb-[12px] w-fit disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ borderWidth: "1px", borderColor: "#C7C7C7" }}
           >
             <div className="flex items-center gap-[8px]">
               <TodoAllIcon />
               <span className="text-[14px] font-[500]">
-                {TODO_CATEGORIES.STORE_ALL}
+                {TODO_CATEGORIES.STORE}
               </span>
               <span className="text-[16px]">+</span>
             </div>
           </button>
-          {editingCategory === "STORE_ALL" && canEdit("STORE_ALL") && (
-            <input
-              type="text"
-              value={newTodoText}
-              onChange={(e) => setNewTodoText(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleCreateTodo("STORE_ALL");
-                }
+          {editingCategory === "STORE" && canEdit("STORE") && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleCreateTodo("STORE");
               }}
-              onBlur={() => handleCreateTodo("STORE_ALL")}
-              autoFocus
-              className="w-full px-[12px] py-[8px] border border-gray-300 rounded-[8px] mb-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
-              placeholder="할 일을 입력하세요"
-            />
+              className="flex items-center gap-[8px] w-full mb-[8px]"
+            >
+              <input
+                type="text"
+                value={newTodoText}
+                onChange={(e) => setNewTodoText(e.target.value)}
+                autoFocus
+                className="flex-1 px-[12px] py-[8px] border border-gray-300 rounded-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
+                placeholder="할 일을 입력하세요"
+              />
+              <button
+                type="submit"
+                disabled={!newTodoText.trim()}
+                className={`w-[36px] h-[36px] rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                  newTodoText.trim()
+                    ? "bg-[#3370FF] cursor-pointer hover:bg-[#2563EB]"
+                    : "bg-gray-300 cursor-not-allowed"
+                }`}
+              >
+                <svg width="16" height="12" viewBox="0 0 10 8" fill="none">
+                  <path
+                    d="M1 4L3.5 6.5L9 1"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </form>
           )}
           <div className="space-y-[8px] w-full">
-            {todos.STORE_ALL.length === 0 && editingCategory !== "STORE_ALL" ? (
+            {todos.STORE.length === 0 && editingCategory !== "STORE" ? (
               <p className="text-[14px] text-gray-400 text-left py-[16px]">
                 할 일이 없습니다
               </p>
             ) : (
-              todos.STORE_ALL.map((todo) => (
+              todos.STORE.map((todo) => (
                 <div
                   key={todo.id}
                   className="flex items-center gap-[8px] p-[12px] bg-gray-50 rounded-[8px] border border-gray-200"
@@ -276,12 +313,12 @@ function EmployeeTodo() {
                   ) : (
                     <span
                       className="flex-1 text-[14px] cursor-pointer"
-                      onClick={(e) => canEdit("STORE_ALL") && handleStartEdit(todo, e)}
+                      onClick={(e) => canEdit("STORE") && handleStartEdit(todo, e)}
                     >
-                      {todo.title}
+                      {todo.content}
                     </span>
                   )}
-                  {canEdit("STORE_ALL") && (
+                  {canEdit("STORE") && (
                     <button
                       onClick={(e) => handleDeleteTodo(todo.id, e)}
                       className="text-[16px] text-gray-500 hover:text-red-500 bg-transparent border-none p-0 cursor-pointer appearance-none outline-none focus:outline-none shrink-0"
@@ -306,27 +343,48 @@ function EmployeeTodo() {
               <div className="flex items-center gap-[8px]">
                 <TodoPartnerIcon />
                 <span className="text-[14px] font-[500]">
-                  {TODO_CATEGORIES.STORE_ALL}
+                  {TODO_CATEGORIES.HANDOVER}
                 </span>
                 <span className="text-[16px]">+</span>
               </div>
             </button>
           )}
           {editingCategory === "HANDOVER" && (
-            <input
-              type="text"
-              value={newTodoText}
-              onChange={(e) => setNewTodoText(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleCreateTodo("HANDOVER");
-                }
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleCreateTodo("HANDOVER");
               }}
-              onBlur={() => handleCreateTodo("HANDOVER")}
-              autoFocus
-              className="w-full px-[12px] py-[8px] border border-gray-300 rounded-[8px] mb-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
-              placeholder="할 일을 입력하세요"
-            />
+              className="flex items-center gap-[8px] w-full mb-[8px]"
+            >
+              <input
+                type="text"
+                value={newTodoText}
+                onChange={(e) => setNewTodoText(e.target.value)}
+                autoFocus
+                className="flex-1 px-[12px] py-[8px] border border-gray-300 rounded-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
+                placeholder="할 일을 입력하세요"
+              />
+              <button
+                type="submit"
+                disabled={!newTodoText.trim()}
+                className={`w-[36px] h-[36px] rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                  newTodoText.trim()
+                    ? "bg-[#3370FF] cursor-pointer hover:bg-[#2563EB]"
+                    : "bg-gray-300 cursor-not-allowed"
+                }`}
+              >
+                <svg width="16" height="12" viewBox="0 0 10 8" fill="none">
+                  <path
+                    d="M1 4L3.5 6.5L9 1"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </form>
           )}
           <div className="space-y-[8px] w-full">
             {todos.HANDOVER.length === 0 && editingCategory !== "HANDOVER" ? (
@@ -380,7 +438,7 @@ function EmployeeTodo() {
                       className="flex-1 text-[14px] cursor-pointer"
                       onClick={(e) => handleStartEdit(todo, e)}
                     >
-                      {todo.title}
+                      {todo.content}
                     </span>
                   )}
                   <button
@@ -397,44 +455,65 @@ function EmployeeTodo() {
 
         {/* 내 할 일 */}
         <div className="mb-[32px] flex flex-col items-start">
-          {canEdit("MY_TODO") && (
+          {canEdit("PERSONAL") && (
             <button
-              onClick={() => handleCategoryClick("MY_TODO")}
+              onClick={() => handleCategoryClick("PERSONAL")}
               className="flex items-center gap-[8px] px-[16px] h-[40px] rounded-[20px] border bg-[#ffffff] mb-[12px] w-fit"
               style={{ borderWidth: "1px", borderColor: "#C7C7C7" }}
             >
               <div className="flex items-center gap-[8px]">
                 <TodoUserIcon />
                 <span className="text-[14px] font-[500]">
-                  {TODO_CATEGORIES.STORE_ALL}
+                  {TODO_CATEGORIES.PERSONAL}
                 </span>
                 <span className="text-[16px]">+</span>
               </div>
             </button>
           )}
-          {editingCategory === "MY_TODO" && (
-            <input
-              type="text"
-              value={newTodoText}
-              onChange={(e) => setNewTodoText(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleCreateTodo("MY_TODO");
-                }
+          {editingCategory === "PERSONAL" && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleCreateTodo("PERSONAL");
               }}
-              onBlur={() => handleCreateTodo("MY_TODO")}
-              autoFocus
-              className="w-full px-[12px] py-[8px] border border-gray-300 rounded-[8px] mb-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
-              placeholder="할 일을 입력하세요"
-            />
+              className="flex items-center gap-[8px] w-full mb-[8px]"
+            >
+              <input
+                type="text"
+                value={newTodoText}
+                onChange={(e) => setNewTodoText(e.target.value)}
+                autoFocus
+                className="flex-1 px-[12px] py-[8px] border border-gray-300 rounded-[8px] text-[14px] focus:outline-none focus:ring-2 focus:ring-[#3370FF]"
+                placeholder="할 일을 입력하세요"
+              />
+              <button
+                type="submit"
+                disabled={!newTodoText.trim()}
+                className={`w-[36px] h-[36px] rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                  newTodoText.trim()
+                    ? "bg-[#3370FF] cursor-pointer hover:bg-[#2563EB]"
+                    : "bg-gray-300 cursor-not-allowed"
+                }`}
+              >
+                <svg width="16" height="12" viewBox="0 0 10 8" fill="none">
+                  <path
+                    d="M1 4L3.5 6.5L9 1"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </form>
           )}
           <div className="space-y-[8px] w-full">
-            {todos.MY_TODO.length === 0 && editingCategory !== "MY_TODO" ? (
+            {todos.PERSONAL.length === 0 && editingCategory !== "PERSONAL" ? (
               <p className="text-[14px] text-gray-400 text-left py-[16px]">
                 할 일이 없습니다
               </p>
             ) : (
-              todos.MY_TODO.map((todo) => (
+              todos.PERSONAL.map((todo) => (
                 <div
                   key={todo.id}
                   className="flex items-center gap-[8px] p-[12px] bg-gray-50 rounded-[8px] border border-gray-200"
@@ -480,7 +559,7 @@ function EmployeeTodo() {
                       className="flex-1 text-[14px] cursor-pointer"
                       onClick={(e) => handleStartEdit(todo, e)}
                     >
-                      {todo.title}
+                      {todo.content}
                     </span>
                   )}
                   <button

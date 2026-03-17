@@ -8,6 +8,8 @@ import {
 import {
   getOwnerStore,
   updateOwnerStore,
+  getOwnerProfile,
+  updateOwnerProfile,
 } from "../../services/MypageService.js";
 
 import Button from "../../components/common/Button.jsx";
@@ -34,6 +36,8 @@ function StoreSettings() {
   const [storeAddress, setStoreAddress] = useState("");
   const [storePhone, setStorePhone] = useState("");
   const [businessNumber, setBusinessNumber] = useState("");
+  const [ownerName, setOwnerName] = useState("");
+  const [ownerEmail, setOwnerEmail] = useState("");
 
   // 스케줄 정보
   const [operatingHours, setOperatingHours] = useState({
@@ -55,11 +59,13 @@ function StoreSettings() {
   useEffect(() => {
     (async () => {
       try {
-        const store = await getOwnerStore();
+        const [store, profile] = await Promise.all([getOwnerStore(), getOwnerProfile()]);
         setStoreName(store.name || "");
         setStoreAddress(store.address || "");
         setStorePhone(store.phoneNumber || "");
-        setBusinessNumber(store.businessRegistrationNumber || "");
+        setBusinessNumber(profile.businessRegistrationNumber || "");
+        setOwnerName(profile.username || "");
+        setOwnerEmail(profile.email || "");
         // TODO: 스케줄 정보 API 연결 시 여기서 로드
       } catch (error) {
         console.error(error);
@@ -92,7 +98,10 @@ function StoreSettings() {
   const handleSubmit = async () => {
     try {
       if (activeTab === "info") {
-        await updateOwnerStore(storeName, storeAddress, storePhone);
+        await Promise.all([
+          updateOwnerStore(storeName, storeAddress, storePhone),
+          updateOwnerProfile(ownerName, ownerEmail, businessNumber),
+        ]);
       } else {
         // TODO: 스케줄 정보 저장 API 연결
         console.log("스케줄 저장:", {
@@ -117,7 +126,7 @@ function StoreSettings() {
       </div>
 
       {/* 컨텐츠 영역 */}
-      <div className="w-full max-w-[393px] mt-8 flex flex-col items-center px-[8px] pb-[80px]">
+      <div className="w-full mt-8 flex flex-col items-center px-[8px] pb-[80px]">
         {/* 매장 이름 + 편집 아이콘 */}
         <div className="w-full mb-8">
           {isEditingName ? (

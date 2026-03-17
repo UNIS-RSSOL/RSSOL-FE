@@ -579,17 +579,16 @@ function OwnerSchedule() {
       );
 
       // PUT 요청을 위한 payload 생성 (백엔드 DTO 구조에 맞게)
+      // API는 { availabilities: [...] } 형태만 받음
       const payload = {
-        userStoreId: ownerStoreId,
-        userName: ownerUserName,
-        availabilities: availabilitiesWithoutId, // id 없는 순수 배열 (전체 INSERT로 처리)
+        availabilities: availabilitiesWithoutId, // id 없는 순수 배열
       };
 
       console.log("🔍 PUT 요청으로 전체 갱신 중...");
       console.log("🔍 payload:", JSON.stringify(payload, null, 2));
       console.log("🔍 payload 상세:", {
-        userStoreId: payload.userStoreId,
-        userName: payload.userName,
+        userStoreId: ownerStoreId,
+        userName: ownerUserName,
         availabilitiesCount: payload.availabilities.length,
         availabilities: payload.availabilities,
       });

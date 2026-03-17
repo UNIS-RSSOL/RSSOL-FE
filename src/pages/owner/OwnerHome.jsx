@@ -23,7 +23,9 @@ function OwnerHome() {
     setSidebarOpen,
     isAppModalOpen,
     setIsAppModalOpen,
+    attendance,
     handleCheckIn,
+    handleCheckOut,
     handleStoreChange,
     handleLogout,
     navigate,
@@ -73,7 +75,7 @@ function OwnerHome() {
           {today.format("M월 D일")}
         </p>
 
-        <WorkInfoCard todayShift={todayShift} onCheckIn={handleCheckIn} />
+        <WorkInfoCard todayShift={todayShift} onCheckIn={handleCheckIn} onCheckOut={handleCheckOut} attendance={attendance} />
         <TasksCard todos={todos} onToggle={toggleTodo} />
         <MiniTimeline className="flex-1" schedules={todaySchedules} />
       </main>

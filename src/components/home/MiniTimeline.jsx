@@ -9,9 +9,14 @@ function MiniTimeline({ schedules, className = "" }) {
       {/* 이벤트 영역 */}
       <div
         className="relative"
-        style={{ minHeight: `${schedules.length * 50 + 4}px` }}
+        style={{ minHeight: `${Math.max(schedules.length, 1) * 50 + 4}px` }}
       >
         <GridLines accentColor="#004DFF" />
+        {schedules.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <p className="text-[13px] text-[#87888c]">오늘 등록된 일정이 없습니다.</p>
+          </div>
+        )}
         {schedules.map((s, i) => {
           const pos = calcEventPosition(s.startDatetime, s.endDatetime);
           if (!pos) return null;
@@ -29,7 +34,7 @@ function MiniTimeline({ schedules, className = "" }) {
               }}
             >
               <span className="text-[12px] font-[500] truncate">
-                {s.storeName}
+                {s.username || s.storeName}
               </span>
             </div>
           );

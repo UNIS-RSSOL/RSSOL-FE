@@ -28,6 +28,7 @@ function NotificationItem({
   time,
   children,
   id,
+  responseId,
   status,
   approval,
   owner,
@@ -38,31 +39,41 @@ function NotificationItem({
   const defaultImg = owner ? OwnerBtn : EmpBtn;
 
   useEffect(() => {
-    if (alarmType === 2 && (status === "ACCEPTED" || status === "REJECTED")) {
-      setIsDisabled(true);
-      if (status === "ACCEPTED") setIsAccepted(true);
-      else setIsAccepted(false);
+    if (alarmType === 2) {
+      const s = status?.toUpperCase();
+      if (s && s !== "PENDING") {
+        setIsDisabled(true);
+        setIsAccepted(s.includes("ACCEPT"));
+      }
     }
-    if (
-      alarmType === 3 &&
-      (approval === "APPROVED" || approval === "REJECTED")
-    ) {
-      setIsDisabled(true);
-      if (approval === "APPROVED") setIsAccepted(true);
-      else setIsAccepted(false);
+    if (alarmType === 3) {
+      const a = approval?.toUpperCase();
+      if (a && a !== "PENDING") {
+        setIsDisabled(true);
+        setIsAccepted(a.includes("APPROV"));
+      }
     }
-  }, [status, approval, isDisabled]);
+  }, [status, approval, alarmType]);
+
+  const handleActionError = (error) => {
+    const msg = error.response?.data?.message;
+    if (error.response?.status === 500 || error.response?.status === 400) {
+      alert(msg || "이미 처리된 요청입니다.");
+      setIsDisabled(true);
+    } else {
+      alert(msg || "요청 처리에 실패했습니다.");
+    }
+  };
 
   //대타1차(ACCEPT/REJECT)
   const handleAcceptShiftSwap = async (requestId, action) => {
     try {
       const response = await respondShiftSwapRequest(requestId, action);
       setIsDisabled(true);
-      if (action === "ACCEPT") setIsAccepted(true);
-      else setIsAccepted(false);
+      setIsAccepted(action === "ACCEPT");
       return response;
     } catch (error) {
-      console.error("대타 요청 수락 실패:", error);
+      handleActionError(error);
     }
   };
 
@@ -71,11 +82,10 @@ function NotificationItem({
     try {
       const response = await approveShiftSwapRequest(requestId, action);
       setIsDisabled(true);
-      if (action === "APPROVE") setIsAccepted(true);
-      else setIsAccepted(false);
+      setIsAccepted(action === "APPROVE");
       return response;
     } catch (error) {
-      console.error("대타 요청 최종 승인 실패:", error);
+      handleActionError(error);
     }
   };
 
@@ -84,29 +94,27 @@ function NotificationItem({
     try {
       const response = await respondExtraShiftRequest(requestId, action);
       setIsDisabled(true);
-      if (action === "ACCEPT") setIsAccepted(true);
-      else setIsAccepted(false);
+      setIsAccepted(action === "ACCEPT");
       return response;
     } catch (error) {
-      console.error("알바생 인력 요청 수락/거절 실패:", error);
+      handleActionError(error);
     }
   };
 
   //알바생 인력요청 최종 승인/미승인
   const handleApproveStaffRequest = async (requestId, action) => {
     try {
-      const response = await approveExtraShiftRequest(requestId, action);
+      const response = await approveExtraShiftRequest(requestId, responseId, action);
       setIsDisabled(true);
-      if (action === "APPROVE") setIsAccepted(true);
-      else setIsAccepted(false);
+      setIsAccepted(action === "APPROVE");
       return response;
     } catch (error) {
-      console.error("알바생 인력 요청 최종 승인/미승인 실패:", error);
+      handleActionError(error);
     }
   };
 
   return (
-    <div className="flex flex-row px-5 my-2 items-center gap-4">
+    <div className={`flex flex-row px-5 my-2 items-center gap-4 ${isDisabled ? "opacity-60" : ""}`}>
       {!img || img === "" || img === null ? (
         <img src={defaultImg} alt="profile" className="size-[47px]" />
       ) : (
@@ -116,81 +124,87 @@ function NotificationItem({
       )}
 
       <div className="flex-1 flex flex-col items-start gap-1">
-        <RoundTag className="flex items-center bg-[#fdfffe] border-[#32d1aa] border-[1px] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] font-[400] text-[12px]/[16px] px-3 h-[24px]">
+        <RoundTag className="flex items-center bg-[#fdfffe] border-[#3370FF] border-[1px] rounded-[20px] shadow-[0_2px_4px_0_rgba(0,0,0,0.15)] font-[400] text-[12px]/[16px] px-3 h-[24px]">
           {storename || "매장"}
         </RoundTag>
         <p className="text-[14px] font-[500] text-left">{children}</p>
         <span className="text-[10px] font-[400] text-[#87888c]">{time}</span>
         <div className="w-full flex justify-end items-center gap-2">
           {alarmType === 2 ? (
-            <>
-              <Button
-                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isDisabled && isAccepted ? "bg-[#EDF0F7] text-[#87888c]" : ""}`}
-                disabled={isDisabled}
-                onClick={() => {
-                  if (children.includes("대타")) {
-                    handleAcceptShiftSwap(id, "REJECT");
-                  } else {
-                    handleAcceptStaffRequest(id, "REJECT");
-                  }
-                }}
-              >
-                거절
-              </Button>
-              <Button
-                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isDisabled && !isAccepted ? "bg-[#EDF0F7] text-[#87888c]" : ""}`}
-                disabled={isDisabled}
-                onClick={() => {
-                  if (children.includes("대타")) {
-                    handleAcceptShiftSwap(id, "ACCEPT");
-                  } else {
-                    handleAcceptStaffRequest(id, "ACCEPT");
-                  }
-                }}
-              >
-                수락
-              </Button>
-            </>
+            isDisabled ? (
+              <span className={`rounded-[10px] px-3 h-[32px] flex items-center font-[500] text-[14px] ${isAccepted ? "bg-[#E8F5E9] text-[#2E7D32]" : "bg-[#EDF0F7] text-[#87888c]"}`}>
+                {isAccepted ? "수락됨" : "거절됨"}
+              </span>
+            ) : (
+              <>
+                <Button
+                  className="rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px]"
+                  onClick={() => {
+                    if (children.includes("대타")) {
+                      handleAcceptShiftSwap(id, "REJECT");
+                    } else {
+                      handleAcceptStaffRequest(id, "REJECT");
+                    }
+                  }}
+                >
+                  거절
+                </Button>
+                <Button
+                  className="rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px]"
+                  onClick={() => {
+                    if (children.includes("대타")) {
+                      handleAcceptShiftSwap(id, "ACCEPT");
+                    } else {
+                      handleAcceptStaffRequest(id, "ACCEPT");
+                    }
+                  }}
+                >
+                  수락
+                </Button>
+              </>
+            )
           ) : alarmType === 3 ? (
-            <>
-              <Button
-                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isDisabled && isAccepted ? "bg-[#EDF0F7] text-[#87888c]" : ""}`}
-                disabled={isDisabled}
-                onClick={() => {
-                  if (children.includes("대타")) {
-                    handleApproveShiftSwap(id, "REJECT");
-                  } else {
-                    handleApproveStaffRequest(id, "REJECT");
-                  }
-                }}
-              >
-                미승인
-              </Button>
-              <Button
-                className={`rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px] ${isDisabled && !isAccepted ? "bg-[#EDF0F7] text-[#87888c]" : ""}`}
-                disabled={isDisabled}
-                onClick={() => {
-                  if (children.includes("대타")) {
-                    handleApproveShiftSwap(id, "APPROVE");
-                  } else {
-                    handleApproveStaffRequest(id, "APPROVE");
-                  }
-                }}
-              >
-                승인
-              </Button>
-            </>
+            isDisabled ? (
+              <span className={`rounded-[10px] px-3 h-[32px] flex items-center font-[500] text-[14px] ${isAccepted ? "bg-[#E8F5E9] text-[#2E7D32]" : "bg-[#EDF0F7] text-[#87888c]"}`}>
+                {isAccepted ? "승인됨" : "미승인"}
+              </span>
+            ) : (
+              <>
+                <Button
+                  className="rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px]"
+                  onClick={() => {
+                    if (children.includes("대타")) {
+                      handleApproveShiftSwap(id, "REJECT");
+                    } else {
+                      handleApproveStaffRequest(id, "REJECT");
+                    }
+                  }}
+                >
+                  미승인
+                </Button>
+                <Button
+                  className="rounded-[10px] w-[64px] h-[32px] font-[500] text-[14px]"
+                  onClick={() => {
+                    if (children.includes("대타")) {
+                      handleApproveShiftSwap(id, "APPROVE");
+                    } else {
+                      handleApproveStaffRequest(id, "APPROVE");
+                    }
+                  }}
+                >
+                  승인
+                </Button>
+              </>
+            )
           ) : alarmType === 4 ? (
-            <>
-              <Button
-                className={`w-[132px] h-[32px] font-[500] text-[14px]`}
-                onClick={() => {
-                  navigate("/calModEmp");
-                }}
-              >
-                추가하기
-              </Button>
-            </>
+            <Button
+              className="w-[132px] h-[32px] font-[500] text-[14px]"
+              onClick={() => {
+                navigate("/employee/schedule/modifying");
+              }}
+            >
+              추가하기
+            </Button>
           ) : (
             <></>
           )}

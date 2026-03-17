@@ -80,7 +80,7 @@ function Login() {
       )}
 
       {/* 로그인 버튼들 */}
-      <div className="flex flex-col gap-[10px] w-full max-w-[393px] px-[40px] pb-[60px]">
+      <div className="flex flex-col gap-[10px] w-full px-[40px] pb-[60px]">
         <LoginButton
           className="!bg-[#fee500]"
           onClick={goToKakaoLogin}

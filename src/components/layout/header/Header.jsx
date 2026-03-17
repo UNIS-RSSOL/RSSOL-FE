@@ -62,14 +62,14 @@ function Header() {
             navigate("/calAdd");
           }
         } else {
-          // 알바: CalModEmp로 이동 (최초 입력과 수정 모두 처리)
-          navigate("/calModEmp");
+          // 알바: 근무표 제출 페이지로 이동 (최초 입력과 수정 모두 처리)
+          navigate("/employee/schedule/modifying");
         }
       } catch (error) {
         console.error("캘린더 생성 페이지 이동 실패:", error);
         // 기본값으로 이동
         const fromEmployeeSection = location.pathname.startsWith("/employee");
-        navigate(fromEmployeeSection ? "/calModEmp" : "/calAdd");
+        navigate(fromEmployeeSection ? "/employee/schedule/modifying" : "/calAdd");
       }
     }
     if (menu === "알림") {

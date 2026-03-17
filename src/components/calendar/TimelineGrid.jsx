@@ -119,7 +119,7 @@ function TimelineGrid({
 
         <div
           ref={scrollRef}
-          className="flex-1 overflow-x-auto min-w-0"
+          className="flex-1 overflow-x-auto min-w-0 scrollbar-hide"
           onScroll={handleScroll}
         >
           <div

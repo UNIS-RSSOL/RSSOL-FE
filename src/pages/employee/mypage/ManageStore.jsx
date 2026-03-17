@@ -182,7 +182,7 @@ function ManageStore() {
               ))}
             </div>
             <Button
-              className="w-[361px] h-[48px] text-[16px] font-[600]"
+              className="w-full max-w-[361px] h-[48px] text-[16px] font-[600]"
               onClick={handleAddStore}
             >
               추가하기

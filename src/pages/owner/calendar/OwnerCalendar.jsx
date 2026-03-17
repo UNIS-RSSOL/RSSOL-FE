@@ -134,7 +134,7 @@ function OwnerCalendar() {
     (async () => {
       try {
         const response = await getActiveStore();
-        setActiveStore(response.name);
+        setActiveStore(response.name || "내 매장");
         const storeId = response.storeId || response.id;
         if (storeId) setActiveStoreId(storeId);
       } catch (error) {
@@ -169,6 +169,7 @@ function OwnerCalendar() {
       SetIsMsgOpen1(true);
     } catch (error) {
       console.error("대타 요청 실패:", error);
+      alert(error.response?.data?.message || "대타 요청에 실패했습니다.");
     }
   };
 
@@ -180,21 +181,17 @@ function OwnerCalendar() {
       setNeedWorkers(1);
     } catch (error) {
       console.error("추가 근무 요청 실패:", error);
+      alert(error.response?.data?.message || "추가 근무 요청에 실패했습니다.");
     }
   };
 
   const handleAddWorkshift = async () => {
     try {
-      const data = {
-        userStoreId: newTime.userStoreId,
-        start:
-          newTime.date.format("YYYY-MM-DD") +
-          "T" +
-          newTime.start.format("HH:mm"),
-        end:
-          newTime.date.format("YYYY-MM-DD") + "T" + newTime.end.format("HH:mm"),
-      };
-      await addWorkShift(data.userStoreId, data.start, data.end);
+      const startDatetime =
+        newTime.date.format("YYYY-MM-DD") + "T" + newTime.start.format("HH:mm:ss");
+      const endDatetime =
+        newTime.date.format("YYYY-MM-DD") + "T" + newTime.end.format("HH:mm:ss");
+      await addWorkShift(newTime.userStoreId, startDatetime, endDatetime);
       setNewTime({
         userStoreId: "",
         username: "",
@@ -204,8 +201,10 @@ function OwnerCalendar() {
       });
       setIsModalOpen(false);
       setIsMsgOpen(true);
+      setRefreshKey((prev) => prev + 1);
     } catch (error) {
       console.error("근무 블록 추가 실패:", error);
+      alert(error.response?.data?.message || "근무 일정 추가에 실패했습니다.");
     }
   };
 
@@ -214,8 +213,10 @@ function OwnerCalendar() {
       await deleteWorkShift(eventData.id);
       setIsDeleteShift(false);
       setIsMsgOpen3(true);
+      setRefreshKey((prev) => prev + 1);
     } catch (error) {
       console.error("근무 블록 삭제 실패:", error);
+      alert(error.response?.data?.message || "근무 일정 삭제에 실패했습니다.");
     }
   };
 
@@ -228,7 +229,7 @@ function OwnerCalendar() {
         onRightClick={() => navigate("/owner/notification/home")}
       />
 
-      <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden">
+      <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden scrollbar-hide">
         <ConfigProvider
           theme={{
             components: {
@@ -384,24 +385,22 @@ function OwnerCalendar() {
                     </p>
                   </div>
                   <Button
-                    className="h-[48px] text-[16px] font-[600] items-center relative"
+                    className="w-full h-[48px] text-[16px] font-[600]"
                     onClick={() => {
                       setIsEventToastOpen(false);
                       setAddShiftToastOpen(true);
                     }}
                   >
-                    <UserAddIcon className="absolute left-4" />
-                    <span className="w-full text-center">추가 근무 요청</span>
+                    추가 근무 요청
                   </Button>
                   <Button
-                    className="h-[48px] text-[16px] font-[600] items-center relative"
+                    className="w-full h-[48px] text-[16px] font-[600]"
                     onClick={() => {
                       setIsEventToastOpen(false);
                       setIsDeleteShift(true);
                     }}
                   >
-                    <TrashIcon className="absolute left-4" />
-                    <span className="w-full text-center">근무 일정 삭제하기</span>
+                    근무 일정 삭제하기
                   </Button>
                 </div>
               </Toast>
@@ -450,17 +449,17 @@ function OwnerCalendar() {
                       선택한 일정에 {needWorkers}명으로 추가 근무를 요청할까요?
                     </p>
                   </div>
-                  <div className="flex flex-row items-center justify-between w-full">
-                    <div className="w-[100px]">
-                      <RoundTag> {activeStore}</RoundTag>
-                    </div>
+                  <div className="flex flex-row items-center justify-center w-full gap-3">
+                    <RoundTag className="!text-[12px] !font-[400] !px-2 !py-[1.5px]">
+                      {activeStore}
+                    </RoundTag>
                     <span className="text-[14px] font-[500]">
                       {eventData.start.format("dd(DD) HH:mm-")}
                       {eventData.end.format("HH:mm")}
                     </span>
-                    <div className="flex flex-row w-[100px] items-center gap-3">
+                    <div className="flex flex-row items-center gap-3">
                       <DeleteIcon
-                        className="size-[20px]"
+                        className="size-[20px] cursor-pointer"
                         onClick={() =>
                           setNeedWorkers(Math.max(needWorkers - 1, 1))
                         }
@@ -475,7 +474,7 @@ function OwnerCalendar() {
                     </div>
                   </div>
                   <Button
-                    className="h-[48px] text-[16px] font-[600] items-center relative"
+                    className="w-full h-[48px] text-[16px] font-[600] items-center"
                     onClick={handleRequestWork}
                   >
                     요청하기
@@ -503,7 +502,7 @@ function OwnerCalendar() {
                   </div>
                   <div className="flex flex-row w-full items-center gap-2">
                     <Button
-                      className="h-[33px] bg-[#fdfffe] border-[1px] border-[#26272a] flex-1/2 text-[14px] font-[400]"
+                      className="h-[33px] bg-[#fdfffe] !text-black border-[1px] border-[#26272a] flex-1/2 text-[14px] font-[400]"
                       onClick={() => setIsDeleteShift(false)}
                     >
                       아니오
