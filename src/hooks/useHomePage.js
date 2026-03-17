@@ -71,11 +71,10 @@ export default function useHomePage(role) {
         // 오늘 할 일 조회 (전체 카테고리)
         try {
           const todoRes = await getTodos(todayStr);
-          const mapTodos = (arr) => (arr || []).map((t) => ({ ...t, text: t.content, done: t.completed }));
           setTodos({
-            STORE: mapTodos(todoRes.storeTodos),
-            HANDOVER: mapTodos(todoRes.handoverTodos),
-            PERSONAL: mapTodos(todoRes.personalTodos),
+            STORE: todoRes.storeTodos || [],
+            HANDOVER: todoRes.handoverTodos || [],
+            PERSONAL: todoRes.personalTodos || [],
           });
         } catch {
           // 할 일 조회 실패 시 무시
@@ -104,7 +103,7 @@ export default function useHomePage(role) {
       setTodos((prev) => {
         const updated = {};
         for (const key of Object.keys(prev)) {
-          updated[key] = prev[key].map((t) => (t.id === id ? { ...t, done: !t.done } : t));
+          updated[key] = prev[key].map((t) => (t.id === id ? { ...t, completed: !t.completed } : t));
         }
         return updated;
       });
