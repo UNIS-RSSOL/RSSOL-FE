@@ -200,9 +200,9 @@ function EmployeeProfile() {
     }, [attendance]);
 
     return (
-      <div>
-        <div className="static flex items-center justify-between mb-10">
-          <div className="absolute left-1/2 flex items-center justify-center gap-2 -translate-x-1/2">
+      <div className="mb-20">
+        <div className="flex w-full items-center justify-between mb-10">
+          <div className="flex w-full items-center justify-center gap-2">
             <LeftArrowIcon
               className="cursor-pointer"
               onClick={() => setCurrentDate(currentDate.subtract(1, "month"))}
@@ -215,7 +215,6 @@ function EmployeeProfile() {
               onClick={() => setCurrentDate(currentDate.add(1, "month"))}
             />
           </div>
-          <PencilIcon className="absolute right-15 cursor-pointer -translate-x-1/2" />
         </div>
         <div className="flex flex-col w-full justify-center items-center">
           {weeks.map((week, index) => (
