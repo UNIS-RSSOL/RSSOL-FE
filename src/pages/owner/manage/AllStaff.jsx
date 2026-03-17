@@ -8,7 +8,6 @@ import { getAllWorkerSummary } from "../../../services/StoreService";
 function AllStaff() {
   const today = dayjs();
   const navigate = useNavigate();
-  const [tab, setTab] = useState(0);
   const [employees, setEmployees] = useState();
 
   useEffect(() => {
@@ -31,11 +30,10 @@ function AllStaff() {
               <Box
                 key={emp.userStoreId}
                 disabled={false}
-                // isSelected={checked === emp.userStoreId}
-                // onClick={() => setChecked(emp.userStoreId)}
-                onClick={() =>
-                  navigate(`/owner/manage/employee/${emp.userStoreId}`)
-                }
+                onClick={() => {
+                  console.log(emp.userStoreId);
+                  navigate(`/owner/manage/employee/${emp.userStoreId}`);
+                }}
               >
                 <EmployeeInfo
                   tab={0}

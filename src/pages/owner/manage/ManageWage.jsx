@@ -34,6 +34,11 @@ function ManageWage() {
     })();
   }, [currentDate]);
 
+  const formatCurrency = (amount) => {
+    if (!amount) return "0";
+    return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + "";
+  };
+
   return (
     <div className="w-full">
       <div className="flex flex-col w-full items-center mt-5">
@@ -62,16 +67,18 @@ function ManageWage() {
             <div className="flex justify-between">
               <p className="text-[14px] font-[500]">누적 급여</p>
               <p className="text-[14px] font-[500]">
-                {wage?.totalRegularPay || 0}원
+                {formatCurrency(wage?.totalRegularPay || 0)}원
               </p>
             </div>
             <div className="flex justify-between">
               <p className="text-[14px] font-[500]">주휴수당(+)</p>
               <p className="text-[14px] font-[500]">
-                {wage?.totalOvertimePay +
-                  wage?.totalNightPay +
-                  wage?.totalHolidayPay +
-                  wage?.totalWeeklyHolidayPay || 0}
+                {formatCurrency(
+                  wage?.totalOvertimePay +
+                    wage?.totalNightPay +
+                    wage?.totalHolidayPay +
+                    wage?.totalWeeklyHolidayPay || 0,
+                )}
                 원
               </p>
             </div>
@@ -82,11 +89,13 @@ function ManageWage() {
           />
           <div className="flex justify-between w-full px-2 pt-3">
             <p className="text-[20px] font-[400]">총 급여(=)</p>
-            <p className="text-[20px] font-[400]">{wage?.totalPay || 0}원</p>
+            <p className="text-[20px] font-[400]">
+              {formatCurrency(wage?.totalPay || 0)}원
+            </p>
           </div>
         </Box>
         <div className="w-full h-[8px] bg-[#e7eaf3] my-5" />
-        <Box className="flex flex-col" disabled={true}>
+        <Box className="flex flex-col mb-5" disabled={true}>
           <p className="text-[16px] font-[500] mb-5">
             {currentDate.format("M")}월 급여 지급 리스트
           </p>
@@ -99,7 +108,7 @@ function ManageWage() {
                     key={emp.userStoreId}
                     profileImageUrl={emp.profileImageUrl}
                     username={emp.username}
-                    monthlypay={emp.monthlyPay || 0}
+                    monthlypay={formatCurrency(emp.monthlyPay || 0)}
                     bankName={emp.bankName}
                     accountNumber={emp.accountNumber}
                   />

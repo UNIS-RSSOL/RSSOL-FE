@@ -28,7 +28,9 @@ function EmployeeInfo({
   return (
     <div className="flex flex-row w-full items-center">
       <div className=" flex justify-center items-center flex-shrink-0 w-[70px] h-[70px] bg-[#68E194] rounded-full border-[3px] border-white shadow-[0_2px_4px_0_RGBA(0,0,0,0.25)] mr-[16px] overflow-hidden">
-        <img src={profileImageUrl} className="size-[70px]" />
+        {profileImageUrl && (
+          <img src={profileImageUrl} className="size-[70px]" />
+        )}
       </div>
       <div className="flex flex-col w-full gap-1">
         <div
