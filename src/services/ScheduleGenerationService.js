@@ -47,17 +47,35 @@ export const requestScheduleInput = async (
   timeSegments,
 ) => {
   try {
-    const response = await api.post(`schedules/requests`, {
+    const requestBody = {
       storeId,
       openTime,
       closeTime,
       startDate,
       endDate,
       timeSegments,
+    };
+    
+    console.log("📤 근무표 생성 요청 전송:", {
+      endpoint: "schedules/requests",
+      data: requestBody,
     });
+    
+    const response = await api.post(`schedules/requests`, requestBody);
+    
+    console.log("✅ 근무표 생성 요청 성공:", response.data);
     return response.data;
   } catch (error) {
-    console.error("근무표 생성 요청 실패:", error);
+    console.error("❌ 근무표 생성 요청 실패:", {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      url: error.config?.url,
+      baseURL: error.config?.baseURL,
+      fullURL: error.config?.baseURL + error.config?.url,
+      requestData: error.config?.data,
+      responseData: error.response?.data,
+    });
     throw error;
   }
 };
