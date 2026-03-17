@@ -22,7 +22,7 @@ function AllStaff() {
   }, []);
 
   return (
-    <div className="w-full px-3">
+    <div className="w-full px-3 my-5 scrollbar-hide">
       <div className="flex flex-col w-full h-full items-center mt-5 gap-5 ">
         {employees?.map(
           (emp) =>
