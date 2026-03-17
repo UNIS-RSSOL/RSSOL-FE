@@ -1,6 +1,6 @@
 import { Settings } from "lucide-react";
 import useHomePage from "../../hooks/useHomePage.js";
-
+import { useNavigate } from "react-router-dom";
 import BellIcon from "../../assets/icons/BellIcon.jsx";
 import Footer from "../../components/layout/footer/Footer.jsx";
 import HomeHeader from "../../components/home/HomeHeader.jsx";
@@ -31,24 +31,6 @@ function OwnerHome() {
     navigate,
   } = useHomePage("owner");
 
-  /* ── 사장님 전용: 사이드바 메뉴 ── */
-  const sidebarMenuItems = [
-    {
-      label: "직원관리",
-      onClick: () => {
-        setSidebarOpen(false);
-        navigate("/owner/manage/employee");
-      },
-    },
-    {
-      label: "급여관리",
-      onClick: () => {
-        setSidebarOpen(false);
-        navigate("/owner/manage/wage");
-      },
-    },
-  ];
-
   const sidebarTitleExtra = (
     <div
       className="cursor-pointer p-[4px]"
@@ -75,7 +57,12 @@ function OwnerHome() {
           {today.format("M월 D일")}
         </p>
 
-        <WorkInfoCard todayShift={todayShift} onCheckIn={handleCheckIn} onCheckOut={handleCheckOut} attendance={attendance} />
+        <WorkInfoCard
+          todayShift={todayShift}
+          onCheckIn={handleCheckIn}
+          onCheckOut={handleCheckOut}
+          attendance={attendance}
+        />
         <TasksCard todos={todos} onToggle={toggleTodo} />
         <MiniTimeline className="flex-1" schedules={todaySchedules} />
       </main>
@@ -87,7 +74,6 @@ function OwnerHome() {
         onClose={() => setSidebarOpen(false)}
         storeName={activeStore.name}
         titleExtra={sidebarTitleExtra}
-        menuItems={sidebarMenuItems}
         storeList={storeList}
         activeStoreId={activeStore.storeId}
         onStoreChange={handleStoreChange}
@@ -96,6 +82,8 @@ function OwnerHome() {
           navigate("/owner/mypage");
         }}
         onLogout={handleLogout}
+        setSidebarOpen={setSidebarOpen}
+        role="OWNER"
       />
 
       <AppOnlyModal

@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import LeftArrowIcon from "../../assets/icons/LeftArrowIcon.jsx";
 import RightArrowIcon from "../../assets/icons/RightArrowIcon.jsx";
 import logoImg from "../../assets/images/logo-default.svg";
@@ -8,13 +9,43 @@ function HomeSidebar({
   onClose,
   storeName,
   titleExtra,
-  menuItems,
   storeList,
   activeStoreId,
   onStoreChange,
   onMyPage,
   onLogout,
+  role,
+  setSidebarOpen,
 }) {
+  const navigate = useNavigate();
+  const menuItems =
+    role === "OWNER"
+      ? [
+          {
+            label: "직원관리",
+            onClick: () => {
+              setSidebarOpen(false);
+              navigate("/owner/manage/employee");
+            },
+          },
+          {
+            label: "급여관리",
+            onClick: () => {
+              setSidebarOpen(false);
+              navigate("/owner/manage/wage");
+            },
+          },
+        ]
+      : [
+          {
+            label: "급여관리",
+            onClick: () => {
+              setSidebarOpen(false);
+              navigate("/employee/manage");
+            },
+          },
+        ];
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -80,9 +111,7 @@ function HomeSidebar({
 
               <div className="flex items-center justify-center gap-[16px] mt-[20px] text-[16px] text-[#87888c]">
                 <LeftArrowIcon color="#87888c" className="cursor-pointer" />
-                <span>
-                  1 / {Math.max(1, Math.ceil(storeList.length / 5))}
-                </span>
+                <span>1 / {Math.max(1, Math.ceil(storeList.length / 5))}</span>
                 <RightArrowIcon className="cursor-pointer" />
               </div>
 

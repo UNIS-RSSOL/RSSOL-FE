@@ -22,7 +22,7 @@ function BottomBar({
         <Button
           onClick={onSingleClick}
           disabled={disabledSingle}
-          className={`h-[48px] w-full max-w-[361px] font-[600] text-[16px] ${base} ${disabledSingle ? "opacity-60 cursor-not-allowed" : "opacity-100"}`}
+          className={`h-[48px] w-full font-[600] text-[16px] ${base} ${disabledSingle ? "opacity-60 cursor-not-allowed" : "opacity-100"}`}
         >
           {singleButtonText || rightText || leftText}
         </Button>
