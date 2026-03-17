@@ -22,7 +22,7 @@ function AllStaff() {
   }, []);
 
   return (
-    <div className="w-full">
+    <div className="w-full px-3">
       <div className="flex flex-col w-full h-full items-center mt-5 gap-5 ">
         {employees?.map(
           (emp) =>

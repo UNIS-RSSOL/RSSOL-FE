@@ -40,7 +40,7 @@ function ManageWage() {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full px-3">
       <div className="flex flex-col w-full items-center mt-5">
         <Box className="flex flex-col" disabled={true}>
           <div className="flex items-center justify-center">
