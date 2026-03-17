@@ -23,10 +23,10 @@ function TodoSelectIcon({ className, filled = false, fillColor = "#6694FF" }) {
         strokeLinejoin="round"
         fill="none"
       />
-      {/* 연필 윤곽 */}
+      {/* 연필 윤곽 — 항상 검은색 */}
       <path
         d="M7.68649 16.3136L11.8244 15.4799C12.044 15.4356 12.2457 15.3274 12.4041 15.1689L21.6671 5.90116C22.1112 5.45682 22.1109 4.73657 21.6664 4.2926L19.7042 2.33264C19.2599 1.88886 18.54 1.88916 18.0961 2.33332L8.8321 11.6021C8.674 11.7602 8.56605 11.9615 8.52175 12.1807L7.68649 16.3136Z"
-        stroke={filled ? fillColor : "black"}
+        stroke="black"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
