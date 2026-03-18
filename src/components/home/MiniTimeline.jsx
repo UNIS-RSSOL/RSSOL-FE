@@ -3,7 +3,9 @@ import TimelineGrid, {
   calcEventPosition,
 } from "../calendar/TimelineGrid.jsx";
 
-function MiniTimeline({ schedules, className = "" }) {
+function MiniTimeline({ schedule, className = "" }) {
+  const schedules = Array.isArray(schedule) ? schedule : [];
+
   return (
     <TimelineGrid accentColor="#004DFF" className={className}>
       {/* 이벤트 영역 */}
@@ -14,7 +16,9 @@ function MiniTimeline({ schedules, className = "" }) {
         <GridLines accentColor="#004DFF" />
         {schedules.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-[13px] text-[#87888c]">오늘 등록된 일정이 없습니다.</p>
+            <p className="text-[13px] text-[#87888c]">
+              오늘 등록된 일정이 없습니다.
+            </p>
           </div>
         )}
         {schedules.map((s, i) => {

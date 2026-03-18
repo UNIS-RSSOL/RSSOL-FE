@@ -103,15 +103,19 @@ function Login() {
       <div
         className="absolute bottom-0 flex w-full h-[20px]"
         onClick={async () => {
-          const email = prompt("로그인하세요");
-          const response = await getDevToken(email);
-          localStorage.setItem("accessToken", response);
-          console.log(response);
-          const store = await getActiveStore();
-          if (store.position === "OWNER") {
-            navigate("/owner");
-          } else {
-            navigate("/employee");
+          try {
+            const email = prompt("로그인하세요");
+            const response = await getDevToken(email);
+            localStorage.setItem("accessToken", response);
+            console.log(response);
+            const store = await getActiveStore();
+            if (store.position === "OWNER") {
+              navigate("/owner");
+            } else {
+              navigate("/employee");
+            }
+          } catch (error) {
+            alert("개발자 모드 로그인 실패:" + error);
           }
         }}
       ></div>

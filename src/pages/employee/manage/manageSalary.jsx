@@ -44,7 +44,7 @@ const ManageSalary = () => {
             className="cursor-pointer"
             onClick={() => setCurrentDate(currentDate.subtract(1, "month"))}
           />
-          <p className="w-[140px] text-[16px] font-[500] px-5">
+          <p className="w-[140px] text-center text-[16px] font-[500] px-5">
             {currentDate.format("YYYY")}년 {currentDate.format("M")}월
           </p>
           <RightArrowIcon

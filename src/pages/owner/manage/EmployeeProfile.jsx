@@ -92,7 +92,7 @@ function EmployeeProfile() {
 
   const InfoPage = () => {
     return (
-      <div className="flex flex-col w-full gap-5 mx-1">
+      <div className="flex flex-col w-full gap-5">
         <div className="flex items-center justify-between">
           <p className="font-[400] text-[16px]">상태</p>
           <StatusBox />
@@ -200,14 +200,14 @@ function EmployeeProfile() {
     }, [attendance]);
 
     return (
-      <div className="mb-20">
-        <div className="flex w-full items-center justify-between mb-10">
-          <div className="flex w-full items-center justify-center gap-2">
+      <div className="">
+        <div className="flex w-full items-center justify-between mb-20">
+          <div className="flex flex-row w-full items-center justify-center gap-2">
             <LeftArrowIcon
               className="cursor-pointer"
               onClick={() => setCurrentDate(currentDate.subtract(1, "month"))}
             />
-            <p className="w-[60px] font-[700] text-[18px]">
+            <p className="w-[100px] font-[700] text-[18px] text-center">
               {currentDate.format("MM")}월
             </p>
             <RightArrowIcon
@@ -220,12 +220,12 @@ function EmployeeProfile() {
           {weeks.map((week, index) => (
             <div
               key={index}
-              className="flex flex-row h-[55px] justify-center items-center"
+              className="flex flex-row w-full h-[60px] justify-center items-center"
             >
               {week.map((day) => (
                 <div
                   key={day.workDate}
-                  className="flex flex-col w-[55px] h-full items-center"
+                  className="flex flex-col w-full min-w-[50px] max-w-[100px] h-full items-center"
                 >
                   <span
                     className={`text-[14px] font-[700] text-center ${dayjs(day.workDate).format("M") === currentDate.format("M") ? "text-black" : "text-[#B3B3B3]"}`}
@@ -269,7 +269,7 @@ function EmployeeProfile() {
   return (
     <div className="static h-full flex flex-col bg-white pt-10 px-5">
       <BackButton />
-      <div className="flex flex-col my-7 gap-5">
+      <div className="flex flex-col my-7 gap-5 overflow-y-auto mb-20">
         <div className="flex flex-col items-start">
           <div className="flex justify-center items-center size-[80px] bg-[#d9d9d9] rounded-full my-2 overflow-hidden">
             <img src={profile?.profileImageUrl} className="size-[80px]" />
@@ -283,9 +283,11 @@ function EmployeeProfile() {
         {page === 2 && <AttendPage />}
       </div>
       <PageBox />
-      <Button className="fixed left-1/2 bottom-5 h-[60px] w-[calc(100%-40px)] max-w-[368px] bg-[#b31b1b] text-white font-[500] text-[16px] -translate-x-1/2">
-        삭제
-      </Button>
+      <div className="flex fixed bottom-0 left-3 right-3 justify-center items-center bg-white">
+        <Button className="h-[60px] bg-[#b31b1b] text-white font-[500] text-[16px] my-3">
+          삭제
+        </Button>
+      </div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
+import { useNavigate } from "react-router-dom";
 import useHomePage from "../../hooks/useHomePage.js";
-
 import BellIcon from "../../assets/icons/BellIcon.jsx";
 import Footer from "../../components/layout/footer/Footer.jsx";
 import HomeHeader from "../../components/home/HomeHeader.jsx";
@@ -30,17 +30,6 @@ function EmpHome() {
     navigate,
   } = useHomePage("employee");
 
-  /* ── 알바생 전용: 사이드바 메뉴 ── */
-  const sidebarMenuItems = [
-    {
-      label: "급여관리",
-      onClick: () => {
-        setSidebarOpen(false);
-        navigate("/employee/manage");
-      },
-    },
-  ];
-
   return (
     <div className="w-full h-full flex flex-col bg-white font-Pretendard">
       <HomeHeader
@@ -55,7 +44,12 @@ function EmpHome() {
           {today.format("M월 D일")}
         </p>
 
-        <WorkInfoCard todayShift={todayShift} onCheckIn={handleCheckIn} onCheckOut={handleCheckOut} attendance={attendance} />
+        <WorkInfoCard
+          todayShift={todayShift}
+          onCheckIn={handleCheckIn}
+          onCheckOut={handleCheckOut}
+          attendance={attendance}
+        />
         <TasksCard todos={todos} onToggle={toggleTodo} />
         <MiniTimeline className="flex-1" schedules={todaySchedules} />
       </main>
@@ -66,7 +60,6 @@ function EmpHome() {
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         storeName={activeStore.name}
-        menuItems={sidebarMenuItems}
         storeList={storeList}
         activeStoreId={activeStore.storeId}
         onStoreChange={handleStoreChange}
@@ -74,7 +67,9 @@ function EmpHome() {
           setSidebarOpen(false);
           navigate("/employee/mypage");
         }}
+        setSidebarOpen={setSidebarOpen}
         onLogout={handleLogout}
+        role="EMPLOYEE"
       />
 
       <AppOnlyModal
