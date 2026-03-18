@@ -12,7 +12,7 @@ function TodoSelectIcon({ className, filled = false, fillColor = "#6694FF" }) {
         fillRule="evenodd"
         clipRule="evenodd"
         d="M18.0961 2.33332C18.54 1.88916 19.2599 1.88886 19.7042 2.33264L21.6664 4.2926C22.1109 4.73657 22.1112 5.45682 21.6671 5.90116L12.4041 15.1689C12.2457 15.3274 12.044 15.4356 11.8244 15.4799L7.68649 16.3136L8.52175 12.1807C8.56605 11.9615 8.674 11.7602 8.8321 11.6021L18.0961 2.33332Z"
-        fill={filled ? fillColor : "none"}
+        fill="none"
       />
       {/* 사각형 테두리 — 항상 검은색 */}
       <path
@@ -30,7 +30,7 @@ function TodoSelectIcon({ className, filled = false, fillColor = "#6694FF" }) {
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        fill="none"
+        fill={filled ? fillColor : "none"}
       />
     </svg>
   );
