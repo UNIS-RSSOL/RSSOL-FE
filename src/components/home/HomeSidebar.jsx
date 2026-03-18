@@ -1,23 +1,27 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { Settings } from "lucide-react";
+import { useEffect, useState } from "react";
 import LeftArrowIcon from "../../assets/icons/LeftArrowIcon.jsx";
 import RightArrowIcon from "../../assets/icons/RightArrowIcon.jsx";
 import logoImg from "../../assets/images/logo-default.svg";
+import { logout } from "../../services/AuthService.js";
+import {
+  changeActiveStore,
+  getOwnerStoreList,
+  getStaffStoreList,
+} from "../../services/MypageService.js";
 
 function HomeSidebar({
   isOpen,
   onClose,
-  storeName,
-  titleExtra,
-  storeList,
-  activeStoreId,
-  onStoreChange,
-  onMyPage,
-  onLogout,
+  activeStore,
+  setActiveStore,
   role,
   setSidebarOpen,
 }) {
   const navigate = useNavigate();
+  const [storeList, setStoreList] = useState([]);
   const menuItems =
     role === "OWNER"
       ? [
@@ -46,6 +50,47 @@ function HomeSidebar({
           },
         ];
 
+  useEffect(() => {
+    (async () => {
+      try {
+        if (role === "OWNER") {
+          const res = await getOwnerStoreList();
+          setStoreList(res);
+        } else {
+          const res = await getStaffStoreList();
+          setStoreList(res);
+        }
+      } catch (error) {
+        console.error("매장 목록 조회 실패:", error);
+      }
+    })();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setSidebarOpen(false);
+      navigate("/");
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+    }
+  };
+
+  const handleMypage = () => {
+    setSidebarOpen(false);
+    navigate(`mypage`);
+  };
+
+  const handleStoreChange = async (newStore) => {
+    try {
+      setSidebarOpen(false);
+      await changeActiveStore(newStore.storeId);
+      setActiveStore(newStore);
+    } catch (error) {
+      console.error("매장 변경 실패:", error);
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -65,16 +110,24 @@ function HomeSidebar({
             className="fixed top-0 left-0 w-[280px] h-full bg-white z-50 flex flex-col"
           >
             <div className="flex-1 flex flex-col px-[16px] pt-[40px] pb-[24px]">
-              {titleExtra ? (
+              {role === "OWNER" ? (
                 <div className="flex items-center justify-between mb-[24px]">
                   <h2 className="text-[22px] font-[700] text-left">
-                    {storeName || "매장 이름"}
+                    {activeStore.name || "매장 이름"}
                   </h2>
-                  {titleExtra}
+                  <div
+                    className="cursor-pointer p-[4px]"
+                    onClick={() => {
+                      setSidebarOpen(false);
+                      navigate("/owner/store-settings");
+                    }}
+                  >
+                    <Settings size={20} strokeWidth={1.5} color="black" />
+                  </div>
                 </div>
               ) : (
                 <h2 className="text-[22px] font-[700] mb-[24px] text-left">
-                  {storeName || "매장 이름"}
+                  {activeStore.name || "매장 이름"}
                 </h2>
               )}
 
@@ -97,9 +150,9 @@ function HomeSidebar({
                 {storeList.map((store) => (
                   <p
                     key={store.storeId}
-                    onClick={() => onStoreChange(store.storeId)}
+                    onClick={() => handleStoreChange(store)}
                     className={`text-[16px] py-[4px] cursor-pointer text-left ${
-                      Number(store.storeId) === Number(activeStoreId)
+                      Number(store.storeId) === Number(activeStore.storeId)
                         ? "font-[600]"
                         : "font-[400]"
                     }`}
@@ -124,11 +177,11 @@ function HomeSidebar({
                   />
                 </div>
                 <div className="flex items-center gap-[8px] text-[13px] text-[#87888c]">
-                  <span className="cursor-pointer" onClick={onMyPage}>
+                  <span className="cursor-pointer" onClick={handleMypage}>
                     내 정보 수정
                   </span>
                   <span>|</span>
-                  <span className="cursor-pointer" onClick={onLogout}>
+                  <span className="cursor-pointer" onClick={handleLogout}>
                     로그아웃
                   </span>
                 </div>

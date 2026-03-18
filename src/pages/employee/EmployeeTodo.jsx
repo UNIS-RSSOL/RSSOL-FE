@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 
-import { getActiveStore, getStaffProfile } from "../../services/MypageService.js";
+import {
+  getActiveStore,
+  getStaffProfile,
+} from "../../services/MypageService.js";
 import {
   getTodos,
   addTodo,
@@ -23,7 +26,7 @@ import TodoSelectIcon from "../../assets/icons/TodoSelectIcon.jsx";
 import FooterMenu from "../../components/layout/footer/FooterMenu.jsx";
 
 import HomeHeader from "../../components/home/HomeHeader.jsx";
-
+import HomeSidebar from "../../components/home/HomeSidebar.jsx";
 dayjs.locale("ko");
 
 const TODO_CATEGORIES = {
@@ -46,7 +49,7 @@ function EmployeeTodo() {
   const [editingTodoId, setEditingTodoId] = useState(null);
   const [newTodoText, setNewTodoText] = useState("");
   const [editTodoText, setEditTodoText] = useState("");
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(dayjs());
   const days = ["일", "월", "화", "수", "목", "금", "토"];
   const dayOfWeek = days[currentDate.day()];
@@ -122,7 +125,7 @@ function EmployeeTodo() {
       console.error("에러 상세:", error.response?.data || error.message);
       alert(
         error.response?.data?.message ||
-        "할 일 추가에 실패했습니다. 다시 시도해주세요."
+          "할 일 추가에 실패했습니다. 다시 시도해주세요.",
       );
     }
   };
@@ -184,7 +187,9 @@ function EmployeeTodo() {
     <div className="w-full h-full flex flex-col bg-white font-Pretendard">
       <HomeHeader
         storeName={activeStore.name}
-        onMenuClick={() => {}}
+        onMenuClick={() => {
+          setSidebarOpen(true);
+        }}
         rightIcon={<BellIcon />}
         onRightClick={() => navigate("/employee/notification")}
       />
@@ -268,7 +273,9 @@ function EmployeeTodo() {
           )}
           <div className="w-full">
             {todos.STORE.length === 0 && (
-              <p className="text-[13px] text-[#87888c] text-center py-[8px]">등록된 할 일이 없습니다.</p>
+              <p className="text-[13px] text-[#87888c] text-center py-[8px]">
+                등록된 할 일이 없습니다.
+              </p>
             )}
             {todos.STORE.map((todo) => (
               <div
@@ -295,9 +302,7 @@ function EmployeeTodo() {
                     </svg>
                   )}
                 </div>
-                <span className="flex-1 text-[14px]">
-                  {todo.content}
-                </span>
+                <span className="flex-1 text-[14px]">{todo.content}</span>
               </div>
             ))}
           </div>
@@ -359,7 +364,9 @@ function EmployeeTodo() {
           )}
           <div className="w-full">
             {todos.HANDOVER.length === 0 && (
-              <p className="text-[13px] text-[#87888c] text-center py-[8px]">등록된 할 일이 없습니다.</p>
+              <p className="text-[13px] text-[#87888c] text-center py-[8px]">
+                등록된 할 일이 없습니다.
+              </p>
             )}
             {todos.HANDOVER.map((todo) => {
               const isMyTodo = todo.authorId === currentUserId;
@@ -411,7 +418,9 @@ function EmployeeTodo() {
                     >
                       {todo.content}
                       {todo.authorName && (
-                        <span className="text-[11px] text-[#87888c] ml-[6px]">({todo.authorName})</span>
+                        <span className="text-[11px] text-[#87888c] ml-[6px]">
+                          ({todo.authorName})
+                        </span>
                       )}
                     </span>
                   )}
@@ -485,7 +494,9 @@ function EmployeeTodo() {
           )}
           <div className="w-full">
             {todos.PERSONAL.length === 0 && (
-              <p className="text-[13px] text-[#87888c] text-center py-[8px]">등록된 할 일이 없습니다.</p>
+              <p className="text-[13px] text-[#87888c] text-center py-[8px]">
+                등록된 할 일이 없습니다.
+              </p>
             )}
             {todos.PERSONAL.map((todo) => (
               <div
@@ -584,6 +595,14 @@ function EmployeeTodo() {
           onClick={() => navigate("/employee/schedule/modifying")}
         />
       </nav>
+      <HomeSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        activeStore={activeStore}
+        setActiveStore={setActiveStore}
+        setSidebarOpen={setSidebarOpen}
+        role="EMPLOYEE"
+      />
     </div>
   );
 }

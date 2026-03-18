@@ -11,6 +11,7 @@ import MessageModal from "../../../components/common/MessageModal.jsx";
 import Toast from "../../../components/common/Toast.jsx";
 import Button from "../../../components/common/Button.jsx";
 import HomeHeader from "../../../components/home/HomeHeader.jsx";
+import HomeSidebar from "../../../components/home/HomeSidebar.jsx";
 import BellIcon from "../../../assets/icons/BellIcon.jsx";
 import Footer from "../../../components/layout/footer/Footer.jsx";
 import { getMyScheduleByPeriod } from "../../../services/WorkShiftService.js";
@@ -30,7 +31,7 @@ function EmpCalendar() {
   const formattedCurrentWeek = `${startOfWeek.format("YYYY.MM.DD")} - ${startOfWeek.add(6, "day").format("YYYY.MM.DD")}`;
 
   // 데이터 상태
-  const [activeStoreName, setActiveStoreName] = useState("");
+  const [activeStore, setActiveStore] = useState();
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
   const [eventData, setEventData] = useState();
   const [dayWorkers, setDayWorkers] = useState([]);
@@ -41,13 +42,14 @@ function EmpCalendar() {
   // 모달/토스트 상태
   const [isEventToastOpen, setIsEventToastOpen] = useState(false);
   const [isMsgOpen, setIsMsgOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // 활성 매장 로딩
   useEffect(() => {
     (async () => {
       try {
         const active = await getActiveStore();
-        setActiveStoreName(active.name);
+        setActiveStore(active);
       } catch (error) {
         console.error("활성 매장 조회 실패:", error);
       }
@@ -152,8 +154,8 @@ function EmpCalendar() {
   return (
     <div className="w-full h-full flex flex-col bg-white font-Pretendard relative">
       <HomeHeader
-        storeName={activeStoreName}
-        onMenuClick={() => navigate("/employee")}
+        storeName={activeStore?.name || ""}
+        onMenuClick={() => setSidebarOpen(true)}
         rightIcon={<BellIcon />}
         onRightClick={() => navigate("/employee/notification")}
       />
@@ -255,6 +257,14 @@ function EmpCalendar() {
       </div>
 
       <Footer />
+      <HomeSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        activeStore={activeStore}
+        setActiveStore={setActiveStore}
+        setSidebarOpen={setSidebarOpen}
+        role="EMPLOYEE"
+      />
     </div>
   );
 }

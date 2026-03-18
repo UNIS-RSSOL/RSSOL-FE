@@ -1,6 +1,5 @@
-import { Settings } from "lucide-react";
 import useHomePage from "../../hooks/useHomePage.js";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import BellIcon from "../../assets/icons/BellIcon.jsx";
 import Footer from "../../components/layout/footer/Footer.jsx";
 import HomeHeader from "../../components/home/HomeHeader.jsx";
@@ -9,11 +8,12 @@ import TasksCard from "../../components/home/TasksCard.jsx";
 import MiniTimeline from "../../components/home/MiniTimeline.jsx";
 import HomeSidebar from "../../components/home/HomeSidebar.jsx";
 import AppOnlyModal from "../../components/home/AppOnlyModal.jsx";
+import { getActiveStore } from "../../services/MypageService.js";
 
 function OwnerHome() {
   const {
     today,
-    activeStore,
+    active,
     storeList,
     todaySchedules,
     todayShift,
@@ -31,22 +31,24 @@ function OwnerHome() {
     navigate,
   } = useHomePage("owner");
 
-  const sidebarTitleExtra = (
-    <div
-      className="cursor-pointer p-[4px]"
-      onClick={() => {
-        setSidebarOpen(false);
-        navigate("/owner/store-settings");
-      }}
-    >
-      <Settings size={20} strokeWidth={1.5} color="black" />
-    </div>
-  );
+  const [activeStore, setActiveStore] = useState();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await getActiveStore();
+        console.log(res);
+        setActiveStore(res);
+      } catch (e) {
+        console.log(e);
+      }
+    })();
+  }, []);
 
   return (
     <div className="w-full h-full flex flex-col bg-white font-Pretendard">
       <HomeHeader
-        storeName={activeStore.name}
+        storeName={activeStore?.name || "매장 이름"}
         onMenuClick={() => setSidebarOpen(true)}
         rightIcon={<BellIcon />}
         onRightClick={() => navigate("/owner/notification/home")}
@@ -72,16 +74,8 @@ function OwnerHome() {
       <HomeSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
-        storeName={activeStore.name}
-        titleExtra={sidebarTitleExtra}
-        storeList={storeList}
-        activeStoreId={activeStore.storeId}
-        onStoreChange={handleStoreChange}
-        onMyPage={() => {
-          setSidebarOpen(false);
-          navigate("/owner/mypage");
-        }}
-        onLogout={handleLogout}
+        activeStore={activeStore}
+        setActiveStore={setActiveStore}
         setSidebarOpen={setSidebarOpen}
         role="OWNER"
       />
