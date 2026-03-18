@@ -13,7 +13,10 @@ import {
   getStaffStoreList,
   changeActiveStore,
 } from "../services/MypageService.js";
-import { getScheduleByPeriod, getMyScheduleByPeriod } from "../services/WorkShiftService.js";
+import {
+  getScheduleByPeriod,
+  getMyScheduleByPeriod,
+} from "../services/WorkShiftService.js";
 import { getTodos, toggleTodoComplete } from "../services/TodoService.js";
 import {
   getTodayAttendance,
@@ -71,7 +74,12 @@ export default function useHomePage(role) {
         // 오늘 할 일 조회 (전체 카테고리)
         try {
           const todoRes = await getTodos(todayStr);
-          const mapTodos = (arr) => (arr || []).map((t) => ({ ...t, text: t.content, done: t.completed }));
+          const mapTodos = (arr) =>
+            (arr || []).map((t) => ({
+              ...t,
+              text: t.content,
+              done: t.completed,
+            }));
           setTodos({
             STORE: mapTodos(todoRes.storeTodos),
             HANDOVER: mapTodos(todoRes.handoverTodos),
@@ -104,7 +112,9 @@ export default function useHomePage(role) {
       setTodos((prev) => {
         const updated = {};
         for (const key of Object.keys(prev)) {
-          updated[key] = prev[key].map((t) => (t.id === id ? { ...t, done: !t.done } : t));
+          updated[key] = prev[key].map((t) =>
+            t.id === id ? { ...t, done: !t.done } : t,
+          );
         }
         return updated;
       });

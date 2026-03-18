@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import useHomePage from "../../hooks/useHomePage.js";
 import BellIcon from "../../assets/icons/BellIcon.jsx";
 import Footer from "../../components/layout/footer/Footer.jsx";
@@ -8,11 +9,12 @@ import TasksCard from "../../components/home/TasksCard.jsx";
 import MiniTimeline from "../../components/home/MiniTimeline.jsx";
 import HomeSidebar from "../../components/home/HomeSidebar.jsx";
 import AppOnlyModal from "../../components/home/AppOnlyModal.jsx";
+import { getActiveStore } from "../../services/MypageService.js";
 
 function EmpHome() {
   const {
     today,
-    activeStore,
+    active,
     storeList,
     todaySchedules,
     todayShift,
@@ -30,10 +32,23 @@ function EmpHome() {
     navigate,
   } = useHomePage("employee");
 
+  const [activeStore, setActiveStore] = useState();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await getActiveStore();
+        setActiveStore(response);
+      } catch (error) {
+        console.error("Failed to get active store:", error);
+      }
+    })();
+  }, []);
+
   return (
     <div className="w-full h-full flex flex-col bg-white font-Pretendard">
       <HomeHeader
-        storeName={activeStore.name}
+        storeName={activeStore?.name}
         onMenuClick={() => setSidebarOpen(true)}
         rightIcon={<BellIcon />}
         onRightClick={() => navigate("/employee/notification")}
@@ -59,16 +74,9 @@ function EmpHome() {
       <HomeSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
-        storeName={activeStore.name}
-        storeList={storeList}
-        activeStoreId={activeStore.storeId}
-        onStoreChange={handleStoreChange}
-        onMyPage={() => {
-          setSidebarOpen(false);
-          navigate("/employee/mypage");
-        }}
+        activeStore={activeStore}
+        setActiveStore={setActiveStore}
         setSidebarOpen={setSidebarOpen}
-        onLogout={handleLogout}
         role="EMPLOYEE"
       />
 

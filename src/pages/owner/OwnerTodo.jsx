@@ -22,7 +22,7 @@ import TodoUserIcon from "../../assets/icons/TodoUserIcon.jsx";
 import TodoSelectIcon from "../../assets/icons/TodoSelectIcon.jsx";
 import Footer from "../../components/layout/footer/Footer.jsx";
 import HomeHeader from "../../components/home/HomeHeader.jsx";
-
+import HomeSidebar from "../../components/home/HomeSidebar.jsx";
 dayjs.locale("ko");
 
 const TODO_CATEGORIES = {
@@ -45,6 +45,7 @@ function OwnerTodo() {
   const [newTodoText, setNewTodoText] = useState("");
   const [editTodoText, setEditTodoText] = useState("");
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(dayjs());
   const days = ["일", "월", "화", "수", "목", "금", "토"];
   const dayOfWeek = days[currentDate.day()];
@@ -109,7 +110,7 @@ function OwnerTodo() {
 
     try {
       const response = await addTodo(todoText, category, dueDate);
-      
+
       setNewTodoText("");
       setEditingCategory(null);
       await loadTodos();
@@ -117,8 +118,8 @@ function OwnerTodo() {
       console.error("할 일 생성 실패:", error);
       console.error("에러 상세:", error.response?.data || error.message);
       alert(
-        error.response?.data?.message || 
-        "할 일 추가에 실패했습니다. 다시 시도해주세요."
+        error.response?.data?.message ||
+          "할 일 추가에 실패했습니다. 다시 시도해주세요.",
       );
     }
   };
@@ -180,7 +181,7 @@ function OwnerTodo() {
     <div className="w-full h-full flex flex-col bg-white font-Pretendard">
       <HomeHeader
         storeName={activeStore.name}
-        onMenuClick={() => {}}
+        onMenuClick={() => setSidebarOpen(true)}
         rightIcon={<BellIcon />}
         onRightClick={() => navigate("/owner/notification/home")}
       />
@@ -261,7 +262,9 @@ function OwnerTodo() {
           )}
           <div className="w-full">
             {todos.STORE.length === 0 && (
-              <p className="text-[13px] text-[#87888c] text-center py-[8px]">등록된 할 일이 없습니다.</p>
+              <p className="text-[13px] text-[#87888c] text-center py-[8px]">
+                등록된 할 일이 없습니다.
+              </p>
             )}
             {todos.STORE.map((todo) => (
               <div
@@ -379,7 +382,9 @@ function OwnerTodo() {
           )}
           <div className="w-full">
             {todos.HANDOVER.length === 0 && (
-              <p className="text-[13px] text-[#87888c] text-center py-[8px]">등록된 할 일이 없습니다.</p>
+              <p className="text-[13px] text-[#87888c] text-center py-[8px]">
+                등록된 할 일이 없습니다.
+              </p>
             )}
             {todos.HANDOVER.map((todo) => (
               <div
@@ -429,7 +434,9 @@ function OwnerTodo() {
                   >
                     {todo.content}
                     {todo.authorName && (
-                      <span className="text-[11px] text-[#87888c] ml-[6px]">({todo.authorName})</span>
+                      <span className="text-[11px] text-[#87888c] ml-[6px]">
+                        ({todo.authorName})
+                      </span>
                     )}
                   </span>
                 )}
@@ -500,7 +507,9 @@ function OwnerTodo() {
           )}
           <div className="w-full">
             {todos.PERSONAL.length === 0 && (
-              <p className="text-[13px] text-[#87888c] text-center py-[8px]">등록된 할 일이 없습니다.</p>
+              <p className="text-[13px] text-[#87888c] text-center py-[8px]">
+                등록된 할 일이 없습니다.
+              </p>
             )}
             {todos.PERSONAL.map((todo) => (
               <div
@@ -563,7 +572,15 @@ function OwnerTodo() {
         </div>
       </main>
 
-    <Footer />
+      <Footer />
+      <HomeSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        activeStore={activeStore}
+        setActiveStore={setActiveStore}
+        setSidebarOpen={setSidebarOpen}
+        role="OWNER"
+      />
     </div>
   );
 }

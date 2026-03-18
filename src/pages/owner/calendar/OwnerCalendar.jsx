@@ -25,6 +25,7 @@ import { createShiftSwapRequest } from "../../../services/ShiftSwapService.js";
 import { createExtraShiftRequest } from "../../../services/ExtraShiftService.js";
 import { getAllWorker } from "../../../services/StoreService.js";
 import HomeHeader from "../../../components/home/HomeHeader.jsx";
+import HomeSidebar from "../../../components/home/HomeSidebar.jsx";
 import BellIcon from "../../../assets/icons/BellIcon.jsx";
 import Footer from "../../../components/layout/footer/Footer.jsx";
 import PillToggle from "../../../components/common/PillToggle.jsx";
@@ -72,9 +73,7 @@ function WorkersDropDown({ selected, onSelect }) {
                 setDropdownOpen(false);
               }}
             >
-              <span className="text-[12px] font-[400]">
-                {worker.username}
-              </span>
+              <span className="text-[12px] font-[400]">{worker.username}</span>
             </div>
           ))}
         </div>
@@ -114,13 +113,13 @@ function OwnerCalendar() {
   const [isMsgOpen2, setIsMsgOpen2] = useState(false);
   const [isDeleteShift, setIsDeleteShift] = useState(false);
   const [isMsgOpen3, setIsMsgOpen3] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // 데이터 상태
   const [eventData, setEventData] = useState();
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
   const [needWorkers, setNeedWorkers] = useState(1);
-  const [activeStore, setActiveStore] = useState("");
-  const [activeStoreId, setActiveStoreId] = useState(null);
+  const [activeStore, setActiveStore] = useState();
   const [newTime, setNewTime] = useState({
     userStoreId: "",
     username: "",
@@ -134,9 +133,7 @@ function OwnerCalendar() {
     (async () => {
       try {
         const response = await getActiveStore();
-        setActiveStore(response.name || "내 매장");
-        const storeId = response.storeId || response.id;
-        if (storeId) setActiveStoreId(storeId);
+        setActiveStore(response);
       } catch (error) {
         console.error("활성 매장 조회 실패:", error);
       }
@@ -188,9 +185,13 @@ function OwnerCalendar() {
   const handleAddWorkshift = async () => {
     try {
       const startDatetime =
-        newTime.date.format("YYYY-MM-DD") + "T" + newTime.start.format("HH:mm:ss");
+        newTime.date.format("YYYY-MM-DD") +
+        "T" +
+        newTime.start.format("HH:mm:ss");
       const endDatetime =
-        newTime.date.format("YYYY-MM-DD") + "T" + newTime.end.format("HH:mm:ss");
+        newTime.date.format("YYYY-MM-DD") +
+        "T" +
+        newTime.end.format("HH:mm:ss");
       await addWorkShift(newTime.userStoreId, startDatetime, endDatetime);
       setNewTime({
         userStoreId: "",
@@ -223,8 +224,8 @@ function OwnerCalendar() {
   return (
     <div className="w-full h-full flex flex-col bg-white font-Pretendard relative">
       <HomeHeader
-        storeName={activeStore}
-        onMenuClick={() => navigate("/owner")}
+        storeName={activeStore?.name || "내 매장"}
+        onMenuClick={() => setSidebarOpen(true)}
         rightIcon={<BellIcon />}
         onRightClick={() => navigate("/owner/notification/home")}
       />
@@ -255,7 +256,7 @@ function OwnerCalendar() {
                   onEventClick={handleEventClick}
                   selectedEventProp={selectedCalendarEvent}
                   setSelectedEventProp={setSelectedCalendarEvent}
-                  storeId={activeStoreId}
+                  storeId={activeStore?.storeId}
                   refreshKey={refreshKey}
                 />
               </div>
@@ -273,7 +274,7 @@ function OwnerCalendar() {
                   onEventClick={handleEventClick}
                   selectedEventProp={selectedCalendarEvent}
                   setSelectedEventProp={setSelectedCalendarEvent}
-                  storeId={activeStoreId}
+                  storeId={activeStore.storeId}
                   refreshKey={refreshKey}
                 />
               </div>
@@ -301,7 +302,10 @@ function OwnerCalendar() {
                           current && current < dayjs().startOf("day")
                         }
                         suffixIcon={
-                          <CalendarIcon className="size-[15px]" color="#87888c" />
+                          <CalendarIcon
+                            className="size-[15px]"
+                            color="#87888c"
+                          />
                         }
                         onChange={(e) =>
                           setNewTime({ ...newTime, date: dayjs(e) })
@@ -420,7 +424,7 @@ function OwnerCalendar() {
                     </p>
                   </div>
                   <div className="flex flex-row items-center justify-center w-full gap-5">
-                    <RoundTag> {activeStore}</RoundTag>
+                    <RoundTag> {activeStore.name}</RoundTag>
                     <span className="text-[14px] font-[500]">
                       {eventData.start.format("dd(DD) HH:mm-")}
                       {eventData.end.format("HH:mm")}
@@ -451,7 +455,7 @@ function OwnerCalendar() {
                   </div>
                   <div className="flex flex-row items-center justify-center w-full gap-3">
                     <RoundTag className="!text-[12px] !font-[400] !px-2 !py-[1.5px]">
-                      {activeStore}
+                      {activeStore.name}
                     </RoundTag>
                     <span className="text-[14px] font-[500]">
                       {eventData.start.format("dd(DD) HH:mm-")}
@@ -494,7 +498,7 @@ function OwnerCalendar() {
                     </p>
                   </div>
                   <div className="flex flex-row items-center gap-3">
-                    <RoundTag>{activeStore}</RoundTag>
+                    <RoundTag>{activeStore.name}</RoundTag>
                     <span className="text-[14px] font-[500]">
                       {eventData.start.format("dd(DD) HH:mm-")}
                       {eventData.end.format("HH:mm")}
@@ -560,14 +564,33 @@ function OwnerCalendar() {
             className="w-[50px] h-[50px] rounded-full border-[1px] border-[#B3B3B3] bg-white flex items-center justify-center cursor-pointer shadow-[0_2px_8px_0_rgba(0,0,0,0.15)]"
             onClick={() => setIsModalOpen(true)}
           >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 4V16M4 10H16" stroke="#87888C" strokeWidth="2" strokeLinecap="round" />
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M10 4V16M4 10H16"
+                stroke="#87888C"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
             </svg>
           </div>
         </div>
       </div>
 
       <Footer />
+      <HomeSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        activeStore={activeStore}
+        setActiveStore={setActiveStore}
+        setSidebarOpen={setSidebarOpen}
+        role="OWNER"
+      />
     </div>
   );
 }
