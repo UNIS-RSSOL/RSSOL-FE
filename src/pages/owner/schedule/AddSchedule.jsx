@@ -49,6 +49,11 @@ export default function AddSchedule() {
   const [hasPartTimeSegments, setHasPartTimeSegments] = useState(false); // 파트타임 구간 존재 여부
   const [isLoadingPartTime, setIsLoadingPartTime] = useState(false);
 
+  const redirectToStoreSettings = (message) => {
+    alert(message || "매장 설정을 먼저 완료해주세요.");
+    navigate("/owner/store-settings");
+  };
+
   // -------------------------
   // 날짜 선택 로직
   // -------------------------
@@ -182,27 +187,32 @@ export default function AddSchedule() {
       setIsLoadingPartTime(true);
       try {
         const settings = await getActiveStoreSettings();
-        // API 응답 구조에 따라 조정 필요
         const segments = settings?.partTimeSegments || settings?.partTimes || [];
-        
-        if (segments && segments.length > 0) {
-          setPartTimeSegments(segments);
-          setHasPartTimeSegments(true);
-          // 각 구간별 인원 수 초기화 (기본값 1)
-          const initialPersonnel = {};
-          segments.forEach((_, index) => {
-            initialPersonnel[index] = 1;
-          });
-          setPartTimePersonnel(initialPersonnel);
-        } else {
-          setHasPartTimeSegments(false);
-          setPartTimeSegments([]);
+
+        if (!settings || !segments.length) {
+          redirectToStoreSettings("매장 설정을 먼저 완료해주세요.");
+          return;
         }
+
+        setPartTimeSegments(segments);
+        setHasPartTimeSegments(true);
+        const initialPersonnel = {};
+        segments.forEach((_, index) => {
+          initialPersonnel[index] = 1;
+        });
+        setPartTimePersonnel(initialPersonnel);
       } catch (error) {
         console.error("파트타임 구간 조회 실패:", error);
-        // API 실패 시 파트타임 구간 없음으로 처리
-        setHasPartTimeSegments(false);
-        setPartTimeSegments([]);
+        const serverMessage =
+          error.response?.data?.message || error.response?.data?.error || "";
+        if (
+          error.response?.status === 404 &&
+          serverMessage.includes("매장 기본 설정이 존재하지 않습니다")
+        ) {
+          redirectToStoreSettings("매장 설정을 먼저 완료해주세요.");
+          return;
+        }
+        alert("매장 설정 조회에 실패했습니다. 잠시 후 다시 시도해주세요.");
       } finally {
         setIsLoadingPartTime(false);
       }
@@ -263,6 +273,31 @@ export default function AddSchedule() {
         setIsLoading(false);
         setShowRequestPopup(false);
         return;
+      }
+      try {
+        const settings = await getActiveStoreSettings();
+        const segments = settings?.partTimeSegments || settings?.partTimes || [];
+        if (!settings || !segments.length) {
+          setShowRequestPopup(false);
+          setIsLoading(false);
+          redirectToStoreSettings("매장 설정을 먼저 완료해주세요.");
+          return;
+        }
+      } catch (settingsError) {
+        const serverMessage =
+          settingsError.response?.data?.message ||
+          settingsError.response?.data?.error ||
+          "";
+        if (
+          settingsError.response?.status === 404 &&
+          serverMessage.includes("매장 기본 설정이 존재하지 않습니다")
+        ) {
+          setShowRequestPopup(false);
+          setIsLoading(false);
+          redirectToStoreSettings("매장 설정을 먼저 완료해주세요.");
+          return;
+        }
+        throw settingsError;
       }
       if (!startDate || !endDate) {
         alert("시작일자와 마무리일자를 모두 선택해주세요.");
@@ -375,6 +410,13 @@ export default function AddSchedule() {
         // 서버 응답이 있는 경우
         const status = error.response.status;
         if (status === 404) {
+          const serverMessage =
+            error.response.data?.message || error.response.data?.error || "";
+          if (serverMessage.includes("매장 기본 설정이 존재하지 않습니다")) {
+            setShowRequestPopup(false);
+            redirectToStoreSettings("매장 설정을 먼저 완료해주세요.");
+            return;
+          }
           errorMessage = "API 엔드포인트를 찾을 수 없습니다. 관리자에게 문의해주세요.";
         } else if (status === 400) {
           errorMessage = "요청 데이터가 올바르지 않습니다. 입력 정보를 확인해주세요.";

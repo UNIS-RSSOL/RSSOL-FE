@@ -151,10 +151,6 @@ export default function Onboarding() {
           return;
         }
 
-        // TODO: API 연결 시 아래 3줄(navigate~return) 제거 후 주석 블록 해제
-        navigate("/employee");
-        return;
-        /* ── 알바생 온보딩 API (연결 시 주석 해제) ──
         setIsLoading(true);
         setError("");
         try {
@@ -167,15 +163,10 @@ export default function Onboarding() {
           setIsLoading(false);
         }
         return;
-        ── */
       }
     }
 
     if (step === 3) {
-      // TODO: API 연결 시 아래 3줄(navigate~return) 제거 후 주석 블록 해제
-      navigate("/owner");
-      return;
-      /* ── 사장님 온보딩 API (연결 시 주석 해제) ──
       setIsLoading(true);
       setError("");
       try {
@@ -195,7 +186,6 @@ export default function Onboarding() {
         setIsLoading(false);
       }
       return;
-      ── */
     }
 
     if (step < 2) setStep(step + 1);
