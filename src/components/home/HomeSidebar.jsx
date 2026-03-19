@@ -78,7 +78,7 @@ function HomeSidebar({
 
   const handleMypage = () => {
     setSidebarOpen(false);
-    navigate(`mypage`);
+    navigate(`/${role.toLowerCase()}/mypage`);
   };
 
   const handleStoreChange = async (newStore) => {

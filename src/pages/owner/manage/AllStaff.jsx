@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import EmployeeInfo from "../../../components/manage/EmployeeInfo";
 import Box from "../../../components/common/Box";
 import { getAllWorkerSummary } from "../../../services/StoreService";
+import TopBar from "../../../components/layout/header/TopBar";
 
 function AllStaff() {
   const today = dayjs();
@@ -22,8 +23,9 @@ function AllStaff() {
   }, []);
 
   return (
-    <div className="w-full px-3 my-5 scrollbar-hide">
-      <div className="flex flex-col w-full h-full items-center mt-5 gap-5 ">
+    <div className="w-full scrollbar-hide">
+      <TopBar title="직원관리" />
+      <div className="flex flex-col w-full h-full items-center mt-5 pb-5 px-3 gap-5 overflow-y-auto">
         {employees?.map(
           (emp) =>
             emp.role !== "OWNER" && (

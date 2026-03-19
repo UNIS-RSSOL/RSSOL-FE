@@ -5,6 +5,7 @@ import { Divider } from "antd";
 import LeftArrowIcon from "../../../assets/icons/LeftArrowIcon.jsx";
 import RightArrowIcon from "../../../assets/icons/RightArrowIcon.jsx";
 import Box from "../../../components/common/Box.jsx";
+import TopBar from "../../../components/layout/header/TopBar.jsx";
 import EmployeeInfo from "../../../components/manage/EmployeeInfo.jsx";
 import { getAllWorkerSummary } from "../../../services/StoreService";
 import {
@@ -56,6 +57,7 @@ function ManageWage() {
 
   return (
     <div className="w-full px-3">
+      <TopBar title="급여관리" />
       <div className="flex flex-col w-full items-center mt-5">
         <Box className="flex flex-col" disabled={true}>
           <div className="flex items-center justify-center">

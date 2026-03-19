@@ -196,8 +196,6 @@ function App() {
     "/owner/notification/home",
     "/owner/notification/check",
     "/employee/notification",
-    "/owner/mypage",
-    "/employee/mypage",
     "/owner/store-settings",
     "/owner/calendar",
     "/employee/calendar",

@@ -7,6 +7,7 @@ import CoinIcon from "../../../assets/icons/CoinIcon.jsx";
 import StoreIcon from "../../../assets/icons/StoreIcon.jsx";
 import character2 from "../../../assets/images/character2.png";
 import Footer from "../../../components/layout/footer/Footer.jsx";
+import TopBar from "../../../components/layout/header/TopBar.jsx";
 import {
   getStaffProfile,
   getStaffStoreList,
@@ -21,7 +22,14 @@ function EmployeePage() {
   const [profile, setProfile] = useState("");
   const [username, setUsername] = useState("");
 
-  const buildMydata = (name, storeName, bankId, accountNumber, phone, storeStr) => [
+  const buildMydata = (
+    name,
+    storeName,
+    bankId,
+    accountNumber,
+    phone,
+    storeStr,
+  ) => [
     {
       icon: <UserIcon className="size-[20px]" />,
       title: "내 이름",
@@ -65,26 +73,30 @@ function EmployeePage() {
         let storeStr = storeList.map((store) => store.name).join(", ");
         if (storeStr.length > 10) storeStr = storeStr.slice(0, 10) + "...";
 
-        setMydata(buildMydata(
-          my.username,
-          my.currentStore.name,
-          my.bankAccount.bankId,
-          my.bankAccount.accountNumber,
-          my.phoneNumber || "",
-          storeStr,
-        ));
+        setMydata(
+          buildMydata(
+            my.username,
+            my.currentStore.name,
+            my.bankAccount.bankId,
+            my.bankAccount.accountNumber,
+            my.phoneNumber || "",
+            storeStr,
+          ),
+        );
       } catch (error) {
         console.error(error);
         // API 실패 시 목업 데이터
         setUsername("홍길동");
-        setMydata(buildMydata(
-          "홍길동",
-          "알바 솔로몬 1호점",
-          7,
-          "333-3333-3333-33",
-          "010-000-0000",
-          "알바 솔로몬 1호점, 알바솔로...",
-        ));
+        setMydata(
+          buildMydata(
+            "홍길동",
+            "알바 솔로몬 1호점",
+            7,
+            "333-3333-3333-33",
+            "010-000-0000",
+            "알바 솔로몬 1호점, 알바솔로...",
+          ),
+        );
       }
     })();
   }, []);
@@ -125,9 +137,7 @@ function EmployeePage() {
   return (
     <div className="w-full h-full flex flex-col bg-white font-Pretendard">
       {/* 마이페이지 헤더 */}
-      <div className="w-full h-[60px] flex items-center justify-center shrink-0 shadow-[0_2px_7px_0_rgba(0,0,0,0.1)] bg-white">
-        <p className="text-[18px] font-[600]">마이페이지</p>
-      </div>
+      <TopBar title="마이페이지" />
 
       <main className="flex-1 overflow-y-auto">
         <div className="flex flex-col divide-y-8 divide-[#e7eaf3]">
@@ -162,8 +172,6 @@ function EmployeePage() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import SaveIcon from "../../../assets/icons/SaveIcon.jsx";
 import TypeIcon from "../../../assets/icons/TypeIcon.jsx";
 import MarkerIcon from "../../../assets/icons/MarkerIcon.jsx";
 import PhoneIcon from "../../../assets/icons/PhoneIcon.jsx";
+import TopBar from "../../../components/layout/header/TopBar.jsx";
 import FileEditIcon from "../../../assets/icons/FileEditIcon.jsx";
 import character1 from "../../../assets/images/character1.png";
 import Footer from "../../../components/layout/footer/Footer.jsx";
@@ -94,14 +95,34 @@ function OwnerPage() {
         let storeStr = storeList.map((store) => store.name).join(", ");
         if (storeStr.length > 10) storeStr = storeStr.slice(0, 10) + "...";
 
-        setMydata(buildMydata(my.username, my.email, my.businessRegistrationNumber));
-        setStoredata(buildStoredata(store.storeCode, store.name, store.address, store.phoneNumber, storeStr));
+        setMydata(
+          buildMydata(my.username, my.email, my.businessRegistrationNumber),
+        );
+        setStoredata(
+          buildStoredata(
+            store.storeCode,
+            store.name,
+            store.address,
+            store.phoneNumber,
+            storeStr,
+          ),
+        );
       } catch (error) {
         console.error(error);
         // API 실패 시 목업 데이터
         setUsername("홍길동");
-        setMydata(buildMydata("홍길동", "alssol8888@gmail.com", "254-16-20568"));
-        setStoredata(buildStoredata("QI-23-KCJS-9J2", "알바 솔로몬", "서대문구 대현동 21-3", "02-000-0000", "알바 솔로몬 1호점, 알바솔로..."));
+        setMydata(
+          buildMydata("홍길동", "alssol8888@gmail.com", "254-16-20568"),
+        );
+        setStoredata(
+          buildStoredata(
+            "QI-23-KCJS-9J2",
+            "알바 솔로몬",
+            "서대문구 대현동 21-3",
+            "02-000-0000",
+            "알바 솔로몬 1호점, 알바솔로...",
+          ),
+        );
       }
     })();
   }, []);
@@ -170,9 +191,7 @@ function OwnerPage() {
   return (
     <div className="w-full h-full flex flex-col bg-white font-Pretendard">
       {/* 마이페이지 헤더 */}
-      <div className="w-full h-[60px] flex items-center justify-center shrink-0 shadow-[0_2px_7px_0_rgba(0,0,0,0.1)] bg-white">
-        <p className="text-[18px] font-[600]">마이페이지</p>
-      </div>
+      <TopBar title="마이페이지" />
 
       <main className="flex-1 overflow-y-auto">
         <div className="flex flex-col divide-y-8 divide-[#e7eaf3]">
@@ -214,8 +233,6 @@ function OwnerPage() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }
