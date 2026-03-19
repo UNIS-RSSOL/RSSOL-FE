@@ -45,7 +45,10 @@ function OwnerTodo() {
   const [newTodoText, setNewTodoText] = useState("");
   const [editTodoText, setEditTodoText] = useState("");
 
+<<<<<<< HEAD
   const [sidebarOpen, setSidebarOpen] = useState(false);
+=======
+>>>>>>> 34ebf6095473accba90b27cf4a974a8003a92548
   const [currentDate, setCurrentDate] = useState(dayjs());
   const days = ["일", "월", "화", "수", "목", "금", "토"];
   const dayOfWeek = days[currentDate.day()];
@@ -382,9 +385,13 @@ function OwnerTodo() {
           )}
           <div className="w-full">
             {todos.HANDOVER.length === 0 && (
+<<<<<<< HEAD
               <p className="text-[13px] text-[#87888c] text-center py-[8px]">
                 등록된 할 일이 없습니다.
               </p>
+=======
+              <p className="text-[13px] text-[#87888c] text-center py-[8px]">등록된 할 일이 없습니다.</p>
+>>>>>>> 34ebf6095473accba90b27cf4a974a8003a92548
             )}
             {todos.HANDOVER.map((todo) => (
               <div
@@ -433,11 +440,14 @@ function OwnerTodo() {
                     onClick={(e) => handleStartEdit(todo, e)}
                   >
                     {todo.content}
+<<<<<<< HEAD
                     {todo.authorName && (
                       <span className="text-[11px] text-[#87888c] ml-[6px]">
                         ({todo.authorName})
                       </span>
                     )}
+=======
+>>>>>>> 34ebf6095473accba90b27cf4a974a8003a92548
                   </span>
                 )}
                 <button
@@ -507,9 +517,13 @@ function OwnerTodo() {
           )}
           <div className="w-full">
             {todos.PERSONAL.length === 0 && (
+<<<<<<< HEAD
               <p className="text-[13px] text-[#87888c] text-center py-[8px]">
                 등록된 할 일이 없습니다.
               </p>
+=======
+              <p className="text-[13px] text-[#87888c] text-center py-[8px]">등록된 할 일이 없습니다.</p>
+>>>>>>> 34ebf6095473accba90b27cf4a974a8003a92548
             )}
             {todos.PERSONAL.map((todo) => (
               <div

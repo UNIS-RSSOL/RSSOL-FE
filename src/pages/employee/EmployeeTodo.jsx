@@ -3,10 +3,14 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 
+<<<<<<< HEAD
 import {
   getActiveStore,
   getStaffProfile,
 } from "../../services/MypageService.js";
+=======
+import { getActiveStore, getStaffProfile } from "../../services/MypageService.js";
+>>>>>>> 34ebf6095473accba90b27cf4a974a8003a92548
 import {
   getTodos,
   addTodo,
@@ -49,7 +53,11 @@ function EmployeeTodo() {
   const [editingTodoId, setEditingTodoId] = useState(null);
   const [newTodoText, setNewTodoText] = useState("");
   const [editTodoText, setEditTodoText] = useState("");
+<<<<<<< HEAD
   const [sidebarOpen, setSidebarOpen] = useState(false);
+=======
+
+>>>>>>> 34ebf6095473accba90b27cf4a974a8003a92548
   const [currentDate, setCurrentDate] = useState(dayjs());
   const days = ["일", "월", "화", "수", "목", "금", "토"];
   const dayOfWeek = days[currentDate.day()];
@@ -273,9 +281,13 @@ function EmployeeTodo() {
           )}
           <div className="w-full">
             {todos.STORE.length === 0 && (
+<<<<<<< HEAD
               <p className="text-[13px] text-[#87888c] text-center py-[8px]">
                 등록된 할 일이 없습니다.
               </p>
+=======
+              <p className="text-[13px] text-[#87888c] text-center py-[8px]">등록된 할 일이 없습니다.</p>
+>>>>>>> 34ebf6095473accba90b27cf4a974a8003a92548
             )}
             {todos.STORE.map((todo) => (
               <div
@@ -302,7 +314,13 @@ function EmployeeTodo() {
                     </svg>
                   )}
                 </div>
+<<<<<<< HEAD
                 <span className="flex-1 text-[14px]">{todo.content}</span>
+=======
+                <span className="flex-1 text-[14px]">
+                  {todo.content}
+                </span>
+>>>>>>> 34ebf6095473accba90b27cf4a974a8003a92548
               </div>
             ))}
           </div>
@@ -364,9 +382,13 @@ function EmployeeTodo() {
           )}
           <div className="w-full">
             {todos.HANDOVER.length === 0 && (
+<<<<<<< HEAD
               <p className="text-[13px] text-[#87888c] text-center py-[8px]">
                 등록된 할 일이 없습니다.
               </p>
+=======
+              <p className="text-[13px] text-[#87888c] text-center py-[8px]">등록된 할 일이 없습니다.</p>
+>>>>>>> 34ebf6095473accba90b27cf4a974a8003a92548
             )}
             {todos.HANDOVER.map((todo) => {
               const isMyTodo = todo.authorId === currentUserId;
@@ -494,9 +516,13 @@ function EmployeeTodo() {
           )}
           <div className="w-full">
             {todos.PERSONAL.length === 0 && (
+<<<<<<< HEAD
               <p className="text-[13px] text-[#87888c] text-center py-[8px]">
                 등록된 할 일이 없습니다.
               </p>
+=======
+              <p className="text-[13px] text-[#87888c] text-center py-[8px]">등록된 할 일이 없습니다.</p>
+>>>>>>> 34ebf6095473accba90b27cf4a974a8003a92548
             )}
             {todos.PERSONAL.map((todo) => (
               <div
