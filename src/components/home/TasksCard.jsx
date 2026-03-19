@@ -39,12 +39,12 @@ function TasksCard({ todos, onToggle }) {
             >
               <div
                 className={`w-[20px] h-[20px] rounded-full border-[2px] shrink-0 flex items-center justify-center ${
-                  todo.done
+                  todo.completed
                     ? "bg-[#3370FF] border-[#3370FF]"
                     : "border-[#D9D9D9] bg-white"
                 }`}
               >
-                {todo.done && (
+                {todo.completed && (
                   <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
                     <path
                       d="M1 4L3.5 6.5L9 1"
@@ -56,7 +56,7 @@ function TasksCard({ todos, onToggle }) {
                   </svg>
                 )}
               </div>
-              <span className="text-[14px]">{todo.text}</span>
+              <span className="text-[14px]">{todo.content}</span>
             </div>
           ))}
         </div>
