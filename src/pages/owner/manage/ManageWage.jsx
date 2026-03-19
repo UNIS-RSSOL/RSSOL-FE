@@ -7,32 +7,47 @@ import RightArrowIcon from "../../../assets/icons/RightArrowIcon.jsx";
 import Box from "../../../components/common/Box.jsx";
 import EmployeeInfo from "../../../components/manage/EmployeeInfo.jsx";
 import { getAllWorkerSummary } from "../../../services/StoreService";
-import { getTotalWage } from "../../../services/PayrollService.js";
+import {
+  getTotalWage,
+  checkPayroll,
+} from "../../../services/PayrollService.js";
 
 function ManageWage() {
-  const navigate = useNavigate();
-  const [tab, setTab] = useState(1);
-
-  const [employees, setEmployees] = useState();
   const [wage, setWage] = useState();
   const [currentDate, setCurrentDate] = useState(dayjs());
+  const [isPaid, setIsPaid] = useState([]);
   const start = currentDate.startOf("month");
   const end = currentDate.endOf("month");
 
   useEffect(() => {
     (async () => {
-      const response = await getAllWorkerSummary(
-        currentDate.format("YYYY"),
-        currentDate.format("M"),
-      );
-      setEmployees(response.staffList);
       const wages = await getTotalWage(
         currentDate.format("YYYY"),
         currentDate.format("M"),
       );
       setWage(wages);
+      const arr = [];
+      wages.employees.map((emp) => {
+        arr.push(emp.paid);
+      });
+      setIsPaid(arr);
+      console.log(arr);
+      console.log(wages);
     })();
   }, [currentDate]);
+
+  const handleCheck = async (userStoreId, paid) => {
+    try {
+      await checkPayroll(
+        userStoreId,
+        currentDate.format("YYYY"),
+        currentDate.format("M"),
+        paid,
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const formatCurrency = (amount) => {
     if (!amount) return "0";
@@ -100,20 +115,26 @@ function ManageWage() {
             {currentDate.format("M")}월 급여 지급 리스트
           </p>
           <div className="flex flex-col w-full gap-5">
-            {employees?.map(
-              (emp) =>
-                emp.role !== "OWNER" && (
-                  <EmployeeInfo
-                    tab={1}
-                    key={emp.userStoreId}
-                    profileImageUrl={emp.profileImageUrl}
-                    username={emp.username}
-                    monthlypay={formatCurrency(emp.monthlyPay || 0)}
-                    bankName={emp.bankName}
-                    accountNumber={emp.accountNumber}
-                  />
-                ),
-            )}
+            {wage?.employees?.map((emp, index) => (
+              <EmployeeInfo
+                tab={1}
+                key={emp.userStoreId}
+                profileImageUrl={emp.profileImageUrl}
+                username={emp.username}
+                monthlypay={formatCurrency(emp.totalPay || 0)}
+                // bankName={emp.bankName}
+                // accountNumber={emp.accountNumber}
+                check={isPaid[index]}
+                onCheck={() => {
+                  handleCheck(emp.userStoreId, !isPaid[index]);
+                  setIsPaid((prev) => {
+                    const newPaid = [...prev];
+                    newPaid[index] = !isPaid[index];
+                    return newPaid;
+                  });
+                }}
+              />
+            ))}
           </div>
         </Box>
       </div>
