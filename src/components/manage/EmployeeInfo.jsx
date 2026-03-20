@@ -16,15 +16,9 @@ function EmployeeInfo({
   tel,
   bankName,
   accountNumber,
-  onClick,
+  check,
+  onCheck,
 }) {
-  const [checked, setChecked] = useState(false);
-
-  const handleClick = () => {
-    setChecked(!checked);
-    onClick();
-  };
-
   return (
     <div className="flex flex-row w-full items-center">
       <div className=" flex justify-center items-center flex-shrink-0 w-[70px] h-[70px] bg-[#68E194] rounded-full border-[3px] border-white shadow-[0_2px_4px_0_RGBA(0,0,0,0.25)] mr-[16px] overflow-hidden">
@@ -75,9 +69,10 @@ function EmployeeInfo({
       {tab === 1 && (
         <div className="flex flex-col items-center justify-center gap-2">
           <div
-            className={`flex size-[30px] rounded-full border-[1px] ${checked ? "border-[#32d1aa]" : "border-[#606060]"} cursor-pointer items-center justify-center`}
+            className={`flex size-[30px] rounded-full border-[1px] ${check ? "border-[#32d1aa]" : "border-[#606060]"} cursor-pointer items-center justify-center`}
+            onClick={onCheck}
           >
-            {checked && (
+            {check && (
               <CheckOutlined style={{ fontWeight: "bold", fontSize: "20px" }} />
             )}
           </div>

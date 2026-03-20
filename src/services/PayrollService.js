@@ -1,3 +1,4 @@
+import { param } from "framer-motion/client";
 import api from "./Api.js";
 
 //직원별 시급 입력
@@ -26,6 +27,18 @@ export const setMinimumWageByPeriod = async (
       effectiveTo,
       description,
     });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+//임금 지급 체크
+export const checkPayroll = async (userStoreId, year, month, isPaid) => {
+  try {
+    const response = await api.patch(
+      `payroll/store/summary/${userStoreId}?year=${year}&month=${month}&isPaid=${isPaid}`,
+    );
     return response.data;
   } catch (error) {
     throw error;

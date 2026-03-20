@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import LeftArrowIcon from "../../../assets/icons/LeftArrowIcon.jsx";
 import RightArrowIcon from "../../../assets/icons/RightArrowIcon.jsx";
 import { Divider } from "antd";
+import TopBar from "../../../components/layout/header/TopBar.jsx";
 import { getMyWage } from "../../../services/PayrollService.js";
 import { getActiveStore } from "../../../services/MypageService.js";
 
@@ -38,6 +39,7 @@ const ManageSalary = () => {
 
   return (
     <div className="flex flex-col w-full items-center px-[16px] mt-5">
+      <TopBar title="급여관리" />
       <Box disabled={true} className="flex flex-col">
         <div className="flex items-center justify-center">
           <LeftArrowIcon

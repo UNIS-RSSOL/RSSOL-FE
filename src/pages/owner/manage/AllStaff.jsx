@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import EmployeeInfo from "../../../components/manage/EmployeeInfo";
 import Box from "../../../components/common/Box";
 import { getAllWorkerSummary } from "../../../services/StoreService";
+import TopBar from "../../../components/layout/header/TopBar";
 
 function AllStaff() {
   const today = dayjs();
@@ -22,35 +23,44 @@ function AllStaff() {
   }, []);
 
   return (
-    <div className="w-full px-3 my-5 scrollbar-hide">
-      <div className="flex flex-col w-full h-full items-center mt-5 gap-5 ">
-        {employees?.map(
-          (emp) =>
-            emp.role !== "OWNER" && (
-              <Box
-                key={emp.userStoreId}
-                disabled={false}
-                onClick={() => {
-                  console.log(emp.userStoreId);
-                  navigate(`/owner/manage/employee/${emp.userStoreId}`);
-                }}
-              >
-                <EmployeeInfo
-                  tab={0}
-                  profileImageUrl={emp.profileImageUrl}
-                  username={emp.username}
-                  role={emp.role}
-                  lateCount={emp.lateCount}
-                  absenceCount={emp.absenceCount}
-                  monthlypay={emp.monthlypay}
-                  tel={emp.tel}
-                  bankName={emp.bankName}
-                  accountNumber={emp.accountNumber}
-                />
-              </Box>
-            ),
-        )}
-      </div>
+    <div className="w-full scrollbar-hide">
+      <TopBar title="직원관리" />
+      {employees?.length > 1 ? (
+        <div className="flex flex-col w-full h-full items-center mt-5 pb-5 px-3 gap-5 overflow-y-auto">
+          {employees.map(
+            (emp) =>
+              emp.role !== "OWNER" && (
+                <Box
+                  key={emp.userStoreId}
+                  disabled={false}
+                  onClick={() => {
+                    console.log(emp.userStoreId);
+                    navigate(`/owner/manage/employee/${emp.userStoreId}`);
+                  }}
+                >
+                  <EmployeeInfo
+                    tab={0}
+                    profileImageUrl={emp.profileImageUrl}
+                    username={emp.username}
+                    role={emp.role}
+                    lateCount={emp.lateCount}
+                    absenceCount={emp.absenceCount}
+                    monthlypay={emp.monthlypay}
+                    tel={emp.tel}
+                    bankName={emp.bankName}
+                    accountNumber={emp.accountNumber}
+                  />
+                </Box>
+              ),
+          )}
+        </div>
+      ) : (
+        <div className="w-full h-full flex items-center justify-center mt-20">
+          <p className="text-[16px] text-gray-500 font-[400]">
+            등록된 직원이 없습니다
+          </p>
+        </div>
+      )}
     </div>
   );
 }
