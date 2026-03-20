@@ -45,10 +45,7 @@ function OwnerTodo() {
   const [newTodoText, setNewTodoText] = useState("");
   const [editTodoText, setEditTodoText] = useState("");
 
-<<<<<<< HEAD
   const [sidebarOpen, setSidebarOpen] = useState(false);
-=======
->>>>>>> 34ebf6095473accba90b27cf4a974a8003a92548
   const [currentDate, setCurrentDate] = useState(dayjs());
   const days = ["일", "월", "화", "수", "목", "금", "토"];
   const dayOfWeek = days[currentDate.day()];
