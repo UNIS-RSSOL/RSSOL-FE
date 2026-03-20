@@ -74,15 +74,6 @@ export default function useHomePage(role) {
         // 오늘 할 일 조회 (전체 카테고리)
         try {
           const todoRes = await getTodos(todayStr);
-<<<<<<< HEAD
-          const mapTodos = (arr) =>
-            (arr || []).map((t) => ({
-              ...t,
-              text: t.content,
-              done: t.completed,
-            }));
-=======
->>>>>>> 34ebf6095473accba90b27cf4a974a8003a92548
           setTodos({
             STORE: todoRes.storeTodos || [],
             HANDOVER: todoRes.handoverTodos || [],
@@ -115,13 +106,9 @@ export default function useHomePage(role) {
       setTodos((prev) => {
         const updated = {};
         for (const key of Object.keys(prev)) {
-<<<<<<< HEAD
           updated[key] = prev[key].map((t) =>
             t.id === id ? { ...t, done: !t.done } : t,
           );
-=======
-          updated[key] = prev[key].map((t) => (t.id === id ? { ...t, completed: !t.completed } : t));
->>>>>>> 34ebf6095473accba90b27cf4a974a8003a92548
         }
         return updated;
       });
