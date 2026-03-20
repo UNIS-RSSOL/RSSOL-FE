@@ -28,7 +28,7 @@ function ManageWage() {
       );
       setWage(wages);
       const arr = [];
-      wages.employees.map((emp) => {
+      wages?.staffPayrolls?.map((emp) => {
         arr.push(emp.paid);
       });
       setIsPaid(arr);
@@ -117,15 +117,15 @@ function ManageWage() {
             {currentDate.format("M")}월 급여 지급 리스트
           </p>
           <div className="flex flex-col w-full gap-5">
-            {wage?.employees?.map((emp, index) => (
+            {wage?.staffPayrolls?.map((emp, index) => (
               <EmployeeInfo
                 tab={1}
                 key={emp.userStoreId}
                 profileImageUrl={emp.profileImageUrl}
-                username={emp.username}
+                username={emp.staffName}
                 monthlypay={formatCurrency(emp.totalPay || 0)}
-                // bankName={emp.bankName}
-                // accountNumber={emp.accountNumber}
+                bankName={emp.bankName}
+                accountNumber={emp.accountNumber}
                 check={isPaid[index]}
                 onCheck={() => {
                   handleCheck(emp.userStoreId, !isPaid[index]);
