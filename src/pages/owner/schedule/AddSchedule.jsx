@@ -206,8 +206,9 @@ export default function AddSchedule() {
         const serverMessage =
           error.response?.data?.message || error.response?.data?.error || "";
         if (
-          error.response?.status === 404 &&
-          serverMessage.includes("매장 기본 설정이 존재하지 않습니다")
+          error.response?.status === 404 ||
+          serverMessage.includes("매장 기본 설정이 존재하지 않습니다") ||
+          serverMessage.includes("매장 설정을 찾을 수 없습니다")
         ) {
           redirectToStoreSettings("매장 설정을 먼저 완료해주세요.");
           return;
@@ -289,8 +290,9 @@ export default function AddSchedule() {
           settingsError.response?.data?.error ||
           "";
         if (
-          settingsError.response?.status === 404 &&
-          serverMessage.includes("매장 기본 설정이 존재하지 않습니다")
+          settingsError.response?.status === 404 ||
+          serverMessage.includes("매장 기본 설정이 존재하지 않습니다") ||
+          serverMessage.includes("매장 설정을 찾을 수 없습니다")
         ) {
           setShowRequestPopup(false);
           setIsLoading(false);
@@ -412,7 +414,7 @@ export default function AddSchedule() {
         if (status === 404) {
           const serverMessage =
             error.response.data?.message || error.response.data?.error || "";
-          if (serverMessage.includes("매장 기본 설정이 존재하지 않습니다")) {
+          if (serverMessage.includes("매장 기본 설정이 존재하지 않습니다") || serverMessage.includes("매장 설정을 찾을 수 없습니다")) {
             setShowRequestPopup(false);
             redirectToStoreSettings("매장 설정을 먼저 완료해주세요.");
             return;

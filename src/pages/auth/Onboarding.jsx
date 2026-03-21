@@ -170,14 +170,28 @@ export default function Onboarding() {
       setIsLoading(true);
       setError("");
       try {
+        const storeSetting = {
+          openTime: operatingHours.start,
+          closeTime: operatingHours.end,
+          useSegments: partTimeEnabled && partTimes.length > 0,
+          segments: partTimeEnabled
+            ? partTimes.map((pt) => ({
+                startTime: pt.start,
+                endTime: pt.end,
+              }))
+            : [],
+          hasBreakTime: breakTimeEnabled,
+          breakStartTime: breakTimeEnabled ? breakTime.start : null,
+          breakEndTime: breakTimeEnabled ? breakTime.end : null,
+        };
         await onboardingOwner(
           formData.storeName,
           formData.storeAddress,
           formData.storePhone,
           formData.businessNumber,
           formData.hireDate,
+          storeSetting,
         );
-        // TODO: 매장 운영 정보 API 호출 (operatingHours, partTimes, breakTime)
         navigate("/owner");
       } catch (err) {
         console.error("온보딩(사장님) 실패:", err);

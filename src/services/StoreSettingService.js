@@ -11,6 +11,17 @@ export const getStoreSettings = async (storeId) => {
   }
 };
 
+// 매장 설정 수정 (활성 매장 기준, OWNER 전용)
+export const updateActiveStoreSettings = async (settingData) => {
+  try {
+    const response = await api.patch("store-settings", settingData);
+    return response.data;
+  } catch (error) {
+    console.error("매장 설정 수정 실패:", error);
+    throw error;
+  }
+};
+
 // 매장 설정 조회 (활성 매장 기준)
 export const getActiveStoreSettings = async () => {
   try {

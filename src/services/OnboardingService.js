@@ -30,6 +30,7 @@ export const onboardingOwner = async (
   phoneNumber,
   businessRegistrationNumber,
   hireDate,
+  storeSetting,
 ) => {
   try {
     const response = await api.post("auth/onboarding", {
@@ -39,6 +40,7 @@ export const onboardingOwner = async (
       phoneNumber,
       businessRegistrationNumber,
       hireDate,
+      storeSetting,
     });
     return response.data;
   } catch (error) {
