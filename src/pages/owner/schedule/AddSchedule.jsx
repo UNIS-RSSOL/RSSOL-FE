@@ -187,15 +187,19 @@ export default function AddSchedule() {
       setIsLoadingPartTime(true);
       try {
         const settings = await getActiveStoreSettings();
-        const segments = settings?.partTimeSegments || settings?.partTimes || [];
+        const segments = settings?.segments || settings?.partTimeSegments || settings?.partTimes || [];
 
-        if (!settings || !segments.length) {
+        if (!settings) {
           redirectToStoreSettings("매장 설정을 먼저 완료해주세요.");
           return;
         }
 
-        setPartTimeSegments(segments);
-        setHasPartTimeSegments(true);
+        if (segments.length > 0 && settings.useSegments !== false) {
+          setPartTimeSegments(segments);
+          setHasPartTimeSegments(true);
+        } else {
+          setHasPartTimeSegments(false);
+        }
         const initialPersonnel = {};
         segments.forEach((_, index) => {
           initialPersonnel[index] = 1;
@@ -277,8 +281,8 @@ export default function AddSchedule() {
       }
       try {
         const settings = await getActiveStoreSettings();
-        const segments = settings?.partTimeSegments || settings?.partTimes || [];
-        if (!settings || !segments.length) {
+        const segments = settings?.segments || settings?.partTimeSegments || settings?.partTimes || [];
+        if (!settings) {
           setShowRequestPopup(false);
           setIsLoading(false);
           redirectToStoreSettings("매장 설정을 먼저 완료해주세요.");
