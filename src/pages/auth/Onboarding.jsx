@@ -61,8 +61,8 @@ export default function Onboarding() {
     end: "22:00",
   });
   const [partTimes, setPartTimes] = useState([
-    { start: "09:00", end: "14:00" },
-    { start: "14:00", end: "22:00" },
+    { start: "09:00", end: "14:00", label: "오픈조" },
+    { start: "14:00", end: "22:00", label: "구간 2" },
   ]);
   const [partTimeEnabled, setPartTimeEnabled] = useState(true);
   const [breakTimeEnabled, setBreakTimeEnabled] = useState(true);
@@ -205,9 +205,10 @@ export default function Onboarding() {
       partTimes.length > 0
         ? partTimes[partTimes.length - 1].end
         : operatingHours.start;
+    const newIndex = partTimes.length;
     setPartTimes((prev) => [
       ...prev,
-      { start: lastEnd, end: operatingHours.end },
+      { start: lastEnd, end: operatingHours.end, label: `구간 ${newIndex + 1}` },
     ]);
   };
 
@@ -552,9 +553,14 @@ export default function Onboarding() {
                           key={idx}
                           className="flex items-center gap-3 ml-7"
                         >
-                          <span className="text-[14px] font-[500] min-w-[60px] shrink-0 text-left">
-                            {getPartTimeLabel(idx)}
-                          </span>
+                          <input
+                            type="text"
+                            value={pt.label}
+                            onChange={(e) =>
+                              handlePartTimeChange(idx, "label", e.target.value)
+                            }
+                            className="text-[14px] font-[500] w-[70px] shrink-0 text-left bg-transparent border-b border-transparent focus:border-[#3370FF] outline-none"
+                          />
                           <TimeRangeSelect
                             start={pt.start}
                             end={pt.end}
