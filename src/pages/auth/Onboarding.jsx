@@ -359,11 +359,6 @@ export default function Onboarding() {
                   name: "businessNumber",
                   placeholder: "사업자 등록 번호를 입력해주세요.",
                 },
-                {
-                  label: "입사 날짜",
-                  name: "hireDate",
-                  placeholder: "0000.00.00",
-                },
               ].map((item) => (
                 <div key={item.name} className="flex flex-col">
                   <p className="text-sm mb-1 text-left">{item.label}</p>
@@ -387,6 +382,16 @@ export default function Onboarding() {
                   )}
                 </div>
               ))}
+              <div className="flex flex-col">
+                <p className="text-sm mb-1 text-left">입사 날짜</p>
+                <input
+                  name="hireDate"
+                  type="date"
+                  value={formData.hireDate}
+                  onChange={handleChange}
+                  className="border h-[61px] py-[17.5px] px-[26.25px] rounded-[11px] w-full text-sm"
+                />
+              </div>
             </div>
           </>
         )}
