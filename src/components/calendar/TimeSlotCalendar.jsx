@@ -12,12 +12,12 @@ function TimeSlotCalendar({ onTimeSlotClick, getAvailabilityCount }) {
 
     // 인원 수에 따라 색 농도 단계 조절 (최대 4단계로 클램프)
     const level = Math.min(count, 4);
-    // 가장 진한 색 #68E194 (104, 225, 148) 기준으로 단계별로 더 연하게
+    // 가장 진한 색 #3370FF (51, 112, 255) 기준으로 단계별로 더 연하게
     // 레벨 4가 가장 진함 (alpha 1.0), 레벨 1이 가장 연함 (alpha 0.25)
     const alpha = 0.25 + (level / 4) * 0.75;
 
     return {
-      backgroundColor: `rgba(104, 225, 148, ${alpha})`,
+      backgroundColor: `rgba(51, 112, 255, ${alpha})`,
       transition: "background-color 0.15s ease-out",
     };
   };

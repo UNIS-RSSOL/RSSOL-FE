@@ -634,6 +634,7 @@ function OwnerSchedule() {
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f9fd]">
       <TopBar title="근무표 생성" onBack={() => navigate(-1)} />
+      <div className="h-[60px] shrink-0" />
 
       <div className="flex-1 px-4 py-3 flex flex-col gap-4 overflow-y-auto">
         <div className="text-lg font-semibold">내 스케줄 추가</div>

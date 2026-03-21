@@ -11,7 +11,7 @@ dayjs.locale("ko");
  */
 function AutoCalCalendar({ hasSelection, schedules }) {
   const days = ["일", "월", "화", "수", "목", "금", "토"];
-  const colors = ["#68e194", "#32d1aa", "#00c1bd"];
+  const colors = ["#99bbff", "#3370FF", "#1a4fcc"];
 
   // 실제 스케줄 데이터 처리
   const normalized = hasSelection && schedules ? (schedules || []).map((s) => ({

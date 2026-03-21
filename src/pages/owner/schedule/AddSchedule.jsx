@@ -106,6 +106,9 @@ export default function AddSchedule() {
 
         cell.classList.remove("range-start", "range-end", "range-between");
 
+        // 다른 달의 날짜(fc-day-other)에는 선택 스타일 적용하지 않음
+        if (cell.classList.contains("fc-day-other")) return;
+
         if (selectedDates.length === 1) {
           if (selectedDates[0] === dateStr) cell.classList.add("range-start");
         } else if (selectedDates.length === 2) {
@@ -460,7 +463,7 @@ export default function AddSchedule() {
 
   return (
     <div className="add-schedule-page w-full flex flex-col h-screen">
-        <div className="flex items-center justify-between h-[60px] px-3 sm:px-4 bg-white shadow-[0_4px_8px_0_rgba(0,0,0,0.08)] flex-shrink-0 gap-2">
+        <div className="flex items-center justify-between h-[60px] px-3 sm:px-4 bg-white border-b border-[#e7eaf3] flex-shrink-0 gap-2">
         <span className="text-base sm:text-[18px] font-semibold text-gray-900 truncate min-w-0 flex-1">
           {storeName || "매장"}
         </span>
@@ -714,8 +717,8 @@ export default function AddSchedule() {
               {hasPartTimeSegments && partTimeSegments.length > 0 ? (
                 <div className="space-y-1">
                   {partTimeSegments.map((segment, index) => {
-                    const startTime = segment.startTime || segment.start || "09:00";
-                    const endTime = segment.endTime || segment.end || "18:00";
+                    const startTime = (segment.startTime || segment.start || "09:00").slice(0, 5);
+                    const endTime = (segment.endTime || segment.end || "18:00").slice(0, 5);
                     const personnel = partTimePersonnel[index] || 1;
                     return (
                       <p key={index} className="text-sm sm:text-base font-medium break-keep">
@@ -730,11 +733,11 @@ export default function AddSchedule() {
                 </p>
               )}
             </div>
-            <div className="flex gap-2 sm:gap-3">
+            <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => setShowRequestPopup(false)}
-                className="flex-1 py-3 rounded-xl font-semibold border border-gray-300 text-gray-700 text-sm sm:text-base"
+                className="flex-1 py-3 rounded-xl font-semibold border border-gray-300 text-gray-700 text-base"
               >
                 수정하기
               </button>
@@ -742,7 +745,7 @@ export default function AddSchedule() {
                 type="button"
                 onClick={handleRequestSchedule}
                 disabled={isLoading}
-                className="flex-1 py-3 rounded-xl font-semibold bg-[#68E194] text-black disabled:opacity-60 text-sm sm:text-base"
+                className="flex-1 py-3 rounded-xl font-semibold bg-[#3370FF] text-white disabled:opacity-60 text-base"
               >
                 요청하기
               </button>

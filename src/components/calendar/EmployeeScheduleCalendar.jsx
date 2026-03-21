@@ -197,7 +197,7 @@ function EmployeeScheduleCalendar({
                   key={`${hour}-${w.format("DD")}`}
                   className="flex flex-shrink-0 w-[44px] h-full items-center justify-center border-l border-[#e7eaf3] cursor-pointer select-none"
                   style={{
-                    backgroundColor: isSelected ? "#4DD99F" : isInDragRange ? "#4DD99F80" : "transparent",
+                    backgroundColor: isSelected ? "#3370FF" : isInDragRange ? "#3370FF80" : "transparent",
                   }}
                   onMouseDown={(e) => {
                     e.preventDefault();

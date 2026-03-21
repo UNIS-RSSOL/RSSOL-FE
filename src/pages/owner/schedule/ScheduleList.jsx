@@ -609,6 +609,7 @@ function ScheduleList() {
   return (
     <div className="w-full h-full bg-[#f8f9fd] flex flex-col">
       <TopBar title="근무표 생성" onBack={() => navigate("/owner")} />
+      <div className="h-[60px] shrink-0" />
 
       {/* 상단바를 고정하고, 나머지 영역만 스크롤 되도록 처리 */}
       <div className="flex-1 overflow-y-auto">
