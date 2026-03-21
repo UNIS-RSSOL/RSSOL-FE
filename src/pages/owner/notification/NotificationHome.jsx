@@ -27,6 +27,7 @@ function NotificationHome() {
   return (
     <div className="w-full h-full flex flex-col">
       <TopBar title="알림" onBack={() => navigate("/owner")} />
+      <div className="h-[60px] shrink-0" />
       <NavBar currentTab={tab} setCurrentTab={setTab} />
       <div className="w-full h-full bg-[#F8FBFE] overflow-y-auto">
         <div className="px-4 mt-4 text-[15px] font-semibold text-left">

@@ -69,11 +69,11 @@ function EmployeeInfo({
       {tab === 1 && (
         <div className="flex flex-col items-center justify-center gap-2">
           <div
-            className={`flex size-[30px] rounded-full border-[1px] ${check ? "border-[#32d1aa]" : "border-[#606060]"} cursor-pointer items-center justify-center`}
+            className={`flex size-[30px] rounded-full border-[1px] ${check ? "border-[#3370FF]" : "border-[#606060]"} cursor-pointer items-center justify-center`}
             onClick={onCheck}
           >
             {check && (
-              <CheckOutlined style={{ fontWeight: "bold", fontSize: "20px" }} />
+              <CheckOutlined style={{ fontWeight: "bold", fontSize: "20px", color: "#3370FF" }} />
             )}
           </div>
         </div>
