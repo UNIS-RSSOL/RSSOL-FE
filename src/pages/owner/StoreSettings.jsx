@@ -17,6 +17,10 @@ import BackButton from "../../components/common/BackButton.jsx";
 import TimeRangeSelect from "../../components/common/TimeRangeSelect.jsx";
 import ToggleHeader from "../../components/common/ToggleHeader.jsx";
 import PillToggle from "../../components/common/PillToggle.jsx";
+import {
+  getActiveStoreSettings,
+  updateActiveStoreSettings,
+} from "../../services/StoreSettingService.js";
 
 // 파트 타임 라벨
 const getPartTimeLabel = (index) => {
@@ -66,7 +70,26 @@ function StoreSettings() {
         setBusinessNumber(profile.businessRegistrationNumber || "");
         setOwnerName(profile.username || "");
         setOwnerEmail(profile.email || "");
-        // TODO: 스케줄 정보 API 연결 시 여기서 로드
+        // 매장 스케줄 설정 로드
+        try {
+          const settings = await getActiveStoreSettings();
+          if (settings) {
+            if (settings.openTime) setOperatingHours({ start: settings.openTime.slice(0, 5), end: settings.closeTime.slice(0, 5) });
+            setPartTimeEnabled(settings.useSegments ?? true);
+            if (settings.segments && settings.segments.length > 0) {
+              setPartTimes(settings.segments.map((seg) => ({
+                start: seg.startTime.slice(0, 5),
+                end: seg.endTime.slice(0, 5),
+              })));
+            }
+            setBreakTimeEnabled(settings.hasBreakTime ?? false);
+            if (settings.breakStartTime && settings.breakEndTime) {
+              setBreakTime({ start: settings.breakStartTime.slice(0, 5), end: settings.breakEndTime.slice(0, 5) });
+            }
+          }
+        } catch {
+          // 매장 설정이 없는 경우 기본값 유지
+        }
       } catch (error) {
         console.error(error);
       }
@@ -103,13 +126,16 @@ function StoreSettings() {
           updateOwnerProfile(ownerName, ownerEmail, businessNumber),
         ]);
       } else {
-        // TODO: 스케줄 정보 저장 API 연결
-        console.log("스케줄 저장:", {
-          operatingHours,
-          partTimeEnabled,
-          partTimes: partTimeEnabled ? partTimes : [],
-          breakTimeEnabled,
-          breakTime: breakTimeEnabled ? breakTime : null,
+        await updateActiveStoreSettings({
+          openTime: operatingHours.start,
+          closeTime: operatingHours.end,
+          useSegments: partTimeEnabled && partTimes.length > 0,
+          segments: partTimeEnabled
+            ? partTimes.map((pt) => ({ startTime: pt.start, endTime: pt.end }))
+            : [],
+          hasBreakTime: breakTimeEnabled,
+          breakStartTime: breakTimeEnabled ? breakTime.start : null,
+          breakEndTime: breakTimeEnabled ? breakTime.end : null,
         });
       }
       navigate(-1);
@@ -326,7 +352,7 @@ function StoreSettings() {
           {/* 입력 완료 버튼 */}
           <Button
             onClick={handleSubmit}
-            className="!w-full h-[53px] text-[16px] font-[600] rounded-[11px] !bg-[#E7EAF3] !text-[#87888c]"
+            className="!w-full h-[53px] text-[16px] font-[600] rounded-[11px] !bg-[#3370FF] text-white"
           >
             입력 완료
           </Button>
