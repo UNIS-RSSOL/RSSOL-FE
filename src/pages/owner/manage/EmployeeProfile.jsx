@@ -27,15 +27,15 @@ function EmployeeProfile() {
 
   const PageBox = () => {
     return (
-      <div className="fixed left-1/2 bottom-25 flex h-[45px] rounded-full divide-x-1 border-[1px] border-[#b3b3b3] divide-[#b3b3b3] shadow-[0_4px_4px_0_rgba(0,0,0,0.25)] overflow-hidden -translate-x-1/2">
+      <div className="fixed left-1/2 bottom-25 flex h-[45px] rounded-full border border-[#e7eaf3] overflow-hidden -translate-x-1/2">
         <span
-          className={`flex items-center justify-center w-[70px] font-[510] text-[16px] cursor-pointer ${page === 1 ? "bg-white text-black" : "bg-[#b3b3b3] text-[#4e4e4e]"}`}
+          className={`flex items-center justify-center w-[70px] font-[510] text-[16px] cursor-pointer ${page === 1 ? "bg-[#3370FF] text-white" : "bg-white text-[#888]"}`}
           onClick={() => setPage(1)}
         >
           정보
         </span>
         <span
-          className={`flex items-center justify-center w-[70px] font-[510] text-[16px] cursor-pointer ${page === 2 ? "bg-white text-black" : "bg-[#b3b3b3] text-[#4e4e4e]"}`}
+          className={`flex items-center justify-center w-[70px] font-[510] text-[16px] cursor-pointer ${page === 2 ? "bg-[#3370FF] text-white" : "bg-white text-[#888]"}`}
           onClick={() => setPage(2)}
         >
           근태

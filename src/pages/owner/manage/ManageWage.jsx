@@ -58,7 +58,6 @@ function ManageWage() {
   return (
     <div className="w-full px-3">
       <TopBar title="급여관리" />
-      <div className="h-[60px] shrink-0" />
       <div className="flex flex-col w-full items-center mt-5">
         <Box className="flex flex-col" disabled={true}>
           <div className="flex items-center justify-center">
