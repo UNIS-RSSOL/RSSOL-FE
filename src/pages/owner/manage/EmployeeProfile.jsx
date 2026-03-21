@@ -6,6 +6,7 @@ import RightArrowIcon from "../../../assets/icons/RightArrowIcon";
 import BackButton from "../../../components/common/BackButton";
 import Button from "../../../components/common/Button";
 import PencilIcon from "../../../assets/icons/PencilIcon";
+import PillToggle from "../../../components/common/PillToggle";
 import { getEmployeeAttendance } from "../../../services/ViewAttendanceService";
 import { getEmployeeProfile } from "../../../services/ViewProfileService";
 
@@ -25,24 +26,10 @@ function EmployeeProfile() {
     })();
   }, [userStoreId]);
 
-  const PageBox = () => {
-    return (
-      <div className="fixed left-1/2 bottom-25 flex h-[45px] rounded-full border border-[#e7eaf3] overflow-hidden -translate-x-1/2">
-        <span
-          className={`flex items-center justify-center w-[70px] font-[510] text-[16px] cursor-pointer ${page === 1 ? "bg-[#3370FF] text-white" : "bg-white text-[#888]"}`}
-          onClick={() => setPage(1)}
-        >
-          정보
-        </span>
-        <span
-          className={`flex items-center justify-center w-[70px] font-[510] text-[16px] cursor-pointer ${page === 2 ? "bg-[#3370FF] text-white" : "bg-white text-[#888]"}`}
-          onClick={() => setPage(2)}
-        >
-          근태
-        </span>
-      </div>
-    );
-  };
+  const pageToggleTabs = [
+    { key: "1", label: "정보" },
+    { key: "2", label: "근태" },
+  ];
 
   const StatusBox = () => {
     const status =
@@ -282,7 +269,13 @@ function EmployeeProfile() {
         {page === 1 && <InfoPage />}
         {page === 2 && <AttendPage />}
       </div>
-      <PageBox />
+      <div className="fixed left-1/2 bottom-25 -translate-x-1/2">
+        <PillToggle
+          tabs={pageToggleTabs}
+          activeKey={String(page)}
+          onChange={(key) => setPage(Number(key))}
+        />
+      </div>
       <div className="flex fixed bottom-0 left-3 right-3 justify-center items-center bg-white">
         <Button className="h-[60px] bg-[#b31b1b] text-white font-[500] text-[16px] my-3">
           삭제
