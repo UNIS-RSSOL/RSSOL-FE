@@ -107,7 +107,7 @@ export default function useHomePage(role) {
         const updated = {};
         for (const key of Object.keys(prev)) {
           updated[key] = prev[key].map((t) =>
-            t.id === id ? { ...t, done: !t.done } : t,
+            t.id === id ? { ...t, completed: !t.completed } : t,
           );
         }
         return updated;

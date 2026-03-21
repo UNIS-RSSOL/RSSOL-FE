@@ -281,7 +281,7 @@ export default function Onboarding() {
       </div>
 
       {/* 컨텐츠 영역 */}
-      <div className="w-full mt-8 flex flex-col items-center px-[8px] pb-[80px]">
+      <div className="w-full mt-8 flex flex-col items-center px-[24px] pb-[80px]">
         {error && (
           <div className="w-full mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
             {error}
@@ -616,7 +616,7 @@ export default function Onboarding() {
         )}
 
         {/* --- Bottom Fixed Button --- */}
-        <div className="absolute bottom-10 w-full px-[8px]">
+        <div className="absolute bottom-10 w-full px-[24px]">
           <Button
             onClick={handleNext}
             className={`!w-full h-[53px] text-[16px] font-[600] rounded-[11px] ${isStepComplete() ? "!bg-[#3370FF] text-white" : "!bg-[#E7EAF3] !text-[#87888c] !cursor-not-allowed hover:!opacity-100"}`}
