@@ -25,6 +25,7 @@ function AllStaff() {
   return (
     <div className="w-full scrollbar-hide">
       <TopBar title="직원관리" />
+      <div className="h-[60px] shrink-0" />
       {employees?.length > 1 ? (
         <div className="flex flex-col w-full h-full items-center mt-5 pb-5 px-3 gap-5 overflow-y-auto">
           {employees.map(
