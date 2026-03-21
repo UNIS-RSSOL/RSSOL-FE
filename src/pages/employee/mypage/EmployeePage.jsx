@@ -147,7 +147,7 @@ function EmployeePage() {
               <img
                 src={profile || character2}
                 alt="profile"
-                className="size-[100px] object-contain"
+                className="w-full h-full object-cover"
               />
             </div>
             <p className="text-[18px] font-[600] mt-2 mb-5">{username}</p>
