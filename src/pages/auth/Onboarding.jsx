@@ -15,6 +15,13 @@ import OnboardingBtn from "../../components/login/OnboardingBtn.jsx";
 import TimeRangeSelect from "../../components/common/TimeRangeSelect.jsx";
 import ToggleHeader from "../../components/common/ToggleHeader.jsx";
 
+const createPartTime = (start, end, label) => ({
+  id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  start,
+  end,
+  label,
+});
+
 // 은행 드롭다운 목록
 const bankItems = [
   { label: "국민은행", key: 1 },
@@ -61,8 +68,8 @@ export default function Onboarding() {
     end: "22:00",
   });
   const [partTimes, setPartTimes] = useState([
-    { start: "09:00", end: "14:00", label: "오픈조" },
-    { start: "14:00", end: "22:00", label: "구간 2" },
+    createPartTime("09:00", "14:00", "오픈조"),
+    createPartTime("14:00", "22:00", "구간 2"),
   ]);
   const [partTimeEnabled, setPartTimeEnabled] = useState(true);
   const [breakTimeEnabled, setBreakTimeEnabled] = useState(true);
@@ -222,18 +229,18 @@ export default function Onboarding() {
     const newIndex = partTimes.length;
     setPartTimes((prev) => [
       ...prev,
-      { start: lastEnd, end: operatingHours.end, label: `구간 ${newIndex + 1}` },
+      createPartTime(lastEnd, operatingHours.end, `구간 ${newIndex + 1}`),
     ]);
   };
 
-  const handleRemovePartTime = (index) => {
+  const handleRemovePartTime = (partTimeId) => {
     if (partTimes.length <= 1) return;
-    setPartTimes((prev) => prev.filter((_, i) => i !== index));
+    setPartTimes((prev) => prev.filter((pt) => pt.id !== partTimeId));
   };
 
-  const handlePartTimeChange = (index, field, value) => {
+  const handlePartTimeChange = (partTimeId, field, value) => {
     setPartTimes((prev) =>
-      prev.map((pt, i) => (i === index ? { ...pt, [field]: value } : pt)),
+      prev.map((pt) => (pt.id === partTimeId ? { ...pt, [field]: value } : pt)),
     );
   };
 
@@ -569,14 +576,18 @@ export default function Onboarding() {
                     <div className="flex flex-col gap-3">
                       {partTimes.map((pt, idx) => (
                         <div
-                          key={idx}
+                          key={pt.id}
                           className="flex items-center gap-3 ml-7"
                         >
                           <input
                             type="text"
                             value={pt.label}
                             onChange={(e) =>
-                              handlePartTimeChange(idx, "label", e.target.value)
+                              handlePartTimeChange(
+                                pt.id,
+                                "label",
+                                e.target.value,
+                              )
                             }
                             className="text-[14px] font-[500] w-[70px] shrink-0 text-left bg-transparent border-b border-transparent focus:border-[#3370FF] outline-none"
                           />
@@ -584,14 +595,14 @@ export default function Onboarding() {
                             start={pt.start}
                             end={pt.end}
                             onStartChange={(val) =>
-                              handlePartTimeChange(idx, "start", val)
+                              handlePartTimeChange(pt.id, "start", val)
                             }
                             onEndChange={(val) =>
-                              handlePartTimeChange(idx, "end", val)
+                              handlePartTimeChange(pt.id, "end", val)
                             }
                           />
                           <div
-                            onClick={() => handleRemovePartTime(idx)}
+                            onClick={() => handleRemovePartTime(pt.id)}
                             className={`w-[22px] h-[22px] rounded-full bg-[#555] text-white flex items-center justify-center text-[10px] shrink-0 ${partTimes.length <= 1 ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
                           >
                             ✕

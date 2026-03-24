@@ -3,6 +3,7 @@ import {
   getOwnerStoreList,
   deleteOwnerStore,
   addOwnerStore,
+  changeActiveStore,
 } from "../../../services/MypageService.js";
 import TopBar from "../../../components/layout/header/TopBar.jsx";
 import AddItem from "../../../components/mypage/AddItem.jsx";
@@ -95,13 +96,23 @@ function ManageStore() {
         return;
       }
       console.log(newStore);
-      await addOwnerStore(
+      const createdStore = await addOwnerStore(
         newStore[0].content,
         newStore[1].content,
         newStore[2].content,
         newStore[3].content,
         newStore[4].content,
       );
+
+      // 신규 매장 추가 직후 활성 매장을 전환해 이후 화면(매장 설정/근무표 요청)이 새 매장을 기준으로 동작하도록 보장
+      const createdStoreId = createdStore?.storeId || createdStore?.id;
+      if (createdStoreId) {
+        try {
+          await changeActiveStore(createdStoreId);
+        } catch (activeStoreError) {
+          console.error("신규 매장 활성화 실패:", activeStoreError);
+        }
+      }
       setAddToast(false);
       setNewStore([
         {
@@ -131,6 +142,9 @@ function ManageStore() {
           type: "date",
         },
       ]);
+      alert(
+        "매장이 추가되었습니다. 방금 추가한 매장으로 전환했어요.\n매장 설정을 완료한 뒤 근무표 요청을 진행해주세요.",
+      );
     } catch (error) {
       console.error(error);
     }

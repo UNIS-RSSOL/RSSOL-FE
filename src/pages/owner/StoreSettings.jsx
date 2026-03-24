@@ -22,6 +22,13 @@ import {
   updateActiveStoreSettings,
 } from "../../services/StoreSettingService.js";
 
+const createPartTime = (start, end, label = "") => ({
+  id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  start,
+  end,
+  label,
+});
+
 // 파트 타임 라벨
 const getPartTimeLabel = (index) => {
   if (index === 0) return "오픈";
@@ -50,9 +57,9 @@ function StoreSettings() {
   });
   const [partTimeEnabled, setPartTimeEnabled] = useState(true);
   const [partTimes, setPartTimes] = useState([
-    { start: "09:00", end: "14:00" },
-    { start: "14:00", end: "18:00" },
-    { start: "18:00", end: "22:00" },
+    createPartTime("09:00", "14:00", getPartTimeLabel(0)),
+    createPartTime("14:00", "18:00", getPartTimeLabel(1)),
+    createPartTime("18:00", "22:00", getPartTimeLabel(2)),
   ]);
   const [breakTimeEnabled, setBreakTimeEnabled] = useState(true);
   const [breakTime, setBreakTime] = useState({
@@ -77,10 +84,15 @@ function StoreSettings() {
             if (settings.openTime) setOperatingHours({ start: settings.openTime.slice(0, 5), end: settings.closeTime.slice(0, 5) });
             setPartTimeEnabled(settings.useSegments ?? true);
             if (settings.segments && settings.segments.length > 0) {
-              setPartTimes(settings.segments.map((seg) => ({
-                start: seg.startTime.slice(0, 5),
-                end: seg.endTime.slice(0, 5),
-              })));
+              setPartTimes(
+                settings.segments.map((seg, index) =>
+                  createPartTime(
+                    seg.startTime.slice(0, 5),
+                    seg.endTime.slice(0, 5),
+                    getPartTimeLabel(index),
+                  ),
+                ),
+              );
             }
             setBreakTimeEnabled(settings.hasBreakTime ?? false);
             if (settings.breakStartTime && settings.breakEndTime) {
@@ -103,18 +115,18 @@ function StoreSettings() {
         : operatingHours.start;
     setPartTimes((prev) => [
       ...prev,
-      { start: lastEnd, end: operatingHours.end },
+      createPartTime(lastEnd, operatingHours.end, getPartTimeLabel(prev.length)),
     ]);
   };
 
-  const handleRemovePartTime = (index) => {
+  const handleRemovePartTime = (partTimeId) => {
     if (partTimes.length <= 1) return;
-    setPartTimes((prev) => prev.filter((_, i) => i !== index));
+    setPartTimes((prev) => prev.filter((pt) => pt.id !== partTimeId));
   };
 
-  const handlePartTimeChange = (index, field, value) => {
+  const handlePartTimeChange = (partTimeId, field, value) => {
     setPartTimes((prev) =>
-      prev.map((pt, i) => (i === index ? { ...pt, [field]: value } : pt)),
+      prev.map((pt) => (pt.id === partTimeId ? { ...pt, [field]: value } : pt)),
     );
   };
 
@@ -272,24 +284,24 @@ function StoreSettings() {
                   <div className="flex flex-col gap-3">
                     {partTimes.map((pt, idx) => (
                       <div
-                        key={idx}
+                          key={pt.id}
                         className="flex items-center gap-3 ml-7"
                       >
                         <span className="text-[14px] font-[500] min-w-[60px] shrink-0 text-left">
-                          {getPartTimeLabel(idx)}
+                          {pt.label || getPartTimeLabel(idx)}
                         </span>
                         <TimeRangeSelect
                           start={pt.start}
                           end={pt.end}
                           onStartChange={(val) =>
-                            handlePartTimeChange(idx, "start", val)
+                              handlePartTimeChange(pt.id, "start", val)
                           }
                           onEndChange={(val) =>
-                            handlePartTimeChange(idx, "end", val)
+                              handlePartTimeChange(pt.id, "end", val)
                           }
                         />
                         <div
-                          onClick={() => handleRemovePartTime(idx)}
+                          onClick={() => handleRemovePartTime(pt.id)}
                           className={`w-[22px] h-[22px] rounded-full bg-[#555] text-white flex items-center justify-center text-[10px] shrink-0 ${partTimes.length <= 1 ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
                         >
                           ✕
