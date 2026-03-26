@@ -103,19 +103,19 @@ function Header() {
   const checkExistingAvailability = async () => {
     try {
       console.log("🔍 Header: work availability 확인 시작");
-      const availabilities = await getMyWorkAvailability();
-      console.log("🔍 Header: getMyWorkAvailability 응답:", availabilities);
+      const availabilityData = await getMyWorkAvailability();
+      const list = Array.isArray(availabilityData)
+        ? availabilityData
+        : availabilityData?.availabilities || [];
+      console.log("🔍 Header: getMyWorkAvailability 응답:", availabilityData);
 
       // availabilities가 배열이고 길이가 0보다 크면 true
-      const hasAvailability =
-        availabilities &&
-        Array.isArray(availabilities) &&
-        availabilities.length > 0;
+      const hasAvailability = list.length > 0;
       console.log(
         "🔍 Header: availability 존재 여부:",
         hasAvailability,
         "개수:",
-        availabilities?.length || 0,
+        list.length || 0,
       );
 
       return hasAvailability;

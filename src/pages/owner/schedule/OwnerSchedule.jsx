@@ -115,35 +115,35 @@ function OwnerSchedule() {
       try {
         console.log("🔍 AddOwner: work availability 불러오기 시작");
         const availabilityData = await getMyWorkAvailability();
+        // 백엔드 응답이 { availabilities: [...] } (객체) 이거나 [...] (배열) 일 수 있어 항상 배열로 정규화
+        const list = Array.isArray(availabilityData)
+          ? availabilityData
+          : availabilityData?.availabilities || [];
         console.log(
           "🔍 AddOwner: getMyWorkAvailability 응답:",
           availabilityData,
         );
         console.log(
           "🔍 AddOwner: availability 개수:",
-          availabilityData?.length || 0,
+          list.length || 0,
         );
 
         // availability 데이터 구조 확인
-        if (availabilityData && availabilityData.length > 0) {
+        if (list.length > 0) {
           console.log(
             "🔍 AddOwner: 첫 번째 availability 샘플:",
-            availabilityData[0],
+            list[0],
           );
           console.log(
             "🔍 AddOwner: 모든 availability ID 목록:",
-            availabilityData.map((a) => a.id || "NO_ID"),
+            list.map((a) => a.id || "NO_ID"),
           );
         }
 
-        setAvailabilities(availabilityData || []);
+        setAvailabilities(list);
 
         // work availability를 selectedTimeSlots에 추가
-        if (
-          availabilityData &&
-          Array.isArray(availabilityData) &&
-          availabilityData.length > 0
-        ) {
+        if (list.length > 0) {
           console.log(
             "🔍 AddOwner: availability 데이터가 있음, selectedTimeSlots 설정 시작",
           );
@@ -152,7 +152,7 @@ function OwnerSchedule() {
           const startOfWeek = dayjs(currentDate).locale("ko").startOf("week");
           const endOfWeek = startOfWeek.add(6, "day").endOf("day");
 
-          availabilityData.forEach((availability) => {
+          list.forEach((availability) => {
             // availability 데이터 구조 확인: startDatetime/endDatetime 또는 dayOfWeek/startTime/endTime
             let availabilityStart, availabilityEnd;
 
@@ -611,7 +611,10 @@ function OwnerSchedule() {
       try {
         const updatedAvailabilityData = await getMyWorkAvailability();
         console.log("🔍 저장 후 최신 데이터:", updatedAvailabilityData);
-        setAvailabilities(updatedAvailabilityData || []);
+        const updatedList = Array.isArray(updatedAvailabilityData)
+          ? updatedAvailabilityData
+          : updatedAvailabilityData?.availabilities || [];
+        setAvailabilities(updatedList);
       } catch (refreshError) {
         console.warn("⚠️ 저장 후 데이터 새로고침 실패:", refreshError);
         // 새로고침 실패해도 계속 진행
