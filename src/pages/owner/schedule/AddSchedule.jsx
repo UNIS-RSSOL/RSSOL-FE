@@ -700,18 +700,50 @@ export default function AddSchedule() {
         </div>
       </div>
 
-      {/* 근무표 요청 팝업 */}
+      {/* 근무표 요청 확인 모달 */}
       {showRequestPopup && (
         <div
-          className="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50 p-4"
-          onClick={() => setShowRequestPopup(false)}
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+          onClick={() => !isLoading && setShowRequestPopup(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="schedule-request-modal-title"
         >
           <div
-            className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[500px] p-4 sm:p-6 space-y-4 sm:space-y-6"
+            className="bg-white rounded-2xl w-full sm:max-w-[500px] p-4 sm:p-6 space-y-4 sm:space-y-6 max-h-[min(90vh,640px)] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="flex items-start justify-between gap-3">
+              <h2
+                id="schedule-request-modal-title"
+                className="text-lg sm:text-xl font-bold text-gray-900 min-w-0 flex-1 break-keep"
+              >
+                요청 전 내용을 확인해 주세요
+              </h2>
+              <button
+                type="button"
+                onClick={() => !isLoading && setShowRequestPopup(false)}
+                disabled={isLoading}
+                className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 disabled:opacity-50"
+                aria-label="닫기"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
             <div className="space-y-2">
-              <p className="text-sm sm:text-base font-medium break-keep">
+              <p className="text-sm sm:text-base font-medium text-gray-700 break-keep">
                 근무 기간: {periodText}
               </p>
               {hasPartTimeSegments && partTimeSegments.length > 0 ? (
@@ -721,33 +753,37 @@ export default function AddSchedule() {
                     const endTime = (segment.endTime || segment.end || "18:00").slice(0, 5);
                     const personnel = partTimePersonnel[index] || 1;
                     return (
-                      <p key={index} className="text-sm sm:text-base font-medium break-keep">
+                      <p key={index} className="text-sm sm:text-base font-medium text-gray-700 break-keep">
                         {getPartTimeLabel(index)} ({startTime}-{endTime}): {personnel}명
                       </p>
                     );
                   })}
                 </div>
               ) : (
-                <p className="text-sm sm:text-base font-medium break-keep">
+                <p className="text-sm sm:text-base font-medium text-gray-700 break-keep">
                   근무 인원: {totalPersonnel}명
                 </p>
               )}
             </div>
-            <div className="flex gap-3">
+            <div className="flex items-center justify-center pt-1">
               <button
                 type="button"
                 onClick={() => setShowRequestPopup(false)}
-                className="flex-1 py-3 rounded-xl font-semibold border border-gray-300 text-gray-700 text-base"
+                disabled={isLoading}
+                className="px-6 py-3 rounded-xl font-semibold border border-gray-300 text-gray-700 text-base disabled:opacity-60"
               >
                 수정하기
               </button>
+              <span className="mx-4 text-gray-300 select-none" aria-hidden="true">
+                |
+              </span>
               <button
                 type="button"
                 onClick={handleRequestSchedule}
                 disabled={isLoading}
-                className="flex-1 py-3 rounded-xl font-semibold bg-[#3370FF] text-white disabled:opacity-60 text-base"
+                className="px-6 py-3 rounded-xl font-semibold bg-[#3370FF] text-white disabled:opacity-60 text-base"
               >
-                요청하기
+                {isLoading ? "요청 중..." : "요청하기"}
               </button>
             </div>
           </div>
