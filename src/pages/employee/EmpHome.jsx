@@ -32,7 +32,7 @@ function EmpHome() {
     navigate,
   } = useHomePage("employee");
 
-  const [activeStore, setActiveStore] = useState();
+  const [activeStore, setActiveStore] = useState({ storeId: null, name: "" });
 
   useEffect(() => {
     (async () => {

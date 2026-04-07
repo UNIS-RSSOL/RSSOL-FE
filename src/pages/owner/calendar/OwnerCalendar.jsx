@@ -119,7 +119,7 @@ function OwnerCalendar() {
   const [eventData, setEventData] = useState();
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
   const [needWorkers, setNeedWorkers] = useState(1);
-  const [activeStore, setActiveStore] = useState();
+  const [activeStore, setActiveStore] = useState({ storeId: null, name: "" });
   const [newTime, setNewTime] = useState({
     userStoreId: "",
     username: "",

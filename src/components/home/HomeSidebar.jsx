@@ -113,7 +113,7 @@ function HomeSidebar({
               {role === "OWNER" ? (
                 <div className="flex items-center justify-between mb-[24px]">
                   <h2 className="text-[22px] font-[700] text-left">
-                    {activeStore.name || "매장 이름"}
+                    {activeStore?.name || "매장 이름"}
                   </h2>
                   <div
                     className="cursor-pointer p-[4px]"
@@ -127,7 +127,7 @@ function HomeSidebar({
                 </div>
               ) : (
                 <h2 className="text-[22px] font-[700] mb-[24px] text-left">
-                  {activeStore.name || "매장 이름"}
+                  {activeStore?.name || "매장 이름"}
                 </h2>
               )}
 
@@ -152,7 +152,7 @@ function HomeSidebar({
                     key={store.storeId}
                     onClick={() => handleStoreChange(store)}
                     className={`text-[16px] py-[4px] cursor-pointer text-left ${
-                      Number(store.storeId) === Number(activeStore.storeId)
+                      Number(store.storeId) === Number(activeStore?.storeId)
                         ? "font-[600]"
                         : "font-[400]"
                     }`}

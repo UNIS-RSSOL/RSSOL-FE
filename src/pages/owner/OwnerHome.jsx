@@ -31,7 +31,7 @@ function OwnerHome() {
     navigate,
   } = useHomePage("owner");
 
-  const [activeStore, setActiveStore] = useState();
+  const [activeStore, setActiveStore] = useState({ storeId: null, name: "" });
 
   useEffect(() => {
     (async () => {

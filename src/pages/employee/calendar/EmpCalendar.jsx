@@ -31,7 +31,7 @@ function EmpCalendar() {
   const formattedCurrentWeek = `${startOfWeek.format("YYYY.MM.DD")} - ${startOfWeek.add(6, "day").format("YYYY.MM.DD")}`;
 
   // 데이터 상태
-  const [activeStore, setActiveStore] = useState();
+  const [activeStore, setActiveStore] = useState({ storeId: null, name: "" });
   const [selectedCalendarEvent, setSelectedCalendarEvent] = useState(null);
   const [eventData, setEventData] = useState();
   const [dayWorkers, setDayWorkers] = useState([]);
