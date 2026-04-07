@@ -201,6 +201,8 @@ function App() {
     "/employee/calendar",
     "/owner/todo",
     "/employee/todo",
+    "/owner/mypage",
+    "/employee/mypage",
   ];
 
   const hideLayout =
