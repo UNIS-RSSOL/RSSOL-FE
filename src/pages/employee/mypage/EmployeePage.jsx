@@ -7,11 +7,14 @@ import CoinIcon from "../../../assets/icons/CoinIcon.jsx";
 import StoreIcon from "../../../assets/icons/StoreIcon.jsx";
 import character2 from "../../../assets/images/character2.png";
 import Footer from "../../../components/layout/footer/Footer.jsx";
-import TopBar from "../../../components/layout/header/TopBar.jsx";
+import HomeHeader from "../../../components/home/HomeHeader.jsx";
+import HomeSidebar from "../../../components/home/HomeSidebar.jsx";
+import BellIcon from "../../../assets/icons/BellIcon.jsx";
 import {
   getStaffProfile,
   getStaffStoreList,
   updateStaffProfile,
+  getActiveStore,
 } from "../../../services/MypageService.js";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../../services/AuthService.js";
@@ -21,6 +24,8 @@ function EmployeePage() {
   const [mydata, setMydata] = useState([]);
   const [profile, setProfile] = useState("");
   const [username, setUsername] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeStore, setActiveStore] = useState({ storeId: null, name: "" });
 
   const buildMydata = (
     name,
@@ -65,6 +70,9 @@ function EmployeePage() {
   useEffect(() => {
     (async () => {
       try {
+        const active = await getActiveStore();
+        setActiveStore(active);
+
         const my = await getStaffProfile();
         setProfile(my.profileImageUrl);
         setUsername(my.username);
@@ -86,6 +94,7 @@ function EmployeePage() {
       } catch (error) {
         console.error(error);
         // API 실패 시 목업 데이터
+        setActiveStore({ storeId: 0, name: "매장 이름" });
         setUsername("홍길동");
         setMydata(
           buildMydata(
@@ -136,8 +145,12 @@ function EmployeePage() {
 
   return (
     <div className="w-full h-full flex flex-col bg-white font-Pretendard">
-      {/* 마이페이지 헤더 */}
-      <TopBar title="마이페이지" />
+      <HomeHeader
+        storeName="마이페이지"
+        onMenuClick={() => setSidebarOpen(true)}
+        rightIcon={<BellIcon />}
+        onRightClick={() => navigate("/employee/notification")}
+      />
 
       <main className="flex-1 overflow-y-auto">
         <div className="flex flex-col divide-y-8 divide-[#e7eaf3]">
@@ -172,6 +185,17 @@ function EmployeePage() {
           </div>
         </div>
       </main>
+
+      <Footer />
+
+      <HomeSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        activeStore={activeStore}
+        setActiveStore={setActiveStore}
+        setSidebarOpen={setSidebarOpen}
+        role="EMPLOYEE"
+      />
     </div>
   );
 }
