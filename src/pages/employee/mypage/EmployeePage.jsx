@@ -152,7 +152,7 @@ function EmployeePage() {
         onRightClick={() => navigate("/employee/notification")}
       />
 
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden">
         <div className="flex flex-col divide-y-8 divide-[#e7eaf3]">
           {/* 프로필 + 이름 */}
           <div className="flex flex-col items-center justify-center">
