@@ -65,7 +65,11 @@ function OwnerHome() {
           onCheckOut={handleCheckOut}
           attendance={attendance}
         />
-        <TasksCard todos={todos} onToggle={toggleTodo} />
+        <TasksCard
+          todos={todos}
+          onToggle={toggleTodo}
+          onCardClick={() => navigate("/owner/todo")}
+        />
         <MiniTimeline className="flex-1" schedules={todaySchedules} />
       </main>
 

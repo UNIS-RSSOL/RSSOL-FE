@@ -6,23 +6,27 @@ const TABS = [
   { key: "PERSONAL", label: "내 할일" },
 ];
 
-function TasksCard({ todos, onToggle }) {
+function TasksCard({ todos, onToggle, onCardClick }) {
   const [tabIndex, setTabIndex] = useState(0);
   const currentTab = TABS[tabIndex];
   const currentTodos = todos[currentTab.key] || [];
 
-  const handleTabClick = () => {
+  const handleTabClick = (e) => {
+    e.stopPropagation();
     setTabIndex((prev) => (prev + 1) % TABS.length);
   };
 
   return (
-    <div className="border-[1px] border-[#E7EAF3] rounded-[25px] overflow-hidden mb-[16px]">
+    <div
+      className="border-[1px] border-[#E7EAF3] rounded-[25px] overflow-hidden mb-[16px] cursor-pointer"
+      onClick={onCardClick}
+    >
       <div className="px-[16px] py-[14px]">
         <div className="flex items-center justify-between mb-[12px]">
           <p className="text-[16px] font-[600]">오늘 해야할 일</p>
           <span
             className="inline-flex items-center justify-center min-w-[70px] h-[30px] bg-white text-black border border-[#3370FF] rounded-[20px] px-[12px] text-[12px] font-[500] cursor-pointer select-none"
-            onClick={handleTabClick}
+            onClick={(e) => handleTabClick(e)}
           >
             {currentTab.label}
           </span>
@@ -35,7 +39,10 @@ function TasksCard({ todos, onToggle }) {
             <div
               key={todo.id}
               className="flex items-center gap-[8px] cursor-pointer"
-              onClick={() => onToggle(todo.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggle(todo.id);
+              }}
             >
               <div
                 className={`w-[20px] h-[20px] rounded-full border-[2px] shrink-0 flex items-center justify-center ${
