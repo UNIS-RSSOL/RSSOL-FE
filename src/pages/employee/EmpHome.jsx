@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import useHomePage from "../../hooks/useHomePage.js";
 import BellIcon from "../../assets/icons/BellIcon.jsx";
@@ -65,7 +64,11 @@ function EmpHome() {
           onCheckOut={handleCheckOut}
           attendance={attendance}
         />
-        <TasksCard todos={todos} onToggle={toggleTodo} />
+        <TasksCard
+          todos={todos}
+          onToggle={toggleTodo}
+          onCardClick={() => navigate("/employee/todo")}
+        />
         <MiniTimeline className="flex-1" schedules={todaySchedules} />
       </main>
 
