@@ -86,6 +86,7 @@ export const getScheduleCandidate = async (key, index) => {
     const response = await api.get("schedules/candidates", {
       params: {
         key,
+        index,
       },
     });
     return response.data;

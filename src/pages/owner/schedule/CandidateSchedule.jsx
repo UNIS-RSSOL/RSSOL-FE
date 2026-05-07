@@ -54,6 +54,13 @@ export default function CandidateSchedule() {
       for (let i = 0; i < candidates.length; i++) {
         try {
           const data = await getScheduleCandidate(candidateKey, i);
+          console.log("📥 후보 스케줄 응답:", {
+            index: i,
+            candidateKey,
+            isArray: Array.isArray(data),
+            length: Array.isArray(data) ? data.length : undefined,
+            sample: Array.isArray(data) ? data?.[0] : data,
+          });
 
           // 백엔드 응답 형식 변환
           // 응답: [{ storeId: 1, shifts: [{ userStoreId, username, startTime, endTime, day }] }]
@@ -61,8 +68,8 @@ export default function CandidateSchedule() {
           let convertedData = [];
 
           if (Array.isArray(data) && data.length > 0) {
-            // 첫 번째 store의 shifts 사용 (보통 하나의 store만 있음)
-            const storeData = data[0];
+            // 백엔드가 후보들을 배열로 반환하는 경우가 있어 index에 맞는 원소를 우선 사용
+            const storeData = data[i] ?? data[0];
             if (
               storeData &&
               storeData.shifts &&
@@ -133,6 +140,8 @@ export default function CandidateSchedule() {
         }
       }
       setCandidateSchedules(schedules);
+      // 최초 진입 시 1번 대안을 기본 선택(빈 캘린더 방지)
+      setSelectedIndex((prev) => (prev === null ? 0 : prev));
     };
 
     loadCandidateSchedules();
@@ -282,6 +291,9 @@ export default function CandidateSchedule() {
       {/* 상단바 - 고정 */}
       <TopBar title="근무표 대안 선택" onBack={() => navigate(-1)} />
 
+      {/* TopBar(fixed) 아래에서 시작하도록 본문 래퍼 */}
+      <div className="flex flex-col flex-1 pt-[60px] min-h-0">
+
       {/* 고정 영역: 제목, 소제목, 대안 번호 버튼들 */}
       <div className="flex-shrink-0 px-4 pt-4 pb-2 flex flex-col gap-4">
         {/* 제목과 소제목 */}
@@ -292,54 +304,32 @@ export default function CandidateSchedule() {
           </div>
         </div>
 
-        {/* 대안 번호 버튼들 (수평 나열) - 항상 보이도록 고정 */}
-        <div className="flex flex-row gap-2 overflow-x-scroll scrollbar-hide">
+        {/* 대안 번호 버튼들 (동그란 버튼) */}
+        <div className="flex flex-row items-center gap-2 overflow-x-auto scrollbar-hide py-1">
           {candidates.map((idx) => {
             const isActive = idx === selectedIndex;
-            const scheduleData = candidateSchedules[idx] || [];
-            const previewGrid = generatePreviewGrid(scheduleData);
-
             return (
               <button
                 key={idx}
                 type="button"
                 onClick={() => setSelectedIndex(idx)}
+                className="flex-shrink-0 flex items-center justify-center text-[14px] font-semibold transition-colors"
                 style={{
-                  backgroundColor: "white",
-                  WebkitAppearance: "none",
-                  appearance: "none",
+                  width: 40,
+                  height: 40,
+                  borderRadius: 9999,
+                  backgroundColor: isActive ? "#004DFF" : "#FFFFFF",
+                  color: isActive ? "#FFFFFF" : "#000000",
+                  border: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  textAlign: "center",
                 }}
-                className={`relative flex-shrink-0 w-20 h-20 rounded-lg border border-black flex items-center justify-center overflow-hidden ${
-                  isActive ? "border-[#32D1AA] border-2" : ""
-                }`}
+                aria-pressed={isActive}
+                aria-label={`대안 ${idx + 1} 선택`}
               >
-                {/* 숫자 - 왼쪽 상단 */}
-                <span
-                  className={`absolute top-0.5 left-0.5 text-[10px] font-semibold z-10 ${
-                    isActive ? "text-[#32D1AA]" : "text-[#666]"
-                  }`}
-                >
-                  {idx + 1}
-                </span>
-
-                {/* 작은 캘린더 미리보기 - 배경 꽉차게 */}
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="w-full h-full bg-[#F8FBFE] flex flex-col">
-                    {/* 간단한 캘린더 그리드 미리보기 */}
-                    <div className="flex-1 grid grid-cols-7 gap-px p-0.5">
-                      {previewGrid.map((hasSchedule, i) => (
-                        <div
-                          key={i}
-                          className={`${
-                            hasSchedule
-                              ? "bg-[#32D1AA] opacity-40"
-                              : "bg-transparent"
-                          } rounded-sm`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                {idx + 1}
               </button>
             );
           })}
@@ -347,7 +337,7 @@ export default function CandidateSchedule() {
       </div>
 
       {/* 캘린더 영역 - 스크롤 가능 */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-2">
+      <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pb-2 min-h-0">
         <div className="flex justify-center">
           <AutoCalCalendar
             hasSelection={selectedIndex !== null}
@@ -391,6 +381,7 @@ export default function CandidateSchedule() {
           </div>
         </Modal>
       )}
+      </div>
     </div>
   );
 }
