@@ -75,10 +75,10 @@ export default function CandidateSchedule() {
               storeData.shifts &&
               Array.isArray(storeData.shifts)
             ) {
-              // 주의 시작일 계산 (일요일 기준)
-              const startOfWeek = dayjs(defaultStartDate)
-                .locale("ko")
-                .startOf("week");
+              // 선택한 기간의 시작일을 기준으로 후보 요일을 매핑
+              // (startOf('week')로 당기면 선택 기간과 어긋날 수 있음)
+              const baseDate = dayjs(defaultStartDate).locale("ko");
+              const baseDow = baseDate.day(); // 0(일) ~ 6(토)
               const dayMap = {
                 SUN: 0,
                 MON: 1,
@@ -90,8 +90,9 @@ export default function CandidateSchedule() {
               };
 
               convertedData = storeData.shifts.map((shift) => {
-                const dayIndex = dayMap[shift.day?.toUpperCase()] ?? 0;
-                const targetDate = startOfWeek.add(dayIndex, "day");
+                const shiftDow = dayMap[shift.day?.toUpperCase()] ?? 0;
+                const offset = (shiftDow - baseDow + 7) % 7;
+                const targetDate = baseDate.add(offset, "day");
 
                 // startTime, endTime을 파싱 (예: "09:00:00")
                 const [startHour, startMinute, startSecond = 0] = (

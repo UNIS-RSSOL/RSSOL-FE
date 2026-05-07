@@ -105,12 +105,25 @@ export const confirmSchedule = async (
   endDate,
 ) => {
   try {
-    const response = await api.post(`schedules/requests/${scheduleRequestId}/confirm`, {
+    const payload = {
+      // key naming variations (백엔드 구현 차이 대비)
       candidateKey,
+      candidateScheduleKey: candidateKey,
+      key: candidateKey,
       index,
+      candidateIndex: index,
       startDate,
       endDate,
-    });
+    };
+
+    const response = await api.post(
+      `schedules/requests/${scheduleRequestId}/confirm`,
+      payload,
+      {
+        // 일부 백엔드가 RequestParam으로 받는 경우를 대비
+        params: payload,
+      },
+    );
     return response.data;
   } catch (error) {
     console.error("근무표 지정 실패:", error);
