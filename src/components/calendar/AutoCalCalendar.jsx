@@ -84,22 +84,33 @@ function AutoCalCalendar({ hasSelection, schedules }) {
             const event = getEventForCell(worker.id, dayIndex);
 
             return event ? (
-              <div
+              (() => {
+                const colorIndex = getColorIndex(dayjs(event.start).hour());
+                const isDarkBlock = colorIndex === colors.length - 1;
+                const textColor = isDarkBlock ? "#FFFFFF" : "#000000";
+
+                return (
+                  <div
                 key={`${worker.id}-${dayIndex}`}
                 className="flex flex-col flex-shrink-0 w-[44px] h-full items-center justify-center border-l border-[#e7eaf3]"
                 style={{
-                  backgroundColor:
-                    colors[getColorIndex(dayjs(event.start).hour())],
+                  backgroundColor: colors[colorIndex],
+                  color: textColor,
                 }}
               >
                 <span className="text-[12px]/[16px] font-[400]">
                   {dayjs(event.start).format("HH:mm")}
                 </span>
-                <span className="h-[5px] w-[1px] bg-black my-[2px]" />
+                <span
+                  className="h-[5px] w-[1px] my-[2px]"
+                  style={{ backgroundColor: isDarkBlock ? "#FFFFFF" : "#000000" }}
+                />
                 <span className="text-[12px]/[16px] font-[400]">
                   {dayjs(event.end).format("HH:mm")}
                 </span>
               </div>
+                );
+              })()
             ) : (
               <div
                 key={`${worker.id}-${dayIndex}`}

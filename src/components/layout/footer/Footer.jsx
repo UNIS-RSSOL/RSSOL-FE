@@ -33,6 +33,36 @@ function Footer() {
     role === "owner" ? isScheduleAdd : isScheduleModifying;
   const isMyPage = path.includes("mypage");
 
+  const handleScheduleMenuClick = () => {
+    if (role !== "owner") {
+      navigate("/employee/schedule/modifying");
+      return;
+    }
+
+    try {
+      const isGenerationCompleted =
+        localStorage.getItem("scheduleGenerationCompleted") === "true";
+      const hasScheduleRequest =
+        localStorage.getItem("hasScheduleRequest") === "true";
+
+      if (isGenerationCompleted) {
+        localStorage.removeItem("scheduleGenerationCompleted");
+        localStorage.removeItem("hasScheduleRequest");
+        navigate("/owner/schedule/add");
+        return;
+      }
+
+      if (hasScheduleRequest) {
+        navigate("/owner/schedule/list");
+        return;
+      }
+    } catch (_) {
+      // localStorage 접근 실패 등 예외 시 기본 경로로 이동
+    }
+
+    navigate("/owner/schedule/add");
+  };
+
   return (
     <nav className="w-full h-[60px] flex flex-row justify-around items-center shrink-0 shadow-[0_-2px_7px_0_rgba(0,0,0,0.1)] bg-white">
       <FooterMenu
@@ -47,13 +77,7 @@ function Footer() {
         MenuIcon={
           <FileEditIcon filled={isFourthMenuActive} fillColor={ACTIVE_COLOR} />
         }
-        onClick={() =>
-          navigate(
-            role === "owner"
-              ? "/owner/schedule/add"
-              : "/employee/schedule/modifying",
-          )
-        }
+        onClick={handleScheduleMenuClick}
       />
       <FooterMenu
         MenuIcon={<TodoSelectIcon filled={isTodo} fillColor={ACTIVE_COLOR} />}

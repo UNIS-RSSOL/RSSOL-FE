@@ -4,6 +4,18 @@ import "dayjs/locale/ko";
 import { getScheduleByPeriod } from "../../services/WorkShiftService";
 const DAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
+const EVENT_COLORS = ["#99bbff", "#3370FF", "#1a4fcc"];
+const getEventColorIndex = (startHour) => {
+  const hours = Array.from({ length: 16 }, (_, i) => i + 8);
+  const totalHours = hours.length - 1;
+  const segmentSize = Math.trunc(totalHours / EVENT_COLORS.length);
+  const normalizedHour = startHour - hours[0];
+  return Math.min(
+    EVENT_COLORS.length - 1,
+    Math.floor(normalizedHour / segmentSize),
+  );
+};
+
 const getDayColor = (idx) => {
   if (idx === 0) return "text-[#FF8A8A]";
   if (idx === 6) return "text-[#7BA3FF]";
@@ -125,10 +137,18 @@ function WeekCalendar({
                 {event ? (
                   <div
                     className={`w-full h-full rounded-[10px] flex items-center justify-center cursor-pointer ${
-                      isSelected
-                        ? "bg-[#C8C8C8] ring-2 ring-black"
-                        : "bg-[#E0E0E0]"
+                      isSelected ? "ring-2 ring-black brightness-90" : ""
                     }`}
+                    style={(() => {
+                      const colorIndex = getEventColorIndex(
+                        dayjs(event.start).hour(),
+                      );
+                      const isDarkBlock = colorIndex === EVENT_COLORS.length - 1;
+                      return {
+                        backgroundColor: EVENT_COLORS[colorIndex],
+                        color: isDarkBlock ? "#FFFFFF" : "#000000",
+                      };
+                    })()}
                     onClick={(e) => {
                       e.stopPropagation();
                       const clickedEvent = {
@@ -142,7 +162,7 @@ function WeekCalendar({
                       onEventClick(clickedEvent);
                     }}
                   >
-                    <span className="text-[11px] font-[500] text-black">
+                    <span className="text-[11px] font-[500]">
                       {dayjs(event.start).format("H")}-
                       {dayjs(event.end).format("H")}
                     </span>

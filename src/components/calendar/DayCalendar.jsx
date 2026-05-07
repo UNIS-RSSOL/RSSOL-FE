@@ -2,6 +2,19 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { getScheduleByPeriod } from "../../services/WorkShiftService";
 import TimelineGrid, { GridLines, calcEventPosition } from "./TimelineGrid.jsx";
+
+const EVENT_COLORS = ["#99bbff", "#3370FF", "#1a4fcc"];
+const getEventColorIndex = (startHour) => {
+  const hours = Array.from({ length: 16 }, (_, i) => i + 8);
+  const totalHours = hours.length - 1;
+  const segmentSize = Math.trunc(totalHours / EVENT_COLORS.length);
+  const normalizedHour = startHour - hours[0];
+  return Math.min(
+    EVENT_COLORS.length - 1,
+    Math.floor(normalizedHour / segmentSize),
+  );
+};
+
 function DayCalendar({
   date,
   onEventClick,
@@ -88,6 +101,9 @@ function DayCalendar({
             if (!pos) return null;
             const isSelected =
               selectedEventProp && selectedEventProp.id === event.id;
+            const colorIndex = getEventColorIndex(dayjs(event.start).hour());
+            const isDarkBlock = colorIndex === EVENT_COLORS.length - 1;
+            const textColor = isDarkBlock ? "#FFFFFF" : "#000000";
 
             return (
               <div
@@ -98,8 +114,9 @@ function DayCalendar({
                 style={{
                   left: `${pos.left}%`,
                   width: `${pos.width}%`,
-                  backgroundColor: "#E7EAF3",
-                  border: "1px solid #E7EAF3",
+                  backgroundColor: EVENT_COLORS[colorIndex],
+                  border: `1px solid ${EVENT_COLORS[colorIndex]}`,
+                  color: textColor,
                 }}
                 onClick={(e) => {
                   e.stopPropagation();

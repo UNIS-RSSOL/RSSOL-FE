@@ -586,7 +586,7 @@ function ScheduleList() {
             .add(6, "day")
             .format("YYYY-MM-DD");
 
-        navigate("/autoCal", {
+        navigate("/owner/schedule/candidate", {
           state: {
             scheduleRequestId,
             candidateKey: result.candidateScheduleKey,
@@ -807,8 +807,15 @@ function ScheduleList() {
             );
             return availableWorkers.length > 0 ? (
               <div className="flex flex-col gap-3">
-                {availableWorkers.map((worker) => (
-                  <div key={worker.id} className="flex items-center gap-3">
+                {availableWorkers.map((worker, idx) => {
+                  const key =
+                    worker.id ||
+                    worker.staffId ||
+                    worker.userStoreId ||
+                    worker.userId ||
+                    `${worker.username || worker.name || worker.userName || "worker"}_${idx}`;
+                  return (
+                    <div key={key} className="flex items-center gap-3">
                     <div className="flex-shrink-0 w-10 h-10 bg-[#3370FF] rounded-full border-2 border-white shadow-sm" />
                     <p className="text-base font-semibold">
                       {worker.username ||
@@ -817,7 +824,8 @@ function ScheduleList() {
                         "이름 없음"}
                     </p>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="text-gray-500">근무 가능한 직원이 없습니다.</p>
